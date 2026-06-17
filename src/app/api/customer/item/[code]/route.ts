@@ -1,0 +1,153 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { decodeUrlParam } from '@/lib/api/decode-param';
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ code: string }> }
+) {
+  const { code: rawCode } = await params;
+  try {
+
+    if (!rawCode) {
+      return NextResponse.json(
+        { error: 'Código requerido' },
+        { status: 400 }
+      );
+    }
+
+    // Decode the code parameter in case it's URL-encoded
+    const code = decodeUrlParam(rawCode);
+    console.log('[API] Looking for item with ID:', code);
+
+    // Buscar el item por ID (asumiendo que el código es el ID del item)
+    const item = await prisma.item.findUnique({
+      where: {
+        id: code,
+      },
+      include: {
+        ItemCategory: {
+          include: {
+            Category: true
+          }
+        },
+        User: {
+          select: {
+            name: true,
+            email: true,
+          }
+        },
+        EnergySource: {
+          include: {
+            EnergyConsumption: {
+              include: {
+                EmissionRecord: {
+                  where: { verificationStatus: 'VERIFIED' },
+                  orderBy: { createdAt: 'desc' },
+                  take: 5,
+                },
+              },
+              orderBy: { createdAt: 'desc' },
+              take: 10,
+            },
+          },
+        },
+        State: {
+          include: {
+            StatusType: true,
+            User: {
+              select: {
+                name: true,
+                email: true,
+              }
+            },
+          },
+          orderBy: {
+            createdAt: 'desc',
+          },
+        },
+      },
+    });
+
+    if (!item) {
+      return NextResponse.json(
+        { error: 'Item no encontrado' },
+        { status: 404 }
+      );
+    }
+
+    // No ejecutar verificación antifraude aquí - se hace en /api/customer/verify/[code]
+    // Solo retornar el estado actual
+    // IMPORTANTE: isFirstVerification = false porque NO estamos verificando en esta ruta
+    const isFirstVerification = false;
+    const antifraudEvidenceId = item.antifraudEvidenceId;
+
+    // Transformar los datos para el frontend
+    const transformedItem = {
+      id: item.id,
+      name: item.name,
+      description: item.description,
+      imageUrl: item.imageUrl,
+      templateFields: item.templateFields,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      evidenceID: (item as any).evidenceID || null,
+      antifraudEvidenceId: antifraudEvidenceId || null,
+      isFirstVerification: isFirstVerification,
+      createdBy: item.User || null,
+      category: item.ItemCategory.length > 0 ? {
+        id: item.ItemCategory[0].Category.id,
+        name: item.ItemCategory[0].Category.name,
+        description: item.ItemCategory[0].Category.description,
+      } : {
+        id: '',
+        name: 'Sin categoría',
+        description: '',
+      },
+      energyCertifications: (item as any).EnergySource?.flatMap((src: any) =>
+        src.EnergyConsumption?.flatMap((c: any) =>
+          c.EmissionRecord?.map((e: any) => ({
+            id: e.id,
+            co2eKg: e.co2eKg,
+            scope: e.scope,
+            systemBoundary: e.systemBoundary,
+            calculationMethodology: e.calculationMethodology,
+            verifierBody: e.verifierBody,
+            verificationStandard: e.verificationStandard,
+            verificationStatus: e.verificationStatus,
+            periodStart: c.periodStart,
+            periodEnd: c.periodEnd,
+            consumptionKwh: c.consumptionKwh,
+            energyCarrier: src.energyCarrier,
+            createdAt: e.createdAt,
+          })) ?? []
+        ) ?? []
+      ) ?? [],
+      states: item.State.map((state) => ({
+        id: state.id,
+        title: state.title,
+        description: state.description,
+        evidenceID: state.evidenceID,
+        backed: state.backed,
+        backedAt: state.backedAt,
+        imageUrls: state.imageUrls,
+        templateConfig: state.templateConfig,
+        createdAt: state.createdAt,
+        createdBy: state.User || null,
+        statusType: {
+          id: state.StatusType.id,
+          name: state.StatusType.name,
+          description: state.StatusType.description,
+        },
+      })),
+    };
+
+    return NextResponse.json(transformedItem);
+  } catch (error) {
+    console.error('Error fetching item:', error);
+    return NextResponse.json(
+      { error: 'Error interno del servidor' },
+      { status: 500 }
+    );
+  }
+}

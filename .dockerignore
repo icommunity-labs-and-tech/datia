@@ -1,0 +1,53 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Build outputs
+.next
+out
+dist
+build
+
+# Testing
+coverage
+playwright-report
+test-results
+*.db
+
+# Development
+.env*.local
+.DS_Store
+*.log
+npm-debug.log*
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+
+# Git
+.git
+.gitignore
+
+# Documentation (not needed in production)
+docs
+*.md
+!README.md
+
+# Scripts (not needed in production build)
+scripts
+
+# Tests
+tests
+**/*.test.ts
+**/*.spec.ts
+**/__tests__
+vitest.config.ts
+playwright.config.ts
+
+# Misc
+.dockerignore
+Dockerfile
+docker-compose*.yml

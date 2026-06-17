@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma-e2e"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("E2E_SQLITE_URL")
+}
+
+// Models mirrored from prisma/schema.prisma for SQLite-based e2e
+
+model Organization {
+  id                String             @id @default(uuid())
+  nombre            String
+  slug              String             @unique
+  dominio           String?            @unique
+  activa            Boolean            @default(true)
+  plan              String             @default("basic")
+  limites           Json?
+  configuracion      Json?
+  signatureID        String?            @unique
+  kycURL            String?
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
+  createdAt         DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  
+  users         User[]
+  categories    Category[]
+  items         Item[]
+  issues        Issue[]
+  notifications Notification[]
+  invitations   Invitation[]
+  statusTypes   StatusType[]
+  
+  @@index([signatureID])
+}
+
+model User {
+  id                   String               @id @default(uuid())
+  organizationId       String?
+  email                String               @unique
+  password             String?
+  name                 String
+  role                 UserRole             @default(USER)
+  status               UserStatus           @default(PENDING)
+  signsWithCertificate Boolean              @default(false)
+  phone                String?
+  permissions          Json?
+  notes                String?
+  activationToken      String?              @unique
+  activationExpiresAt  DateTime?
+  activatedAt          DateTime?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime             @updatedAt
+  
+  organization         Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  notifications        Notification[]
+  passwordResetTokens  PasswordResetToken[]
+  createdStates        State[]
+  createdItems         Item[]               @relation(name: "CreatedItems")
+  createdInvitations   Invitation[]         @relation(name: "CreatedInvitations")
+
+  @@index([email])
+  @@index([role])
+  @@index([status])
+  @@index([organizationId])
+  @@index([activationToken])
+}
+
+model Notification {
+  id             String           @id @default(uuid())
+  organizationId String
+  userId         String
+  type           NotificationType
+  title          String
+  message        String
+  read           Boolean          @default(false)
+  readAt         DateTime?
+  data           Json?
+  createdAt      DateTime         @default(now())
+  
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User             @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+  @@index([organizationId])
+}
+
+model Category {
+  id             String         @id @default(uuid())
+  organizationId String
+  name           String
+  description    String         @default("")
+  itemTemplate   Json           @default("[]")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  items          ItemCategory[]
+  
+  @@index([organizationId])
+}
+
+model Item {
+  id               String         @id
+  organizationId   String
+  name             String
+  description      String?
+  imageUrl         String?
+  itemTemplate     Json           @default("[]")
+  templateFields   Json?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  evidenceID       String?
+  evidenceDataJson String?
+  createdByUserId  String?
+  
+  organization     Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  categories       ItemCategory[]
+  states           State[]
+  createdBy        User?          @relation(fields: [createdByUserId], references: [id], name: "CreatedItems", onDelete: SetNull)
+
+  @@index([createdByUserId])
+  @@index([organizationId])
+}
+
+model StatusType {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  description    String       @default("")
+  template       Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  states         State[]
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+  @@unique([organizationId, name])
+}
+
+model ItemCategory {
+  itemId     String
+  categoryId String
+  
+  item       Item     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  
+  @@id([itemId, categoryId])
+  @@index([itemId])
+  @@index([categoryId])
+}
+
+model State {
+  id              String     @id @default(uuid())
+  itemId          String
+  statusTypeId    String
+  title           String
+  description     String
+  evidenceID      String
+  backed          Boolean    @default(false)
+  backedAt        DateTime?
+  imageUrls       Json?
+  templateConfig  Json?
+  issueDataJson   String?
+  createdAt       DateTime   @default(now())
+  item            Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  statusType      StatusType @relation(fields: [statusTypeId], references: [id], onDelete: Cascade)
+  createdByUserId String?
+  createdBy       User?      @relation(fields: [createdByUserId], references: [id])
+
+  @@index([itemId])
+  @@index([statusTypeId])
+  @@index([createdAt])
+  @@index([createdByUserId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Invitation {
+  id             String    @id @default(uuid())
+  organizationId String
+  email          String
+  role           UserRole  @default(USER)
+  token          String    @unique
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdBy      String
+  createdAt      DateTime  @default(now())
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  creator        User         @relation(fields: [createdBy], references: [id], name: "CreatedInvitations")
+
+  @@index([organizationId])
+  @@index([email])
+  @@index([token])
+  @@index([createdBy])
+}
+
+model Issue {
+  id             String   @id @default(uuid())
+  organizationId String
+  title          String
+  description    String?
+  status         String   @default("open")
+  priority       String   @default("medium")
+  assignedTo     String?
+  createdBy      String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  imageUrl       String?
+  category       String?
+  tags           Json     @default("[]")
+  attachments    Json?
+  comments       Json?
+  dueDate        DateTime?
+  resolvedAt     DateTime?
+  resolution     String?
+  metadata       Json?
+  
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@index([organizationId])
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum VerificationStatus {
+  NOT_VERIFIED
+  WAITING
+  VERIFIED
+  REJECTED
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
+
+

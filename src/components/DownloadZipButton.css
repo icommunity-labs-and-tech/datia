@@ -1,0 +1,39 @@
+/* Estilos para el spinner de tarta */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.pie-spinner {
+  display: inline-block;
+}
+
+/* Estilos para la barra de progreso */
+.progress-bar-container {
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.progress-fill {
+  transition: transform 0.3s ease;
+}
+
+/* Animaciones adicionales para mejor feedback */
+.download-button-success {
+  animation: pulse-success 0.5s ease-in-out;
+}
+
+.download-button-error {
+  animation: shake 0.5s ease-in-out;
+}
+
+@keyframes pulse-success {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}

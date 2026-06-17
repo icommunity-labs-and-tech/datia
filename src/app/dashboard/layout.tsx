@@ -1,0 +1,38 @@
+import type { Metadata } from 'next';
+import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
+import { adminAuthConfig } from '@/lib/auth/admin/config';
+import { redirect } from 'next/navigation';
+import { cookies } from 'next/headers';
+import { appConfig } from '@/config/app';
+
+export const metadata: Metadata = {
+  title: `Dashboard - ${appConfig.name}`,
+  description: `Panel de administración de ${appConfig.name}`,
+};
+
+export default async function DashboardRootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const cookieStore = await cookies();
+  const token = cookieStore.get(adminAuthConfig.cookieName)?.value;
+
+  // Verificar autenticación
+  if (!token) {
+    redirect('/auth/admin/login?error=Unauthorized');
+  }
+
+  const user = await verifyAdminJWT(token);
+  
+  if (!user) {
+    redirect('/auth/admin/login?error=Unauthorized');
+  }
+
+  // Verificar que sea admin (solo admins pueden acceder al dashboard)
+  if (user.role !== 'ADMIN') {
+    redirect('/auth/admin/login?error=AccessDenied');
+  }
+
+  return <>{children}</>;
+}

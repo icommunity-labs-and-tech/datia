@@ -1,0 +1,554 @@
+generator client {
+  provider        = "prisma-client-js"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions"]
+  engineType      = "binary"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ApiCall {
+  id             String       @id
+  apiTokenId     String
+  organizationId String
+  method         String
+  path           String
+  statusCode     Int
+  createdAt      DateTime     @default(now())
+  ApiToken       ApiToken     @relation(fields: [apiTokenId], references: [id], onDelete: Cascade)
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([apiTokenId])
+  @@index([organizationId])
+  @@index([createdAt])
+  @@index([apiTokenId, createdAt])
+}
+
+model ApiToken {
+  id             String       @id
+  name           String
+  tokenHash      String       @unique
+  organizationId String
+  lastUsedAt     DateTime?
+  expiresAt      DateTime?
+  createdAt      DateTime     @default(now())
+  ApiCall        ApiCall[]
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([tokenHash])
+}
+
+model Category {
+  id             String         @id
+  name           String
+  description    String         @default("")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime
+  itemTemplate   Json           @default("[]")
+  organizationId String
+  Organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ItemCategory   ItemCategory[]
+
+  @@index([organizationId])
+  @@index([organizationId, name])
+}
+
+model EventLog {
+  id             String       @id
+  organizationId String
+  eventType      String
+  entityType     String
+  entityId       String
+  data           Json
+  createdAt      DateTime     @default(now())
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([organizationId, entityType, entityId])
+  @@index([organizationId, eventType])
+  @@index([organizationId])
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  email          String
+  role           UserRole     @default(USER)
+  token          String       @unique
+  expiresAt      DateTime
+  acceptedAt     DateTime?
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  User           User         @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([createdBy])
+  @@index([email])
+  @@index([organizationId])
+  @@index([token])
+}
+
+model Issue {
+  id             String       @id
+  title          String
+  description    String?
+  status         String       @default("open")
+  priority       String       @default("medium")
+  assignedTo     String?
+  createdBy      String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  imageUrl       String?
+  category       String?
+  tags           String[]
+  attachments    Json?
+  comments       Json?
+  dueDate        DateTime?
+  resolvedAt     DateTime?
+  resolution     String?
+  metadata       Json?
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdBy])
+  @@index([organizationId])
+  @@index([organizationId, status])
+}
+
+model Item {
+  id                  String         @id
+  name                String
+  description         String?
+  imageUrl            String?
+  templateFields      Json?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime
+  itemTemplate        Json           @default("[]")
+  evidenceID          String?
+  evidenceDataJson    String?
+  createdByUserId     String?
+  organizationId      String
+  antifraudEvidenceId String?
+  User                User?          @relation(fields: [createdByUserId], references: [id])
+  Organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ItemCategory        ItemCategory[]
+  State               State[]
+  FraudReport         FraudReport[]
+  EnergySource        EnergySource[]
+
+  @@index([createdByUserId])
+  @@index([organizationId])
+}
+
+model FraudReport {
+  id             String            @id @default(cuid())
+  itemId         String
+  organizationId String
+  acquiredAt     String?
+  latitude       Float?
+  longitude      Float?
+  locationName   String?
+  comments       String?
+  imageUrls      String[]
+  status         FraudReportStatus @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  Item           Item              @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  Organization   Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([itemId])
+  @@index([status])
+  @@index([organizationId, status])
+  @@index([createdAt])
+}
+
+model ItemCategory {
+  itemId     String
+  categoryId String
+  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Item       Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@id([itemId, categoryId])
+  @@index([categoryId])
+  @@index([itemId])
+}
+
+model Notification {
+  id             String           @id
+  userId         String
+  type           NotificationType
+  title          String
+  message        String
+  read           Boolean          @default(false)
+  readAt         DateTime?
+  data           Json?
+  createdAt      DateTime         @default(now())
+  organizationId String
+  Organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  User           User             @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([organizationId])
+  @@index([organizationId, userId])
+  @@index([read])
+  @@index([userId])
+}
+
+model Organization {
+  id                String             @id
+  nombre            String
+  slug              String             @unique
+  dominio           String?            @unique
+  activa            Boolean            @default(true)
+  plan              String             @default("basic")
+  limites           Json?
+  configuracion      Json?
+  signatureID        String?
+  kycURL            String?
+  logoUrl           String?
+  brandColorPrimary  String?
+  brandColorSecondary String?
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
+  sectorId          String?
+  createdAt         DateTime           @default(now())
+  updatedAt          DateTime
+  ApiCall           ApiCall[]
+  ApiToken          ApiToken[]
+  Category          Category[]
+  EventLog          EventLog[]
+  Invitation        Invitation[]
+  Issue             Issue[]
+  Item              Item[]
+  Notification      Notification[]
+  Sector            Sector?            @relation(fields: [sectorId], references: [id])
+  StatusType        StatusType[]
+  User              User[]
+  Webhook           Webhook[]
+  ImportJob         ImportJob[]
+  SupportMessage    SupportMessage[]
+  FraudReport       FraudReport[]
+
+  @@index([activa])
+  @@index([slug])
+  @@index([signatureID])
+  @@index([sectorId])
+}
+
+model Sector {
+  id            String         @id
+  name          String         @unique
+  slug          String         @unique
+  description   String         @default("")
+  createdAt     DateTime       @default(now())
+  Organization  Organization[]
+}
+
+model SupportMessage {
+  id             String       @id
+  subject        String
+  message        String
+  page           String?
+  status         String       @default("pending")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  userId         String
+  userName       String?
+  organizationId String
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([status])
+}
+
+model PasswordResetToken {
+  id        String    @id
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  User      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model State {
+  id              String     @id
+  itemId          String
+  statusTypeId    String
+  title           String
+  description     String
+  evidenceID      String
+  backed          Boolean    @default(false)
+  backedAt        DateTime?
+  imageUrls       Json?
+  templateConfig  Json?
+  createdAt       DateTime   @default(now())
+  createdByUserId String?
+  issueDataJson   String?
+  User            User?      @relation(fields: [createdByUserId], references: [id])
+  Item            Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  StatusType      StatusType @relation(fields: [statusTypeId], references: [id], onDelete: Cascade)
+
+  @@index([createdAt])
+  @@index([createdByUserId])
+  @@index([itemId])
+  @@index([statusTypeId])
+}
+
+model StatusType {
+  id             String       @id
+  name           String
+  description    String       @default("")
+  template       Json
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime
+  organizationId String
+  State          State[]
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
+model User {
+  id                   String               @id
+  email                String               @unique
+  password             String?
+  name                 String
+  role                 UserRole             @default(USER)
+  signsWithCertificate Boolean              @default(false)
+  phone                String?
+  permissions          Json?
+  notes                String?
+  createdAt            DateTime             @default(now())
+  updatedAt            DateTime
+  organizationId       String?
+  activationToken      String?
+  activatedAt          DateTime?
+  status               UserStatus           @default(ACTIVE)
+  activationExpiresAt  DateTime?
+  Invitation           Invitation[]
+  Item                 Item[]
+  Notification         Notification[]
+  PasswordResetToken   PasswordResetToken[]
+  State                State[]
+  Organization         Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  ImportJobUploadedBy  ImportJob[]          @relation("ImportJobUploadedBy")
+  ImportJobExecutedBy  ImportJob[]          @relation("ImportJobExecutedBy")
+
+  @@index([email])
+  @@index([organizationId, email])
+  @@index([organizationId])
+  @@index([role])
+  @@index([status])
+}
+
+model Webhook {
+  id              String       @id
+  organizationId  String
+  name            String
+  url             String
+  secret          String?
+  events          String[]
+  active          Boolean      @default(true)
+  headers         Json?
+  lastTriggeredAt DateTime?
+  lastSuccessAt   DateTime?
+  lastFailureAt   DateTime?
+  failureCount    Int          @default(0)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime
+  Organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, active])
+  @@index([organizationId])
+}
+
+enum NotificationType {
+  INFO
+  WARNING
+  ERROR
+  SUCCESS
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+}
+
+enum VerificationStatus {
+  NOT_VERIFIED
+  WAITING
+  VERIFIED
+  REJECTED
+}
+
+model ImportJob {
+  id             String       @id
+  organizationId String
+  fileName       String
+  fileUrl        String
+  fileSize       Int
+  status         ImportStatus @default(PENDING)
+  uploadedBy     String
+  executedBy     String?
+  rowCount       Int?
+  createdCount   Int?
+  errorDetails   Json?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  UploadedByUser User         @relation("ImportJobUploadedBy", fields: [uploadedBy], references: [id])
+  ExecutedByUser User?        @relation("ImportJobExecutedBy", fields: [executedBy], references: [id])
+
+  @@index([organizationId, status])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ImportJob")
+}
+
+enum ImportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum FraudReportStatus {
+  PENDING
+  UNDER_REVIEW
+  CONFIRMED
+  DISMISSED
+}
+
+// ── Energy Certification Module (ESPR-aligned) ───────────────────────────────
+
+model EnergySource {
+  id                  String        @id @default(cuid())
+  // Identity
+  name                String
+  energyCarrier       EnergyCarrier
+  generationTechnology String?      // e.g. photovoltaic, wind_onshore, ccgt
+  capacityKw          Float?
+  location            String?
+  installationDate    DateTime?
+  // ESPR / EU energy taxonomy
+  renewableShare      Float?        // 0–100 %
+  guaranteeOfOriginId String?       // GO / RECs certificate reference
+  countryOfOrigin     String?       // ISO 3166-1 alpha-2
+  gridEmissionFactor  Float?        // gCO2eq/kWh (IEA, national grid)
+  // Relations — itemId required: every source is a physical asset
+  itemId              String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  Item              Item               @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  EnergyConsumption EnergyConsumption[]
+
+  @@index([itemId])
+}
+
+enum EnergyCarrier {
+  ELECTRICITY
+  NATURAL_GAS
+  HYDROGEN
+  SOLAR_THERMAL
+  DISTRICT_HEATING
+  DISTRICT_COOLING
+  BIOMASS
+  OIL
+  COAL
+  OTHER
+}
+
+model EnergyConsumption {
+  id                  String         @id @default(cuid())
+  // energySourceId required: every consumption comes from a source
+  energySourceId      String
+  periodStart         DateTime
+  periodEnd           DateTime
+  // Energy quantity — kWh primary, MJ for ESPR compliance (1 kWh = 3.6 MJ)
+  consumptionKwh      Float
+  consumptionMj       Float?
+  lifecycleStage      LifecycleStage
+  measurementStandard String?        // EN 50598, IEC 61724, ISO 50001…
+  operatingConditions Json?          // rated load, temperature, etc.
+  // Optional financials (not ESPR-required but useful)
+  costAmount          Float?
+  currency            String?        // ISO 4217
+  createdAt           DateTime       @default(now())
+
+  EnergySource   EnergySource    @relation(fields: [energySourceId], references: [id], onDelete: Cascade)
+  EmissionRecord EmissionRecord[]
+
+  @@index([energySourceId])
+  @@index([periodStart, periodEnd])
+}
+
+enum LifecycleStage {
+  MANUFACTURING
+  TRANSPORT
+  USE
+  MAINTENANCE
+  END_OF_LIFE
+}
+
+model EmissionRecord {
+  id                         String                     @id @default(cuid())
+  // energyConsumptionId required: every emission traces to a consumption
+  energyConsumptionId        String
+  // Carbon footprint — ISO 14067 / GHG Protocol
+  co2eKg                     Float                      // CO2 equivalent (includes CH4, N2O…)
+  scope                      EmissionScope              // GHG Protocol scope 1/2/3
+  systemBoundary             SystemBoundary             // cradle-to-gate, cradle-to-grave…
+  emissionFactor             Float?                     // kgCO2e/kWh (or per unit)
+  emissionFactorSource       String?                    // DEFRA, IEA, IPCC AR6…
+  calculationMethodology     String?                    // ISO 14067, GHG Protocol, PEFCR…
+  gwpCharacterizationFactors String?                    // IPCC AR6 (default), AR5…
+  functionalUnit             String?                    // e.g. "1 kWh delivered"
+  // Third-party verification — ISO 14064-3
+  verificationStatus         EmissionVerificationStatus @default(PENDING)
+  verifierBody               String?
+  verificationStandard       String?                    // ISO 14064-3, etc.
+  createdAt                  DateTime                   @default(now())
+
+  EnergyConsumption EnergyConsumption @relation(fields: [energyConsumptionId], references: [id], onDelete: Cascade)
+
+  @@index([energyConsumptionId])
+}
+
+enum EmissionScope {
+  SCOPE_1
+  SCOPE_2
+  SCOPE_3
+}
+
+enum SystemBoundary {
+  CRADLE_TO_GATE
+  CRADLE_TO_GRAVE
+  GATE_TO_GATE
+  CRADLE_TO_CRADLE
+}
+
+enum EmissionVerificationStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}

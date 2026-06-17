@@ -1,0 +1,53 @@
+/* Estilos personalizados para los popovers de Driver.js */
+
+/* Popover principal */
+.driver-popover,
+.driver-popover-wrapper {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.15) !important;
+}
+
+/* Título del popover */
+.driver-popover-title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+  color: #0f172a !important;
+  margin-bottom: 12px !important;
+}
+
+/* Descripción del popover */
+.driver-popover-description {
+  font-size: 0.95rem !important;
+  color: #475569 !important;
+  line-height: 1.6 !important;
+  margin-bottom: 20px !important;
+}
+
+/* Botones */
+.driver-popover-btn {
+  padding: 10px 20px !important;
+  border-radius: 10px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.driver-popover-btn-next {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+}
+
+.driver-popover-btn-done {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%) !important;
+  color: white !important;
+}
+
+/* Ocultar overlay y popover durante la navegación entre páginas */
+body.tutorial-navigating .driver-popover,
+body.tutorial-navigating .driver-overlay {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity 0.15s ease !important;
+}

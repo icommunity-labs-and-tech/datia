@@ -1,0 +1,126 @@
+/* Antifraud Modal Styles */
+.antifraud-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.antifraud-modal-content {
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2.5rem;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 
+    0 20px 25px -5px rgba(0, 0, 0, 0.2),
+    0 10px 10px -5px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  animation: slideUp 0.3s ease-out;
+  text-align: center;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.antifraud-modal-icon {
+  width: 4rem;
+  height: 4rem;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.antifraud-modal-icon.success {
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #059669;
+}
+
+
+.antifraud-modal-icon svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.antifraud-modal-content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  color: #1e293b;
+}
+
+.antifraud-modal-content p {
+  color: #64748b;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.antifraud-modal-success h2 {
+  color: #059669;
+}
+
+
+
+.antifraud-modal-button {
+  margin-top: 1.5rem;
+  padding: 0.875rem 2rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  width: 100%;
+}
+
+.antifraud-modal-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.antifraud-modal-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .antifraud-modal-content {
+    padding: 2rem 1.5rem;
+  }
+
+  .antifraud-modal-content h2 {
+    font-size: 1.25rem;
+  }
+}
+

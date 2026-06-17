@@ -1,0 +1,7 @@
+id,name,description,categoryName,imageUrl
+PROD-001,Producto de Prueba 1,Este es un producto de ejemplo para probar la importación CSV,Categoría A,https://example.com/image1.jpg
+PROD-002,Producto de Prueba 2,Descripción del segundo producto de prueba,Categoría B,https://example.com/image2.jpg
+PROD-003,Producto de Prueba 3,Otro producto para validar la funcionalidad de importación,Categoría A,
+PROD-004,Producto de Prueba 4,Producto sin imagen URL,Categoría C,
+PROD-005,Producto de Prueba 5,Último producto de ejemplo para el CSV,Categoría B,https://example.com/image5.jpg
+
