@@ -5,7 +5,7 @@
 
 export const appConfig = {
   // Nombre de la aplicación - personalizable via variable de entorno
-  name: process.env.NEXT_PUBLIC_APP_NAME || 'certypass',
+  name: process.env.NEXT_PUBLIC_APP_NAME || 'Datia',
   
   // Descripción de la aplicación
   description: process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'Sistema de Gestión Digital',

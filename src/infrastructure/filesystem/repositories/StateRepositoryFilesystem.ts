@@ -1,7 +1,7 @@
 /**
  * Filesystem-backed implementation of StateRepository.
  *
- * Stores states as JSON in `$TMPDIR/certypass-sandbox/states.json`.
+ * Stores states as JSON in `$TMPDIR/datia-sandbox/states.json`.
  * Intended exclusively for the sandbox/docs-preview context — zero DB impact.
  * Analytics/aggregation methods return stubs since they are not exercised
  * through the public API.
@@ -14,7 +14,7 @@ import { randomUUID } from 'crypto';
 import type { StateRepository, StateRecord, CreateStateInput } from '@/domain/states/StateRepository';
 import type { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
-const SANDBOX_DIR = join(tmpdir(), 'certypass-sandbox');
+const SANDBOX_DIR = join(tmpdir(), 'datia-sandbox');
 const STATES_FILE = join(SANDBOX_DIR, 'states.json');
 
 // ── Storage helpers ────────────────────────────────────────────────────────

@@ -42,8 +42,8 @@ async function verifyAdminJWT(token: string) {
   try {
     const secret = new TextEncoder().encode(ADMIN_JWT_SECRET);
     const { payload } = await jwtVerify(token, secret, {
-      issuer: 'certypass-admin',
-      audience: 'certypass-dashboard',
+      issuer: 'datia-admin',
+      audience: 'datia-dashboard',
     });
     
     if (payload.context !== 'admin' || payload.role !== 'ADMIN') {
@@ -60,8 +60,8 @@ async function verifyOperatorJWT(token: string) {
   try {
     const secret = new TextEncoder().encode(OPERATOR_JWT_SECRET);
     const { payload } = await jwtVerify(token, secret, {
-      issuer: 'certypass-operator',
-      audience: 'certypass-operator-app',
+      issuer: 'datia-operator',
+      audience: 'datia-operator-app',
     });
     
     if (payload.context !== 'operator' || payload.role !== 'USER') {
@@ -74,20 +74,8 @@ async function verifyOperatorJWT(token: string) {
   }
 }
 
-// Domains that map to a specific org slug for host-based routing
-const HOST_ORG_MAP: Record<string, string> = {
-  'datia.icommunitylabs.com': 'datia',
-};
-
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
-  const host = request.headers.get('host') ?? '';
-  const hostSlug = HOST_ORG_MAP[host];
-
-  // Host-based routing: redirect bare root to the org login
-  if (hostSlug && (pathname === '/' || pathname === '/apps')) {
-    return NextResponse.redirect(new URL(`/org/${hostSlug}/admin`, request.url));
-  }
 
   // Detectar idioma
   const locale = getLocale(request);

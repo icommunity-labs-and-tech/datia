@@ -1,7 +1,7 @@
 /**
  * Filesystem-backed implementation of ItemRepository.
  *
- * Stores items as JSON in `$TMPDIR/certypass-sandbox/items.json`.
+ * Stores items as JSON in `$TMPDIR/datia-sandbox/items.json`.
  * Intended exclusively for the sandbox/docs-preview context — zero DB impact.
  * Dashboard-specific analytics methods (counts, exports, backups) return
  * stubs since they are not exercised through the public API.
@@ -17,7 +17,7 @@ import type {
 } from '@/domain/items/ItemRepository';
 import type { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
-const SANDBOX_DIR = join(tmpdir(), 'certypass-sandbox');
+const SANDBOX_DIR = join(tmpdir(), 'datia-sandbox');
 const ITEMS_FILE = join(SANDBOX_DIR, 'items.json');
 
 // ── Storage helpers ────────────────────────────────────────────────────────

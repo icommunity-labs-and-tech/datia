@@ -39,7 +39,7 @@ const defaultDriverConfig: Partial<Config> = {
   overlayOpacity: 0.6,
   stagePadding: 6,
   stageRadius: 12,
-  popoverClass: 'certypass-tutorial-popover',
+  popoverClass: 'datia-tutorial-popover',
   popoverOffset: 10,
 };
 

@@ -265,7 +265,7 @@ export default function OrganizationsPanel({
               </div>
               <p className="mb-2">
                 <strong>¿Qué es una organización?</strong> Una organización representa una empresa, cliente o grupo independiente 
-                que usa certypass. Cada organización tiene sus propios usuarios, categorías, items y datos completamente aislados.
+                que usa Datia. Cada organización tiene sus propios usuarios, categorías, items y datos completamente aislados.
               </p>
               <p className="mb-0">
                 <strong>Ejemplo:</strong> Si creas la organización &quot;Acme Corp&quot;, todos sus usuarios solo verán y gestionarán 

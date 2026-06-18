@@ -73,7 +73,7 @@ export default function LoginPreview({ logoUrl, orgName, colorPrimary, colorSeco
               {logoUrl ? (
                 <Image src={logoUrl} alt={orgName} width={90} height={32} style={{ objectFit: 'contain' }} unoptimized />
               ) : (
-                <Image src="/logo.webp" alt="CertyPass" width={80} height={28} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
+                <Image src="/logo.webp" alt="Datia" width={80} height={28} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }} />
               )}
             </div>
             <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: 10, fontWeight: 600, textAlign: 'center' }}>{orgName}</span>
@@ -82,7 +82,7 @@ export default function LoginPreview({ logoUrl, orgName, colorPrimary, colorSeco
           {/* Powered by */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
             <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: 7, letterSpacing: '0.04em', textTransform: 'uppercase' }}>powered by</span>
-            <Image src="/logo.webp" alt="CertyPass" width={36} height={12} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.35 }} />
+            <Image src="/logo.webp" alt="Datia" width={36} height={12} style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.35 }} />
           </div>
         </div>
 

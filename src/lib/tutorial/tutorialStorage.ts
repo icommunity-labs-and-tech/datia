@@ -1,6 +1,6 @@
 import type { TutorialState, TourId } from './types';
 
-const STORAGE_KEY = 'certypass_tutorial_state';
+const STORAGE_KEY = 'datia_tutorial_state';
 
 /**
  * Obtiene el estado actual de los tutoriales desde localStorage

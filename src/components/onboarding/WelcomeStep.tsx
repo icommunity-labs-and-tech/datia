@@ -33,7 +33,7 @@ export default function WelcomeStep({
           <i className="bi bi-emoji-smile-fill text-white" style={{ fontSize: '3rem' }}></i>
         </div>
       </div>
-      <h2 className="mb-3" style={{ color: '#1a1a1a', fontWeight: 600 }}>¡Bienvenido a CertyPass!</h2>
+      <h2 className="mb-3" style={{ color: '#1a1a1a', fontWeight: 600 }}>¡Bienvenido a Datia!</h2>
       <p style={{ color: '#666', fontSize: '1.1rem', marginBottom: '2rem' }}>
         Hola <strong style={{ color: '#1a1a1a' }}>{userName}</strong>, estamos encantados de tenerte aquí.
       </p>

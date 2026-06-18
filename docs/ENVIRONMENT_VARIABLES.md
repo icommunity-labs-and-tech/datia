@@ -6,7 +6,7 @@ Este documento describe las variables de entorno disponibles para personalizar l
 
 ### NEXT_PUBLIC_APP_NAME
 - **Descripción**: Nombre de la aplicación que se mostrará en la interfaz
-- **Valor por defecto**: "certypass"
+- **Valor por defecto**: "Datia"
 - **Ejemplo**: `NEXT_PUBLIC_APP_NAME="Mi Empresa"`
 
 ### NEXT_PUBLIC_APP_DESCRIPTION
@@ -46,7 +46,7 @@ Este documento describe las variables de entorno disponibles para personalizar l
 ### DATABASE_URL
 - **Descripción**: URL de conexión a la base de datos PostgreSQL
 - **Requerido**: Sí
-- **Ejemplo**: `DATABASE_URL="postgresql://usuario:password@localhost:5432/certypass"`
+- **Ejemplo**: `DATABASE_URL="postgresql://usuario:password@localhost:5432/datia"`
 
 ## Configuración de Mailgun (Emails)
 
@@ -67,7 +67,7 @@ Este documento describe las variables de entorno disponibles para personalizar l
 
 ### MAILGUN_FROM_NAME
 - **Descripción**: Nombre del remitente que aparecerá en los emails
-- **Requerido**: No (por defecto: `certypass`)
+- **Requerido**: No (por defecto: `Datia`)
 - **Ejemplo**: `MAILGUN_FROM_NAME="Mi Empresa"`
 
 ### NEXT_PUBLIC_APP_URL
@@ -101,7 +101,7 @@ DATABASE_URL="postgresql://usuario:password@localhost:5432/miapp"
 MAILGUN_API_KEY="fc97eb228d0246cd94daff9d3cc63759-826eddfb-affbba41"
 MAILGUN_DOMAIN="icommunity.io"
 MAILGUN_FROM_EMAIL="ibs@icommunity.io"
-MAILGUN_FROM_NAME="certypass"
+MAILGUN_FROM_NAME="Datia"
 NEXT_PUBLIC_APP_URL="https://miapp.com"
 ```
 

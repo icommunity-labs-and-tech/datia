@@ -1,4 +1,4 @@
-# 📚 Documentación Técnica - certypass
+# 📚 Documentación Técnica - Datia
 
 Este directorio contiene documentación técnica detallada que complementa el README principal del proyecto.
 

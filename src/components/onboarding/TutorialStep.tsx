@@ -46,7 +46,7 @@ export default function TutorialStep({
         }}>
           <i className="bi bi-play-circle-fill text-white" style={{ fontSize: '2.5rem' }}></i>
         </div>
-        <h3 className="mb-2" style={{ color: '#1a1a1a', fontWeight: 600 }}>Conoce CertyPass</h3>
+        <h3 className="mb-2" style={{ color: '#1a1a1a', fontWeight: 600 }}>Conoce Datia</h3>
         <p style={{ color: '#666', fontSize: '1rem' }}>
           Ve cómo crear productos y estados en el dashboard
         </p>

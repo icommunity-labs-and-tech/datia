@@ -589,7 +589,7 @@ function ActivateAccountForm() {
           }}>
             <Image 
               src="/logo.webp" 
-              alt="CertyPass" 
+              alt="Datia" 
               width={180} 
               height={60} 
               style={{ objectFit: 'contain' }}
@@ -926,7 +926,7 @@ function ActivateAccountForm() {
           }}>
             <Image 
               src="/logo.webp" 
-              alt="CertyPass" 
+              alt="Datia" 
               width={200} 
               height={70} 
               style={{ objectFit: 'contain' }}
@@ -1171,7 +1171,7 @@ function ActivateAccountForm() {
         }}>
           <Image 
             src="/logo.webp" 
-            alt="CertyPass" 
+            alt="Datia" 
             width={200} 
             height={70} 
             style={{ objectFit: 'contain' }}

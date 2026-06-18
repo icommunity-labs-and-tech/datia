@@ -29,7 +29,7 @@ export async function sendInvitationEmail(params: SendInvitationEmailParams): Pr
     recipientEmail,
     recipientName,
     organizationName,
-    appName: 'CertyPass',
+    appName: 'Datia',
     activationToken,
     activationUrl,
     appUrl: appUrl,

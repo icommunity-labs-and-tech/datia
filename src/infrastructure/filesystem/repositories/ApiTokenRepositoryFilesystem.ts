@@ -2,7 +2,7 @@
  * Filesystem-backed implementation of ApiTokenRepository.
  *
  * Stores tokens as a JSON file in the OS temp directory
- * (`$TMPDIR/certypass-sandbox/tokens.json`). Data survives process restarts
+ * (`$TMPDIR/datia-sandbox/tokens.json`). Data survives process restarts
  * but is wiped when the container is replaced — intentionally ephemeral.
  *
  * This is the sandbox adapter used so that docs-preview tokens never touch
@@ -20,7 +20,7 @@ import type {
   CreateApiTokenInput,
 } from '@/domain/api-tokens/ApiTokenRepository';
 
-const SANDBOX_DIR = join(tmpdir(), 'certypass-sandbox');
+const SANDBOX_DIR = join(tmpdir(), 'datia-sandbox');
 const TOKENS_FILE = join(SANDBOX_DIR, 'tokens.json');
 
 function ensureDir(): void {

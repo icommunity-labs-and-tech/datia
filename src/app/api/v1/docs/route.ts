@@ -411,8 +411,8 @@ export async function GET(request: Request) {
       clientKey: 'fetch',
     },
     metaData: {
-      title: 'certypass API Reference',
-      description: 'RESTful API for the certypass platform',
+      title: 'Datia API Reference',
+      description: 'RESTful API for the Datia platform',
     },
   });
 

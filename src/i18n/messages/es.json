@@ -315,7 +315,7 @@
         }
       },
       "superadmin": {
-        "title": "certypass",
+        "title": "Datia",
         "subtitle": "Panel de Super Administrador",
         "emailLabel": "Email",
         "emailPlaceholder": "superadmin@ejemplo.com",
@@ -481,7 +481,7 @@
     "scanWithCamera": "Escanear con Cámara",
     "manualInput": "O ingresa el código manualmente",
     "search": "Buscar",
-    "copyright": "© 2026 certypass - Pasaporte Digital",
+    "copyright": "© 2026 Datia - Pasaporte Digital",
     "loading": "Cargando...",
     "loadingProduct": "Obteniendo información del producto",
     "productNotFound": "Producto no encontrado",
@@ -510,7 +510,7 @@
     "registrationDate": "Fecha de registro:",
     "evidenceDate": "Fecha de la evidencia:",
     "firstVerificationTitle": "✓ Producto Original Verificado",
-    "firstVerificationDescription": "Este es el primer registro de este producto en nuestro sistema. certypass garantiza la autenticidad de este artículo.",
+    "firstVerificationDescription": "Este es el primer registro de este producto en nuestro sistema. Datia garantiza la autenticidad de este artículo.",
     "firstVerificationDisclaimer": "En caso de ser un producto falsificado o ya abierto anteriormente te habríamos mostrado otro mensaje.",
     "understood": "Entendido",
     "verifyingEvidence": "Verificando evidencia...",
@@ -617,7 +617,7 @@
     }
   },
   "operator": {
-    "title": "Operador certypass",
+    "title": "Operador Datia",
     "welcome": "Bienvenido, {name}",
     "openScanner": "Abrir escáner",
     "verifyingAccess": "Verificando acceso...",
@@ -929,7 +929,7 @@
       "currentLogo": "Logo actual",
       "noLogo": "Sin logo personalizado",
       "uploadLogo": "Subir logo",
-      "deleteLogo": "Usar logo de CertyPass",
+      "deleteLogo": "Usar logo de Datia",
       "uploading": "Subiendo...",
       "deleting": "Eliminando...",
       "uploadSuccess": "Logo actualizado correctamente",
@@ -1130,8 +1130,8 @@
     },
     "api": {
       "title": "API REST",
-      "subtitle": "Integra CertyPass en tu plataforma mediante nuestra API REST",
-      "description": "La API REST de CertyPass te permite crear productos, añadir estados certificados y consultar datos de tu organización de forma programática. Puedes integrarla en tus propias aplicaciones usando un token de autenticación.",
+      "subtitle": "Integra Datia en tu plataforma mediante nuestra API REST",
+      "description": "La API REST de Datia te permite crear productos, añadir estados certificados y consultar datos de tu organización de forma programática. Puedes integrarla en tus propias aplicaciones usando un token de autenticación.",
       "openDocs": "Abrir documentación interactiva",
       "capabilities": {
         "title": "¿Qué puedes hacer con la API?",

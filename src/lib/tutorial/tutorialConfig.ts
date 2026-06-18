@@ -13,7 +13,7 @@ export const sidebarTour: TutorialStep[] = [
   {
     element: '[data-tour="sidebar"]',
     popover: {
-      title: 'Bienvenido a CertyPass',
+      title: 'Bienvenido a Datia',
       description: 'Este es el menú principal de navegación. Te guiaremos por las diferentes secciones disponibles.',
       side: 'right',
       align: 'start',

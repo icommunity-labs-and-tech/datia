@@ -26,7 +26,7 @@ const TEST_ORG = 'iCommunity';
 const TEST_TOKEN = 'test-token-' + Date.now();
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
   ? `https://${process.env.VERCEL_URL}` 
-  : process.env.APP_URL || 'https://certypass.icommunitylabs.com';
+  : process.env.APP_URL || 'https://datia.icommunitylabs.com';
 const ACTIVATION_URL = `${APP_URL}/auth/activate?token=${TEST_TOKEN}`;
 
 async function testInvitationEmail() {
@@ -45,7 +45,7 @@ async function testInvitationEmail() {
       recipientEmail: TEST_EMAIL,
       recipientName: TEST_NAME,
       organizationName: TEST_ORG,
-      appName: 'certypass',
+      appName: 'Datia',
       activationToken: TEST_TOKEN,
       activationUrl: ACTIVATION_URL,
       appUrl: APP_URL,

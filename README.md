@@ -1,4 +1,4 @@
-# certypass - Sistema de Gestión Multi-Tenant
+# Datia - Sistema de Gestión Multi-Tenant
 
 Sistema de gestión de items con arquitectura multi-tenant, construido con Next.js, TypeScript y Prisma.
 
@@ -498,7 +498,7 @@ npm test -- --watch
 ```bash
 # Clonar repositorio
 git clone <repo-url>
-cd certypass
+cd datia
 
 # Instalar dependencias
 npm install

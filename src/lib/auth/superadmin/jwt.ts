@@ -49,8 +49,8 @@ export async function signSuperAdminJWT(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime(new Date(exp * 1000))
-    .setIssuer('certypass-superadmin')
-    .setAudience('certypass-superadmin-panel')
+    .setIssuer('datia-superadmin')
+    .setAudience('datia-superadmin-panel')
     .sign(secret);
 }
 
@@ -62,8 +62,8 @@ export async function verifySuperAdminJWT(token: string): Promise<JWTPayload | n
     const secret = new TextEncoder().encode(superadminAuthConfig.jwtSecret);
     
     const { payload } = await jwtVerify(token, secret, {
-      issuer: 'certypass-superadmin',
-      audience: 'certypass-superadmin-panel',
+      issuer: 'datia-superadmin',
+      audience: 'datia-superadmin-panel',
     });
     
     const decoded = payload as JWTPayload;

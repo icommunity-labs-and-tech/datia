@@ -29,7 +29,7 @@ async function createSuperAdmin() {
     const superAdmin = await prisma.user.create({
       data: {
         id: crypto.randomUUID(),
-        email: 'superadmin@certypass.com',
+        email: 'superadmin@datia.icommunitylabs.com',
         password: hashedPassword,
         name: 'Super Administrador',
         role: 'SUPER_ADMIN',
@@ -45,7 +45,7 @@ async function createSuperAdmin() {
     console.log(`   Role: ${superAdmin.role}\n`);
     
     console.log('🔑 Credenciales de acceso:');
-    console.log('   Email: superadmin@certypass.com');
+    console.log('   Email: superadmin@datia.icommunitylabs.com');
     console.log('   Contraseña: superadmin123\n');
     
     console.log('🌐 Puedes acceder a:');

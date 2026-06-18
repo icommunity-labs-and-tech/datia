@@ -62,7 +62,7 @@ export async function sendVerificationEmail(
       itemName: item.name,
       itemId: item.id,
       verificationUrl,
-      appName: 'certypass',
+      appName: 'Datia',
       appUrl,
     });
 

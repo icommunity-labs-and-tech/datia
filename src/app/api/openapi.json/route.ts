@@ -21,9 +21,9 @@ export async function GET() {
 const manualOpenApiSpec = {
   openapi: '3.0.0',
   info: {
-    title: 'certypass API',
+    title: 'Datia API',
     version: '1.0.0',
-    description: 'RESTful API for certypass platform',
+    description: 'RESTful API for Datia platform',
   },
   servers: [
     {

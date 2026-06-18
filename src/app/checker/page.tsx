@@ -46,7 +46,7 @@ export default function CheckerHomePage() {
         </div>
       </div>
       <div className="customer-footer">
-        <p>&copy; 2026 certypass - Verificador</p>
+        <p>&copy; 2026 Datia - Verificador</p>
       </div>
     </div>
   );

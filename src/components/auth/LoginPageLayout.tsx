@@ -114,7 +114,7 @@ export default function LoginPageLayout({
               <Image src={logoUrl} alt={orgName ?? 'Logo'} width={180} height={64}
                 style={{ objectFit: 'contain', maxWidth: '100%' }} priority unoptimized />
             ) : (
-              <Image src="/logo.webp" alt="CertyPass" width={160} height={54}
+              <Image src="/logo.webp" alt="Datia" width={160} height={54}
                 style={{ objectFit: 'contain', maxWidth: '100%', filter: 'brightness(0) invert(1)' }} priority />
             )}
           </div>
@@ -132,7 +132,7 @@ export default function LoginPageLayout({
             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', whiteSpace: 'nowrap', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               {poweredByText}
             </span>
-            <Image src="/logo.webp" alt="CertyPass" width={68} height={22}
+            <Image src="/logo.webp" alt="Datia" width={68} height={22}
               style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.4 }} priority />
           </div>
         )}

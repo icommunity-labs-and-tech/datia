@@ -12,7 +12,7 @@ import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
-// Datia brand: teal/green palette, distinct from CertyPass blue
+// Datia brand: teal/green palette
 const DATIA_CONFIG = {
   slug: 'datia',
   nombre: 'Datia',

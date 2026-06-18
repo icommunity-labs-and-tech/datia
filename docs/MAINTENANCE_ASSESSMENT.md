@@ -1,4 +1,4 @@
-# 📊 Valoración de Mantenibilidad - certypass
+# 📊 Valoración de Mantenibilidad - Datia
 
 **Fecha de evaluación:** $(date)  
 **Rama:** maintenance-assessment  
@@ -6,7 +6,7 @@
 
 ## 🎯 Resumen Ejecutivo
 
-El proyecto certypass presenta una **arquitectura sólida** con buenas prácticas de desarrollo, pero requiere **refactorización estratégica** para mejorar la mantenibilidad a largo plazo. La puntuación general de mantenibilidad es **7.2/10**.
+El proyecto Datia presenta una **arquitectura sólida** con buenas prácticas de desarrollo, pero requiere **refactorización estratégica** para mejorar la mantenibilidad a largo plazo. La puntuación general de mantenibilidad es **7.2/10**.
 
 ### Puntuaciones por Área
 - **Arquitectura**: 8.5/10 ⭐⭐⭐⭐⭐
@@ -429,7 +429,7 @@ const result = await createItem({
 
 ## 🔍 Conclusiones
 
-El proyecto certypass tiene una **base sólida** con buenas prácticas de desarrollo, pero requiere **refactorización estratégica** para mejorar la mantenibilidad a largo plazo. Las principales áreas de mejora son:
+El proyecto Datia tiene una **base sólida** con buenas prácticas de desarrollo, pero requiere **refactorización estratégica** para mejorar la mantenibilidad a largo plazo. Las principales áreas de mejora son:
 
 1. **Refactorización de componentes grandes** - Prioridad crítica
 2. **Eliminación de deuda técnica** - Tipos, logs, configuración

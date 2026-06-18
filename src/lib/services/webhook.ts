@@ -110,7 +110,7 @@ async function triggerWebhookWithRetry(
   const payloadString = JSON.stringify(payload);
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'User-Agent': 'certypass-Webhooks/1.0',
+    'User-Agent': 'datia-Webhooks/1.0',
     'X-Webhook-Timestamp': new Date().toISOString(),
     ...(customHeaders || {}),
   };
