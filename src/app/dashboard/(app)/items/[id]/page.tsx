@@ -12,7 +12,6 @@ import { Button } from 'react-bootstrap';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { getCascadeInfo } from '@/config/entityConfig';
 import ItemQrModal from '@/components/ItemQrModal';
-import ItemVerifyQrModal from '@/components/ItemVerifyQrModal';
 import ItemStatesTable from '@/components/views/ItemStatesTable';
 import { Row, Col } from 'react-bootstrap';
 import ImageDisplay from '@/components/ImageDisplay';
@@ -31,7 +30,6 @@ export default function ItemDetailPage() {
   const [states, setStates] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
-  const [showVerifyQr, setShowVerifyQr] = useState(false);
   const [showAddStateModal, setShowAddStateModal] = useState(false);
 
   // Usar el hook refactorizado
@@ -142,16 +140,6 @@ export default function ItemDetailPage() {
             >
               <i className="bi bi-qr-code me-1"></i>
               QR
-            </Button>
-            <Button
-              variant="outline-success"
-              size="sm"
-              onClick={() => setShowVerifyQr(true)}
-              className="d-flex align-items-center gap-1"
-              disabled={!itemId}
-            >
-              <i className="bi bi-shield-check me-1"></i>
-              {t('qrVerification')}
             </Button>
             <Button
               variant="outline-info"
@@ -303,13 +291,6 @@ export default function ItemDetailPage() {
       <ItemQrModal
         show={showQr}
         onHide={() => setShowQr(false)}
-        itemId={itemId}
-        itemName={item?.name}
-      />
-
-      <ItemVerifyQrModal
-        show={showVerifyQr}
-        onHide={() => setShowVerifyQr(false)}
         itemId={itemId}
         itemName={item?.name}
       />

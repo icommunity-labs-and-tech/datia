@@ -4,18 +4,12 @@ import type { ExcelItemInput, ExcelResult } from '../excel/types';
 
 export interface ExcelExportService {
   generateExcelWithQRCodes(items: ExcelItemInput[]): Promise<ExcelResult>;
-  generateExcelWithVerifyQRCodes(items: ExcelItemInput[]): Promise<ExcelResult>;
 }
 import { getDynamicAppUrl } from '@/lib/env';
 
 async function buildItemUrl(id: string): Promise<string> {
   const base = (await getDynamicAppUrl()).replace(/\/$/, '');
   return `${base}/customer/item/${encodeURIComponent(id)}`;
-}
-
-async function buildVerifyUrl(id: string): Promise<string> {
-  const base = (await getDynamicAppUrl()).replace(/\/$/, '');
-  return `${base}/customer/verify/${encodeURIComponent(id)}`;
 }
 
 export function createExcelExportService(): ExcelExportService {
@@ -91,77 +85,6 @@ export function createExcelExportService(): ExcelExportService {
 
         return {
           filename: 'items_con_qr.xlsx',
-          contentType:
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-          base64: Buffer.from(buffer).toString('base64'),
-        };
-      } catch (error) {
-        throw error instanceof Error ? error : new Error(String(error));
-      }
-    },
-
-    async generateExcelWithVerifyQRCodes(items: ExcelItemInput[]): Promise<ExcelResult> {
-      try {
-        const workbook = new ExcelJS.Workbook();
-        const worksheet = workbook.addWorksheet('Verification QRs');
-
-        worksheet.columns = [
-          { header: 'ID', key: 'id', width: 20 },
-          { header: 'Nombre', key: 'name', width: 30 },
-          { header: 'Descripción', key: 'description', width: 40 },
-          { header: 'Categoría', key: 'categoryName', width: 20 },
-          { header: 'QR Verificación', key: 'qr', width: 20 },
-        ];
-
-        const headerRow = worksheet.getRow(1);
-        headerRow.font = { bold: true };
-        headerRow.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'FFE0E0E0' },
-        };
-        headerRow.height = 20;
-
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          const rowNumber = i + 2;
-          const row = worksheet.addRow({
-            id: item.id,
-            name: item.name || '',
-            description: item.description || '',
-            categoryName: item.categoryName || '',
-            qr: '',
-          });
-
-          const url = await buildVerifyUrl(item.id);
-          const qrBuffer = await QRCode.toBuffer(url, {
-            type: 'png',
-            errorCorrectionLevel: 'M',
-            margin: 1,
-            width: 200,
-            color: {
-              dark: '#000000',
-              light: '#FFFFFF',
-            },
-          });
-
-          const imageId = workbook.addImage({
-            buffer: qrBuffer as any,
-            extension: 'png',
-          });
-
-          row.height = 120;
-
-          worksheet.addImage(imageId, {
-            tl: { col: 4, row: rowNumber - 1 },
-            ext: { width: 120, height: 120 },
-          });
-        }
-
-        const buffer = await workbook.xlsx.writeBuffer();
-
-        return {
-          filename: 'items_verify_qr.xlsx',
           contentType:
             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           base64: Buffer.from(buffer).toString('base64'),

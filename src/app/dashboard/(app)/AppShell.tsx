@@ -6,7 +6,6 @@ import PageHeader from '@/components/Header';
 import PageBody from '@/components/Body';
 import { SidebarProvider, useSidebar } from '@/components/SidebarContext';
 import { AuthProvider } from '@/hooks/useAuthSeparated';
-import { TutorialProvider } from '@/lib/tutorial/TutorialProvider';
 import type { OrgModules } from './layout';
 
 interface AppShellProps {
@@ -21,11 +20,9 @@ export default function AppShell({ children, logoUrl, brandColorPrimary, brandCo
   return (
     <AuthProvider>
       <SidebarProvider>
-        <TutorialProvider>
-          <Shell logoUrl={logoUrl} brandColorPrimary={brandColorPrimary} brandColorSecondary={brandColorSecondary} modules={modules}>
-            {children}
-          </Shell>
-        </TutorialProvider>
+        <Shell logoUrl={logoUrl} brandColorPrimary={brandColorPrimary} brandColorSecondary={brandColorSecondary} modules={modules}>
+          {children}
+        </Shell>
       </SidebarProvider>
     </AuthProvider>
   );

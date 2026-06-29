@@ -8,7 +8,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import { getOnboardingInfo } from '@/actions/organizations/get-onboarding-info';
 import WelcomeStep from '@/components/onboarding/WelcomeStep';
-import TutorialStep from '@/components/onboarding/TutorialStep';
 import KycStep from '@/components/onboarding/KycStep';
 import { useTranslations } from 'next-intl';
 
@@ -67,7 +66,7 @@ const backgroundStyles = `
   }
 `;
 
-type OnboardingStep = 1 | 2 | 3 | 4 | 5;
+type OnboardingStep = 1 | 2 | 3 | 4;
 
 function ActivateAccountForm() {
   const t = useTranslations('auth.activate');
@@ -212,14 +211,14 @@ function ActivateAccountForm() {
             // Determinar el paso correcto basado en el estado guardado y el estado real
             let restoredStep: OnboardingStep = savedState.step;
             
-            // Si el KYC ya está verificado, ir al paso 5 (completado)
+            // Si el KYC ya está verificado, ir al paso 4 (completado)
             if (info.verificationStatus === 'VERIFIED') {
-              restoredStep = 5;
+              restoredStep = 4;
               setAccountActivated(true);
             }
-            // Si guardó la contraseña pero no completó KYC, ir al paso 4 (KYC)
-            else if (savedState.passwordSet && restoredStep < 4) {
-              restoredStep = 4;
+            // Si guardó la contraseña pero no completó KYC, ir al paso 3 (KYC)
+            else if (savedState.passwordSet && restoredStep < 3) {
+              restoredStep = 3;
             }
             // Si estaba en paso 1 pero guardó contraseña, ir al paso 2
             else if (savedState.passwordSet && restoredStep === 1) {
@@ -276,8 +275,8 @@ function ActivateAccountForm() {
         if (data.success) {
           setPasswordSaved(true);
           setAccountActivated(true);
-          saveOnboardingState(3, true); // Guardar que completó paso 2 y va al paso 3 (tour)
-          setCurrentStep(3); // Ir al paso del tour
+          saveOnboardingState(3, true); // Guardar que completó paso 2 y va al paso 3 (KYC)
+          setCurrentStep(3); // Ir al paso de KYC
         } else {
           setError(data.error || t('error.activationError'));
         }
@@ -379,9 +378,9 @@ function ActivateAccountForm() {
       if (data.success) {
         setAccountActivated(true);
         // Guardar estado de completado
-        saveOnboardingState(5, true);
+        saveOnboardingState(4, true);
         // Avanzar al paso final de confirmación
-        setCurrentStep(5);
+        setCurrentStep(4);
         // Redirigir automáticamente al dashboard después de 2 segundos
         setTimeout(() => {
           handleFinish();
@@ -401,7 +400,7 @@ function ActivateAccountForm() {
 
   const handleNext = () => {
     setError('');
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       const nextStep = (currentStep + 1) as OnboardingStep;
       setCurrentStep(nextStep);
       // Guardar estado cuando avanza de paso
@@ -420,20 +419,20 @@ function ActivateAccountForm() {
       return;
     }
     
-    if (currentStep === 5) {
-      console.log('Already at step 5, skipping');
+    if (currentStep === 4) {
+      console.log('Already at step 4, skipping');
       return; // Ya estamos en el paso de completado
     }
-    
+
     kycVerifiedCalledRef.current = true;
-    
-    // La cuenta debería estar activada desde el paso 2, así que solo avanzamos al paso 5
+
+    // La cuenta debería estar activada desde el paso 2, así que solo avanzamos al paso 4
     // Si por alguna razón no está activada pero la contraseña fue guardada, redirigimos directamente
     if (accountActivated || passwordSaved) {
-      console.log('Account already activated or password saved, moving to step 5');
+      console.log('Account already activated or password saved, moving to step 4');
       // La cuenta ya está activada o la contraseña fue guardada, solo avanzar al paso de completado
-      saveOnboardingState(5, true);
-      setCurrentStep(5);
+      saveOnboardingState(4, true);
+      setCurrentStep(4);
       // Redirigir automáticamente al dashboard después de 2 segundos
       setTimeout(() => {
         console.log('Redirecting to dashboard...');
@@ -942,21 +941,20 @@ function ActivateAccountForm() {
                 <span className="small" style={{ color: '#667eea', fontWeight: 600 }}>
                   {currentStep === 1 && t('steps.welcome')}
                   {currentStep === 2 && t('steps.password')}
-                  {currentStep === 3 && t('steps.tour')}
-                  {currentStep === 4 && t('steps.verification')}
-                  {currentStep === 5 && t('steps.completed')}
+                  {currentStep === 3 && t('steps.verification')}
+                  {currentStep === 4 && t('steps.completed')}
                 </span>
               </div>
               <ProgressBar
-                now={(currentStep / 5) * 100}
-                style={{ 
-                  height: '10px', 
+                now={(currentStep / 4) * 100}
+                style={{
+                  height: '10px',
                   borderRadius: '10px',
                   backgroundColor: '#e9ecef'
                 }}
               >
                 <div style={{
-                  width: `${(currentStep / 5) * 100}%`,
+                  width: `${(currentStep / 4) * 100}%`,
                   height: '100%',
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   borderRadius: '10px',
@@ -1091,21 +1089,8 @@ function ActivateAccountForm() {
               </div>
             )}
 
-            {/* Paso 3: Tour */}
+            {/* Paso 3: KYC */}
             {currentStep === 3 && (
-              <TutorialStep
-                onNext={handleNext}
-                onPrevious={handlePrevious}
-                onSkip={() => {
-                  // Si omite el tour, ir directamente al KYC
-                  setCurrentStep(4);
-                  saveOnboardingState(4, passwordSaved);
-                }}
-              />
-            )}
-
-            {/* Paso 4: KYC */}
-            {currentStep === 4 && (
               <div>
                 <KycStep
                   organizationId={onboardingInfo.organizationId}
@@ -1124,8 +1109,8 @@ function ActivateAccountForm() {
               </div>
             )}
 
-            {/* Paso 5: Completado */}
-            {currentStep === 5 && accountActivated && (
+            {/* Paso 4: Completado */}
+            {currentStep === 4 && accountActivated && (
               <div className="text-center">
                 <div style={{
                   width: '80px',

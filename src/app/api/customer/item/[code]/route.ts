@@ -76,12 +76,6 @@ export async function GET(
       );
     }
 
-    // No ejecutar verificación antifraude aquí - se hace en /api/customer/verify/[code]
-    // Solo retornar el estado actual
-    // IMPORTANTE: isFirstVerification = false porque NO estamos verificando en esta ruta
-    const isFirstVerification = false;
-    const antifraudEvidenceId = item.antifraudEvidenceId;
-
     // Transformar los datos para el frontend
     const transformedItem = {
       id: item.id,
@@ -92,8 +86,6 @@ export async function GET(
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
       evidenceID: (item as any).evidenceID || null,
-      antifraudEvidenceId: antifraudEvidenceId || null,
-      isFirstVerification: isFirstVerification,
       createdBy: item.User || null,
       category: item.ItemCategory.length > 0 ? {
         id: item.ItemCategory[0].Category.id,

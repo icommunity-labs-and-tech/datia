@@ -10,7 +10,6 @@ const toDomain = (i: any): ItemRecord => ({
   itemTemplate: i.itemTemplate ?? [],
   templateFields: i.templateFields ?? null,
   evidenceID: i.evidenceID ?? null,
-  antifraudEvidenceId: i.antifraudEvidenceId ?? null,
   createdAt: i.createdAt,
   updatedAt: i.updatedAt,
 });
@@ -41,7 +40,6 @@ export const itemRepository: ItemRepository = {
           itemTemplate: true,
           templateFields: true,
           evidenceID: true,
-          antifraudEvidenceId: true,
           createdAt: true,
           updatedAt: true,
           ItemCategory: {

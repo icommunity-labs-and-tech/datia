@@ -36,19 +36,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
         }
         
         const data = await response.json();
-        console.log('[Frontend] Item data received:', {
-          id: data.id,
-          antifraudEvidenceId: data.antifraudEvidenceId,
-          isFirstVerification: data.isFirstVerification,
-        });
-        
         setItemData(data);
-        
-        // NO mostrar el modal de antifalsificación aquí porque esta ruta (/customer/item/[id])
-        // NO ejecuta la verificación antifalsificación. Solo la ruta /customer/verify/[id]
-        // ejecuta la verificación y debe mostrar el modal.
-        // El modal solo se muestra cuando se accede a través de /customer/verify/[id]
-        console.log('[Frontend] This is the normal item view - no antifraud verification modal');
       } catch (err) {
         setError(err instanceof Error ? err.message : t('errorGettingProduct'));
         setItemData(null);
@@ -148,9 +136,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
           <ItemPassport item={itemData} onBack={handleBack} />
         </div>
       </div>
-      
-      {/* NO mostrar modal de antifalsificación aquí - esta ruta no ejecuta verificación */}
-      
+
       <div className="customer-footer">
         <p>{t('copyright')}</p>
       </div>

@@ -13,7 +13,7 @@ export function parseAndValidateFormData(formData: FormData): UploadRequest {
   }
 
   const type = formData.get('type') as string | null;
-  if (!type || !['product', 'item', 'issue', 'fraud-report'].includes(type)) {
+  if (!type || !['product', 'item', 'issue'].includes(type)) {
     throw new UploadInputError('type', 'Tipo de upload inválido');
   }
 

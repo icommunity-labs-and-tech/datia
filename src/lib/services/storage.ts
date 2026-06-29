@@ -74,7 +74,7 @@ export function createStorageService(): StorageService {
       }
 
       // Validar tipo de upload
-      if (!['product', 'item', 'issue', 'fraud-report', 'org-logo'].includes(kind)) {
+      if (!['product', 'item', 'issue', 'org-logo'].includes(kind)) {
         throw new InvalidFileError('invalid_upload_type');
       }
 

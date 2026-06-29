@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ItemData, EnergyCertification } from '../types';
-import { AntifraudPanel } from './AntifraudPanel';
 import { ItemInfoSection } from './sections/ItemInfoSection';
 import { ItemHistorySection } from './sections/ItemHistorySection';
 import { VerifiedBadge } from './ui';
@@ -54,19 +53,15 @@ function EnergyCertificationPanel({ certifications }: { certifications: EnergyCe
 interface ItemPassportProps {
   item: ItemData;
   onBack: () => void;
-  showFraudReport?: boolean;
 }
 
-export function ItemPassport({ item, onBack, showFraudReport = false }: ItemPassportProps) {
+export function ItemPassport({ item, onBack }: ItemPassportProps) {
   const t = useTranslations('common');
   const tCustomer = useTranslations('customer');
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'info' | 'history' | 'antifraud' | 'energy'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'history' | 'energy'>('info');
   const isMobile = useMobileDetection();
 
-  // Determinar si se debe mostrar la pestaña de antifalsificación
-  const hasEvidence = item.antifraudEvidenceId && item.antifraudEvidenceId !== 'NO_SIGNATURE';
-  const shouldShowAntifraud = hasEvidence || item.isFirstVerification;
   const verifiedEmissions = item.energyCertifications?.filter(e => e.verificationStatus === 'VERIFIED') ?? [];
   const showEnergy = verifiedEmissions.length > 0;
 
@@ -145,17 +140,6 @@ export function ItemPassport({ item, onBack, showFraudReport = false }: ItemPass
             >
               {tCustomer('tabHistory')}
             </button>
-            {shouldShowAntifraud && (
-              <button
-                style={{
-                  ...passportStyles.tab,
-                  ...(activeTab === 'antifraud' ? passportStyles.tabActive : {}),
-                }}
-                onClick={() => setActiveTab('antifraud')}
-              >
-                {tCustomer('tabAntifraud')}
-              </button>
-            )}
             {showEnergy && (
               <button
                 style={{
@@ -177,12 +161,6 @@ export function ItemPassport({ item, onBack, showFraudReport = false }: ItemPass
               <ItemInfoSection item={item} isMobile={isMobile} />
               <div style={{ height: '1rem' }} />
               <ItemHistorySection states={item.states} />
-              {shouldShowAntifraud && (
-                <>
-                  <div style={{ height: '1rem' }} />
-                  <AntifraudPanel item={item} showFraudReport={showFraudReport} />
-                </>
-              )}
               {showEnergy && (
                 <>
                   <div style={{ height: '1rem' }} />
@@ -194,7 +172,6 @@ export function ItemPassport({ item, onBack, showFraudReport = false }: ItemPass
             <>
               {activeTab === 'info' && <ItemInfoSection item={item} isMobile={isMobile} />}
               {activeTab === 'history' && <ItemHistorySection states={item.states} />}
-              {activeTab === 'antifraud' && shouldShowAntifraud && <AntifraudPanel item={item} showFraudReport={showFraudReport} />}
               {activeTab === 'energy' && showEnergy && <EnergyCertificationPanel certifications={verifiedEmissions} />}
             </>
           )}

@@ -42,8 +42,6 @@ export type ItemData = {
   createdAt: string;
   updatedAt: string;
   evidenceID?: string | null;
-  antifraudEvidenceId?: string | null;
-  isFirstVerification: boolean;
   createdBy?: { name: string; email: string } | null;
   category: {
     id: string;

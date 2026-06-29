@@ -77,7 +77,7 @@ export async function uploadImage(formData: FormData): Promise<{ imageUrl: strin
       throw new Error('No se proporcionó ningún archivo');
     }
 
-    if (!type || !['product', 'item', 'issue', 'fraud-report', 'org-logo'].includes(type)) {
+    if (!type || !['product', 'item', 'issue', 'org-logo'].includes(type)) {
       throw new Error('Tipo de upload inválido');
     }
 

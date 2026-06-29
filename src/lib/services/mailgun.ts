@@ -1,10 +1,9 @@
-import type { InvitationEmailData, VerificationEmailData } from '../mailgun/types';
+import type { InvitationEmailData } from '../mailgun/types';
 import { MailgunConfigError, MailgunHTTPError } from '../mailgun/errors';
-import { generateInvitationEmailHTML, generateInvitationEmailText, generateVerificationEmailHTML, generateVerificationEmailText } from '../mailgun/templates';
+import { generateInvitationEmailHTML, generateInvitationEmailText } from '../mailgun/templates';
 
 export interface MailgunService {
   sendInvitationEmail(data: InvitationEmailData): Promise<void>;
-  sendVerificationEmail(data: VerificationEmailData): Promise<void>;
 }
 import Mailgun from 'mailgun.js';
 import FormData from 'form-data';
@@ -143,44 +142,6 @@ export function createMailgunService(): MailgunService {
           throw error;
         }
         throw new MailgunHTTPError('sendInvitationEmail', `Unexpected error: ${error}`);
-      }
-    },
-    async sendVerificationEmail(data: VerificationEmailData): Promise<void> {
-      try {
-        const config = getConfig();
-        
-        const html = generateVerificationEmailHTML({
-          recipientName: data.recipientName,
-          itemName: data.itemName,
-          verificationUrl: data.verificationUrl,
-          appName: data.appName,
-          appUrl: data.appUrl,
-        });
-
-        const text = generateVerificationEmailText({
-          recipientName: data.recipientName,
-          itemName: data.itemName,
-          verificationUrl: data.verificationUrl,
-          appName: data.appName,
-        });
-
-        const subject = `Verificación de producto: ${data.itemName} - ${data.appName}`;
-
-        await sendEmailWithRetry(
-          config.domain,
-          config.apiKey,
-          config.fromEmail,
-          config.fromName,
-          data.recipientEmail,
-          subject,
-          html,
-          text
-        );
-      } catch (error) {
-        if (error instanceof MailgunConfigError || error instanceof MailgunHTTPError) {
-          throw error;
-        }
-        throw new MailgunHTTPError('sendVerificationEmail', `Unexpected error: ${error}`);
       }
     },
   };

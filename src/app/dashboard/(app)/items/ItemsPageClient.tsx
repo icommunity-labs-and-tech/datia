@@ -8,12 +8,10 @@ import { Divider } from '@/components/Divider';
 import ItemsStatsPanel, { CATEGORY_NONE } from '@/components/charts/ItemsStatsPanel';
 import { ItemsTable } from '@/components/views';
 import { getItems } from '@/actions/items';
-import { useTutorialContext } from '@/lib/tutorial/TutorialProvider';
 
 export default function ItemsPageClient() {
   const t = useTranslations('itemsPage.charts');
   const tTables = useTranslations('tables');
-  const { isTourActive } = useTutorialContext();
 
   const [allItems, setAllItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -29,17 +27,14 @@ export default function ItemsPageClient() {
   }, []);
 
   useEffect(() => {
-    if (!isTourActive) load();
-    else setLoading(false);
-  }, [isTourActive, load]);
+    load();
+  }, [load]);
 
   const filteredItems = useMemo(() => {
     if (categoryFilter === CATEGORY_NONE) return allItems.filter(i => !i.categories?.length);
     if (categoryFilter !== null) return allItems.filter(i => i.categories?.some((c: any) => c.id === categoryFilter));
     return allItems;
   }, [allItems, categoryFilter]);
-
-  if (isTourActive) return <ItemsTable showBox={true} />;
 
   if (loading) {
     return (

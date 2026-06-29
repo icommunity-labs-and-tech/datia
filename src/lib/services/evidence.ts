@@ -136,19 +136,6 @@ async function buildEvidenceFiles(
       itemTemplate: input.metadata.itemTemplate,
     });
     fileName = 'item_data.json';
-  } else if (type === 'antifraud_verification') {
-    // Build antifraud verification data
-    json = {
-      type: 'antifraud_verification',
-      itemId: input.metadata.itemId,
-      verificationDate: input.metadata.verificationDate,
-      verificationType: input.metadata.verificationType,
-      ipAddress: input.metadata.ipAddress,
-      userAgent: input.metadata.userAgent,
-      description: input.description,
-      title: input.title,
-    };
-    fileName = 'antifraud_verification.json';
   } else {
     json = buildIssueDataObject({
       description: input.description,

@@ -12,13 +12,3 @@ export interface InvitationEmailData {
   appUrl?: string; // URL base de la aplicación para recursos (logo, etc.)
   language?: 'es' | 'en'; // Idioma del email (default: 'es')
 }
-
-export interface VerificationEmailData {
-  recipientEmail: string;
-  recipientName?: string;
-  itemName: string;
-  itemId: string;
-  verificationUrl: string;
-  appName: string;
-  appUrl?: string;
-}

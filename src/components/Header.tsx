@@ -11,23 +11,11 @@ import LogoutButton from './logout';
 import { useBreadcrumbs } from '@/hooks/useBreadcrumbs';
 import LanguageSwitcher from './LanguageSwitcher';
 import { useTranslations } from 'next-intl';
-import { useTutorialContext } from '@/lib/tutorial/TutorialProvider';
-import { TOUR_IDS, sidebarTour } from '@/lib/tutorial/tutorialConfig';
 
 export default function PageHeader() {
   const t = useTranslations('header');
   const tAccessibility = useTranslations('accessibility');
-  const { resetTour, startTour } = useTutorialContext();
 
-  const handleShowTutorial = () => {
-    // Resetear el tour del sidebar para poder mostrarlo de nuevo
-    resetTour(TOUR_IDS.SIDEBAR_TOUR);
-    // Iniciar el tour después de un pequeño delay para asegurar que los elementos estén renderizados
-    setTimeout(() => {
-      startTour(TOUR_IDS.SIDEBAR_TOUR, sidebarTour, { allowClose: true });
-    }, 300);
-  };
-  
   return (
     <BoxStretched>
       <Stack direction="horizontal" className="w-100 justify-content-between align-items-center">
@@ -55,15 +43,6 @@ export default function PageHeader() {
           <Link href="/dashboard/profile" className="text-dark" title={tAccessibility('profile')}>
             <i className="bi bi-person-circle fs-5" />
           </Link>
-          <button
-            type="button"
-            className="btn btn-link p-0 text-dark"
-            title="Mostrar tutorial"
-            aria-label="Mostrar tutorial"
-            onClick={handleShowTutorial}
-          >
-            <i className="bi bi-question-circle fs-5" />
-          </button>
           <LogoutButton />
         </div>
       </Stack>

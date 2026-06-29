@@ -10,8 +10,6 @@ import { Badge } from 'react-bootstrap';
 import Logo from './Logo';
 import './Sidebar.css';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
-import { getFraudReportsPendingCount } from '@/actions/fraudReports/get-pending-count';
 import type { OrgModules } from '@/app/dashboard/(app)/layout';
 
 export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null; modules?: OrgModules }) {
@@ -19,11 +17,6 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
   const { isDesktop, closeMobile } = useSidebar();
   const { user, loading } = useAuthSeparated();
   const t = useTranslations('sidebar');
-  const [fraudPendingCount, setFraudPendingCount] = useState(0);
-
-  useEffect(() => {
-    getFraudReportsPendingCount().then(setFraudPendingCount);
-  }, [pathname]);
 
   const showPassport = modules?.passport !== false;
   const showEnergy = modules?.energy === true;
@@ -35,7 +28,6 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
       { href: '/dashboard/items', icon: 'bi-list-columns', label: t('products') },
       { href: '/dashboard/export-qrs', icon: 'bi-qr-code', label: t('exportQrs') },
       { href: '/dashboard/import-products', icon: 'bi-cloud-upload', label: t('importProducts') },
-      { href: '/dashboard/fraud-reports', icon: 'bi-shield-exclamation', label: t('fraudReports'), badge: fraudPendingCount > 0 ? fraudPendingCount : undefined },
     ] : []),
     ...(showEnergy ? [
       { href: '/dashboard/energy/sources', icon: 'bi-lightning-charge', label: t('energySources') },
@@ -79,14 +71,14 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
   };
 
   return (
-    <Container fluid className="sidebar-wrap h-100 p-3 d-flex flex-column" data-tour="sidebar">
+    <Container fluid className="sidebar-wrap h-100 p-3 d-flex flex-column">
       <div className="px-2">
         <Navbar.Brand className="d-flex align-items-center mb-3">
           <Logo href="/dashboard" width={120} height={40} priority src={logoUrl ?? undefined} alt="Logo" />
         </Navbar.Brand>
         <hr className="opacity-75 border" />
         <Nav className="flex-column mb-auto">
-          {navLinks.map(({ href, icon, label, badge }) => (
+          {navLinks.map(({ href, icon, label }) => (
             <Nav.Link
               key={href}
               as={Link}
@@ -98,11 +90,6 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
               onClick={handleNavClick}
             >
               <span><i className={`bi ${icon} me-2`} />{label}</span>
-              {badge !== undefined && (
-                <Badge bg="warning" text="dark" style={{ fontSize: '0.7rem' }}>
-                  {badge}
-                </Badge>
-              )}
             </Nav.Link>
           ))}
         </Nav>
@@ -147,7 +134,7 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
         
         <hr className="opacity-75 border" />
         <div className="mb-2">
-          <small className="text-muted px-3" data-tour="developer-section">{t('developer')}</small>
+          <small className="text-muted px-3">{t('developer')}</small>
         </div>
         <Nav className="flex-column mb-3">
           {developerLinks.map(({ href, icon, label, external }) => (
@@ -183,7 +170,7 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
 
         <hr className="opacity-75 border" />
         <div className="mb-2">
-          <small className="text-muted px-3" data-tour="applications-section">{t('applications')}</small>
+          <small className="text-muted px-3">{t('applications')}</small>
         </div>
         <Nav className="flex-column">
           {appLinks.map(({ href, icon, label }) => (

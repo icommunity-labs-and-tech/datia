@@ -12,8 +12,6 @@ import StatusTypeFieldBuilder, { StatusTypeFieldDefinition } from '@/components/
 import { Button, Modal, Form, Alert } from 'react-bootstrap';
 import { Divider } from '@/components/Divider';
 import { useTranslations, useLocale } from 'next-intl';
-import { useTutorialContext } from '@/lib/tutorial/TutorialProvider';
-import { getTutorialStatusTypes } from '@/lib/tutorial/tutorialExampleData';
 
 // Función helper para crear el template de status types con traducciones
 const createStatusTypeFormTemplate = (tForms: (key: string) => string): FormTemplate => [
@@ -49,8 +47,6 @@ export default function StatusTypesTable({
   const [editFormData, setEditFormData] = useState({ name: '', description: '', template: [] as StatusTypeFieldDefinition[] });
   const [isSavingEdit, setIsSavingEdit] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
-  const { isTourActive, organizationSector } = useTutorialContext();
-  const showTutorialExamples = isTourActive;
 
   // Usar el hook refactorizado
   const {
@@ -76,11 +72,6 @@ export default function StatusTypesTable({
   useEffect(() => {
     const load = async () => {
       try {
-        if (showTutorialExamples) {
-          setStatusTypes(getTutorialStatusTypes(organizationSector || 'fashion'));
-          setIsLoading(false);
-          return;
-        }
         const data = await listStatusTypes();
         setStatusTypes(data);
       } catch (e) {
@@ -90,7 +81,7 @@ export default function StatusTypesTable({
       }
     };
     load();
-  }, [showTutorialExamples, organizationSector]);
+  }, []);
 
   const handleEditStatusType = async (statusType: any) => {
     try {
@@ -140,7 +131,7 @@ export default function StatusTypesTable({
       initialData={statusTypes}
       title={defaultTitle}
       icon="bi-collection"
-      onRowDoubleClick={!showTutorialExamples ? (st) => router.push(`/dashboard/status-types/${st.id}`) : undefined}
+      onRowDoubleClick={(st) => router.push(`/dashboard/status-types/${st.id}`)}
       formTemplate={[]}
       onAddSubmit={async (formData: any) => {
         // El template viene del customFormContent a través del formState
@@ -190,10 +181,10 @@ export default function StatusTypesTable({
           </div>
         );
       }}
-      rowActions={!showTutorialExamples ? [
+      rowActions={[
         { icon: 'bi-pencil', label: tCommon('edit'), onClick: handleEditStatusType, variant: 'outline-secondary' },
         { icon: 'bi-trash', label: tCommon('delete'), onClick: (row) => openDeleteModal(row), variant: 'outline-danger' },
-      ] : []}
+      ]}
       customColumns={customColumns.length > 0 ? customColumns : [
         {
           key: 'name',
@@ -241,7 +232,7 @@ export default function StatusTypesTable({
         </Box>
       )}
 
-      <div data-tour="status-types-table">
+      <div>
         {showBox ? (
           <Box>
             {tableContent}

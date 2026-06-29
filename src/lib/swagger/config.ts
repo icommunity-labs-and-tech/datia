@@ -43,10 +43,6 @@ export function getSwaggerSpec() {
           name: 'Events',
           description: 'Operations related to event logs',
         },
-        {
-          name: 'FraudReports',
-          description: 'Operations related to fraud report management',
-        },
       ],
     },
   });

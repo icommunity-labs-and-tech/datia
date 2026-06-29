@@ -38,7 +38,6 @@ function readAll(): ItemRecord[] {
       itemTemplate: (r.itemTemplate as any[]) ?? [],
       templateFields: (r.templateFields as Record<string, any> | null) ?? null,
       evidenceID: (r.evidenceID as string | null) ?? null,
-      antifraudEvidenceId: (r.antifraudEvidenceId as string | null) ?? null,
       createdAt: new Date(r.createdAt as string),
       updatedAt: new Date(r.updatedAt as string),
     }));
@@ -70,7 +69,6 @@ function readRaw(): PersistedItem[] {
       itemTemplate: (r.itemTemplate as any[]) ?? [],
       templateFields: (r.templateFields as Record<string, any> | null) ?? null,
       evidenceID: (r.evidenceID as string | null) ?? null,
-      antifraudEvidenceId: (r.antifraudEvidenceId as string | null) ?? null,
       createdAt: new Date(r.createdAt as string),
       updatedAt: new Date(r.updatedAt as string),
     }));
@@ -126,7 +124,6 @@ export const itemRepositoryFilesystem: ItemRepository = {
       itemTemplate: input.itemTemplate ?? [],
       templateFields: input.templateFields ?? null,
       evidenceID: null,
-      antifraudEvidenceId: null,
       createdAt: now,
       updatedAt: now,
     };

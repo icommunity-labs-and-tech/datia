@@ -19,7 +19,6 @@ export interface ItemRecord {
   itemTemplate: any[];
   templateFields: Record<string, any> | null;
   evidenceID?: string | null;
-  antifraudEvidenceId?: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
