@@ -3,7 +3,7 @@ import { loginOperator } from './utils/auth';
 
 test.describe('Operator - Scanner', () => {
   test.beforeEach(async ({ page }) => {
-    const email = process.env.OPERATOR_E2E_EMAIL || 'operator@certypass.com';
+    const email = process.env.OPERATOR_E2E_EMAIL || 'operator@datia.icommunitylabs.com';
     const password = process.env.OPERATOR_E2E_PASSWORD || 'operator123';
     await loginOperator(page, email, password);
   });

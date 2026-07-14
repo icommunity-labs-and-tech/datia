@@ -4,10 +4,10 @@ test.describe('Shared - Responsive checks', () => {
   test('apps page mobile/desktop', async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
     await page.goto('/apps');
-    await expect(page.getByRole('heading', { name: /certypass/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /datia/i })).toBeVisible();
 
     await page.setViewportSize({ width: 1440, height: 900 });
-    await expect(page.getByRole('heading', { name: /certypass/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /datia/i })).toBeVisible();
   });
 
   test('admin login mobile', async ({ page }) => {

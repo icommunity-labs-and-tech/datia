@@ -45,7 +45,7 @@ const { ORG_ID, PRODUCT_ID, STATUS_TYPE_ID, fakeStatusType, mockCreateEvidence }
   return { ORG_ID, PRODUCT_ID, STATUS_TYPE_ID, fakeStatusType, mockCreateEvidence };
 });
 
-const SANDBOX_DIR = join(tmpdir(), 'certypass-sandbox');
+const SANDBOX_DIR = join(tmpdir(), 'datia-sandbox');
 
 // ── Mocks ────────────────────────────────────────────────────────────────────
 

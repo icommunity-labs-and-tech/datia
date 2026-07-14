@@ -1,5 +1,5 @@
 {
-  "name": "digipass",
+  "name": "datia",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -30,8 +30,8 @@
     "test:e2e": "playwright test",
     "prisma:gen:e2e": "prisma generate --schema prisma/schema.e2e.prisma",
     "db:reset:e2e": "E2E_SQLITE_URL=file:./playwright-e2e.db prisma migrate reset --schema prisma/schema.e2e.prisma --force",
-    "test:e2e:sqlite": "E2E_SQLITE=1 DATABASE_URL=file:./playwright-e2e.db E2E_SQLITE_URL=file:./playwright-e2e.db E2E_SQLITE_RESET=0 ADMIN_E2E_EMAIL=admin@certypass.com ADMIN_E2E_PASSWORD=admin123 playwright test --project=chromium",
-    "test:e2e:sqlite:reset": "E2E_SQLITE=1 DATABASE_URL=file:./playwright-e2e.db E2E_SQLITE_URL=file:./playwright-e2e.db E2E_SQLITE_RESET=1 ADMIN_E2E_EMAIL=admin@certypass.com ADMIN_E2E_PASSWORD=admin123 playwright test --project=chromium",
+    "test:e2e:sqlite": "E2E_SQLITE=1 DATABASE_URL=file:./playwright-e2e.db E2E_SQLITE_URL=file:./playwright-e2e.db E2E_SQLITE_RESET=0 ADMIN_E2E_EMAIL=admin@datia.icommunitylabs.com ADMIN_E2E_PASSWORD=admin123 playwright test --project=chromium",
+    "test:e2e:sqlite:reset": "E2E_SQLITE=1 DATABASE_URL=file:./playwright-e2e.db E2E_SQLITE_URL=file:./playwright-e2e.db E2E_SQLITE_RESET=1 ADMIN_E2E_EMAIL=admin@datia.icommunitylabs.com ADMIN_E2E_PASSWORD=admin123 playwright test --project=chromium",
     "test:e2e:pg:nightly": "playwright test --project=chromium",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:headed": "playwright test --headed",

@@ -4,7 +4,7 @@ import { loginAdmin, logoutUser } from './utils/auth';
 test.describe('Authenticated User Flow (Admin)', () => {
   test.beforeEach(async ({ page }) => {
     // Login antes de cada test
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
   });
@@ -72,7 +72,7 @@ test.describe('Authenticated User Flow (Admin)', () => {
 
 test.describe('Data Management', () => {
   test.beforeEach(async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
   });

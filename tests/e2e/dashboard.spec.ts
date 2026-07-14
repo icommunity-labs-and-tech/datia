@@ -12,7 +12,7 @@ test.describe('Dashboard Flow', () => {
 
   test('should display dashboard when authenticated', async ({ page }) => {
     await prepareCleanPage(page);
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
     await page.goto('/dashboard', { waitUntil: 'networkidle' });
@@ -23,7 +23,7 @@ test.describe('Dashboard Flow', () => {
   });
 
   test('should navigate to states page', async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
     
@@ -37,7 +37,7 @@ test.describe('Dashboard Flow', () => {
   });
 
   test('should navigate to items page', async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
     
@@ -64,7 +64,7 @@ test.describe('Dashboard Flow', () => {
 
 test.describe('Navigation', () => {
   test('should have working sidebar navigation', async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
     
@@ -82,7 +82,7 @@ test.describe('Navigation', () => {
   });
 
   test('should have working logout button', async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
     

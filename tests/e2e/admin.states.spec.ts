@@ -4,7 +4,7 @@ import { findRowByText, clickActionInRow, saveForm } from './utils/table';
 
 test.describe('Admin - States CRUD', () => {
   test.beforeEach(async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@certypass.com';
+    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
     await page.goto('/dashboard/states');

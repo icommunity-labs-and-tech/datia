@@ -28,7 +28,7 @@ async function assertInputsHaveLabels(page: any) {
 test.describe('Shared - Basic Accessibility (public pages)', () => {
   test('apps page has basic a11y', async ({ page }) => {
     await page.goto('/apps');
-    await expect(page.getByRole('heading', { name: /certypass/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /datia/i })).toBeVisible();
     await assertImagesHaveAlt(page);
   });
 

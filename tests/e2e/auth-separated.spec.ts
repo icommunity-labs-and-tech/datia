@@ -14,7 +14,7 @@ test.describe('Sistema de Autenticación Separado', () => {
       await expect(page).toHaveURL(/.*\/apps/);
       
       // Verificar elementos de la página de selección
-      await expect(page.getByRole('heading', { name: /certypass/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /datia/i })).toBeVisible();
       await expect(page.getByRole('heading', { name: /Admin/i })).toBeVisible();
       await expect(page.getByRole('heading', { name: /Operador/i })).toBeVisible();
     });
@@ -209,7 +209,7 @@ test.describe('Sistema de Autenticación Separado', () => {
       await expect(page.getByRole('heading', { name: /Operador/i })).toBeVisible();
       
       await page.goto('/apps');
-      await expect(page.getByRole('heading', { name: /certypass/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /datia/i })).toBeVisible();
     });
   });
 
@@ -243,7 +243,7 @@ test.describe('Sistema de Autenticación Separado', () => {
       await page.goto('/apps');
       
       // Verificar que la página se adapta a móvil
-      await expect(page.getByRole('heading', { name: /certypass/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /datia/i })).toBeVisible();
       await expect(page.getByRole('heading', { name: /Admin/i })).toBeVisible();
       await expect(page.getByRole('heading', { name: /Operador/i })).toBeVisible();
     });
