@@ -16,9 +16,7 @@ export { default as MultipleImageUpload } from './MultipleImageUpload';
 export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
 
 // Componentes especializados
-export { default as ScannerOverlay } from './ScannerOverlay';
 export { default as AddStateForm } from './AddStateForm';
-export { default as UnifiedScannerButton } from './UnifiedScannerButton';
 export { default as DashboardKPIs } from './charts/DashboardKPIs';
 export { default as CategoryDistributionChart } from './charts/CategoryDistributionChart';
 export { default as BackupStatusChart } from './charts/BackupStatusChart';

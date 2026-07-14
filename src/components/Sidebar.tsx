@@ -26,8 +26,6 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
     ...(showPassport ? [
       { href: '/dashboard/status-types', icon: 'bi-collection', label: t('statusTypes') },
       { href: '/dashboard/items', icon: 'bi-list-columns', label: t('products') },
-      { href: '/dashboard/export-qrs', icon: 'bi-qr-code', label: t('exportQrs') },
-      { href: '/dashboard/import-products', icon: 'bi-cloud-upload', label: t('importProducts') },
     ] : []),
     ...(showEnergy ? [
       { href: '/dashboard/energy/sources', icon: 'bi-lightning-charge', label: t('energySources') },

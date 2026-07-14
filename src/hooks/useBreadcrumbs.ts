@@ -92,7 +92,6 @@ export function useBreadcrumbs() {
       'add-state': 'Agregar Estado',
       'customer': 'Cliente',
       'operator': 'Operador',
-      'scanner': 'Escaner',
       'auth': 'Autenticación',
       'login': 'Iniciar Sesión',
       'signup': 'Registrarse',

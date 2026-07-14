@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 
 export default function CustomerCSS() {
   const pathname = usePathname();
-  const isCustomerRoute = pathname?.startsWith('/customer') || pathname?.startsWith('/checker');
+  const isCustomerRoute = pathname?.startsWith('/customer');
 
   useEffect(() => {
     if (isCustomerRoute) {

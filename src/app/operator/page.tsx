@@ -11,7 +11,6 @@ import { ViewToggle } from '@/components/ViewToggle';
 import { PaginationControls } from '@/components/PaginationControls';
 import { Toolbar } from '@/components/GenericTable/Toolbar';
 import { getItems } from '@/actions/items';
-import { UnifiedScannerButton } from '@/components';
 import { useTranslations } from 'next-intl';
 import { usePagination } from '@/hooks/usePagination';
 import { useItemFilter } from '@/hooks/useItemFilter';
@@ -131,14 +130,6 @@ export default function OperatorPage() {
               <p className="text-muted mb-0">{t('welcome', { name: user?.name || '' })}</p>
             </div>
             <div className="d-flex gap-2 flex-wrap">
-              <UnifiedScannerButton
-                appContext="operator"
-                returnUrl="/operator"
-                variant="primary"
-                aria-label={t('openScanner')}
-              >
-                {t('startScan')}
-              </UnifiedScannerButton>
               {user?.role === 'ADMIN' && (
                 <Button variant="outline-primary" onClick={clearAdminOperatorAccess} aria-label={t('backToDashboard')} className="icon-button-mobile">
                   <i className="bi bi-speedometer2 me-md-2"></i>

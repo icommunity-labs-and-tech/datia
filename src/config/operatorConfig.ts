@@ -8,18 +8,6 @@ export const operatorConfig = {
     description: `Aplicación móvil para operarios de ${appConfig.name}`,
   },
 
-  // Configuración del escáner QR
-  scanner: {
-    maxRetries: 3,
-    scanTimeout: 30000, // 30 segundos
-    supportedFormats: ['QR_CODE', 'CODE_128', 'CODE_39'],
-    cameraPreferences: {
-      facingMode: 'environment', // Cámara trasera por defecto
-      width: { ideal: 1280 },
-      height: { ideal: 720 },
-    },
-  },
-
   // Configuración de la interfaz móvil
   ui: {
     mobile: {

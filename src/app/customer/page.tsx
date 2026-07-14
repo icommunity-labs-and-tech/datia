@@ -2,7 +2,6 @@
 
 import { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { UnifiedScannerButton } from '@/components';
 import { useTranslations } from 'next-intl';
 
 export default function CustomerPage() {
@@ -34,15 +33,6 @@ export default function CustomerPage() {
             <p>{t('scanDescription')}</p>
             
             <div className="scan-actions">
-              <UnifiedScannerButton
-                appContext="customer"
-                returnUrl="/customer"
-                variant="primary"
-                className="scan-button primary"
-              >
-                {t('scanWithCamera')}
-              </UnifiedScannerButton>
-              
               <div className="manual-input">
                 <input
                   type="text"

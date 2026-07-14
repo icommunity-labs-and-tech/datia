@@ -94,8 +94,6 @@ export async function middleware(request: NextRequest) {
     '/api/docs',
     '/api/v1/docs',
     '/customer',
-    '/checker',
-    '/scanner',
     '/logout',
     '/apps',
     '/org',
