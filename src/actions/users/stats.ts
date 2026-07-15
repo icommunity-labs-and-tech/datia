@@ -18,7 +18,6 @@ export interface MonthlyRegistration {
 export interface UserStats {
   total: number;
   admins: number;
-  operators: number;
   certificateSigners: number;
   roleDistribution: UserRoleDistribution[];
   monthlyRegistrations: MonthlyRegistration[];
@@ -42,12 +41,10 @@ export async function getUsersStats(): Promise<{ success: boolean; stats?: UserS
 
     const total = users.length;
     const admins = users.filter(u => u.role === 'ADMIN').length;
-    const operators = users.filter(u => u.role === 'USER').length;
     const certificateSigners = users.filter(u => u.signsWithCertificate).length;
 
     const roleDistribution: UserRoleDistribution[] = [
       { name: 'ADMIN', value: admins, color: '#0d6efd' },
-      { name: 'USER', value: operators, color: '#22c55e' },
     ].filter(r => r.value > 0);
 
     // Monthly registrations — last 6 months
@@ -69,7 +66,7 @@ export async function getUsersStats(): Promise<{ success: boolean; stats?: UserS
 
     return {
       success: true,
-      stats: { total, admins, operators, certificateSigners, roleDistribution, monthlyRegistrations },
+      stats: { total, admins, certificateSigners, roleDistribution, monthlyRegistrations },
     };
   } catch (error) {
     return {

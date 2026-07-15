@@ -66,13 +66,6 @@ export default function DashboardKPIs({ kpis }: DashboardKPIsProps) {
       />
 
       <KPICard
-        title={t('operators.title')}
-        value={KPI_CONFIG.operators.getValue(kpis)}
-        color={KPI_CONFIG.operators.color}
-        icon={KPI_CONFIG.operators.icon}
-      />
-      
-      <KPICard
         title={t('statesThisMonth.title')}
         value={KPI_CONFIG.statesThisMonth.getValue(kpis)}
         color={KPI_CONFIG.statesThisMonth.color}

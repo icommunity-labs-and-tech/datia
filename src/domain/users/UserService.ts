@@ -6,7 +6,7 @@ import { AuthorizationError, InvalidCredentialsError, PasswordValidationError, U
 export interface CreateUserRequest {
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN';
+  role: 'ADMIN';
   phone?: string | null;
   notes?: string | null;
 }
@@ -15,7 +15,7 @@ export interface UpdateUserRequest {
   id: string;
   name?: string;
   email?: string;
-  role?: 'USER' | 'ADMIN';
+  role?: 'ADMIN';
   phone?: string | null;
   notes?: string | null;
 }
@@ -31,7 +31,7 @@ export interface UserResponse {
   id: string;
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN';
+  role: 'ADMIN';
   phone?: string | null;
   notes?: string | null;
 }

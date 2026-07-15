@@ -13,12 +13,13 @@ vi.mock('@/actions/items', () => ({
   getItem: vi.fn()
 }));
 
-// Mock localStorage
+// Mock localStorage with real store so get/set round-trips work in tests
+const store: Record<string, string> = {};
 const localStorageMock = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
+  getItem: vi.fn((key: string) => store[key] ?? null),
+  setItem: vi.fn((key: string, value: string) => { store[key] = value; }),
+  removeItem: vi.fn((key: string) => { delete store[key]; }),
+  clear: vi.fn(() => { Object.keys(store).forEach(k => delete store[k]); }),
 };
 
 Object.defineProperty(window, 'localStorage', {

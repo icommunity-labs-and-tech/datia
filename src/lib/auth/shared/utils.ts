@@ -55,18 +55,12 @@ export async function authenticateUser(email: string, password: string): Promise
 }
 
 /**
- * Valida que el usuario tenga el rol correcto para el contexto
+ * Valida que el usuario tenga el rol correcto para el contexto admin
  */
-export function validateUserRole(user: JWTPayload, context: 'admin' | 'operator'): boolean {
+export function validateUserRole(user: JWTPayload, context: 'admin'): boolean {
   if (context === 'admin') {
-    // Permitir tanto ADMIN como SUPER_ADMIN en el dashboard
     return user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
   }
-  
-  if (context === 'operator') {
-    return user.role === 'USER'; // Los operadores tienen rol USER
-  }
-  
   return false;
 }
 

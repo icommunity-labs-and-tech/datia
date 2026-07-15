@@ -1,8 +1,6 @@
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import { verifyOperatorJWT } from '@/lib/auth/operator/jwt';
-import { operatorAuthConfig } from '@/lib/auth/operator/config';
 import { verifySuperAdminJWT } from '@/lib/auth/superadmin/jwt';
 import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
 
@@ -14,43 +12,35 @@ export async function verifyAdminAuth() {
 
   const cookieStore = await cookies();
   const token = cookieStore.get(adminAuthConfig.cookieName)?.value;
-  
+
   if (!token) {
     throw new Error('No autorizado');
   }
-  
+
   const payload = await verifyAdminJWT(token);
   if (!payload || payload.role !== 'ADMIN') {
     throw new Error('Solo los administradores pueden realizar esta acción');
   }
-  
+
   return payload;
 }
 
 export async function verifyUserAuth() {
   // Bypass in test environment
   if (process.env.VITEST_WORKER_ID) {
-    return { id: 'user-test', role: 'USER' } as any;
+    return { id: 'admin-test', role: 'ADMIN' } as any;
   }
 
   const cookieStore = await cookies();
-  
+
   const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
   if (adminToken) {
     const payload = await verifyAdminJWT(adminToken);
-    if (payload && payload.role === 'ADMIN') {
+    if (payload && (payload.role === 'ADMIN' || payload.role === 'SUPER_ADMIN')) {
       return payload;
     }
   }
-  
-  const operatorToken = cookieStore.get(operatorAuthConfig.cookieName)?.value;
-  if (operatorToken) {
-    const payload = await verifyOperatorJWT(operatorToken);
-    if (payload && payload.role === 'USER') {
-      return payload;
-    }
-  }
-  
+
   throw new Error('No autorizado');
 }
 
@@ -62,16 +52,16 @@ export async function verifySuperAdminAuth() {
 
   const cookieStore = await cookies();
   const token = cookieStore.get(superadminAuthConfig.cookieName)?.value;
-  
+
   if (!token) {
     throw new Error('No autorizado');
   }
-  
+
   const payload = await verifySuperAdminJWT(token);
   if (!payload || payload.role !== 'SUPER_ADMIN') {
     throw new Error('Solo los super administradores pueden realizar esta acción');
   }
-  
+
   return payload;
 }
 
@@ -83,4 +73,3 @@ export function generateTemporaryPassword(): string {
   }
   return result;
 }
-

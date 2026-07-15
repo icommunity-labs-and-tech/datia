@@ -24,6 +24,4 @@ export { default as BackupStatusChart } from './charts/BackupStatusChart';
 export { default as Timeline } from './Timeline';
 export { default as KeyValueList } from './KeyValueList';
 
-// Componentes para operador
-export { OperatorItemsTable } from './OperatorItemsTable';
 export { ViewToggle } from './ViewToggle';

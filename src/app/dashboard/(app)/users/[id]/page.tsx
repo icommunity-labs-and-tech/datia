@@ -107,7 +107,7 @@ export default function UserDetailPage() {
         <h5>{t('info')}</h5>
         <div className="row">
           <div className="col-md-6">
-            <p><strong>{t('role')}</strong> {user?.role === 'ADMIN' ? t('roleAdmin') : t('roleOperator')}</p>
+            <p><strong>{t('role')}</strong> {t('roleAdmin')}</p>
           </div>
           <div className="col-md-6">
             <p><strong>{t('phone')}</strong> {user?.phone || t('notSpecified')}</p>

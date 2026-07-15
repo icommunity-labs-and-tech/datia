@@ -26,7 +26,6 @@ export function createDashboardServiceImpl(deps: {
           statesThisMonth,
           totalUsers,
           verifiedUsers,
-          operators,
           activePassports
         ] = await Promise.all([
           itemRepo.countTotalItems(organizationId),
@@ -35,7 +34,6 @@ export function createDashboardServiceImpl(deps: {
           stateRepo.countStatesThisMonth(organizationId, new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
           userRepo.countActiveUsers(organizationId, 30),
           userRepo.countVerifiedUsers(organizationId),
-          userRepo.countAdmins(organizationId),
           itemRepo.countActiveItems(organizationId, 90)
         ]);
 
@@ -52,7 +50,6 @@ export function createDashboardServiceImpl(deps: {
           backupRate: Math.round(backupRate * 100) / 100,
           activeUsers: totalUsers,
           verifiedUsers,
-          activeOperators: operators
         };
       } catch {
         return {
@@ -65,7 +62,6 @@ export function createDashboardServiceImpl(deps: {
           backupRate: 0,
           activeUsers: 0,
           verifiedUsers: 0,
-          activeOperators: 0,
         };
       }
     },

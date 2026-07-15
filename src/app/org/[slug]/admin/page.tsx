@@ -35,7 +35,6 @@ export default async function OrgAdminLoginPage({ params }: Props) {
       logoUrl={org.logoUrl}
       brandColor={org.brandColorPrimary ?? undefined}
       brandColorSecondary={org.brandColorSecondary ?? undefined}
-      role="admin"
     />
   );
 }

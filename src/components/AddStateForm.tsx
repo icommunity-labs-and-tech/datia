@@ -60,7 +60,7 @@ export default function AddStateForm({
         setStatusTypes(data);
         // Preseleccionar por última elección del operador (si existe)
         try {
-          const last = window.localStorage.getItem('operator:lastStatusTypeId');
+          const last = window.localStorage.getItem('app:lastStatusTypeId');
           if (last) {
             const match = data.find((st: StatusType) => st.id === last);
             if (match) setSelectedStatusType(match);
@@ -118,7 +118,7 @@ export default function AddStateForm({
       });
 
       // Guardar última elección para atajos futuros
-      try { window.localStorage.setItem('operator:lastStatusTypeId', selectedStatusType.id); } catch {}
+      try { window.localStorage.setItem('app:lastStatusTypeId', selectedStatusType.id); } catch {}
 
       if (onStateCreated) {
         onStateCreated(result);

@@ -11,13 +11,12 @@ interface OrgLoginFormProps {
   slug: string;
   orgName: string;
   logoUrl: string | null;
-  role: 'admin' | 'operator';
   brandColor?: string;
   brandColorSecondary?: string;
 }
 
-function OrgLoginContent({ slug, orgName, logoUrl, role, brandColor, brandColorSecondary }: OrgLoginFormProps) {
-  const t = useTranslations(role === 'admin' ? 'auth.login.org.admin' : 'auth.login.org.operator');
+function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSecondary }: OrgLoginFormProps) {
+  const t = useTranslations('auth.login.org.admin');
   const tCommon = useTranslations('common.actions');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,9 +31,8 @@ function OrgLoginContent({ slug, orgName, logoUrl, role, brandColor, brandColorS
 
   useEffect(() => {
     if (!user || loading) return;
-    if (role === 'admin' && user.role === 'ADMIN') router.push('/dashboard');
-    if (role === 'operator' && user.role === 'USER') router.push('/operator');
-  }, [user, loading, router, role]);
+    if (user.role === 'ADMIN') router.push('/dashboard');
+  }, [user, loading, router]);
 
   useEffect(() => {
     const e = searchParams.get('error');
@@ -47,9 +45,9 @@ function OrgLoginContent({ slug, orgName, logoUrl, role, brandColor, brandColorS
     setIsLoading(true);
     setError(null);
     try {
-      const result = await login(email, password, role);
+      const result = await login(email, password);
       if (result.success) {
-        router.push(role === 'admin' ? '/dashboard' : '/operator');
+        router.push('/dashboard');
       } else {
         setError(result.error || t('errors.invalidCredentials'));
       }
@@ -70,10 +68,6 @@ function OrgLoginContent({ slug, orgName, logoUrl, role, brandColor, brandColorS
     );
   }
 
-  const crossLink = role === 'admin'
-    ? { href: `/org/${slug}/operator`, label: t('operatorLink'), cta: t('accessHere') }
-    : { href: `/org/${slug}/admin`, label: t('adminLink'), cta: t('accessHere') };
-
   return (
     <LoginPageLayout
       logoUrl={logoUrl}
@@ -81,15 +75,12 @@ function OrgLoginContent({ slug, orgName, logoUrl, role, brandColor, brandColorS
       brandColor={brandColor}
       brandColorSecondary={brandColorSecondary}
       poweredByText={t('poweredBy')}
-      role={role}
+      role="admin"
       subtitle={t('subtitle')}
       emailPlaceholder={t('emailPlaceholder')}
       passwordPlaceholder={t('passwordPlaceholder')}
       accessText={t('access')}
       accessingText={t('accessing')}
-      crossLinkLabel={crossLink.label}
-      crossLinkCta={crossLink.cta}
-      crossLinkHref={crossLink.href}
       email={email}
       password={password}
       isLoading={isLoading}

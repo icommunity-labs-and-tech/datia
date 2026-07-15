@@ -36,7 +36,7 @@ function AdminLoginContent() {
     setIsLoading(true);
     setError(null);
     try {
-      const result = await login(email, password, 'admin');
+      const result = await login(email, password);
       if (result.success) { router.push('/dashboard'); }
       else { setError(result.error || t('errors.invalidCredentials')); }
     } catch {
@@ -64,9 +64,6 @@ function AdminLoginContent() {
       passwordPlaceholder={t('passwordPlaceholder')}
       accessText={t('access')}
       accessingText={t('accessing')}
-      crossLinkLabel={t('operatorLink')}
-      crossLinkCta={t('accessHere')}
-      crossLinkHref="/auth/operator/login"
       email={email}
       password={password}
       isLoading={isLoading}

@@ -15,13 +15,6 @@ export const KPI_CONFIG = {
     icon: 'bi-shield-check',
     getValue: (kpis: DashboardKPIs) => `${kpis.backupRate}%`
   },
-  operators: {
-    title: 'Operadores',
-    subtitle: 'Operadores activos',
-    color: 'warning' as const,
-    icon: 'bi-person-gear',
-    getValue: (kpis: DashboardKPIs) => kpis.activeOperators
-  },
   statesThisMonth: {
     title: 'Estados este mes',
     subtitle: 'Mes en curso',

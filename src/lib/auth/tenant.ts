@@ -1,10 +1,8 @@
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from './admin/jwt';
-import { verifyOperatorJWT } from './operator/jwt';
 import { verifySuperAdminJWT } from './superadmin/jwt';
 import { superadminAuthConfig } from './superadmin/config';
 import { adminAuthConfig } from './admin/config';
-import { operatorAuthConfig } from './operator/config';
 
 /**
  * Contexto del tenant actual
@@ -57,19 +55,6 @@ export async function getCurrentTenant(): Promise<TenantContext> {
   const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
   if (adminToken) {
     const payload = await verifyAdminJWT(adminToken);
-    if (payload) {
-      return {
-        organizationId: payload.organizationId,
-        userRole: payload.role,
-        userId: payload.id,
-      };
-    }
-  }
-  
-  // Luego verificar operator token
-  const operatorToken = cookieStore.get(operatorAuthConfig.cookieName)?.value;
-  if (operatorToken) {
-    const payload = await verifyOperatorJWT(operatorToken);
     if (payload) {
       return {
         organizationId: payload.organizationId,

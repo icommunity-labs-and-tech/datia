@@ -4,7 +4,7 @@ export interface CreateUserInput {
   organizationId?: string | null; // NULL para SUPER_ADMIN
   email: string;
   name: string;
-  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'ADMIN' | 'SUPER_ADMIN';
   phone?: string | null;
   notes?: string | null;
 }
@@ -12,7 +12,7 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
   name?: string | null;
   email?: string | null;
-  role?: 'USER' | 'ADMIN' | null;
+  role?: 'ADMIN' | null;
   phone?: string | null;
   notes?: string | null;
   passwordHash?: string | null;
@@ -23,7 +23,7 @@ export interface UserRecord {
   organizationId: string | null;
   email: string;
   name: string | null;
-  role: 'USER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'ADMIN' | 'SUPER_ADMIN';
   phone: string | null;
   notes: string | null;
   signsWithCertificate: boolean;

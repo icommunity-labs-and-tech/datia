@@ -8,7 +8,6 @@ export interface DashboardKPIs {
   backupRate: number;
   activeUsers: number;
   verifiedUsers: number;
-  activeOperators: number;
 }
 
 export interface MonthlyActivity {

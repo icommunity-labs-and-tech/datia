@@ -8,7 +8,7 @@ import crypto from "crypto";
 export interface InviteUserInput {
   email: string;
   name: string;
-  role: "ADMIN" | "USER";
+  role: "ADMIN";
   phone?: string;
 }
 

@@ -26,15 +26,12 @@ export default function OrgLoginUrlsCard({ slug }: Props) {
         <h6 className="card-title mb-1">{t('branding.loginUrls')}</h6>
         <p className="text-muted small mb-3">{t('branding.loginUrlsDescription')}</p>
 
-        {(['admin', 'operator'] as const).map(role => {
+        {(['admin'] as const).map(role => {
           const url = `${origin}/org/${slug}/${role}`;
-          const labelKey = `branding.loginUrl${role.charAt(0).toUpperCase() + role.slice(1)}` as
-            | 'branding.loginUrlAdmin'
-            | 'branding.loginUrlOperator';
           return (
             <div key={role} className="mb-3">
               <label className="form-label small fw-semibold text-secondary mb-1">
-                {t(labelKey)}
+                {t('branding.loginUrlAdmin')}
               </label>
               <div className="d-flex align-items-center gap-2">
                 <input

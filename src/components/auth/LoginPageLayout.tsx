@@ -15,15 +15,15 @@ export interface LoginPageLayoutProps {
   brandColorSecondary?: string;
   poweredByText?: string;
   /** Right panel */
-  role: 'admin' | 'operator';
+  role?: 'admin';
   subtitle: string;
   emailPlaceholder: string;
   passwordPlaceholder: string;
   accessText: string;
   accessingText: string;
-  crossLinkLabel: string;
-  crossLinkCta: string;
-  crossLinkHref: string;
+  crossLinkLabel?: string;
+  crossLinkCta?: string;
+  crossLinkHref?: string;
   /** Form state */
   email: string;
   password: string;
@@ -58,7 +58,7 @@ export default function LoginPageLayout({
   onSubmit,
 }: LoginPageLayoutProps) {
   const [pwVisible, setPwVisible] = useState(false);
-  const roleIcon = role === 'admin' ? 'bi-shield-check' : 'bi-tools';
+  const roleIcon = 'bi-shield-check';
   const secondary = brandColorSecondary ?? brandColor;
   const panelBg = brandColorSecondary
     ? `linear-gradient(135deg, ${brandColor} 0%, ${secondary} 100%)`
@@ -232,12 +232,14 @@ export default function LoginPageLayout({
             </button>
           </Form>
 
-          <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8' }}>
-            {crossLinkLabel}{' '}
-            <Link href={crossLinkHref} style={{ color: brandColor, fontWeight: 600, textDecoration: 'none' }}>
-              {crossLinkCta}
-            </Link>
-          </div>
+          {crossLinkLabel && crossLinkHref && (
+            <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8' }}>
+              {crossLinkLabel}{' '}
+              <Link href={crossLinkHref} style={{ color: brandColor, fontWeight: 600, textDecoration: 'none' }}>
+                {crossLinkCta}
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

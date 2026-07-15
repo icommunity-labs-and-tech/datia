@@ -9,28 +9,10 @@ export default function LogoutPage() {
   useEffect(() => {
     async function logout() {
       try {
-        // Detectar contexto basado en referrer o cookies
-        const referrer = document.referrer;
-        let context = 'admin'; // default
-        
-        if (referrer.includes('/operator')) {
-          context = 'operator';
-        } else if (referrer.includes('/dashboard')) {
-          context = 'admin';
-        }
-        
-        // Llamar a la API de logout correcta
-        await fetch(`/api/auth/${context}/logout`, { 
-          method: 'POST',
-          credentials: 'include'
-        });
-        
-        // Redirigir al login correcto
-        router.push(`/auth/${context}/login`);
-      } catch (error) {
-        console.error('Error al hacer logout:', error);
-        // Redirigir a la página de selección como fallback
-        router.push('/apps');
+        await fetch('/api/auth/admin/logout', { method: 'POST', credentials: 'include' });
+        router.push('/auth/admin/login');
+      } catch {
+        router.push('/auth/admin/login');
       }
     }
 

@@ -4,7 +4,7 @@ export interface JWTPayload {
   name: string;
   role: string;
   organizationId: string | null; // NULL para SUPER_ADMIN
-  context: 'admin' | 'operator' | 'superadmin'; // Nuevo campo para identificar el contexto
+  context: 'admin' | 'superadmin';
   iat?: number;
   exp?: number;
   [key: string]: any; // Para compatibilidad con jose
@@ -31,4 +31,4 @@ export interface AuthConfig {
   rateLimitMax: number;
 }
 
-export type AuthContext = 'admin' | 'operator' | 'superadmin';
+export type AuthContext = 'admin' | 'superadmin';

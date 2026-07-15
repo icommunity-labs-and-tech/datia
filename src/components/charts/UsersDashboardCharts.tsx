@@ -49,7 +49,7 @@ function KpiCard({ label, value, icon, accentClass }: KpiCardProps) {
 function RoleDistributionChart({ stats, t }: { stats: UserStats; t: (k: string) => string }) {
   const labelled = stats.roleDistribution.map(r => ({
     ...r,
-    name: r.name === 'ADMIN' ? t('roleAdmin') : t('roleOperator'),
+    name: t('roleAdmin'),
   }));
 
   const CustomTooltip = ({ active, payload }: any) => {
@@ -181,7 +181,6 @@ export default function UsersDashboardCharts() {
       <Row className="text-center mb-2">
         <KpiCard label={t('totalUsers')} value={stats.total} icon="bi-people-fill" accentClass="kpi-accent-1" />
         <KpiCard label={t('admins')} value={stats.admins} icon="bi-shield-check" accentClass="kpi-accent-1" />
-        <KpiCard label={t('operators')} value={stats.operators} icon="bi-person-badge" accentClass="kpi-accent-2" />
         <KpiCard label={t('certificateSigners')} value={stats.certificateSigners} icon="bi-patch-check-fill" accentClass="kpi-accent-3" />
       </Row>
 

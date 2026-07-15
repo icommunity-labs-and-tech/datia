@@ -61,7 +61,6 @@
     "developer": "DESARROLLADOR",
     "applications": "APLICACIONES",
     "appCustomer": "App Cliente",
-    "appOperator": "App Operador",
     "events": "Eventos",
     "webhooks": "Webhooks",
     "auth": "Auth",
@@ -111,7 +110,6 @@
       "additionalNotes": "Notas adicionales (opcional)"
     },
     "roles": {
-      "operator": "Operador",
       "administrator": "Administrador"
     }
   },
@@ -284,29 +282,10 @@
         "passwordPlaceholder": "••••••••",
         "accessing": "Accediendo...",
         "access": "Acceder",
-        "operatorLink": "¿Eres operador?",
         "accessHere": "Accede aquí",
         "errors": {
           "accessDenied": "No tienes permisos para acceder al dashboard",
           "unauthorized": "Debes iniciar sesión como administrador para continuar",
-          "invalidCredentials": "Credenciales inválidas",
-          "loginError": "Error al iniciar sesión"
-        }
-      },
-      "operator": {
-        "title": "Operador",
-        "subtitle": "Acceso para operadores de campo",
-        "emailLabel": "Email",
-        "emailPlaceholder": "tu@email.com",
-        "passwordLabel": "Contraseña",
-        "passwordPlaceholder": "••••••••",
-        "accessing": "Accediendo...",
-        "access": "Acceder",
-        "adminLink": "¿Eres administrador?",
-        "accessHere": "Accede aquí",
-        "errors": {
-          "accessDenied": "No tienes permisos para acceder a la aplicación de operadores",
-          "unauthorized": "Debes iniciar sesión como operador para continuar",
           "invalidCredentials": "Credenciales inválidas",
           "loginError": "Error al iniciar sesión"
         }
@@ -334,28 +313,11 @@
           "passwordPlaceholder": "••••••••",
           "accessing": "Accediendo...",
           "access": "Acceder",
-          "operatorLink": "¿Eres operador?",
           "accessHere": "Accede aquí",
           "poweredBy": "Certificación impulsada por",
           "errors": {
             "accessDenied": "No tienes permisos para acceder al dashboard",
             "unauthorized": "Debes iniciar sesión como administrador para continuar",
-            "invalidCredentials": "Credenciales inválidas",
-            "loginError": "Error al iniciar sesión"
-          }
-        },
-        "operator": {
-          "subtitle": "Acceso para operadores",
-          "emailPlaceholder": "tu@email.com",
-          "passwordPlaceholder": "••••••••",
-          "accessing": "Accediendo...",
-          "access": "Acceder",
-          "adminLink": "¿Eres administrador?",
-          "accessHere": "Accede aquí",
-          "poweredBy": "Certificación impulsada por",
-          "errors": {
-            "accessDenied": "No tienes permisos para acceder a la aplicación de operadores",
-            "unauthorized": "Debes iniciar sesión como operador para continuar",
             "invalidCredentials": "Credenciales inválidas",
             "loginError": "Error al iniciar sesión"
           }
@@ -523,34 +485,6 @@
     },
     "tabEnergy": "Certificación Energética"
   },
-  "operator": {
-    "title": "Operador Datia",
-    "welcome": "Bienvenido, {name}",
-    "openScanner": "Abrir escáner",
-    "verifyingAccess": "Verificando acceso...",
-    "productNotFound": "Producto no encontrado",
-    "loadingDetails": "Cargando detalles del producto",
-    "productDetails": "Detalles del Producto",
-    "addState": "Agregar Estado",
-    "loadingStates": "Cargando estados...",
-    "noStates": "No hay estados registrados para este producto.",
-    "search": "Buscar...",
-    "inventory": "Inventario",
-    "backToDashboard": "Volver al Dashboard",
-    "loadingProducts": "Cargando productos...",
-    "noProducts": "No hay productos disponibles",
-    "noProductsDescription": "Escanea un código QR para ver productos",
-    "startScan": "Iniciar Escaneo",
-    "logout": "Cerrar Sesión",
-    "digitalPassport": "Pasaporte Digital",
-    "backToList": "Volver al listado",
-    "description": "Descripción",
-    "filterByCategory": "Todas las categorías",
-    "dateFrom": "Desde",
-    "dateTo": "Hasta",
-    "clearFilters": "Limpiar filtros",
-    "category": "Categoría"
-  },
   "states": {
     "title": "Estado",
     "notFound": "No se encontró información del estado.",
@@ -664,10 +598,6 @@
         "title": "Estados certificados",
         "subtitle": "{backed} de {total}"
       },
-      "operators": {
-        "title": "Operadores",
-        "subtitle": "Operadores activos"
-      },
       "statesThisMonth": {
         "title": "Estados este mes",
         "subtitle": "Mes en curso"
@@ -694,7 +624,6 @@
     "info": "Información del Usuario",
     "role": "Rol:",
     "roleAdmin": "Administrador",
-    "roleOperator": "Operador",
     "phone": "Teléfono:",
     "createdAt": "Fecha de creación:",
     "notSpecified": "No especificado",
@@ -703,8 +632,7 @@
     "deleteError": "Error al eliminar el usuario",
     "deleteTitle": "Eliminar Usuario",
     "deleteMessage": "¿Estás seguro de que quieres eliminar el {role} \"{name}\"?",
-    "adminRole": "administrador",
-    "operatorRole": "operario"
+    "adminRole": "administrador"
   },
   "profile": {
     "personalInfo": "Información Personal",
@@ -748,7 +676,6 @@
       "loginUrls": "URLs de acceso",
       "loginUrlsDescription": "Comparte estas URLs con tus usuarios para que accedan con el branding de tu organización.",
       "loginUrlAdmin": "Panel de administrador",
-      "loginUrlOperator": "Panel de operador",
       "loginUrlCopied": "URL copiada"
     },
     "changePassword": "Cambio de contraseña",
@@ -997,11 +924,9 @@
       "roleAll": "Todos los roles",
       "newThisMonth": "Nuevos este mes",
       "admins": "Administradores",
-      "operators": "Operadores",
       "roleDistribution": "Distribución de Roles",
       "monthlyRegistrations": "Altas por Mes",
       "roleAdmin": "Administrador",
-      "roleOperator": "Operador",
       "registrations": "Altas",
       "monthlyVerifications": "Verificaciones por mes",
       "verifications": "Verificaciones"

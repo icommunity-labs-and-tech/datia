@@ -77,7 +77,7 @@ model Invitation {
   id             String       @id
   organizationId String
   email          String
-  role           UserRole     @default(USER)
+  role           UserRole     @default(ADMIN)
   token          String       @unique
   expiresAt      DateTime
   acceptedAt     DateTime?
@@ -295,7 +295,7 @@ model User {
   email                String               @unique
   password             String?
   name                 String
-  role                 UserRole             @default(USER)
+  role                 UserRole             @default(ADMIN)
   signsWithCertificate Boolean              @default(false)
   phone                String?
   permissions          Json?
@@ -352,7 +352,6 @@ enum NotificationType {
 }
 
 enum UserRole {
-  USER
   ADMIN
   SUPER_ADMIN
 }

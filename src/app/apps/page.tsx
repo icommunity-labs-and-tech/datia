@@ -10,19 +10,10 @@ function AppsSelectContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Si hay un parámetro de error, redirigir al login apropiado
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'AccessDenied' || error === 'Unauthorized') {
-      // Intentar detectar el contexto basado en el referrer
-      if (typeof window !== 'undefined') {
-        const referrer = document.referrer;
-        if (referrer.includes('/dashboard') || referrer.includes('/admin')) {
-          router.push('/auth/admin/login?error=' + error);
-        } else if (referrer.includes('/operator')) {
-          router.push('/auth/operator/login?error=' + error);
-        }
-      }
+      router.push('/auth/admin/login?error=' + error);
     }
   }, [searchParams, router]);
 
@@ -36,7 +27,7 @@ function AppsSelectContent() {
           </div>
 
           <Row className="g-4 mb-4">
-            <Col md={6}>
+            <Col md={6} className="mx-auto">
               <Link href="/auth/admin/login" className="text-decoration-none">
                 <Card className="h-100 auth-card admin-card border-0 shadow-lg">
                   <Card.Body className="text-center p-4">
@@ -46,22 +37,6 @@ function AppsSelectContent() {
                     <h3 className="h5 mb-3 text-primary fw-bold">Admin</h3>
                     <p className="text-muted mb-0">
                       Acceso exclusivo para administradores del sistema
-                    </p>
-                  </Card.Body>
-                </Card>
-              </Link>
-            </Col>
-
-            <Col md={6}>
-              <Link href="/auth/operator/login" className="text-decoration-none">
-                <Card className="h-100 auth-card operator-card border-0 shadow-lg">
-                  <Card.Body className="text-center p-4">
-                    <div className="mb-3">
-                      <i className="bi bi-phone display-4 text-success"></i>
-                    </div>
-                    <h3 className="h5 mb-3 text-success fw-bold">Operador</h3>
-                    <p className="text-muted mb-0">
-                      Acceso para operadores de campo
                     </p>
                   </Card.Body>
                 </Card>
@@ -116,10 +91,6 @@ function AppsSelectContent() {
         
         .admin-card:hover {
           background: rgba(102, 126, 234, 0.1);
-        }
-        
-        .operator-card:hover {
-          background: rgba(17, 153, 142, 0.1);
         }
         
         .customer-card:hover {

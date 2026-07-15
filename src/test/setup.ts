@@ -13,6 +13,14 @@ vi.mock('../components/charts/KpiGroup.css', () => ({}));
 // Stub for Next.js server-only module to avoid resolution errors in vitest
 vi.mock('server-only', () => ({}));
 
+// Mock next-intl globally — returns key path as string so tests don't need a Provider
+vi.mock('next-intl', () => ({
+  useTranslations: (_ns?: string) => (key: string) => key,
+  useLocale: () => 'es',
+  useMessages: () => ({}),
+  NextIntlClientProvider: ({ children }: any) => children,
+}));
+
 // Mock Next.js modules that are not available in test environment
 vi.mock('next/navigation', () => ({
   useRouter: () => ({

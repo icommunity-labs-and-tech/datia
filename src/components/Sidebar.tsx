@@ -51,7 +51,6 @@ export default function Sidebar({ logoUrl, modules }: { logoUrl?: string | null;
 
   const appLinks = [
     { href: '/customer', icon: 'bi-person-badge', label: t('appCustomer') },
-    { href: '/auth/operator/login?skip=1', icon: 'bi-tools', label: t('appOperator') },
   ];
 
   const developerLinks: Array<{ href: string; icon: string; label: string; external?: boolean }> = [

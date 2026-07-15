@@ -19,7 +19,7 @@ export default function EditUserPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
-    role: 'USER' as 'USER' | 'ADMIN',
+    role: 'ADMIN' as const,
     phone: '',
     notes: ''
   });
@@ -33,7 +33,7 @@ export default function EditUserPage() {
           setFormData({
             name: result.user.name || '',
             email: result.user.email,
-            role: result.user.role as 'USER' | 'ADMIN',
+            role: 'ADMIN',
             phone: result.user.phone || '',
             notes: result.user.notes || ''
           });
@@ -83,7 +83,7 @@ export default function EditUserPage() {
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: field === 'role' ? (value as 'USER' | 'ADMIN') : value
+      [field]: value
     }));
   };
 
@@ -93,7 +93,7 @@ export default function EditUserPage() {
     <>
       <Box>
         <BoxTitle message="Editar Usuario" />
-        
+
         {error && (
           <Alert variant="danger" className="mb-3">
             {error}
@@ -130,12 +130,9 @@ export default function EditUserPage() {
               onChange={(e) => handleChange('role', e.target.value)}
               required
             >
-              <option value="">Seleccionar rol</option>
               <option value="ADMIN">Administrador</option>
-              <option value="USER">Operador</option>
             </Form.Select>
           </Form.Group>
-
 
           <div className="d-flex gap-2">
             <Button

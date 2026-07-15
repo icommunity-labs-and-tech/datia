@@ -9,7 +9,7 @@ export async function updateUser(id: string, formData: FormData) {
   try {
     const name = formData.get('name') as string;
     const email = formData.get('email') as string;
-    const role = formData.get('role') as 'USER' | 'ADMIN';
+    const role = formData.get('role') as 'ADMIN';
     const phone = (formData.get('phone') as string) || null;
     const notes = (formData.get('notes') as string) || null;
 

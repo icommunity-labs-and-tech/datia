@@ -25,7 +25,6 @@ const createUserFormTemplate = (tForms: (key: string) => string): FormTemplate =
     type: 'select', 
     placeholder: tForms('labels.selectRole'),
     options: [
-      { value: 'USER', label: tForms('roles.operator') },
       { value: 'ADMIN', label: tForms('roles.administrator') }
     ]
   },
@@ -198,8 +197,8 @@ export default function UsersTable({
       switch (col.key) {
         case 'role':
           return (
-            <span className={`badge ${value === 'ADMIN' ? 'bg-primary' : 'bg-info'}`}>
-              {value === 'ADMIN' ? tForms('roles.administrator') : tForms('roles.operator')}
+            <span className="badge bg-primary">
+              {tForms('roles.administrator')}
             </span>
           );
         case 'createdAt':
