@@ -1,8 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticateSuperAdmin } from '@/lib/auth/superadmin/jwt';
 import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
+import { createRateLimiter, getClientIp } from '@/lib/auth/rate-limit';
+
+// 5 intentos por IP cada 15 minutos
+const checkRateLimit = createRateLimiter({ windowMs: 15 * 60 * 1000, maxAttempts: 5 });
 
 export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const rl = checkRateLimit(ip);
+
+  if (!rl.allowed) {
+    console.warn(`[superadmin/login] Rate limit hit — ip=${ip} retryAfter=${rl.retryAfter}s`);
+    return NextResponse.json(
+      { success: false, error: 'Demasiados intentos. Inténtalo de nuevo más tarde.' },
+      { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
+    );
+  }
+
   try {
     const { email, password } = await request.json();
 
@@ -16,31 +31,26 @@ export async function POST(request: NextRequest) {
     const result = await authenticateSuperAdmin(email, password);
 
     if (!result.success) {
+      console.warn(`[superadmin/login] Failed attempt — ip=${ip} email=${email}`);
       return NextResponse.json(result, { status: 401 });
     }
 
-    // Crear respuesta con cookie
-    const response = NextResponse.json(result);
-    
+    const response = NextResponse.json({ success: true, user: result.user });
+
     response.cookies.set(superadminAuthConfig.cookieName, result.token!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      sameSite: 'strict',
       maxAge: superadminAuthConfig.sessionDuration,
       path: '/',
     });
 
     return response;
   } catch (error) {
-    console.error('Super Admin login error:', error);
+    console.error('[superadmin/login] Internal error:', error);
     return NextResponse.json(
       { success: false, error: 'Error interno del servidor' },
       { status: 500 }
     );
   }
 }
-
-
-
-
-
