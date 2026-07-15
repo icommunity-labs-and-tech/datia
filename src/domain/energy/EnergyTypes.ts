@@ -102,6 +102,30 @@ export interface CreateEmissionRecordInput {
   verificationStandard?: string;
 }
 
+export interface EvidenceAuditRecord {
+  blockchain_tx: string;
+  timestamp: string;
+  source: string;
+  event_type: 'co2_certification_event';
+  hash: string;
+}
+
+export interface EmissionVerificationReport {
+  emissionRecordId: string;
+  stateId: string;
+  verified: boolean;
+  evidence: EvidenceAuditRecord;
+  originalData: {
+    co2eKg: number;
+    scope: EmissionScope;
+    systemBoundary: SystemBoundary;
+    verifierBody: string;
+    verificationStandard: string;
+    certifiedAt: string;
+  };
+  discrepancies: string[];
+}
+
 export class EnergyValidationError extends Error {
   readonly _tag = 'EnergyValidationError';
   constructor(message: string) {

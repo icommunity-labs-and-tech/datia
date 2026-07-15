@@ -131,25 +131,30 @@ export async function POST(
   // ── 5. Create evidence in iCommunity and anchor to blockchain ──
   try {
     const evidenceService = createEvidenceServiceImpl({ icommunityService });
+    const certifiedAt = new Date().toISOString();
     const evidenceID = await evidenceService.createStateEvidence({
       signatureID: org.signatureID,
       title: state.title,
       description: state.description,
       imageUrls: [],
       metadata: {
-        emissionRecordId: emission.id,
+        id: state.id,
         itemId: item.id,
-        co2eKg: emission.co2eKg,
-        scope: emission.scope,
-        systemBoundary: emission.systemBoundary,
-        calculationMethodology: emission.calculationMethodology ?? '',
-        emissionFactor: emission.emissionFactor,
-        emissionFactorSource: emission.emissionFactorSource ?? '',
-        gwpCharacterizationFactors: emission.gwpCharacterizationFactors ?? 'IPCC AR6',
-        functionalUnit: emission.functionalUnit ?? '',
-        verifierBody: parsed.data.verifierBody,
-        verificationStandard: parsed.data.verificationStandard,
-        certifiedAt: new Date().toISOString(),
+        createdAt: certifiedAt,
+        templateConfig: {
+          emissionRecordId: emission.id,
+          co2eKg: emission.co2eKg,
+          scope: emission.scope,
+          systemBoundary: emission.systemBoundary,
+          calculationMethodology: emission.calculationMethodology ?? '',
+          emissionFactor: emission.emissionFactor,
+          emissionFactorSource: emission.emissionFactorSource ?? '',
+          gwpCharacterizationFactors: emission.gwpCharacterizationFactors ?? 'IPCC AR6',
+          functionalUnit: emission.functionalUnit ?? '',
+          verifierBody: parsed.data.verifierBody,
+          verificationStandard: parsed.data.verificationStandard,
+          certifiedAt,
+        },
       },
     });
 

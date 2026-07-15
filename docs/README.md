@@ -83,6 +83,18 @@ Documentación sobre la feature de IDs manuales para items.
 
 ---
 
+#### [EVIDENCE_AUDIT_MODEL.md](./EVIDENCE_AUDIT_MODEL.md)
+Modelo de evidencia y auditoría para certificaciones de CO₂ (Bloque 7 — EU ESPR/DPP).
+
+**Contiene:**
+- Estructura `EvidenceAuditRecord` (`{hash, timestamp, source, event_type, blockchain_tx}`)
+- JSON almacenado en iCommunity iBS (`issue_data.json`)
+- Proceso de verificación: dato original vs hash en blockchain
+- Ejemplos verificables de los endpoints `/certify` y `/verify`
+- Diagrama de secuencia del flujo completo
+
+---
+
 ### 🔍 Evaluación y Mantenimiento
 
 #### [MAINTENANCE_ASSESSMENT.md](./MAINTENANCE_ASSESSMENT.md)
@@ -115,6 +127,7 @@ Evaluación técnica del estado del proyecto y recomendaciones de mantenimiento.
 - [Admin Item Evidence](./ADMIN_ITEM_EVIDENCE_FEATURE.md)
 - [Implementation Summary](./IMPLEMENTATION_SUMMARY.md)
 - [Manual Item ID](./MANUAL_ITEM_ID.md)
+- [Evidence Audit Model](./EVIDENCE_AUDIT_MODEL.md)
 
 **Mantenimiento:**
 - [Maintenance Assessment](./MAINTENANCE_ASSESSMENT.md)
@@ -151,5 +164,5 @@ Al agregar nueva documentación:
 
 ---
 
-**Última actualización:** Enero 2026
+**Última actualización:** Julio 2026
 
