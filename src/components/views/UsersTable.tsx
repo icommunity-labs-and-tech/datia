@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Modal, Form, Badge, Alert } from 'react-bootstrap';
+import { Button, Modal, Form, Badge, Alert } from '@/components/legacy/bootstrap-compat';
 import GenericTable from '@/components/GenericTable';
 import { getUsers, createUser, deleteUser, updateUser } from '@/actions/users';
 import { getListColumnPresets } from '@/components/GenericTable/useUnifiedColumns';

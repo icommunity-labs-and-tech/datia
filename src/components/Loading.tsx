@@ -1,6 +1,6 @@
 'use client';
 
-import Spinner from 'react-bootstrap/Spinner';
+import { Loader } from '@mantine/core';
 
 export default function LoadingOverlay() {
   return (
@@ -15,7 +15,7 @@ export default function LoadingOverlay() {
       alignItems: 'center',
       zIndex: 9999
     }}>
-      <Spinner animation="border" role="status" />
+      <Loader role="status" />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Alert, Badge, Button, Spinner } from 'react-bootstrap';
+import { Card, Alert, Badge, Button, Loader, Group, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { retryOrganizationKyc } from '@/actions/organizations/retry-organization-kyc';
@@ -42,10 +42,10 @@ export default function OrgKycCard({ organization }: Props) {
     }
   };
 
-  const badgeVariant =
-    status === 'VERIFIED' ? 'success' :
-    status === 'WAITING' ? 'warning' :
-    status === 'REJECTED' ? 'danger' : 'secondary';
+  const badgeColor =
+    status === 'VERIFIED' ? 'green' :
+    status === 'WAITING' ? 'yellow' :
+    status === 'REJECTED' ? 'red' : 'gray';
 
   const statusLabel =
     status === 'VERIFIED' ? t('kyc.verified') :
@@ -53,65 +53,59 @@ export default function OrgKycCard({ organization }: Props) {
     status === 'REJECTED' ? t('kyc.rejected') : t('kyc.notVerified');
 
   return (
-    <Card className="mb-3">
-      <Card.Body>
-        <h6 className="card-title">{t('kyc.orgVerificationStatus')}</h6>
-        <div className="mb-3">
+    <Card mb="md">
+        <Title order={6} mb="xs">{t('kyc.orgVerificationStatus')}</Title>
+        <Text size="sm" mb="sm">
           <strong>{t('kyc.organization')}</strong> {organization.nombre}
-        </div>
-        <div className="mb-3">
+        </Text>
+        <Text size="sm" mb="md" component="div">
           <strong>{t('kyc.status')}</strong>{' '}
-          <Badge bg={badgeVariant}>{statusLabel}</Badge>
-        </div>
+          <Badge color={badgeColor}>{statusLabel}</Badge>
+        </Text>
 
         {status !== 'VERIFIED' && (
           <>
-            <Alert variant={status === 'REJECTED' ? 'danger' : 'warning'} className="mb-3">
-              <Alert.Heading>
-                <i className={`bi bi-${status === 'REJECTED' ? 'x-circle' : 'clock'}-fill me-2`} />
-                {status === 'REJECTED' ? t('kyc.rejectedTitle') : t('kyc.pendingTitle')}
-              </Alert.Heading>
-              <p className="mb-0">
-                {status === 'REJECTED' ? t('kyc.rejectedDescription') : t('kyc.pendingDescription')}
-              </p>
+            <Alert
+              color={status === 'REJECTED' ? 'red' : 'yellow'}
+              mb="md"
+              title={status === 'REJECTED' ? t('kyc.rejectedTitle') : t('kyc.pendingTitle')}
+              icon={<i className={`bi bi-${status === 'REJECTED' ? 'x-circle' : 'clock'}-fill`} />}
+            >
+              {status === 'REJECTED' ? t('kyc.rejectedDescription') : t('kyc.pendingDescription')}
               {status === 'WAITING' && (
-                <p className="mb-0 mt-2 small">
-                  <i className="bi bi-info-circle me-1" />
+                <Text size="xs" mt="xs">
+                  <i className="bi bi-info-circle" style={{ marginRight: 4 }} />
                   {t('kyc.waitingNote')}
-                </p>
+                </Text>
               )}
             </Alert>
 
-            <div className="d-flex gap-2 flex-wrap">
+            <Group gap="xs">
               <Button
-                variant={status === 'REJECTED' ? 'danger' : 'outline-primary'}
+                color={status === 'REJECTED' ? 'red' : undefined}
+                variant={status === 'REJECTED' ? 'filled' : 'default'}
                 onClick={handleRetryKyc}
                 disabled={retrying}
+                leftSection={retrying ? <Loader size="xs" /> : <i className="bi bi-arrow-clockwise" />}
               >
-                {retrying ? (
-                  <><Spinner size="sm" className="me-2" />{t('kyc.retrying')}</>
-                ) : (
-                  <><i className="bi bi-arrow-clockwise me-2" />{t('kyc.retry')}</>
-                )}
+                {retrying ? t('kyc.retrying') : t('kyc.retry')}
               </Button>
-            </div>
+            </Group>
 
-            {retryError && <Alert variant="danger" className="mt-3">{retryError}</Alert>}
+            {retryError && <Alert color="red" mt="md">{retryError}</Alert>}
 
-            <p className="text-muted small mt-3 mb-0">
-              <i className="bi bi-info-circle me-1" />
+            <Text size="xs" c="dimmed" mt="md">
+              <i className="bi bi-info-circle" style={{ marginRight: 4 }} />
               {t('kyc.needKycNote')}
-            </p>
+            </Text>
           </>
         )}
 
         {status === 'VERIFIED' && (
-          <Alert variant="success">
-            <i className="bi bi-check-circle-fill me-2" />
+          <Alert color="green" icon={<i className="bi bi-check-circle-fill" />}>
             {t('kyc.verifiedMessage')}
           </Alert>
         )}
-      </Card.Body>
     </Card>
   );
 }

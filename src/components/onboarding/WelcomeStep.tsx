@@ -1,9 +1,7 @@
 'use client';
 
-import { Card, Button } from 'react-bootstrap';
+import { Card, Button } from '@/components/legacy/bootstrap-compat';
 import Image from 'next/image';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 
 interface WelcomeStepProps {
   userName: string;

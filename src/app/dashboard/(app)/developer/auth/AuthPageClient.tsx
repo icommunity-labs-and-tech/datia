@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Button, Modal, Form, Alert, Badge, Table } from 'react-bootstrap';
+import { Button, Modal, Form, Alert, Badge, Table } from '@/components/legacy/bootstrap-compat';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { createApiToken } from '@/actions/api-tokens/create';

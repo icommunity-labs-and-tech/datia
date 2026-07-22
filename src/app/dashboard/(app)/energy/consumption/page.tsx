@@ -1,9 +1,5 @@
-import { listEnergyConsumption } from '@/actions/energy/list-consumption';
-import EnergyConsumptionClient from './EnergyConsumptionClient';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function EnergyConsumptionPage() {
-  const records = await listEnergyConsumption();
-  return <EnergyConsumptionClient records={records} />;
+export default function EnergyConsumptionPage() {
+  redirect('/dashboard/energy?tab=consumption');
 }

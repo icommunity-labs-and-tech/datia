@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Row, Col, Button } from 'react-bootstrap';
+import { Card, Row, Col, Button } from '@/components/legacy/bootstrap-compat';
 import Link from 'next/link';
 
 export default function SuperAdminDashboard() {

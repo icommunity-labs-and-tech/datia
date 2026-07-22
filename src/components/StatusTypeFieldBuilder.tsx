@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useImperativeHandle, forwardRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Button, Form, Alert } from 'react-bootstrap';
+import { Button, Alert, TextInput, NativeSelect, Switch } from '@mantine/core';
 
 export interface StatusTypeFieldDefinition {
   name: string;
@@ -92,16 +92,17 @@ function SortableFieldItem({
             {/* All fields in one row: Name, Type, Required, Remove */}
             <div className="d-flex align-items-center gap-2 mb-2">
               {/* Name Input */}
-              <Form.Control
-                type="text"
+              <TextInput
                 value={field.name}
                 onChange={(e) => onUpdate({ name: e.target.value })}
                 onBlur={onBlur}
-                placeholder={`${tCommon('fieldName')} ${index + 1}`} 
+                placeholder={`${tCommon('fieldName')} ${index + 1}`}
+                size="xs"
+                style={{ flex: 1 }}
               />
 
               {/* Type Select */}
-              <Form.Select
+              <NativeSelect
                 value={field.type}
                 onChange={(e) =>
                   onUpdate({
@@ -109,22 +110,17 @@ function SortableFieldItem({
                     options: e.target.value === 'select' ? ['Opción 1'] : undefined,
                   })
                 }
-              >
-                {fieldTypes.map((type) => (
-                  <option key={type.value} value={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </Form.Select>
+                size="xs"
+                data={fieldTypes.map((type) => ({ value: type.value, label: type.label }))}
+              />
 
               {/* Required Switch */}
               <div className="d-flex align-items-center gap-1">
-                <Form.Check
-                  type="switch"
+                <Switch
                   id={`required-${index}`}
+                  size="xs"
                   checked={field.required || false}
-                  onChange={(e) => onUpdate({ required: e.target.checked })}
-                  style={{ fontSize: '11px' }}
+                  onChange={(e) => onUpdate({ required: e.currentTarget.checked })}
                 />
                 <label
                   htmlFor={`required-${index}`}
@@ -137,11 +133,12 @@ function SortableFieldItem({
 
               {/* Remove Button */}
               <Button
-                variant="link"
-                size="sm"
+                variant="subtle"
+                color="red"
+                size="compact-sm"
                 onClick={onRemove}
-                className="text-danger p-0 ms-auto"
-                style={{ fontSize: '14px', width: '40px', height: '40px', flexShrink: 0 }}
+                className="ms-auto"
+                style={{ flexShrink: 0 }}
               >
                 <i className="bi bi-trash"></i>
               </Button>
@@ -356,7 +353,7 @@ const StatusTypeFieldBuilder = forwardRef<StatusTypeFieldBuilderRef, StatusTypeF
 
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <Alert variant="danger" className="mb-3 py-2 px-3">
+          <Alert color="red" mb="md" py={8} px={12}>
             <div className="d-flex align-items-start gap-2">
               <i className="bi bi-exclamation-triangle-fill" style={{ fontSize: '13px' }}></i>
               <div className="flex-grow-1">
@@ -391,13 +388,12 @@ const StatusTypeFieldBuilder = forwardRef<StatusTypeFieldBuilderRef, StatusTypeF
 
         {/* Add Field Button */}
         <Button
-          variant="outline-primary"
-          size="sm"
+          variant="light"
+          size="xs"
           onClick={addField}
-          className="w-100"
-          style={{ fontSize: '11px', padding: '4px 4px', marginTop: '-0.25rem' }}
+          fullWidth
+          leftSection={<i className="bi bi-plus-circle" style={{ fontSize: 10 }} />}
         >
-          <i className="bi bi-plus-circle me-1" style={{ fontSize: '10px' }}></i>
           Agregar campo
         </Button>
 

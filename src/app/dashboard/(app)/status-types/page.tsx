@@ -1,8 +1,5 @@
-"use client";
-
-import { StatusTypesTable } from '@/components/views';
+import { redirect } from 'next/navigation';
 
 export default function StatusTypesPage() {
-  return <StatusTypesTable />;
+  redirect('/dashboard/settings?tab=states');
 }
-

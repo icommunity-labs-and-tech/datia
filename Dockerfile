@@ -4,7 +4,7 @@ RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci
+RUN npm ci --legacy-peer-deps
 
 FROM node:22-alpine AS builder
 WORKDIR /app
@@ -30,6 +30,8 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
 
 USER nextjs
 

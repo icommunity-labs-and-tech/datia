@@ -2,10 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Container, Nav, Navbar, Button } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { Button, Center, Group, Loader, Stack, Text } from '@mantine/core';
 import Link from 'next/link';
+
+const NAV_LINKS = [
+  { href: '/superadmin', icon: 'bi-house', label: 'Inicio' },
+  { href: '/superadmin/organizations', icon: 'bi-building', label: 'Organizaciones' },
+  { href: '/superadmin/support-messages', icon: 'bi-chat-dots', label: 'Soporte' },
+];
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -15,13 +19,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   useEffect(() => {
     checkAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkAuth = async () => {
     try {
       const response = await fetch('/api/auth/superadmin/session');
       const data = await response.json();
-      
+
       if (!data.user) {
         router.push('/auth/superadmin/login');
       } else {
@@ -46,157 +51,104 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   if (loading) {
     return (
-      <div className="d-flex align-items-center justify-content-center" style={{ minHeight: '100vh' }}>
-        <div className="text-center">
-          <div className="spinner-border text-danger" role="status">
-            <span className="visually-hidden">Cargando...</span>
-          </div>
-          <p className="mt-3 text-muted">Verificando acceso...</p>
-        </div>
-      </div>
+      <Center style={{ minHeight: '100vh' }}>
+        <Stack align="center" gap="xs">
+          <Loader color="red" />
+          <Text size="sm" c="dimmed">Verificando acceso...</Text>
+        </Stack>
+      </Center>
     );
   }
 
   return (
-    <div className="d-flex flex-column" style={{ minHeight: '100vh', background: '#f8f9fa' }}>
-      {/* Top Navbar */}
-      <Navbar 
-        variant="light" 
-        style={{
-          background: 'transparent',
-          border: 'none',
-          boxShadow: 'none'
-        }}
-      >
-        <Container fluid>
-          <Navbar.Brand className="d-flex align-items-center" style={{ fontSize: '1.25rem', fontWeight: 600, color: '#1f2937' }}>
-            <div 
+    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8f9fa' }}>
+      {/* Top nav */}
+      <header style={{ padding: '12px 24px' }}>
+        <Group justify="space-between" wrap="wrap">
+          <Group gap={12}>
+            <div
               style={{
-                width: '36px',
-                height: '36px',
-                borderRadius: '8px',
+                width: 36,
+                height: 36,
+                borderRadius: 8,
                 background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginRight: '12px'
               }}
             >
-              <i className="bi bi-shield-lock-fill text-danger" style={{ fontSize: '1.25rem' }}></i>
+              <i className="bi bi-shield-lock-fill" style={{ fontSize: '1.25rem', color: '#dc2626' }} />
             </div>
-            <div style={{ lineHeight: 1.2, color: '#1f2937' }}>Datia</div>
-          </Navbar.Brand>
-          <Nav className="ms-auto align-items-center">
-            <Nav.Link
-              as={Link}
-              href="/superadmin"
-              className={pathname === '/superadmin' ? 'text-danger fw-semibold' : 'text-muted'}
-              style={{
-                transition: 'all 0.2s',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                ...(pathname === '/superadmin' && {
-                  background: '#fef2f2',
-                  color: '#dc2626'
-                })
-              }}
-            >
-              <i className="bi bi-house me-1"></i>
-              Inicio
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              href="/superadmin/organizations"
-              className={pathname === '/superadmin/organizations' ? 'text-danger fw-semibold' : 'text-muted'}
-              style={{
-                transition: 'all 0.2s',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                ...(pathname === '/superadmin/organizations' && {
-                  background: '#fef2f2',
-                  color: '#dc2626'
-                })
-              }}
-            >
-              <i className="bi bi-building me-1"></i>
-              Organizaciones
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              href="/superadmin/support-messages"
-              className={pathname === '/superadmin/support-messages' ? 'text-danger fw-semibold' : 'text-muted'}
-              style={{
-                transition: 'all 0.2s',
-                borderRadius: '6px',
-                padding: '6px 12px',
-                ...(pathname === '/superadmin/support-messages' && {
-                  background: '#fef2f2',
-                  color: '#dc2626'
-                })
-              }}
-            >
-              <i className="bi bi-chat-dots me-1"></i>
-              Soporte
-            </Nav.Link>
-            <div className="vr mx-3" style={{ opacity: 0.2 }}></div>
-            <Nav.Link className="text-muted d-flex align-items-center" style={{ padding: '6px 12px' }}>
-              <i className="bi bi-person-circle me-2" style={{ fontSize: '1.25rem' }}></i>
-              <span style={{ fontSize: '0.9rem' }}>{user?.name || user?.email}</span>
-            </Nav.Link>
+            <Text fw={600} fz="lg" c="#1f2937">Datia</Text>
+          </Group>
+
+          <Group gap={4}>
+            {NAV_LINKS.map(({ href, icon, label }) => {
+              const active = pathname === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6,
+                    padding: '6px 12px',
+                    borderRadius: 6,
+                    textDecoration: 'none',
+                    fontSize: 14,
+                    fontWeight: active ? 600 : 400,
+                    color: active ? '#dc2626' : 'var(--mantine-color-dimmed)',
+                    background: active ? '#fef2f2' : 'transparent',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  <i className={`bi ${icon}`} />
+                  {label}
+                </Link>
+              );
+            })}
+
+            <div style={{ width: 1, height: 24, background: 'rgba(0,0,0,0.15)', margin: '0 12px' }} />
+
+            <Group gap={8} style={{ padding: '6px 12px' }}>
+              <i className="bi bi-person-circle" style={{ fontSize: '1.25rem', color: 'var(--mantine-color-dimmed)' }} />
+              <Text size="sm" c="dimmed">{user?.name || user?.email}</Text>
+            </Group>
+
             <Button
-              variant="outline-secondary"
-              size="sm"
+              variant="default"
+              size="xs"
               onClick={handleLogout}
-              className="ms-2"
-              style={{
-                borderWidth: '1px',
-                fontWeight: 500,
-                borderRadius: '6px',
-                transition: 'all 0.2s',
-                color: '#6b7280',
-                borderColor: '#d1d5db'
-              }}
+              leftSection={<i className="bi bi-box-arrow-right" />}
             >
-              <i className="bi bi-box-arrow-right me-1"></i>
               Salir
             </Button>
-          </Nav>
-        </Container>
-      </Navbar>
+          </Group>
+        </Group>
+      </header>
 
-      {/* Main Content */}
-      <Container fluid className="flex-grow-1 py-5 px-4">
+      {/* Main content */}
+      <main style={{ flexGrow: 1, padding: '48px 24px' }}>
         {children}
-      </Container>
+      </main>
 
       {/* Footer */}
-      <footer 
-        className="border-top mt-auto"
+      <footer
         style={{
+          marginTop: 'auto',
           background: 'white',
-          borderTop: '1px solid #dee2e6',
-          padding: '1.5rem 0'
+          borderTop: '1px solid var(--mantine-color-default-border)',
+          padding: '1.5rem 0',
+          textAlign: 'center',
         }}
       >
-        <Container fluid>
-          <div className="text-center">
-            <div className="d-flex align-items-center justify-content-center mb-2">
-              <i className="bi bi-shield-check text-danger me-2"></i>
-              <small className="text-muted" style={{ fontWeight: 500 }}>
-                Panel de Super Administrador - Datia
-              </small>
-            </div>
-            <small className="text-muted" style={{ fontSize: '0.75rem' }}>
-              Acceso Restringido • Solo personal autorizado
-            </small>
-          </div>
-        </Container>
+        <Group justify="center" gap={8} mb={6}>
+          <i className="bi bi-shield-check" style={{ color: '#dc2626' }} />
+          <Text size="sm" c="dimmed" fw={500}>Panel de Super Administrador - Datia</Text>
+        </Group>
+        <Text size="xs" c="dimmed">Acceso Restringido • Solo personal autorizado</Text>
       </footer>
     </div>
   );
 }
-
-
-
-
-

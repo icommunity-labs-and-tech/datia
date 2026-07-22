@@ -1,7 +1,5 @@
-'use client'
+import ItemsGallery from './ItemsGallery';
 
-import ItemsPageClient from './ItemsPageClient';
-
-export default function Page() {
-  return <ItemsPageClient />;
+export default function ItemsPage() {
+  return <ItemsGallery />;
 }

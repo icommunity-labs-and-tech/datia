@@ -8,7 +8,18 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   experimental: {
     // Optimizaciones de rendimiento
-    optimizePackageImports: ['@tanstack/react-table', 'react-bootstrap', 'bootstrap-icons'],
+    optimizePackageImports: [
+      '@tanstack/react-table',
+      'react-bootstrap',
+      'bootstrap-icons',
+      '@mantine/core',
+      '@mantine/hooks',
+      '@mantine/charts',
+      '@mantine/dates',
+      '@mantine/notifications',
+      '@mantine/modals',
+      '@tabler/icons-react',
+    ],
   },
   // Configuración de imágenes para Cloud Run
   images: {

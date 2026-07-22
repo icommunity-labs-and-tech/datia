@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { Loader } from '@mantine/core';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthSeparated, AuthProvider } from '@/hooks/useAuthSeparated';
 import { useTranslations } from 'next-intl';
@@ -49,9 +49,7 @@ function AdminLoginContent() {
   if (!mounted || loading) {
     return (
       <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-        <Spinner animation="border" variant="primary">
-          <span className="visually-hidden">{tCommon('loading')}</span>
-        </Spinner>
+        <Loader color="datiaBlue" aria-label={tCommon('loading')} />
       </div>
     );
   }
@@ -81,9 +79,7 @@ export default function AdminLoginPage() {
     <AuthProvider>
       <Suspense fallback={
         <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center' }}>
-          <Spinner animation="border" variant="primary">
-            <span className="visually-hidden">{tCommon('loading')}</span>
-          </Spinner>
+          <Loader color="datiaBlue" aria-label={tCommon('loading')} />
         </div>
       }>
         <AdminLoginContent />

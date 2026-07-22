@@ -1,6 +1,6 @@
 'use client';
 
-import { Col, Row } from 'react-bootstrap';
+import { Col, Row } from '@/components/legacy/bootstrap-compat';
 import {
   PieChart, Pie, Cell, Tooltip as RechartTooltip, Legend, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,

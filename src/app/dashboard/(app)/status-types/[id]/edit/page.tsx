@@ -7,7 +7,7 @@ import BoxTitle from '@/components/BoxTitle';
 import LoadingOverlay from '@/components/Loading';
 import { Divider } from '@/components/Divider';
 import { getStatusType, updateStatusType } from '@/actions/statusTypes';
-import { Button, Form, Alert } from 'react-bootstrap';
+import { Button, Form, Alert } from '@/components/legacy/bootstrap-compat';
 import StatusTypeFieldBuilder, { StatusTypeFieldDefinition } from '@/components/StatusTypeFieldBuilder';
 import { useTranslations } from 'next-intl';
 

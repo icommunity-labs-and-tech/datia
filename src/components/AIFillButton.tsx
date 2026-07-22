@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Button, Alert, Spinner } from 'react-bootstrap';
+import { Button, Alert, Loader } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 
 interface AIFillButtonProps {
@@ -84,21 +84,18 @@ export default function AIFillButton({
   return (
     <div className={`ai-fill-container ${className}`}>
       <Button
-        variant="outline-primary"
+        variant="default"
         onClick={handleAIFill}
         disabled={isLoading || !canUseAI}
-        className="d-flex align-items-center gap-2"
+        leftSection={isLoading ? undefined : <i className="bi bi-robot" />}
       >
         {isLoading ? (
           <>
-            <Spinner animation="border" size="sm" />
+            <Loader size="xs" mr={8} />
             {t('consultingAI')}
           </>
         ) : (
-          <>
-            <i className="bi bi-robot"></i>
-            {t('fillWithAI')}
-          </>
+          t('fillWithAI')
         )}
       </Button>
 
@@ -109,13 +106,13 @@ export default function AIFillButton({
       )}
 
       {error && (
-        <Alert variant="danger" className="mt-2 mb-0 py-2">
+        <Alert color="red" mt="xs" py={6}>
           <small>{error}</small>
         </Alert>
       )}
 
       {success && (
-        <Alert variant="success" className="mt-2 mb-0 py-2">
+        <Alert color="green" mt="xs" py={6}>
           <small>{success}</small>
         </Alert>
       )}

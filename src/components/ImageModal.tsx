@@ -1,6 +1,6 @@
 'use client';
 
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, ActionIcon, Center, Loader, Stack, Text, Group } from '@mantine/core';
 import { useState, useEffect } from 'react';
 
 interface ImageModalProps {
@@ -42,39 +42,49 @@ export default function ImageModal({ show, onHide, imageUrl, alt, title, imageUr
   }, [show, isGallery, activeIndex, total, onNavigate]);
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered className="image-modal">
-      <Modal.Header closeButton>
-        <Modal.Title>
-          <i className="bi bi-image me-2" />
+    <Modal
+      opened={show}
+      onClose={onHide}
+      size="xl"
+      centered
+      title={
+        <Group gap={6}>
+          <i className="bi bi-image" />
           {title || 'Imagen'}
           {isGallery && (
-            <span className="text-muted fs-6 fw-normal ms-2">
+            <Text component="span" size="sm" c="dimmed" fw={400}>
               {activeIndex + 1} / {total}
-            </span>
+            </Text>
           )}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body className="p-0 d-flex justify-content-center align-items-center position-relative">
+        </Group>
+      }
+    >
+      <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 400, background: 'var(--mantine-color-default-hover)', borderRadius: 6 }}>
         {isLoading && (
-          <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '400px' }}>
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Cargando imagen...</span>
-            </div>
-          </div>
+          <Center style={{ minHeight: 400 }}>
+            <Loader aria-label="Cargando imagen..." />
+          </Center>
         )}
 
         {hasError ? (
-          <div className="d-flex flex-column justify-content-center align-items-center text-muted" style={{ minHeight: '400px' }}>
+          <Stack align="center" gap="xs" c="dimmed" style={{ minHeight: 400, justifyContent: 'center' }}>
             <i className="bi bi-image" style={{ fontSize: '3rem' }} />
-            <p className="mt-2 mb-0">Error al cargar la imagen</p>
-          </div>
+            <Text c="dimmed">Error al cargar la imagen</Text>
+          </Stack>
         ) : (
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={currentUrl}
             alt={alt}
-            className="img-fluid"
-            style={{ maxHeight: '70vh', width: 'auto', display: isLoading ? 'none' : 'block' }}
+            style={{
+              maxHeight: '70vh',
+              maxWidth: '100%',
+              width: 'auto',
+              display: isLoading ? 'none' : 'block',
+              borderRadius: 6,
+              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+              margin: 'auto',
+            }}
             onLoad={() => setIsLoading(false)}
             onError={() => { setIsLoading(false); setHasError(true); }}
           />
@@ -82,44 +92,30 @@ export default function ImageModal({ show, onHide, imageUrl, alt, title, imageUr
 
         {/* Prev button */}
         {isGallery && onNavigate && activeIndex > 0 && (
-          <Button
-            variant="light"
-            size="sm"
+          <ActionIcon
+            variant="default"
+            size="lg"
             onClick={() => onNavigate(activeIndex - 1)}
             style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.85 }}
+            aria-label="Anterior"
           >
             <i className="bi bi-chevron-left" />
-          </Button>
+          </ActionIcon>
         )}
 
         {/* Next button */}
         {isGallery && onNavigate && activeIndex < total - 1 && (
-          <Button
-            variant="light"
-            size="sm"
+          <ActionIcon
+            variant="default"
+            size="lg"
             onClick={() => onNavigate(activeIndex + 1)}
             style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.85 }}
+            aria-label="Siguiente"
           >
             <i className="bi bi-chevron-right" />
-          </Button>
+          </ActionIcon>
         )}
-      </Modal.Body>
-
-      <style jsx>{`
-        .image-modal .modal-dialog {
-          max-width: 90vw;
-        }
-        .image-modal .modal-body {
-          background-color: #f8f9fa;
-          border-radius: 0 0 0.375rem 0.375rem;
-          min-height: 400px;
-        }
-        .image-modal img {
-          border-radius: 0.375rem;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-          margin: auto;
-        }
-      `}</style>
+      </div>
     </Modal>
   );
 }

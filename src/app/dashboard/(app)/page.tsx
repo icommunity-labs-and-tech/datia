@@ -1,32 +1,21 @@
-import DashboardClient from '../DashboardView';
-import { getDashboardKPIs, getMonthlyActivity, getCategoryDistribution, getBackupStatus } from '@/actions/dashboard';
-import { getCategoriesWithItemCount } from '@/actions/categories';
+import DashboardMantine from '../DashboardMantine';
+import { getDashboardKPIs, getEnergySummary } from '@/actions/dashboard';
+import { listEnergySources } from '@/actions/energy/list-sources';
 
 export const dynamic = 'force-dynamic';
 
 export default async function DashboardIndexPage() {
-  const [kpis, monthlyActivity, categoryDistribution, backupStatus, categoriesResult] = await Promise.all([
+  const [kpis, energySummary, sourcesResult] = await Promise.all([
     getDashboardKPIs(),
-    getMonthlyActivity(12),
-    getCategoryDistribution(),
-    getBackupStatus(),
-    getCategoriesWithItemCount(),
+    getEnergySummary(),
+    listEnergySources(),
   ]);
 
-  const pieData = categoriesResult.success ?
-    categoriesResult.categories
-      .map((c: any) => ({ name: c.name, value: c.itemCount || 0 }))
-      .filter((d: { name: string; value: number }) => d.value > 0) :
-    [];
-
   return (
-    <DashboardClient
-      pieData={pieData}
+    <DashboardMantine
       kpis={kpis}
-      monthlyActivity={monthlyActivity}
-      categoryDistribution={categoryDistribution}
-      backupStatus={backupStatus}
-      backupStatusByUser={[]}
+      energySummary={energySummary}
+      energySources={sourcesResult ?? []}
     />
   );
 }

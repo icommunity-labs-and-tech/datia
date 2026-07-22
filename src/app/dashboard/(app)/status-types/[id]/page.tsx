@@ -9,7 +9,7 @@ import LoadingOverlay from '@/components/Loading';
 import { Divider } from '@/components/Divider';
 import { getStatusType, deleteStatusType } from '@/actions/statusTypes';
 import { getStates } from '@/actions/states';
-import { Button } from 'react-bootstrap';
+import { Button } from '@mantine/core';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import GenericTable from '@/components/GenericTable';
@@ -83,16 +83,17 @@ export default function StatusTypeDetailPage() {
           </div>
           <div className="d-flex gap-2">
             <Button
-              variant="outline-secondary"
-              size="sm"
+              variant="default"
+              size="xs"
               onClick={() => router.push(`/dashboard/status-types/${statusTypeId}/edit`)}
             >
               <i className="bi bi-pencil me-1"></i>
               {t('actions.edit')}
             </Button>
             <Button
-              variant="outline-danger"
-              size="sm"
+              variant="light"
+              color="red"
+              size="xs"
               onClick={() => openDeleteModal(statusType)}
             >
               <i className="bi bi-trash me-1"></i>

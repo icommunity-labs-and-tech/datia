@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Card, Row, Col, Badge, Spinner, Alert, Table, Modal } from 'react-bootstrap';
+import { Button, Card, Row, Col, Badge, Spinner, Alert, Table, Modal } from '@/components/legacy/bootstrap-compat';
 import { getOrganizationById, deleteOrganization, type OrganizationDetail } from '@/actions/organizations';
 import { updateOrgModules } from '@/actions/organizations/update-modules';
 import Box from '@/components/Box';

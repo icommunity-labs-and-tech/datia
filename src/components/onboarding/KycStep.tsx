@@ -1,10 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, Button, Alert, Spinner } from 'react-bootstrap';
+import { Card, Button, Alert, Spinner } from '@/components/legacy/bootstrap-compat';
 import { useLocale } from 'next-intl';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import { checkKycStatus } from '@/actions/organizations/check-kyc-status';
 
 interface KycStepProps {

@@ -1,9 +1,9 @@
 'use client';
 
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Alert from 'react-bootstrap/Alert';
+import { Modal } from '@/components/legacy/bootstrap-compat';
+import { Button } from '@/components/legacy/bootstrap-compat';
+import { Form } from '@/components/legacy/bootstrap-compat';
+import { Alert } from '@/components/legacy/bootstrap-compat';
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FormTemplate } from './GenericTable';

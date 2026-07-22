@@ -1,9 +1,5 @@
-import { listEmissions } from '@/actions/energy/list-emissions';
-import EmissionsClient from './EmissionsClient';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function EmissionsPage() {
-  const records = await listEmissions();
-  return <EmissionsClient records={records} />;
+export default function EmissionsPage() {
+  redirect('/dashboard/energy?tab=emissions');
 }

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { Button, Table, Modal, Badge, Form } from 'react-bootstrap';
+import { Button, Table, Modal, Badge, Form } from '@/components/legacy/bootstrap-compat';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { listEvents } from '@/actions/events/list';

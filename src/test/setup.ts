@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom';
 
 // Import mocks
-import './mocks/react-bootstrap';
 import './mocks/hooks';
 import './mocks/actions';
 // prisma-repositories mock removed - Effect.ts has been eliminated

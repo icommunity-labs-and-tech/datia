@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Button } from 'react-bootstrap';
+import { Card, Button, TextInput, Group, Text, Title } from '@mantine/core';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -21,41 +21,36 @@ export default function OrgLoginUrlsCard({ slug }: Props) {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
-    <Card className="mb-3">
-      <Card.Body>
-        <h6 className="card-title mb-1">{t('branding.loginUrls')}</h6>
-        <p className="text-muted small mb-3">{t('branding.loginUrlsDescription')}</p>
+    <Card mb="md">
+        <Title order={6} mb={4}>{t('branding.loginUrls')}</Title>
+        <Text size="sm" c="dimmed" mb="md">{t('branding.loginUrlsDescription')}</Text>
 
         {(['admin'] as const).map(role => {
           const url = `${origin}/org/${slug}/${role}`;
           return (
-            <div key={role} className="mb-3">
-              <label className="form-label small fw-semibold text-secondary mb-1">
-                {t('branding.loginUrlAdmin')}
-              </label>
-              <div className="d-flex align-items-center gap-2">
-                <input
-                  type="text"
-                  readOnly
-                  value={url}
-                  className="form-control form-control-sm"
-                  style={{ fontFamily: 'monospace', fontSize: '0.8rem', background: '#f8fafc' }}
-                  onFocus={e => e.target.select()}
-                />
-                <Button
-                  variant={copiedUrl === role ? 'success' : 'outline-secondary'}
-                  size="sm"
-                  style={{ whiteSpace: 'nowrap', minWidth: 90 }}
-                  onClick={() => handleCopy(url, role)}
-                >
-                  <i className={`bi bi-${copiedUrl === role ? 'check' : 'clipboard'} me-1`} />
-                  {copiedUrl === role ? t('branding.loginUrlCopied') : 'Copiar'}
-                </Button>
-              </div>
-            </div>
+            <Group key={role} align="flex-end" gap="xs" mb="md" wrap="nowrap">
+              <TextInput
+                label={t('branding.loginUrlAdmin')}
+                readOnly
+                value={url}
+                size="sm"
+                styles={{ input: { fontFamily: 'monospace', fontSize: '0.8rem' } }}
+                onFocus={e => e.target.select()}
+                style={{ flex: 1 }}
+              />
+              <Button
+                variant={copiedUrl === role ? 'filled' : 'default'}
+                color={copiedUrl === role ? 'green' : undefined}
+                size="sm"
+                style={{ whiteSpace: 'nowrap', minWidth: 90 }}
+                onClick={() => handleCopy(url, role)}
+                leftSection={<i className={`bi bi-${copiedUrl === role ? 'check' : 'clipboard'}`} />}
+              >
+                {copiedUrl === role ? t('branding.loginUrlCopied') : 'Copiar'}
+              </Button>
+            </Group>
           );
         })}
-      </Card.Body>
     </Card>
   );
 }

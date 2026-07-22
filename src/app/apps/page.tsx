@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, Suspense } from 'react';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container, Row, Col, Card } from '@/components/legacy/bootstrap-compat';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { appConfig } from '@/config/app';

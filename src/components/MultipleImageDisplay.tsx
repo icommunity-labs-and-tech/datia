@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Row, Col } from 'react-bootstrap';
+import { SimpleGrid, Center, Text } from '@mantine/core';
 
 interface MultipleImageDisplayProps {
   imageUrls?: string[];
@@ -9,21 +9,26 @@ interface MultipleImageDisplayProps {
   maxDisplay?: number;
 }
 
-export default function MultipleImageDisplay({ 
-  imageUrls = [], 
-  alt = "Imágenes", 
+const cellBorder = {
+  border: '1px solid var(--mantine-color-default-border)',
+  borderRadius: 4,
+};
+
+export default function MultipleImageDisplay({
+  imageUrls = [],
+  alt = "Imágenes",
   className = "",
   style = {},
   maxDisplay = 3
 }: MultipleImageDisplayProps) {
   if (!imageUrls || imageUrls.length === 0) {
     return (
-      <div 
-        className={`d-flex align-items-center justify-content-center bg-light border rounded ${className}`}
-        style={{ width: '60px', height: '60px', ...style }}
+      <Center
+        className={className}
+        style={{ width: 60, height: 60, background: 'var(--mantine-color-default-hover)', ...cellBorder, ...style }}
       >
-        <small className="text-muted">Sin imágenes</small>
-      </div>
+        <Text size="xs" c="dimmed">Sin imágenes</Text>
+      </Center>
     );
   }
 
@@ -32,34 +37,22 @@ export default function MultipleImageDisplay({
 
   return (
     <div className={className} style={style}>
-      <Row className="g-1">
+      <SimpleGrid cols={3} spacing={4}>
         {displayUrls.map((imageUrl, index) => (
-          <Col key={index} xs={4}>
-            <Image
-              src={imageUrl}
-              alt={`${alt} ${index + 1}`}
-              fluid
-              className="border rounded"
-              style={{ 
-                width: '100%', 
-                height: '20px', 
-                objectFit: 'cover',
-                fontSize: '8px'
-              }}
-            />
-          </Col>
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            key={index}
+            src={imageUrl}
+            alt={`${alt} ${index + 1}`}
+            style={{ width: '100%', height: 20, objectFit: 'cover', ...cellBorder }}
+          />
         ))}
         {remainingCount > 0 && (
-          <Col xs={4}>
-            <div 
-              className="d-flex align-items-center justify-content-center bg-secondary text-white border rounded"
-              style={{ height: '20px', fontSize: '8px' }}
-            >
-              +{remainingCount}
-            </div>
-          </Col>
+          <Center style={{ height: 20, background: 'var(--mantine-color-gray-6)', color: '#fff', fontSize: 8, ...cellBorder }}>
+            +{remainingCount}
+          </Center>
         )}
-      </Row>
+      </SimpleGrid>
     </div>
   );
 }

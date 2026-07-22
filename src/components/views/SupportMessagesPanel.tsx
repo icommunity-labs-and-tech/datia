@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Badge, Card, Spinner, Table, Dropdown, Modal, Button } from 'react-bootstrap';
+import { Badge, Card, Spinner, Table, Dropdown, Modal, Button } from '@/components/legacy/bootstrap-compat';
 import { listSupportMessages } from '@/actions/support-messages/list';
 import { updateSupportMessageStatus } from '@/actions/support-messages/updateStatus';
 import { deleteSupportMessage } from '@/actions/support-messages/delete';

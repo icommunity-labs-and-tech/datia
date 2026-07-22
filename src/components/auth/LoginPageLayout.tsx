@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Form, Spinner } from 'react-bootstrap';
+import { Loader } from '@mantine/core';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -37,7 +37,7 @@ export interface LoginPageLayoutProps {
 export default function LoginPageLayout({
   logoUrl,
   orgName,
-  brandColor = '#0f172a',
+  brandColor = '#1752CC',
   brandColorSecondary,
   poweredByText,
   role,
@@ -114,8 +114,8 @@ export default function LoginPageLayout({
               <Image src={logoUrl} alt={orgName ?? 'Logo'} width={180} height={64}
                 style={{ objectFit: 'contain', maxWidth: '100%' }} priority unoptimized />
             ) : (
-              <Image src="/logo.webp" alt="Datia" width={160} height={54}
-                style={{ objectFit: 'contain', maxWidth: '100%', filter: 'brightness(0) invert(1)' }} priority />
+              <Image src="/logo-datia-white.svg" alt="Datia" width={160} height={48}
+                style={{ objectFit: 'contain', maxWidth: '100%' }} priority />
             )}
           </div>
 
@@ -132,8 +132,8 @@ export default function LoginPageLayout({
             <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem', whiteSpace: 'nowrap', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
               {poweredByText}
             </span>
-            <Image src="/logo.webp" alt="Datia" width={68} height={22}
-              style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', opacity: 0.4 }} priority />
+            <Image src="/logo-datia-white.svg" alt="Datia" width={68} height={22}
+              style={{ objectFit: 'contain', opacity: 0.5 }} priority />
           </div>
         )}
       </div>
@@ -174,7 +174,7 @@ export default function LoginPageLayout({
           )}
           {!orgName && <div style={{ marginBottom: '2.25rem' }} />}
 
-          <Form onSubmit={onSubmit}>
+          <form onSubmit={onSubmit}>
             {/* Email */}
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.4rem', letterSpacing: '0.02em' }}>
@@ -226,11 +226,11 @@ export default function LoginPageLayout({
               style={{ width: '100%', padding: '0.75rem', background: isLoading ? '#94a3b8' : brandColor, color: '#fff', border: 'none', borderRadius: 10, fontSize: '0.95rem', fontWeight: 600, cursor: isLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, transition: 'opacity 0.15s', marginBottom: '1.75rem' }}
             >
               {isLoading
-                ? <><Spinner animation="border" size="sm" />{accessingText}</>
+                ? <><Loader size="xs" color="white" />{accessingText}</>
                 : <>{accessText} <i className="bi bi-arrow-right" /></>
               }
             </button>
-          </Form>
+          </form>
 
           {crossLinkLabel && crossLinkHref && (
             <div style={{ textAlign: 'center', fontSize: '0.85rem', color: '#94a3b8' }}>

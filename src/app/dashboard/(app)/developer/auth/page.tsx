@@ -1,8 +1,5 @@
-import AuthPageClient from './AuthPageClient';
-
-export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
 
 export default function DeveloperAuthPage() {
-  return <AuthPageClient />;
+  redirect('/dashboard/api?tab=auth');
 }
-

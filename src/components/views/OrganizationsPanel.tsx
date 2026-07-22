@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Modal, Form, Alert, Spinner, Card, Row, Col, Badge, Table } from 'react-bootstrap';
+import { Button, Modal, Form, Alert, Spinner, Card, Row, Col, Badge, Table } from '@/components/legacy/bootstrap-compat';
 import { createOrganizationWithAdmin, listOrganizations, type OrganizationListItem } from '@/actions/organizations';
 import { listSectors, type SectorListItem } from '@/actions/sectors';
 import Box from '@/components/Box';

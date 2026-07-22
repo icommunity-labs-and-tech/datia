@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Container, Row, Col, Card, Alert, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Alert, Button } from '@/components/legacy/bootstrap-compat';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 

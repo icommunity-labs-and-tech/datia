@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Form, Row, Col } from 'react-bootstrap';
+import { Form, Row, Col } from '@/components/legacy/bootstrap-compat';
 
 interface ImageConfigSectionProps {
   allowMultipleImages: boolean;

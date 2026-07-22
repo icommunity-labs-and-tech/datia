@@ -1,7 +1,5 @@
 import React from 'react';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import Dropdown from 'react-bootstrap/Dropdown';
+import { Button, Menu, TextInput } from '@mantine/core';
 import type { TableAction } from '../types';
 import './Toolbar.css';
 
@@ -41,30 +39,30 @@ export default function Toolbar({
         {title && <h4>{title}</h4>}
       </div>
       <div className="controls-section" role="search" aria-label="Buscar en la tabla">
-        <Form.Control
-          type="text"
+        <TextInput
           placeholder={filterPlaceholder}
-          className="w-auto"
           value={filter}
           onChange={(e) => onFilterChange(e.target.value)}
           aria-label={filterPlaceholder}
+          size="sm"
         />
         {selectedRow && actions?.length ? (
-          <Dropdown align="end">
-            <Dropdown.Toggle variant="secondary">Acciones</Dropdown.Toggle>
-            <Dropdown.Menu>
+          <Menu position="bottom-end" shadow="md">
+            <Menu.Target>
+              <Button variant="default" size="sm">Acciones</Button>
+            </Menu.Target>
+            <Menu.Dropdown>
               {actions.map((action, index) => (
-                <Dropdown.Item key={index} onClick={() => onActionClick(action)}>
+                <Menu.Item key={index} onClick={() => onActionClick(action)}>
                   {action.label}
-                </Dropdown.Item>
+                </Menu.Item>
               ))}
-            </Dropdown.Menu>
-          </Dropdown>
+            </Menu.Dropdown>
+          </Menu>
         ) : null}
         {showAddButton && (
-          <Button variant="primary" onClick={onAddClick}>
-            <span className="d-none d-md-inline">{addButtonLabel}</span>
-            <span className="d-md-none">+</span>
+          <Button size="sm" onClick={onAddClick}>
+            {addButtonLabel}
           </Button>
         )}
       </div>

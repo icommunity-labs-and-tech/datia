@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { Button, Form, Alert } from 'react-bootstrap';
+import { Button, Form, Alert } from '@/components/legacy/bootstrap-compat';
 import Box from '@/components/Box';
 import BoxTitle from '@/components/BoxTitle';
 import LoadingOverlay from '@/components/Loading';

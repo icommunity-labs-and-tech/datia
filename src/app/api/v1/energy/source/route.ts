@@ -14,6 +14,8 @@ const schema = z.object({
   generationTechnology: z.string().optional(),
   capacityKw: z.number().positive().optional(),
   location: z.string().optional(),
+  latitude: z.number().min(-90).max(90).optional(),
+  longitude: z.number().min(-180).max(180).optional(),
   installationDate: z.string().datetime().optional(),
   renewableShare: z.number().min(0).max(100).optional(),
   guaranteeOfOriginId: z.string().optional(),

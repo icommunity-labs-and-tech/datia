@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Form, Badge, InputGroup } from 'react-bootstrap';
+import { TextInput, Badge, CloseButton } from '@mantine/core';
 import { searchCategories, findOrCreateCategory } from '@/actions/categories';
 
 interface CategoryTagsInputProps {
@@ -123,22 +123,19 @@ export default function CategoryTagsInput({
 
   return (
     <div className="position-relative">
-      <InputGroup>
-        <Form.Control
-          ref={inputRef}
-          type="text"
-          value={inputValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (suggestions.length > 0) {
-              setShowSuggestions(true);
-            }
-          }}
-          placeholder={placeholder}
-          disabled={disabled}
-        />
-      </InputGroup>
+      <TextInput
+        ref={inputRef}
+        value={inputValue}
+        onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
+        onFocus={() => {
+          if (suggestions.length > 0) {
+            setShowSuggestions(true);
+          }
+        }}
+        placeholder={placeholder}
+        disabled={disabled}
+      />
 
       {/* Tags de categorías seleccionadas */}
       {value.length > 0 && (
@@ -146,20 +143,20 @@ export default function CategoryTagsInput({
           {selectedCategories.map((cat) => (
             <Badge
               key={cat.id}
-              bg="primary"
-              className="d-flex align-items-center gap-1"
-              style={{ fontSize: '0.875rem', padding: '0.375rem 0.75rem' }}
+              color="datiaBlue"
+              variant="light"
+              size="lg"
+              rightSection={
+                !disabled ? (
+                  <CloseButton
+                    size="xs"
+                    onClick={() => handleRemoveCategory(cat.id)}
+                    aria-label="Eliminar categoría"
+                  />
+                ) : undefined
+              }
             >
               {cat.name}
-              {!disabled && (
-                <button
-                  type="button"
-                  className="btn-close btn-close-white"
-                  style={{ fontSize: '0.6rem' }}
-                  onClick={() => handleRemoveCategory(cat.id)}
-                  aria-label="Eliminar categoría"
-                />
-              )}
             </Badge>
           ))}
         </div>
@@ -169,8 +166,9 @@ export default function CategoryTagsInput({
       {showSuggestions && suggestions.length > 0 && (
         <div
           ref={suggestionsRef}
-          className="position-absolute w-100 bg-white border rounded shadow-sm mt-1"
-          style={{ zIndex: 1000, maxHeight: '200px', overflowY: 'auto' }}
+          className="position-absolute w-100 mt-1"
+          data-suggestions
+          style={{ zIndex: 1000, maxHeight: 200, overflowY: 'auto', background: 'var(--mantine-color-body)', border: '1px solid var(--mantine-color-default-border)', borderRadius: 8, boxShadow: 'var(--mantine-shadow-sm)' }}
         >
           {suggestions.map((category) => (
             <div
@@ -179,10 +177,10 @@ export default function CategoryTagsInput({
               style={{ cursor: 'pointer' }}
               onClick={() => handleAddCategory(category.id, category.name)}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f9fa';
+                e.currentTarget.style.backgroundColor = 'var(--mantine-color-default-hover)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
               {category.name}
@@ -194,10 +192,10 @@ export default function CategoryTagsInput({
               style={{ cursor: 'pointer', fontStyle: 'italic', color: '#6c757d' }}
               onClick={() => handleAddCategory(undefined, inputValue.trim())}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = '#f8f9fa';
+                e.currentTarget.style.backgroundColor = 'var(--mantine-color-default-hover)';
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'white';
+                e.currentTarget.style.backgroundColor = 'transparent';
               }}
             >
               Crear &quot;{inputValue.trim()}&quot;

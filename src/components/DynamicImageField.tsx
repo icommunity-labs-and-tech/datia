@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Form, Button, Image, Alert } from 'react-bootstrap';
+import { Form, Button, Image, Alert } from '@/components/legacy/bootstrap-compat';
 import { uploadImage } from '@/actions/upload';
 
 interface DynamicImageFieldProps {

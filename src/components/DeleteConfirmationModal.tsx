@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Modal, Button, Alert } from 'react-bootstrap';
+import { Modal, Button, Alert, Group, Loader, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 
 interface CascadeInfo {
@@ -41,14 +41,13 @@ export default function DeleteConfirmationModal({
     if (!hasCascade) return null;
 
     const cascadeItems = [];
-    
-    
+
     // Tipos de estado
     if (cascadeInfo?.statusTypesDeleted && cascadeInfo.statusTypesDeleted > 0) {
       if (cascadeInfo.statusTypeNames && cascadeInfo.statusTypeNames.length > 0) {
         const displayNames = cascadeInfo.statusTypeNames.slice(0, 3);
         const remaining = cascadeInfo.statusTypesDeleted - displayNames.length;
-        
+
         let text = displayNames.join(', ');
         if (remaining > 0) {
           const plural = remaining !== 1 ? 's' : '';
@@ -60,13 +59,13 @@ export default function DeleteConfirmationModal({
         cascadeItems.push(tDeleteConfirmation('statusTypesCount', { count: cascadeInfo.statusTypesDeleted, plural }));
       }
     }
-    
+
     // Items
     if (cascadeInfo?.itemsDeleted && cascadeInfo.itemsDeleted > 0) {
       if (cascadeInfo.itemNames && cascadeInfo.itemNames.length > 0) {
         const displayNames = cascadeInfo.itemNames.slice(0, 3);
         const remaining = cascadeInfo.itemsDeleted - displayNames.length;
-        
+
         let text = displayNames.join(', ');
         if (remaining > 0) {
           const plural = remaining !== 1 ? 's' : '';
@@ -78,13 +77,13 @@ export default function DeleteConfirmationModal({
         cascadeItems.push(tDeleteConfirmation('itemsCount', { count: cascadeInfo.itemsDeleted, plural }));
       }
     }
-    
+
     // Estados
     if (cascadeInfo?.statesDeleted && cascadeInfo.statesDeleted > 0) {
       if (cascadeInfo.stateTitles && cascadeInfo.stateTitles.length > 0) {
         const displayNames = cascadeInfo.stateTitles.slice(0, 3);
         const remaining = cascadeInfo.statesDeleted - displayNames.length;
-        
+
         let text = displayNames.join(', ');
         if (remaining > 0) {
           const plural = remaining !== 1 ? 's' : '';
@@ -98,9 +97,9 @@ export default function DeleteConfirmationModal({
     }
 
     return (
-      <Alert variant="warning" className="mt-3">
-        <strong>{t('cascadeWarning')}</strong>
-        <ul className="mb-0 mt-2">
+      <Alert color="yellow" mt="md">
+        <Text fw={600} size="sm">{t('cascadeWarning')}</Text>
+        <ul style={{ margin: '8px 0 0', paddingLeft: 20 }}>
           {cascadeItems.map((item, index) => (
             <li key={index}>{item}</li>
           ))}
@@ -110,33 +109,29 @@ export default function DeleteConfirmationModal({
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title><i className="bi bi-trash3"></i>{title}</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <p>{message}</p>
-        {renderCascadeWarning()}
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={onHide} disabled={isLoading}>
+    <Modal
+      opened={show}
+      onClose={onHide}
+      centered
+      title={<Group gap={6}><i className="bi bi-trash3" />{title}</Group>}
+    >
+      <Text size="sm">{message}</Text>
+      {renderCascadeWarning()}
+      <Group justify="flex-end" mt="lg">
+        <Button variant="default" onClick={onHide} disabled={isLoading}>
           {tCommon('cancel')}
         </Button>
-        <Button 
-          variant="danger" 
-          onClick={onConfirm} 
-          disabled={isLoading}
-        >
+        <Button color="red" onClick={onConfirm} disabled={isLoading}>
           {isLoading ? (
             <>
-              <span className="spinner-border spinner-border-sm me-2" />
+              <Loader size="xs" color="white" mr={8} />
               {t('deleting')}
             </>
           ) : (
             t('confirmDelete')
           )}
         </Button>
-      </Modal.Footer>
+      </Group>
     </Modal>
   );
 }

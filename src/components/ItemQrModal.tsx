@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Modal, Button } from 'react-bootstrap';
+import { Modal, Button, Group, Stack, Text } from '@mantine/core';
 
 type ItemQrModalProps = {
   show: boolean;
@@ -72,30 +72,25 @@ export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrMo
   };
 
   return (
-    <Modal show={show} onHide={onHide} centered>
-      <Modal.Header closeButton>
-        <Modal.Title>
-          <i className="bi bi-qr-code"></i>
-          {itemName ? `QR de ${itemName}` : 'Código QR del item'}
-        </Modal.Title>
-      </Modal.Header>
-      <Modal.Body>
-        <div className="d-flex flex-column align-items-center text-center">
-          <canvas ref={canvasRef} style={{ width: 260, height: 260 }} />
-          <div className="text-muted small mt-2" style={{ wordBreak: 'break-all' }}>{itemUrl}</div>
-          {error && <div className="text-danger mt-2">{error}</div>}
-        </div>
-      </Modal.Body>
-      <Modal.Footer>
-        <Button variant="outline-secondary" onClick={handleCopyUrl}>
-          <i className="bi bi-clipboard me-1" /> Copiar enlace
+    <Modal
+      opened={show}
+      onClose={onHide}
+      centered
+      title={<Group gap={6}><i className="bi bi-qr-code" />{itemName ? `QR de ${itemName}` : 'Código QR del item'}</Group>}
+    >
+      <Stack align="center" gap="xs">
+        <canvas ref={canvasRef} style={{ width: 260, height: 260 }} />
+        <Text size="xs" c="dimmed" ta="center" style={{ wordBreak: 'break-all' }}>{itemUrl}</Text>
+        {error && <Text size="sm" c="red">{error}</Text>}
+      </Stack>
+      <Group justify="flex-end" mt="lg">
+        <Button variant="default" leftSection={<i className="bi bi-clipboard" />} onClick={handleCopyUrl}>
+          Copiar enlace
         </Button>
-        <Button variant="primary" onClick={handleDownload}>
-          <i className="bi bi-download me-1" /> Descargar PNG
+        <Button leftSection={<i className="bi bi-download" />} onClick={handleDownload}>
+          Descargar PNG
         </Button>
-      </Modal.Footer>
+      </Group>
     </Modal>
   );
 }
-
-

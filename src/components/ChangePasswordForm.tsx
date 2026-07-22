@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Form, Button, Alert } from 'react-bootstrap';
+import { Button, Alert, PasswordInput, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { changePassword } from '@/actions/users';
 
@@ -53,65 +53,56 @@ export default function ChangePasswordForm() {
                      formData.newPassword.length >= 6;
 
   return (
-    <Form onSubmit={handleSubmit}>
-      {message && (
-        <Alert variant={message.type === 'success' ? 'success' : 'danger'} className="mb-3">
-          {message.text}
-        </Alert>
-      )}
+    <form onSubmit={handleSubmit}>
+      <Stack gap="md">
+        {message && (
+          <Alert color={message.type === 'success' ? 'green' : 'red'}>
+            {message.text}
+          </Alert>
+        )}
 
-      <Form.Group className="mb-3">
-        <Form.Label>Contraseña actual</Form.Label>
-        <Form.Control
-          type="password"
+        <PasswordInput
+          label="Contraseña actual"
           name="currentPassword"
           value={formData.currentPassword}
           onChange={handleInputChange}
           placeholder="Ingresa tu contraseña actual"
           required
         />
-      </Form.Group>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Nueva contraseña</Form.Label>
-        <Form.Control
-          type="password"
+        <PasswordInput
+          label="Nueva contraseña"
           name="newPassword"
           value={formData.newPassword}
           onChange={handleInputChange}
           placeholder="Ingresa tu nueva contraseña"
           required
           minLength={6}
+          description={tCommon('passwordMinLength')}
         />
-        <Form.Text className="text-muted">
-          {tCommon('passwordMinLength')}
-        </Form.Text>
-      </Form.Group>
 
-      <Form.Group className="mb-3">
-        <Form.Label>Confirmar nueva contraseña</Form.Label>
-        <Form.Control
-          type="password"
+        <PasswordInput
+          label="Confirmar nueva contraseña"
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleInputChange}
           placeholder="Confirma tu nueva contraseña"
           required
+          error={
+            formData.newPassword && formData.confirmPassword && formData.newPassword !== formData.confirmPassword
+              ? 'Las contraseñas no coinciden'
+              : undefined
+          }
         />
-        {formData.newPassword && formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
-          <Form.Text className="text-danger">
-            Las contraseñas no coinciden
-          </Form.Text>
-        )}
-      </Form.Group>
 
-      <Button 
-        type="submit" 
-        variant="primary" 
-        disabled={!isFormValid || isSubmitting}
-      >
-        {isSubmitting ? 'Cambiando contraseña...' : 'Cambiar contraseña'}
-      </Button>
-    </Form>
+        <Button
+          type="submit"
+          disabled={!isFormValid || isSubmitting}
+          style={{ alignSelf: 'flex-start' }}
+        >
+          {isSubmitting ? 'Cambiando contraseña...' : 'Cambiar contraseña'}
+        </Button>
+      </Stack>
+    </form>
   );
 }

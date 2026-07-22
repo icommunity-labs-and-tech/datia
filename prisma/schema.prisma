@@ -414,6 +414,8 @@ model EnergySource {
   generationTechnology String?      // e.g. photovoltaic, wind_onshore, ccgt
   capacityKw          Float?
   location            String?
+  latitude            Float?
+  longitude           Float?
   installationDate    DateTime?
   // ESPR / EU energy taxonomy
   renewableShare      Float?        // 0–100 %

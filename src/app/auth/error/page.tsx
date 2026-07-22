@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { Container, Row, Col, Card, Button } from 'react-bootstrap';
+import { Container, Row, Col, Card, Button } from '@/components/legacy/bootstrap-compat';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';

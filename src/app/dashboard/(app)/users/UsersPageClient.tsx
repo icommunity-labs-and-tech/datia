@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Spinner } from 'react-bootstrap';
+import { Center, Loader, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import Box from '@/components/Box';
 import { Divider } from '@/components/Divider';
@@ -31,12 +31,12 @@ export default function UsersPageClient() {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center mb-4" style={{ height: 180 }}>
-        <div className="text-center">
-          <Spinner animation="border" variant="primary" />
-          <p className="mt-2 text-muted">{t('loading')}</p>
-        </div>
-      </div>
+      <Center h={180} mb="md">
+        <Stack align="center" gap="xs">
+          <Loader size="sm" />
+          <Text size="sm" c="dimmed">{t('loading')}</Text>
+        </Stack>
+      </Center>
     );
   }
 

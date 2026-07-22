@@ -2,18 +2,39 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Box from '@/components/Box';
-import LoadingOverlay from '@/components/Loading';
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Center,
+  Divider,
+  Grid,
+  Group,
+  Loader,
+  Stack,
+  Text,
+  ThemeIcon,
+  Timeline,
+  Title,
+} from '@mantine/core';
+import {
+  IconQrcode,
+  IconExternalLink,
+  IconTrash,
+  IconPlus,
+  IconFlag,
+  IconMapPin,
+  IconInfoCircle,
+  IconShieldCheck,
+  IconClock,
+} from '@tabler/icons-react';
 import { getItem, deleteItem, getItemDetails } from '@/actions/items';
 import { getStatesByItem } from '@/actions/states';
-import { Divider } from '@/components/Divider';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
-import { Button } from 'react-bootstrap';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { getCascadeInfo } from '@/config/entityConfig';
 import ItemQrModal from '@/components/ItemQrModal';
-import ItemStatesTable from '@/components/views/ItemStatesTable';
-import { Row, Col } from 'react-bootstrap';
 import ImageDisplay from '@/components/ImageDisplay';
 import ItemSpecificFields from '@/components/ItemSpecificFields';
 import ItemStatesMap from '@/components/ItemStatesMapClient';
@@ -21,18 +42,48 @@ import CategoryInputField from '@/components/CategoryInputField';
 import AddStateForm from '@/components/AddStateForm';
 import { useTranslations } from 'next-intl';
 
+interface StateRow {
+  id: string;
+  title?: string | null;
+  description?: string | null;
+  createdAt: string | Date;
+  backed?: boolean | null;
+  templateConfig?: unknown;
+  statusType?: { id?: string; name?: string; description?: string | null } | null;
+}
+
+function stateHasGeolocation(state: StateRow): boolean {
+  let config = state.templateConfig;
+  if (!config) return false;
+  if (typeof config === 'string') {
+    try {
+      config = JSON.parse(config);
+    } catch {
+      return false;
+    }
+  }
+  return Object.values(config as Record<string, unknown>).some(
+    (value) =>
+      value != null &&
+      typeof value === 'object' &&
+      'lat' in value &&
+      'lng' in value &&
+      typeof (value as { lat: unknown }).lat === 'number' &&
+      typeof (value as { lng: unknown }).lng === 'number'
+  );
+}
+
 export default function ItemDetailPage() {
   const t = useTranslations('itemDetail');
   const { id } = useParams();
   const router = useRouter();
   const itemId = id as string;
   const [item, setItem] = useState<any>(null);
-  const [states, setStates] = useState<any[]>([]);
+  const [states, setStates] = useState<StateRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
   const [showAddStateModal, setShowAddStateModal] = useState(false);
 
-  // Usar el hook refactorizado
   const {
     showDeleteModal,
     entityToDelete,
@@ -57,28 +108,14 @@ export default function ItemDetailPage() {
         setIsLoading(false);
         return;
       }
-
       setIsLoading(true);
       try {
         const [itemData, statesData] = await Promise.all([
-          getItem(itemId).catch((err) => {
-            console.error('Error obteniendo item:', err);
-            return null;
-          }),
-          getStatesByItem(itemId).catch((err) => {
-            console.error('Error obteniendo estados:', err);
-            return [];
-          })
+          getItem(itemId).catch(() => null),
+          getStatesByItem(itemId).catch(() => []),
         ]);
-        
-        if (itemData) {
-          setItem(itemData);
-        }
-        if (statesData) {
-          setStates(statesData);
-        }
-      } catch (e) {
-        console.error('Error cargando datos:', e);
+        if (itemData) setItem(itemData);
+        if (statesData) setStates(statesData as StateRow[]);
       } finally {
         setIsLoading(false);
       }
@@ -86,197 +123,251 @@ export default function ItemDetailPage() {
     load();
   }, [itemId]);
 
+  const reloadStates = async () => {
+    setShowAddStateModal(false);
+    try {
+      const statesData = await getStatesByItem(itemId);
+      setStates(statesData as StateRow[]);
+    } catch {
+      /* keep previous states on reload failure */
+    }
+  };
+
   const openDeleteModalWithDetails = async () => {
     try {
-      // Obtener información detallada del item con nombres de dependencias
       const detailedItem = await getItemDetails(itemId);
       setItem(detailedItem);
       openDeleteModal(detailedItem);
-    } catch (error) {
-      console.error('Error obteniendo detalles del producto:', error);
+    } catch {
       openDeleteModal(item);
     }
   };
 
-  
-
-  if (isLoading) return <LoadingOverlay />;
-
-  if (!item) {
+  if (isLoading) {
     return (
-      <Box>
-        <div className="d-flex align-items-center justify-content-between mb-2">
-          <div className="d-flex align-items-center">
-            <i className="bi bi-list-columns me-2" />
-            <h4 className="mb-0">{t('notFound')}</h4>
-          </div>
-        </div>
-        <Divider />
-        <p className="text-muted">{t('notFoundDescription')}</p>
-      </Box>
+      <Center h={240}>
+        <Loader size="sm" />
+      </Center>
     );
   }
 
-  // Obtener información de cascada usando la configuración centralizada
-  const cascadeInfo = entityToDelete ? getCascadeInfo(entityToDelete, 'items') : undefined;
+  if (!item) {
+    return (
+      <Alert icon={<IconInfoCircle size={16} />} color="datiaBlue" variant="light" title={t('notFound')}>
+        {t('notFoundDescription')}
+      </Alert>
+    );
+  }
 
-  // Preparar columnas para la tabla de estados
-  
+  const cascadeInfo = entityToDelete ? getCascadeInfo(entityToDelete, 'items') : undefined;
+  const hasGeolocation = states.some(stateHasGeolocation);
+  const backedCount = states.filter((s) => s.backed).length;
 
   return (
     <>
-      <Box>
-        <div className="d-flex align-items-center justify-content-between mb-2">
-          <div className="d-flex align-items-center">
-            <i className="bi bi-list-columns me-2" />
-            <h4 className="mb-0">{t('title', { name: item?.name })}</h4>
-          </div>
-          <div className="d-flex gap-2">
+      <Stack gap="md">
+        {/* ── Header ── */}
+        <Group justify="space-between" wrap="wrap">
+          <Title order={3}>{item.name}</Title>
+          <Group gap="xs">
             <Button
-              variant="outline-primary"
-              size="sm"
+              variant="default"
+              size="xs"
+              leftSection={<IconQrcode size={15} />}
               onClick={() => setShowQr(true)}
-              className="d-flex align-items-center gap-1"
             >
-              <i className="bi bi-qr-code me-1"></i>
               QR
             </Button>
             <Button
-              variant="outline-info"
-              size="sm"
+              variant="default"
+              size="xs"
+              leftSection={<IconExternalLink size={15} />}
+              component="a"
               href={`/customer/item/${encodeURIComponent(itemId)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="d-flex align-items-center gap-1"
-              disabled={!itemId}
             >
-              <i className="bi bi-eye me-1"></i>
               {t('passport')}
             </Button>
             <Button
-              variant="outline-danger"
-              size="sm"
+              variant="light"
+              color="red"
+              size="xs"
+              leftSection={<IconTrash size={15} />}
               onClick={openDeleteModalWithDetails}
-              className="d-flex align-items-center gap-1"
             >
-              <i className="bi bi-trash me-1"></i>
               {t('delete')}
             </Button>
-          </div>
-        </div>
-        <Divider />
-        
-        <Row>
-          <Col md={8}>
-            <p className="text-muted mb-0">{item?.description}</p>
-            
-            {/* Campos específicos del item */}
-            {item?.itemTemplate && item?.templateFields && (
-              <div className="mt-4">
-                <ItemSpecificFields
-                  itemTemplate={Array.isArray(item.itemTemplate) ? item.itemTemplate : []}
-                  templateFields={item.templateFields || {}}
-                />
-              </div>
-            )}
-          </Col>
-          <Col md={4}>
-            {item?.imageUrl && (
-              <div className="d-flex justify-content-end">
-                <ImageDisplay
-                  imageUrl={item.imageUrl}
-                  alt={t('imageAlt', { name: item.name })}
-                  clickable={true}
-                  modalTitle={t('imageAlt', { name: item.name })}
-                  style={{ 
-                    maxWidth: '150px', 
-                    maxHeight: '150px',
-                    width: '150px',
-                    height: '150px'
+          </Group>
+        </Group>
+
+        <Grid gutter="md">
+          {/* ── Left column: info + states ── */}
+          <Grid.Col span={{ base: 12, md: 8 }}>
+            <Stack gap="md">
+              <Card>
+                {item.description ? (
+                  <Text size="sm" c="dimmed">{item.description}</Text>
+                ) : (
+                  <Text size="sm" c="dimmed" fs="italic">{t('noDescription')}</Text>
+                )}
+
+                {item.itemTemplate && item.templateFields && (
+                  <div style={{ marginTop: 16 }}>
+                    <ItemSpecificFields
+                      itemTemplate={Array.isArray(item.itemTemplate) ? item.itemTemplate : []}
+                      templateFields={item.templateFields || {}}
+                    />
+                  </div>
+                )}
+
+                <Divider my="md" />
+
+                <CategoryInputField
+                  itemId={itemId}
+                  categories={item.categories || []}
+                  onUpdate={(updatedCategories) => {
+                    setItem((prev: any) => ({ ...prev, categories: updatedCategories }));
                   }}
                 />
-              </div>
-            )}
-          </Col>
-        </Row>
+              </Card>
 
-        <Divider />
+              {/* ── States timeline ── */}
+              <Card>
+                <Group justify="space-between" mb="md">
+                  <Group gap="xs">
+                    <ThemeIcon color="datiaBlue" variant="light" size={28} radius="sm">
+                      <IconFlag size={16} />
+                    </ThemeIcon>
+                    <Title order={5}>{t('productStates')}</Title>
+                  </Group>
+                  <Button
+                    size="xs"
+                    leftSection={<IconPlus size={15} />}
+                    onClick={() => setShowAddStateModal(true)}
+                  >
+                    {t('addState')}
+                  </Button>
+                </Group>
 
-        {/* Sección de categorías */}
-        <CategoryInputField
-          itemId={itemId}
-          categories={item?.categories || []}
-          onUpdate={(updatedCategories) => {
-            setItem((prev: any) => ({
-              ...prev,
-              categories: updatedCategories,
-            }));
-          }}
-        />
-      </Box>
+                {states.length === 0 ? (
+                  <Text size="sm" c="dimmed" ta="center" py="lg">{t('noStates')}</Text>
+                ) : (
+                  <Timeline
+                    active={states.length}
+                    bulletSize={26}
+                    lineWidth={2}
+                    color="datiaBlue"
+                  >
+                    {states.map((state) => (
+                      <Timeline.Item
+                        key={state.id}
+                        bullet={
+                          state.backed
+                            ? <IconShieldCheck size={14} />
+                            : <IconClock size={14} />
+                        }
+                        color={state.backed ? 'green' : 'datiaBlue'}
+                        title={
+                          <Group gap={6} wrap="wrap">
+                            <Text
+                              fw={600}
+                              size="sm"
+                              style={{ cursor: 'pointer' }}
+                              onClick={() => router.push(`/dashboard/states/${state.id}`)}
+                            >
+                              {state.title || state.statusType?.name || '—'}
+                            </Text>
+                            {state.statusType?.name && (
+                              <Badge size="xs" color="datiaBlue" variant="light">
+                                {state.statusType.name}
+                              </Badge>
+                            )}
+                            <Badge
+                              size="xs"
+                              color={state.backed ? 'green' : 'yellow'}
+                              variant="dot"
+                            >
+                              {state.backed ? t('certified') : t('pendingBackup')}
+                            </Badge>
+                          </Group>
+                        }
+                      >
+                        {state.description && (
+                          <Text size="sm" c="dimmed" lineClamp={2}>{state.description}</Text>
+                        )}
+                        <Text size="xs" c="dimmed" mt={4}>
+                          {new Date(state.createdAt).toLocaleString()}
+                        </Text>
+                      </Timeline.Item>
+                    ))}
+                  </Timeline>
+                )}
+              </Card>
 
-      {/* Se elimina el box de evidencia; la verificación se hace desde el botón del header */}
+              {/* ── Geotracking map ── */}
+              {hasGeolocation && (
+                <Card>
+                  <Group gap="xs" mb="md">
+                    <ThemeIcon color="datiaBlue" variant="light" size={28} radius="sm">
+                      <IconMapPin size={16} />
+                    </ThemeIcon>
+                    <Title order={5}>{t('geotracking')}</Title>
+                  </Group>
+                  <ItemStatesMap states={states as any} />
+                </Card>
+              )}
+            </Stack>
+          </Grid.Col>
 
-      <Box>
-        <div className="d-flex align-items-center justify-content-between mb-3">
-          <div className="d-flex align-items-center">
-            <i className="bi bi-flag me-2" />
-            <h5 className="mb-0">{t('productStates')}</h5>
-          </div>
-          <Button
-            variant="primary"
-            size="sm"
-            onClick={() => setShowAddStateModal(true)}
-            className="d-flex align-items-center gap-1"
-          >
-            <i className="bi bi-plus-circle me-1"></i>
-            {t('addState')}
-          </Button>
-        </div>
-        <Divider />
-        <ItemStatesTable states={states as any} />
-      </Box>
+          {/* ── Right column: image + summary ── */}
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <Stack gap="md">
+              {item.imageUrl && (
+                <Card>
+                  <Center>
+                    <ImageDisplay
+                      imageUrl={item.imageUrl}
+                      alt={t('imageAlt', { name: item.name })}
+                      clickable={true}
+                      modalTitle={t('imageAlt', { name: item.name })}
+                      style={{ maxWidth: '100%', maxHeight: 220, objectFit: 'contain' }}
+                    />
+                  </Center>
+                </Card>
+              )}
 
-      {(() => {
-        // Verificar si hay estados con geolocalización antes de renderizar
-        const hasGeolocation = states.some((state: any) => {
-          if (!state.templateConfig) return false;
-          let templateConfig = state.templateConfig;
-          if (typeof templateConfig === 'string') {
-            try {
-              templateConfig = JSON.parse(templateConfig);
-            } catch {
-              return false;
-            }
-          }
-          // Buscar cualquier campo que tenga lat y lng
-          return Object.values(templateConfig).some((value: any) =>
-            value &&
-            typeof value === 'object' &&
-            'lat' in value &&
-            'lng' in value &&
-            typeof value.lat === 'number' &&
-            typeof value.lng === 'number'
-          );
-        });
-
-        if (!hasGeolocation) {
-          return null;
-        }
-
-        return (
-          <Box>
-            <div className="d-flex align-items-center justify-content-between mb-3">
-              <div className="d-flex align-items-center">
-                <i className="bi bi-geo-alt me-2" />
-                <h5 className="mb-0">{t('geotracking')}</h5>
-              </div>
-            </div>
-            <Divider />
-            <ItemStatesMap states={states as any} />
-          </Box>
-        );
-      })()}
+              <Card>
+                <Title order={6} mb="sm">{t('summary')}</Title>
+                <Stack gap={8}>
+                  <Group justify="space-between">
+                    <Text size="sm" c="dimmed">{t('totalStates')}</Text>
+                    <Text size="sm" fw={600}>{states.length}</Text>
+                  </Group>
+                  <Group justify="space-between">
+                    <Text size="sm" c="dimmed">{t('certifiedStates')}</Text>
+                    <Text size="sm" fw={600} c={backedCount > 0 ? 'green' : undefined}>
+                      {backedCount}
+                    </Text>
+                  </Group>
+                  {item.categories?.length > 0 && (
+                    <>
+                      <Divider my={4} />
+                      <Group gap={4}>
+                        {item.categories.map((c: { id: string; name: string }) => (
+                          <Badge key={c.id} size="xs" color="datiaBlue" variant="light">
+                            {c.name}
+                          </Badge>
+                        ))}
+                      </Group>
+                    </>
+                  )}
+                </Stack>
+              </Card>
+            </Stack>
+          </Grid.Col>
+        </Grid>
+      </Stack>
 
       <DeleteConfirmationModal
         show={showDeleteModal}
@@ -295,33 +386,14 @@ export default function ItemDetailPage() {
         itemName={item?.name}
       />
 
-      {/* Modal para añadir estado */}
       {item && (
         <AddStateForm
           item={item}
           itemId={itemId}
           show={showAddStateModal}
           onHide={() => setShowAddStateModal(false)}
-          onSuccess={async () => {
-            setShowAddStateModal(false);
-            // Recargar los estados después de crear uno nuevo
-            try {
-              const statesData = await getStatesByItem(itemId);
-              setStates(statesData);
-            } catch (err) {
-              console.error('Error recargando estados:', err);
-            }
-          }}
-          onStateCreated={async (newState) => {
-            // También actualizar cuando se crea el estado
-            setShowAddStateModal(false);
-            try {
-              const statesData = await getStatesByItem(itemId);
-              setStates(statesData);
-            } catch (err) {
-              console.error('Error recargando estados:', err);
-            }
-          }}
+          onSuccess={reloadStates}
+          onStateCreated={reloadStates}
         />
       )}
     </>

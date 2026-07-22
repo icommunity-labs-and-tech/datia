@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Badge } from 'react-bootstrap';
+import { Badge } from '@mantine/core';
 
-const STATUS_VARIANT: Record<string, string> = {
-  PENDING: 'warning',
-  VERIFIED: 'success',
-  REJECTED: 'danger',
+const STATUS_COLOR: Record<string, string> = {
+  PENDING: 'yellow',
+  VERIFIED: 'green',
+  REJECTED: 'red',
 };
 
 interface Props {
@@ -28,7 +28,7 @@ export default function EmissionDetailClient({ emission }: Props) {
           <i className="bi bi-cloud me-2 text-success" />
           Registro de Emisión
         </h2>
-        <Badge bg={STATUS_VARIANT[emission.verificationStatus] ?? 'secondary'}>
+        <Badge color={STATUS_COLOR[emission.verificationStatus] ?? 'gray'}>
           {emission.verificationStatus}
         </Badge>
       </div>
@@ -107,7 +107,7 @@ export default function EmissionDetailClient({ emission }: Props) {
               <dl className="row mb-0 small">
                 <dt className="col-5 text-muted">Estado</dt>
                 <dd className="col-7">
-                  <Badge bg={STATUS_VARIANT[emission.verificationStatus] ?? 'secondary'}>
+                  <Badge color={STATUS_COLOR[emission.verificationStatus] ?? 'gray'}>
                     {emission.verificationStatus}
                   </Badge>
                 </dd>

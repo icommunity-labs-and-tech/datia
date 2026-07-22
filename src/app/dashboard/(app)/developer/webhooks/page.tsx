@@ -1,8 +1,5 @@
-import WebhooksPageClient from './WebhooksPageClient';
-
-export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
 
 export default function DeveloperWebhooksPage() {
-  return <WebhooksPageClient />;
+  redirect('/dashboard/api?tab=webhooks');
 }
-

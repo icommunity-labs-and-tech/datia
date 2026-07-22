@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { Button, Alert, Spinner } from 'react-bootstrap';
+import { Center, Loader, Stack, Text } from '@mantine/core';
 import type { GeolocationCoordinates } from '@/lib/geolocation/types';
 
 interface GeolocationMapProps {
@@ -19,12 +19,12 @@ const GeolocationMapInternal = dynamic(
     ssr: false,
     loading: () => (
       <div className="geolocation-map-container">
-        <div className="d-flex align-items-center justify-content-center" style={{ height: '350px', border: '2px solid #e9ecef', borderRadius: '8px' }}>
-          <div className="text-center">
-            <Spinner animation="border" variant="primary" className="mb-2" />
-            <p className="text-muted mb-0">Cargando mapa...</p>
-          </div>
-        </div>
+        <Center style={{ height: 350, border: '1px solid var(--mantine-color-default-border)', borderRadius: 8 }}>
+          <Stack align="center" gap="xs">
+            <Loader size="sm" />
+            <Text size="sm" c="dimmed">Cargando mapa...</Text>
+          </Stack>
+        </Center>
       </div>
     )
   }

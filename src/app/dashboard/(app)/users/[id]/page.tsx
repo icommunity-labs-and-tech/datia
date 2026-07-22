@@ -6,7 +6,7 @@ import Box from '@/components/Box';
 import LoadingOverlay from '@/components/Loading';
 import { Divider } from '@/components/Divider';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
-import { Button } from 'react-bootstrap';
+import { Button } from '@mantine/core';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { deleteUser, getUserById } from '@/actions/users';
 import { useTranslations } from 'next-intl';
@@ -82,16 +82,17 @@ export default function UserDetailPage() {
           </div>
           <div className="d-flex gap-2">
             <Button
-              variant="outline-secondary"
-              size="sm"
+              variant="default"
+              size="xs"
               onClick={() => router.push(`/dashboard/users/${userId}/edit`)}
             >
               <i className="bi bi-pencil me-1"></i>
               {tCommon('edit')}
             </Button>
             <Button
-              variant="outline-danger"
-              size="sm"
+              variant="light"
+              color="red"
+              size="xs"
               onClick={openDeleteModalWithUser}
             >
               <i className="bi bi-trash me-1"></i>

@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import StatusTypeFieldBuilder, { StatusTypeFieldDefinition } from '@/components/StatusTypeFieldBuilder';
-import { Button, Modal, Form, Alert } from 'react-bootstrap';
+import { Button, Modal, Form, Alert } from '@/components/legacy/bootstrap-compat';
 import { Divider } from '@/components/Divider';
 import { useTranslations, useLocale } from 'next-intl';
 

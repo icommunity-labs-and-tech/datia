@@ -1,7 +1,5 @@
-import ApiDocsPageClient from './ApiDocsPageClient';
-
-export const dynamic = 'force-dynamic';
+import { redirect } from 'next/navigation';
 
 export default function DeveloperApiPage() {
-  return <ApiDocsPageClient />;
+  redirect('/dashboard/api?tab=docs');
 }

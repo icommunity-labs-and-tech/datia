@@ -2,10 +2,23 @@
 
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { Form, Button, Alert, Spinner, Modal, Badge } from 'react-bootstrap';
+import {
+  Alert,
+  Badge,
+  Button,
+  Center,
+  Group,
+  Loader,
+  Modal,
+  NativeSelect,
+  Select,
+  Stack,
+  Text,
+  Textarea,
+  TextInput,
+} from '@mantine/core';
 import { listStatusTypes } from '@/actions/statusTypes';
 import { createState } from '@/actions/states';
-import { getItem } from '@/actions/items';
 import GeolocationMap from './GeolocationMapClient';
 import { parseTemplate, generateFieldLabel } from '@/lib/template-helpers';
 
@@ -29,13 +42,13 @@ interface AddStateFormProps {
   onHide?: () => void;
 }
 
-export default function AddStateForm({ 
-  item, 
-  itemId, 
-  onSuccess, 
-  onStateCreated, 
-  show = true, 
-  onHide 
+export default function AddStateForm({
+  item,
+  itemId,
+  onSuccess,
+  onStateCreated,
+  show = true,
+  onHide
 }: AddStateFormProps) {
   const tCommon = useTranslations('common');
   const tForms = useTranslations('forms');
@@ -93,13 +106,13 @@ export default function AddStateForm({
         if (field.required) {
           const fieldName = field.name;
           const fieldValue = templateConfig[fieldName];
-          
+
           if (field.type === 'geolocation' && (!fieldValue || !fieldValue.lat || !fieldValue.lng)) {
             setError(tForms('fieldRequiredWithName', { field: field.label || fieldName }));
             setIsSubmitting(false);
             return;
           }
-          
+
           if (field.type !== 'geolocation' && (!fieldValue || fieldValue === '')) {
             setError(tForms('fieldRequiredWithName', { field: field.label || fieldName }));
             setIsSubmitting(false);
@@ -137,360 +150,170 @@ export default function AddStateForm({
     }
   };
 
+  const setTemplateField = (fieldName: string, value: any) => {
+    setTemplateConfig(prev => ({ ...prev, [fieldName]: value }));
+  };
+
+  const renderTemplateField = (field: any, index: number) => {
+    const fieldName = field.name || `field_${index}`;
+    const fieldLabel = field.label || generateFieldLabel(fieldName);
+    const fieldValue = templateConfig[fieldName];
+
+    if (field.type === 'geolocation') {
+      return (
+        <GeolocationMap
+          key={index}
+          value={fieldValue ? { lat: fieldValue.lat, lng: fieldValue.lng } : undefined}
+          onChange={(coords) => setTemplateField(fieldName, coords)}
+          required={field.required}
+          label={fieldLabel}
+        />
+      );
+    }
+
+    if (field.type === 'text' || field.type === 'email' || field.type === 'date') {
+      return (
+        <TextInput
+          key={index}
+          type={field.type === 'date' ? 'date' : field.type}
+          label={fieldLabel}
+          value={fieldValue || ''}
+          onChange={(e) => setTemplateField(fieldName, e.target.value)}
+          placeholder={field.type !== 'date' ? (field.placeholder || tCommon('enterField', { field: fieldLabel.toLowerCase() })) : undefined}
+          required={field.required}
+          disabled={isSubmitting}
+        />
+      );
+    }
+
+    if (field.type === 'number') {
+      return (
+        <TextInput
+          key={index}
+          type="number"
+          label={fieldLabel}
+          value={fieldValue ?? ''}
+          onChange={(e) => setTemplateField(fieldName, e.target.value ? parseFloat(e.target.value) : undefined)}
+          placeholder={field.placeholder || tCommon('enterField', { field: fieldLabel.toLowerCase() })}
+          required={field.required}
+          disabled={isSubmitting}
+        />
+      );
+    }
+
+    if (field.type === 'select' && Array.isArray(field.options)) {
+      return (
+        <NativeSelect
+          key={index}
+          label={fieldLabel}
+          value={fieldValue || ''}
+          onChange={(e) => setTemplateField(fieldName, e.target.value)}
+          required={field.required}
+          disabled={isSubmitting}
+          data={[{ value: '', label: 'Seleccionar...' }, ...field.options.map((o: string) => ({ value: o, label: o }))]}
+        />
+      );
+    }
+
+    return null;
+  };
 
   if (isLoading) {
     return (
-      <div className="text-center py-4">
-        <Spinner animation="border" role="status">
-          <span className="visually-hidden">Cargando tipos de estado...</span>
-        </Spinner>
-        <p className="mt-2">Cargando tipos de estado disponibles...</p>
-      </div>
+      <Center py="xl">
+        <Stack align="center" gap="xs">
+          <Loader size="sm" aria-label="Cargando tipos de estado..." />
+          <Text size="sm" c="dimmed">Cargando tipos de estado disponibles...</Text>
+        </Stack>
+      </Center>
     );
   }
 
+  const templateArray = selectedStatusType ? parseTemplate(selectedStatusType.template) : [];
+
   const formContent = (
-    <div className="add-state-form">
-      <Form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
+      <Stack gap="md">
         {/* Selección rápida de tipo (chips) */}
         {statusTypes.length > 0 && (
-          <div className="mb-3 d-flex flex-wrap gap-2">
+          <Group gap="xs">
             {statusTypes.slice(0, 6).map((st) => (
               <Badge
                 key={st.id}
-                bg={selectedStatusType?.id === st.id ? 'primary' : 'secondary'}
+                color={selectedStatusType?.id === st.id ? 'datiaBlue' : 'gray'}
+                variant={selectedStatusType?.id === st.id ? 'filled' : 'light'}
                 style={{ cursor: 'pointer' }}
                 onClick={() => setSelectedStatusType(st)}
               >
                 {st.name}
               </Badge>
             ))}
-          </div>
+          </Group>
         )}
 
         {/* Selección del tipo de estado */}
-        <Form.Group className="mb-4">
-          <Form.Label className="form-label">
-            <span className="label-icon">🏷️</span>
-            Tipo de Estado *
-          </Form.Label>
-          <Form.Select
-            value={selectedStatusType?.id || ''}
-            onChange={(e) => {
-              const statusType = statusTypes.find(st => st.id === e.target.value);
-              setSelectedStatusType(statusType || null);
-              // Reset templateConfig cuando cambia el tipo de estado
-              setTemplateConfig({});
-            }}
-            required
-            disabled={isSubmitting}
-            className="form-control-custom"
-          >
-            <option value="">Selecciona un tipo de estado</option>
-            {statusTypes.map((statusType) => (
-              <option key={statusType.id} value={statusType.id}>
-                {statusType.name}
-              </option>
-            ))}
-          </Form.Select>
-          {selectedStatusType && (
-            <Form.Text className="text-muted">
-              {selectedStatusType.description}
-            </Form.Text>
-          )}
-        </Form.Group>
+        <Select
+          label="Tipo de Estado"
+          placeholder="Selecciona un tipo de estado"
+          value={selectedStatusType?.id || null}
+          onChange={(value) => {
+            const statusType = statusTypes.find(st => st.id === value);
+            setSelectedStatusType(statusType || null);
+            setTemplateConfig({});
+          }}
+          data={statusTypes.map((st) => ({ value: st.id, label: st.name }))}
+          required
+          disabled={isSubmitting}
+          description={selectedStatusType?.description}
+          searchable
+        />
 
         {/* Preview del título generado */}
         {selectedStatusType && item && (
-          <Alert variant="info" className="mb-4">
-            <strong>Título generado:</strong> {item.name} - {selectedStatusType.name}
+          <Alert color="datiaBlue" variant="light">
+            <Text size="sm"><strong>Título generado:</strong> {item.name} - {selectedStatusType.name}</Text>
           </Alert>
         )}
 
         {/* Descripción */}
-        <Form.Group className="mb-4">
-          <Form.Label className="form-label">
-            <span className="label-icon">📄</span>
-            Descripción
-          </Form.Label>
-          <Form.Control
-            as="textarea"
-            rows={3}
-            value={formData.description}
-            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-            placeholder="Describe el estado actual del producto..."
-            disabled={isSubmitting}
-            className="form-control-custom"
-          />
-        </Form.Group>
+        <Textarea
+          label="Descripción"
+          rows={3}
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Describe el estado actual del activo..."
+          disabled={isSubmitting}
+        />
 
         {/* Campos del template del StatusType */}
-        {selectedStatusType && (() => {
-          const templateArray = parseTemplate(selectedStatusType.template);
-          
-          if (templateArray.length === 0) {
-            return null;
-          }
-          
-          return (
-            <>
-              {templateArray.map((field: any, index: number) => {
-                const fieldName = field.name || `field_${index}`;
-                const fieldLabel = field.label || generateFieldLabel(fieldName);
-                const fieldValue = templateConfig[fieldName];
-
-              // Renderizar campo de geolocalización
-              if (field.type === 'geolocation') {
-                return (
-                  <div key={index} className="mb-4">
-                    <GeolocationMap
-                      value={fieldValue ? { lat: fieldValue.lat, lng: fieldValue.lng } : undefined}
-                      onChange={(coords) => {
-                        setTemplateConfig(prev => ({
-                          ...prev,
-                          [fieldName]: coords,
-                        }));
-                      }}
-                      required={field.required}
-                      label={fieldLabel}
-                    />
-                  </div>
-                );
-              }
-
-              // Renderizar otros tipos de campos
-              if (field.type === 'text' || field.type === 'email') {
-                return (
-                  <Form.Group key={index} className="mb-3">
-                    <Form.Label>
-                      {fieldLabel}
-                      {field.required && <span className="text-danger ms-1">*</span>}
-                    </Form.Label>
-                    <Form.Control
-                      type={field.type}
-                      value={fieldValue || ''}
-                      onChange={(e) => {
-                        setTemplateConfig(prev => ({
-                          ...prev,
-                          [fieldName]: e.target.value,
-                        }));
-                      }}
-                      placeholder={field.placeholder || tCommon('enterField', { field: fieldLabel.toLowerCase() })}
-                      required={field.required}
-                      disabled={isSubmitting}
-                      className="form-control-custom"
-                    />
-                  </Form.Group>
-                );
-              }
-
-              if (field.type === 'number') {
-                return (
-                  <Form.Group key={index} className="mb-3">
-                    <Form.Label>
-                      {fieldLabel}
-                      {field.required && <span className="text-danger ms-1">*</span>}
-                    </Form.Label>
-                    <Form.Control
-                      type="number"
-                      value={fieldValue || ''}
-                      onChange={(e) => {
-                        setTemplateConfig(prev => ({
-                          ...prev,
-                          [fieldName]: e.target.value ? parseFloat(e.target.value) : undefined,
-                        }));
-                      }}
-                      placeholder={field.placeholder || tCommon('enterField', { field: fieldLabel.toLowerCase() })}
-                      required={field.required}
-                      disabled={isSubmitting}
-                      className="form-control-custom"
-                    />
-                  </Form.Group>
-                );
-              }
-
-              if (field.type === 'date') {
-                return (
-                  <Form.Group key={index} className="mb-3">
-                    <Form.Label>
-                      {fieldLabel}
-                      {field.required && <span className="text-danger ms-1">*</span>}
-                    </Form.Label>
-                    <Form.Control
-                      type="date"
-                      value={fieldValue || ''}
-                      onChange={(e) => {
-                        setTemplateConfig(prev => ({
-                          ...prev,
-                          [fieldName]: e.target.value,
-                        }));
-                      }}
-                      required={field.required}
-                      disabled={isSubmitting}
-                      className="form-control-custom"
-                    />
-                  </Form.Group>
-                );
-              }
-
-              if (field.type === 'select' && Array.isArray(field.options)) {
-                return (
-                  <Form.Group key={index} className="mb-3">
-                    <Form.Label>
-                      {fieldLabel}
-                      {field.required && <span className="text-danger ms-1">*</span>}
-                    </Form.Label>
-                    <Form.Select
-                      value={fieldValue || ''}
-                      onChange={(e) => {
-                        setTemplateConfig(prev => ({
-                          ...prev,
-                          [fieldName]: e.target.value,
-                        }));
-                      }}
-                      required={field.required}
-                      disabled={isSubmitting}
-                      className="form-control-custom"
-                    >
-                      <option value="">Seleccionar...</option>
-                      {field.options.map((option: string, optIndex: number) => (
-                        <option key={optIndex} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </Form.Select>
-                  </Form.Group>
-                );
-              }
-
-                return null;
-              })}
-            </>
-          );
-        })()}
-
+        {templateArray.map((field: any, index: number) => renderTemplateField(field, index))}
 
         {/* Mensaje de error */}
         {error && (
-          <Alert variant="danger" className="error-alert mb-4">
-            <div className="d-flex align-items-center">
-              <span className="error-icon me-2">⚠️</span>
-              <div>
-                <h6 className="mb-1">Error al crear estado</h6>
-                <p className="mb-0">{error}</p>
-              </div>
-            </div>
+          <Alert color="red" title="Error al crear estado">
+            {error}
           </Alert>
         )}
 
         {/* Botones de acción */}
-        <div className="form-actions">
-          <Button
-            type="submit"
-            variant="success"
-            size="lg"
-            disabled={isSubmitting || !selectedStatusType}
-            className="submit-btn"
-          >
-            {isSubmitting ? (
-              <>
-                <Spinner animation="border" size="sm" className="me-2" />
-                Creando estado...
-              </>
-            ) : (
-              <>
-                <span className="me-2">💾</span>
-                Guardar Estado
-              </>
-            )}
-          </Button>
-        </div>
-      </Form>
-
-      <style jsx>{`
-        .add-state-form {
-          padding: 1rem 0;
-        }
-
-        .form-label {
-          font-weight: 600;
-          color: #333;
-          font-size: 1.1rem;
-          margin-bottom: 0.5rem;
-        }
-
-        .label-icon {
-          margin-right: 0.5rem;
-        }
-
-        .form-control-custom {
-          border-radius: 8px;
-          padding: 0.75rem;
-          border: 2px solid #e9ecef;
-          transition: all 0.3s ease;
-        }
-
-        .form-control-custom:focus {
-          border-color: #667eea;
-          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-        }
-
-
-        .form-actions {
-          display: flex;
-          gap: 1rem;
-          flex-wrap: wrap;
-          justify-content: center;
-          padding: 1rem 0;
-        }
-
-        .submit-btn {
-          padding: 1rem 2rem;
-          border-radius: 8px;
-          font-weight: 600;
-          transition: all 0.3s ease;
-          box-shadow: 0 4px 20px rgba(40, 167, 69, 0.3);
-        }
-
-        .submit-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 25px rgba(40, 167, 69, 0.4);
-        }
-
-        .error-alert {
-          border-radius: 12px;
-          border: none;
-          box-shadow: 0 4px 20px rgba(220, 53, 69, 0.2);
-        }
-
-        .error-icon {
-          font-size: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-          .form-actions {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .submit-btn {
-            width: 100%;
-          }
-        }
-      `}</style>
-    </div>
+        <Button
+          type="submit"
+          color="green"
+          size="md"
+          disabled={isSubmitting || !selectedStatusType}
+          leftSection={isSubmitting ? <Loader size="xs" color="white" /> : <i className="bi bi-floppy" />}
+        >
+          {isSubmitting ? 'Creando estado...' : 'Guardar Estado'}
+        </Button>
+      </Stack>
+    </form>
   );
 
   // Si se está usando como modal
   if (show !== undefined && onHide) {
     return (
-      <Modal show={show} onHide={onHide} size="lg" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>Añadir Estado</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {formContent}
-        </Modal.Body>
+      <Modal opened={show} onClose={onHide} size="lg" centered title="Añadir Estado">
+        {formContent}
       </Modal>
     );
   }

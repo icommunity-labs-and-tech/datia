@@ -1,15 +1,15 @@
 'use client';
 
-import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
-import Stack from 'react-bootstrap/Stack';
+import { Modal } from '@/components/legacy/bootstrap-compat';
+import { Button } from '@/components/legacy/bootstrap-compat';
+import { Form } from '@/components/legacy/bootstrap-compat';
+import { Stack } from '@/components/legacy/bootstrap-compat';
 import { useEffect, useState } from 'react';
 import type { FormTemplate } from './GenericTable';
 import ImageConfigSection from './ImageConfigSection';
 import DynamicImageField from './DynamicImageField';
-import Alert from 'react-bootstrap/Alert';
-import ListGroup from 'react-bootstrap/ListGroup';
+import { Alert } from '@/components/legacy/bootstrap-compat';
+import { ListGroup } from '@/components/legacy/bootstrap-compat';
 import ItemCreationWizard from './ItemCreationWizard';
 import { checkEmailExists } from '@/actions/users';
 import { useTranslations } from 'next-intl';

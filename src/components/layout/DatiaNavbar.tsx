@@ -1,0 +1,132 @@
+'use client';
+
+import {
+  NavLink,
+  Stack,
+  Text,
+  Divider,
+  Badge,
+  ScrollArea,
+  Box,
+} from '@mantine/core';
+import {
+  IconHome2,
+  IconPackage,
+  IconBolt,
+  IconSettings,
+  IconCode,
+  IconBuilding,
+  IconExternalLink,
+  IconUserCircle,
+} from '@tabler/icons-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { useAuthSeparated } from '@/hooks/useAuthSeparated';
+import Logo from '@/components/Logo';
+import type { OrgModules } from '@/app/dashboard/(app)/layout';
+
+interface DatiaNavbarProps {
+  logoUrl?: string | null;
+  modules?: OrgModules;
+  onNavClick?: () => void;
+}
+
+export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavbarProps) {
+  const pathname = usePathname();
+  const t = useTranslations('sidebar');
+  const { user, loading } = useAuthSeparated();
+
+  const showPassport = modules?.passport !== false;
+  const showEnergy = modules?.energy === true;
+
+  const isActive = (href: string, exact = false) =>
+    exact ? pathname === href : pathname === href || pathname.startsWith(href + '/');
+
+  const mainLinks = [
+    { href: '/dashboard', icon: IconHome2, label: t('home'), exact: true },
+    ...(showPassport ? [{ href: '/dashboard/items', icon: IconPackage, label: t('assets') }] : []),
+    ...(showEnergy ? [{ href: '/dashboard/energy', icon: IconBolt, label: t('energy') }] : []),
+    { href: '/dashboard/settings', icon: IconSettings, label: t('settings') },
+    { href: '/dashboard/api', icon: IconCode, label: t('api') },
+  ];
+
+  return (
+    <Stack gap={0} h="100%">
+      {/* Logo */}
+      <Box p="md" pb="xs">
+        <Logo
+          href="/dashboard"
+          width={110}
+          height={36}
+          priority
+          src={logoUrl ?? undefined}
+          alt="Logo"
+        />
+      </Box>
+
+      <Divider />
+
+      {/* Main navigation */}
+      <ScrollArea flex={1} px="xs" py="xs">
+        <Stack gap={2}>
+          {mainLinks.map(({ href, icon: Icon, label, exact }) => (
+            <NavLink
+              key={href}
+              component={Link}
+              href={href}
+              label={label}
+              leftSection={<Icon size={18} stroke={1.5} />}
+              active={isActive(href, exact)}
+              onClick={onNavClick}
+              styles={(theme) => ({
+                root: {
+                  borderRadius: theme.radius.md,
+                  fontWeight: isActive(href, exact) ? 600 : 400,
+                },
+              })}
+            />
+          ))}
+        </Stack>
+
+        {/* Management — SUPER_ADMIN only */}
+        {!loading && user?.role === 'SUPER_ADMIN' && (
+          <>
+            <Divider my="xs" />
+            <Text size="xs" fw={700} c="dimmed" px="sm" mb={4} tt="uppercase">
+              {t('management')}
+            </Text>
+            <NavLink
+              component={Link}
+              href="/dashboard/organizations"
+              label={t('organizations')}
+              leftSection={<IconBuilding size={18} stroke={1.5} />}
+              active={isActive('/dashboard/organizations')}
+              onClick={onNavClick}
+              rightSection={
+                <Badge size="xs" color="red" variant="filled">SUPER</Badge>
+              }
+              styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
+            />
+          </>
+        )}
+
+        {/* Applications */}
+        <Divider my="xs" />
+        <Text size="xs" fw={700} c="dimmed" px="sm" mb={4} tt="uppercase">
+          {t('applications')}
+        </Text>
+        <NavLink
+          component="a"
+          href="/customer"
+          target="_blank"
+          rel="noopener noreferrer"
+          label={t('appCustomer')}
+          leftSection={<IconUserCircle size={18} stroke={1.5} />}
+          rightSection={<IconExternalLink size={14} stroke={1.5} />}
+          styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
+        />
+      </ScrollArea>
+    </Stack>
+  );
+}

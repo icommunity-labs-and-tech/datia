@@ -19,6 +19,8 @@ export interface EnergySourceRecord {
   generationTechnology: string | null;
   capacityKw: number | null;
   location: string | null;
+  latitude: number | null;
+  longitude: number | null;
   installationDate: Date | null;
   renewableShare: number | null;
   guaranteeOfOriginId: string | null;
@@ -67,6 +69,8 @@ export interface CreateEnergySourceInput {
   generationTechnology?: string;
   capacityKw?: number;
   location?: string;
+  latitude?: number;
+  longitude?: number;
   installationDate?: Date;
   renewableShare?: number;
   guaranteeOfOriginId?: string;

@@ -2,10 +2,8 @@
 
 import { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Form, Button, Alert, Card, Container, Spinner, ProgressBar } from 'react-bootstrap';
+import { Form, Button, Alert, Card, Container, Spinner, ProgressBar } from '@/components/legacy/bootstrap-compat';
 import Image from 'next/image';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
 import { getOnboardingInfo } from '@/actions/organizations/get-onboarding-info';
 import WelcomeStep from '@/components/onboarding/WelcomeStep';
 import KycStep from '@/components/onboarding/KycStep';
@@ -463,7 +461,7 @@ function ActivateAccountForm() {
     return (
       <div style={{ 
         minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 50%, #F0930A 100%)',
         backgroundSize: '200% 200%',
         animation: 'gradientShift 15s ease infinite',
         position: 'relative',
@@ -524,7 +522,7 @@ function ActivateAccountForm() {
     return (
       <div style={{ 
         minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 50%, #F0930A 100%)',
         backgroundSize: '200% 200%',
         animation: 'gradientShift 15s ease infinite',
         position: 'relative',
@@ -581,7 +579,7 @@ function ActivateAccountForm() {
         <style dangerouslySetInnerHTML={{ __html: backgroundStyles }} />
         <Card style={{ width: '100%', maxWidth: '500px' }} className="shadow-lg border-0">
           <div style={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
             padding: '2rem',
             textAlign: 'center',
             borderRadius: '0.375rem 0.375rem 0 0'
@@ -608,7 +606,7 @@ function ActivateAccountForm() {
               className="w-100" 
               onClick={() => router.push('/auth/admin/login')}
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
                 border: 'none',
                 padding: '12px',
                 borderRadius: '6px',
@@ -628,7 +626,7 @@ function ActivateAccountForm() {
     return (
       <div style={{ 
         minHeight: '100vh', 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+        background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 50%, #F0930A 100%)',
         backgroundSize: '200% 200%',
         animation: 'gradientShift 15s ease infinite',
         position: 'relative',
@@ -918,7 +916,7 @@ function ActivateAccountForm() {
         <Card style={{ width: '100%', maxWidth: isKycEmbedded ? '1400px' : '650px' }} className="shadow-lg border-0">
           {/* Header con Logo */}
           <div style={{ 
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
             padding: '2.5rem 2rem',
             textAlign: 'center',
             borderRadius: '0.375rem 0.375rem 0 0'
@@ -938,7 +936,7 @@ function ActivateAccountForm() {
             <div className="mb-4">
               <div className="d-flex justify-content-between align-items-center mb-2">
                 <span className="small" style={{ color: '#666', fontWeight: 500 }}>{t('steps.step', { current: currentStep })}</span>
-                <span className="small" style={{ color: '#667eea', fontWeight: 600 }}>
+                <span className="small" style={{ color: '#1752CC', fontWeight: 600 }}>
                   {currentStep === 1 && t('steps.welcome')}
                   {currentStep === 2 && t('steps.password')}
                   {currentStep === 3 && t('steps.verification')}
@@ -956,7 +954,7 @@ function ActivateAccountForm() {
                 <div style={{
                   width: `${(currentStep / 4) * 100}%`,
                   height: '100%',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
                   borderRadius: '10px',
                   transition: 'width 0.3s ease'
                 }} />
@@ -988,7 +986,7 @@ function ActivateAccountForm() {
                       height: '80px',
                       margin: '0 auto',
                       borderRadius: '50%',
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center'
@@ -1065,7 +1063,7 @@ function ActivateAccountForm() {
                       className="flex-grow-1"
                       disabled={loading}
                       style={{
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
                         border: 'none',
                         borderRadius: '6px',
                         fontWeight: 600,
@@ -1141,7 +1139,7 @@ function ActivateAccountForm() {
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -1149,7 +1147,7 @@ function ActivateAccountForm() {
     }}>
       <Card style={{ width: '100%', maxWidth: '500px' }} className="shadow-lg border-0">
         <div style={{ 
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
           padding: '2.5rem 2rem',
           textAlign: 'center',
           borderRadius: '0.375rem 0.375rem 0 0'
@@ -1171,7 +1169,7 @@ function ActivateAccountForm() {
                 height: '80px',
                 margin: '0 auto',
                 borderRadius: '50%',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -1242,7 +1240,7 @@ function ActivateAccountForm() {
               size="lg"
               disabled={loading}
               style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg, #1752CC 0%, #0B2A7A 100%)',
                 border: 'none',
                 borderRadius: '8px',
                 fontWeight: 600,

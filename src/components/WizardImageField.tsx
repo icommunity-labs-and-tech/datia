@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
-import { Form, Button, Image, Alert, Row, Col } from 'react-bootstrap';
+import { Form, Button, Image, Alert, Row, Col } from '@/components/legacy/bootstrap-compat';
 import { uploadImage } from '@/actions/upload';
 
 interface WizardImageFieldProps {

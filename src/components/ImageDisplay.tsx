@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image } from 'react-bootstrap';
+
 import { useState } from 'react';
 import ImageModal from './ImageModal';
 
@@ -51,16 +51,19 @@ export default function ImageDisplay({
         onClick={handleImageClick}
         data-image-clickable={clickable ? 'true' : undefined}
       >
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={imageUrl}
           alt={alt}
-          fluid
-          className={`border rounded ${className}`}
-          style={{ 
-            maxWidth: '60px', 
-            maxHeight: '60px', 
+          className={className}
+          style={{
+            maxWidth: '60px',
+            maxHeight: '60px',
+            width: '100%',
             objectFit: 'cover',
-            ...style 
+            border: '1px solid var(--mantine-color-default-border)',
+            borderRadius: 6,
+            ...style
           }}
         />
       </div>

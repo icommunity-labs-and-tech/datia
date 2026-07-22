@@ -1,6 +1,6 @@
 'use client';
 
-import { Alert } from 'react-bootstrap';
+import { Alert } from '@mantine/core';
 import { useCategoryInput, type Category } from '@/hooks/useCategoryInput';
 
 interface CategoryInputFieldProps {
@@ -43,7 +43,7 @@ export default function CategoryInputField({
   return (
     <div>
       {error && (
-        <Alert variant="danger" className="mb-2" dismissible onClose={() => setError(null)}>
+        <Alert color="red" mb="xs" withCloseButton onClose={() => setError(null)}>
           {error}
         </Alert>
       )}

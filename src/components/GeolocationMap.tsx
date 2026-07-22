@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
-import { Button, Alert } from 'react-bootstrap';
+import { Button, Alert, Loader } from '@mantine/core';
 import L from 'leaflet';
 import { LeafletMapConfig } from '@/lib/geolocation/maps';
 import type { GeolocationCoordinates } from '@/lib/geolocation/types';
@@ -145,7 +145,7 @@ export default function GeolocationMap({
       )}
       
       {error && (
-        <Alert variant="warning" className="mb-2" dismissible onClose={() => setError(null)}>
+        <Alert color="yellow" mb="xs" withCloseButton onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
@@ -153,14 +153,14 @@ export default function GeolocationMap({
       {!readOnly && (
         <div className="mb-2 d-flex gap-2 flex-wrap">
           <Button
-            variant="outline-primary"
-            size="sm"
+            variant="default"
+            size="xs"
             onClick={getCurrentLocation}
             disabled={isGettingLocation}
           >
             {isGettingLocation ? (
               <>
-                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                <Loader size="xs" mr={8} />
                 Obteniendo ubicación...
               </>
             ) : (

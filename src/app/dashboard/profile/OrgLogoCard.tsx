@@ -1,6 +1,6 @@
 'use client';
 
-import { Card, Alert, Button, Spinner } from 'react-bootstrap';
+import { Card, Alert, Button, Loader, Group, Text, Title } from '@mantine/core';
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
@@ -51,9 +51,8 @@ export default function OrgLogoCard({ logoUrl, onLogoChange }: Props) {
   };
 
   return (
-    <Card className="mb-3">
-      <Card.Body>
-        <h6 className="card-title mb-3">{t('branding.currentLogo')}</h6>
+    <Card mb="md">
+        <Title order={6} mb="sm">{t('branding.currentLogo')}</Title>
 
         {logoUrl ? (
           <div className="mb-3">
@@ -67,61 +66,59 @@ export default function OrgLogoCard({ logoUrl, onLogoChange }: Props) {
             />
           </div>
         ) : (
-          <p className="text-muted small mb-3">
-            <i className="bi bi-image me-1" />
+          <Text size="sm" c="dimmed" mb="sm">
+            <i className="bi bi-image" style={{ marginRight: 4 }} />
             {t('branding.noLogo')}
-          </p>
+          </Text>
         )}
 
-        <p className="text-muted small mb-3">
-          <i className="bi bi-info-circle me-1" />
+        <Text size="sm" c="dimmed" mb="sm">
+          <i className="bi bi-info-circle" style={{ marginRight: 4 }} />
           {t('branding.formatHint')}
-        </p>
+        </Text>
 
-        <div className="d-flex gap-2 flex-wrap">
+        <Group gap="xs">
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
-            className="d-none"
+            style={{ display: 'none' }}
             onChange={handleUpload}
           />
           <Button
-            variant="outline-primary"
-            size="sm"
+            variant="default"
+            size="xs"
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading || deleting}
+            leftSection={uploading ? <Loader size="xs" /> : <i className="bi bi-upload" />}
           >
-            {uploading ? (
-              <><Spinner size="sm" className="me-1" />{t('branding.uploading')}</>
-            ) : (
-              <><i className="bi bi-upload me-1" />{t('branding.uploadLogo')}</>
-            )}
+            {uploading ? t('branding.uploading') : t('branding.uploadLogo')}
           </Button>
 
           {logoUrl && (
             <Button
-              variant="outline-danger"
-              size="sm"
+              variant="light"
+              color="red"
+              size="xs"
               onClick={handleDelete}
               disabled={uploading || deleting}
+              leftSection={deleting ? <Loader size="xs" /> : <i className="bi bi-trash" />}
             >
-              {deleting ? (
-                <><Spinner size="sm" className="me-1" />{t('branding.deleting')}</>
-              ) : (
-                <><i className="bi bi-trash me-1" />{t('branding.deleteLogo')}</>
-              )}
+              {deleting ? t('branding.deleting') : t('branding.deleteLogo')}
             </Button>
           )}
-        </div>
+        </Group>
 
         {feedback && (
-          <Alert variant={feedback.type === 'success' ? 'success' : 'danger'} className="mt-3 mb-0 py-2 small">
-            <i className={`bi bi-${feedback.type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2`} />
+          <Alert
+            color={feedback.type === 'success' ? 'green' : 'red'}
+            mt="md"
+            py={8}
+            icon={<i className={`bi bi-${feedback.type === 'success' ? 'check-circle' : 'exclamation-triangle'}`} />}
+          >
             {feedback.message}
           </Alert>
         )}
-      </Card.Body>
     </Card>
   );
 }

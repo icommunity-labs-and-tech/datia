@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Badge } from 'react-bootstrap';
+import { Badge } from '@mantine/core';
 import Box from '@/components/Box';
 import BoxTitle from '@/components/BoxTitle';
 import LoadingOverlay from '@/components/Loading';
@@ -72,7 +72,7 @@ export default function StateDetailPage() {
         <div className="d-flex flex-wrap gap-3 align-items-center">
           <div>
             <span className="text-muted d-block small">{t('type')}</span>
-            <Badge bg="info">{statusType?.name || '—'}</Badge>
+            <Badge color="datiaBlue" variant="light">{statusType?.name || '—'}</Badge>
           </div>
           <div>
             <span className="text-muted d-block small">{t('date')}</span>
@@ -80,7 +80,7 @@ export default function StateDetailPage() {
           </div>
           <div>
             <span className="text-muted d-block small">{t('backed')}</span>
-            <Badge bg={stateData.backed ? 'success' : 'secondary'}>
+            <Badge color={stateData.backed ? 'green' : 'gray'}>
               {stateData.backed ? t('yes') : t('no')}
             </Badge>
           </div>

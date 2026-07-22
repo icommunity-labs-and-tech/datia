@@ -2,9 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Form, Button, Alert, Card, Container, Spinner } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
+import { Form, Button, Alert, Card, Container, Spinner } from '@/components/legacy/bootstrap-compat';
 import { useTranslations } from 'next-intl';
 
 export default function SuperAdminLoginPage() {

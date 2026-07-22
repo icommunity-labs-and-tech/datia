@@ -1,6 +1,6 @@
 'use client';
 
-import { Badge, Row, Col, Card } from 'react-bootstrap';
+import { Badge, Card, SimpleGrid, Text, Title } from '@mantine/core';
 import Box from '@/components/Box';
 import BoxTitle from '@/components/BoxTitle';
 import { formatValueWithSmartDateDetection } from '@/lib/format';
@@ -16,11 +16,11 @@ export default function ProfilePageClient({ user }: { user: any }) {
   const t = useTranslations('profile');
   const [logoUrl, setLogoUrl] = useState<string | null>(user?.Organization?.logoUrl || null);
 
-  const getRoleBadgeVariant = (role: string) => {
+  const getRoleBadgeColor = (role: string) => {
     switch (role) {
-      case 'ADMIN': return 'primary';
-      case 'USER': return 'info';
-      default: return 'secondary';
+      case 'ADMIN': return 'datiaBlue';
+      case 'USER': return 'cyan';
+      default: return 'gray';
     }
   };
 
@@ -30,48 +30,36 @@ export default function ProfilePageClient({ user }: { user: any }) {
       <Box>
         <BoxTitle message={t('personalInfo')} />
 
-        <Row>
-          <Col md={6}>
-            <Card className="mb-3">
-              <Card.Body>
-                <h6 className="card-title">{t('basicData')}</h6>
-                <div className="mb-2"><strong>{t('name')}</strong> {user.name || t('notSpecified')}</div>
-                <div className="mb-2"><strong>{t('email')}</strong> {user.email}</div>
-                <div className="mb-2"><strong>{t('phone')}</strong> {user.phone || t('notSpecified')}</div>
-              </Card.Body>
-            </Card>
-          </Col>
+        <SimpleGrid cols={{ base: 1, md: 2 }} mb="md">
+          <Card>
+            <Title order={6} mb="xs">{t('basicData')}</Title>
+            <Text size="sm" mb={6}><strong>{t('name')}</strong> {user.name || t('notSpecified')}</Text>
+            <Text size="sm" mb={6}><strong>{t('email')}</strong> {user.email}</Text>
+            <Text size="sm"><strong>{t('phone')}</strong> {user.phone || t('notSpecified')}</Text>
+          </Card>
 
-          <Col md={6}>
-            <Card className="mb-3">
-              <Card.Body>
-                <h6 className="card-title">{t('accountStatus')}</h6>
-                <div className="mb-2">
-                  <strong>{t('role')}</strong>{' '}
-                  <Badge bg={getRoleBadgeVariant(user.role)}>
-                    {user.role === 'ADMIN' ? t('roleAdmin') : t('roleUser')}
-                  </Badge>
-                </div>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
+          <Card>
+            <Title order={6} mb="xs">{t('accountStatus')}</Title>
+            <Text size="sm" component="div">
+              <strong>{t('role')}</strong>{' '}
+              <Badge color={getRoleBadgeColor(user.role)}>
+                {user.role === 'ADMIN' ? t('roleAdmin') : t('roleUser')}
+              </Badge>
+            </Text>
+          </Card>
+        </SimpleGrid>
 
         {user.notes && (
-          <Card className="mb-3">
-            <Card.Body>
-              <h6 className="card-title">{t('notes')}</h6>
-              <p className="card-text">{user.notes}</p>
-            </Card.Body>
+          <Card mb="md">
+            <Title order={6} mb="xs">{t('notes')}</Title>
+            <Text size="sm">{user.notes}</Text>
           </Card>
         )}
 
-        <Card className="mb-3">
-          <Card.Body>
-            <h6 className="card-title">{t('accountInfo')}</h6>
-            <div className="mb-2"><strong>{t('created')}</strong> {formatValueWithSmartDateDetection(user.createdAt, 'createdAt')}</div>
-            <div className="mb-2"><strong>{t('lastUpdated')}</strong> {formatValueWithSmartDateDetection(user.updatedAt, 'updatedAt')}</div>
-          </Card.Body>
+        <Card mb="md">
+          <Title order={6} mb="xs">{t('accountInfo')}</Title>
+          <Text size="sm" mb={6}><strong>{t('created')}</strong> {formatValueWithSmartDateDetection(user.createdAt, 'createdAt')}</Text>
+          <Text size="sm"><strong>{t('lastUpdated')}</strong> {formatValueWithSmartDateDetection(user.updatedAt, 'updatedAt')}</Text>
         </Card>
       </Box>
 

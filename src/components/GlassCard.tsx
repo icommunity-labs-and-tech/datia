@@ -1,7 +1,5 @@
 'use client';
 
-import { Card } from 'react-bootstrap';
-
 type GlassVariant = 'box' | 'header' | 'kpi';
 
 export default function GlassCard({
@@ -15,12 +13,10 @@ export default function GlassCard({
 }) {
   const base = variant === 'header' ? 'glass-stretched' : 'glass-card';
   return (
-    <Card className={`${base} border-0 rounded ${className}`}>
-      <Card.Body className={variant === 'header' ? 'px-4 py-3' : 'px-4 py-3'}>
+    <div className={`${base} ${className}`} style={{ borderRadius: 8 }}>
+      <div style={{ padding: '0.75rem 1.5rem' }}>
         {children}
-      </Card.Body>
-    </Card>
+      </div>
+    </div>
   );
 }
-
-
