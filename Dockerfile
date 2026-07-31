@@ -1,10 +1,12 @@
+# syntax=docker/dockerfile:1
 # Dockerfile optimizado para Cloud Build
 FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 COPY package*.json ./
 COPY prisma ./prisma/
-RUN npm ci --legacy-peer-deps
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps
 
 FROM node:22-alpine AS builder
 WORKDIR /app

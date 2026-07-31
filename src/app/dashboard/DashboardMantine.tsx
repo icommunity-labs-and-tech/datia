@@ -27,7 +27,7 @@ import type { DashboardKPIs } from '@/types/dashboard';
 import type { EnergySummary } from '@/actions/dashboard/getEnergySummary';
 import type { EnergySourceRecord, EnergyCarrier } from '@/domain/energy/EnergyTypes';
 import EnergySourcesGlobalMapLazy from '@/components/maps/EnergySourcesGlobalMapLazy';
-import { CARRIER_COLORS } from '@/components/maps/EnergySourcesGlobalMap';
+import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
 
 interface DashboardMantineProps {
   kpis: DashboardKPIs;

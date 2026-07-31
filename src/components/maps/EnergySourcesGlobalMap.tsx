@@ -7,6 +7,7 @@ import { LeafletMapConfig } from '@/lib/geolocation/maps';
 import type { EnergySourceRecord, EnergyCarrier } from '@/domain/energy/EnergyTypes';
 import { Text, Badge, Stack, Group } from '@mantine/core';
 import { useTranslations } from 'next-intl';
+import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
 
 // Fix Leaflet icons in Next.js
 if (typeof window !== 'undefined') {
@@ -19,19 +20,6 @@ if (typeof window !== 'undefined') {
     });
   } catch {}
 }
-
-const CARRIER_COLORS: Record<EnergyCarrier, string> = {
-  ELECTRICITY: '#1752CC',
-  NATURAL_GAS: '#f76707',
-  HYDROGEN: '#7950f2',
-  SOLAR_THERMAL: '#f59f00',
-  DISTRICT_HEATING: '#e64980',
-  DISTRICT_COOLING: '#1098ad',
-  BIOMASS: '#2f9e44',
-  OIL: '#5c3317',
-  COAL: '#495057',
-  OTHER: '#868e96',
-};
 
 function makeCarrierIcon(carrier: EnergyCarrier) {
   const color = CARRIER_COLORS[carrier] ?? '#868e96';
@@ -116,5 +104,3 @@ export default function EnergySourcesGlobalMap({
     </div>
   );
 }
-
-export { CARRIER_COLORS };

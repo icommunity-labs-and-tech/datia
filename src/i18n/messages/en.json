@@ -1030,6 +1030,55 @@
     },
     "mapPopup": {
       "renewable": "{share}% renewable"
+    },
+    "bmsSimulator": {
+      "trigger": "Simulate BMS data",
+      "title": "BMS Data Simulator",
+      "description": "Generates a full year of realistic BMS (Building Management System) readings for an asset: an electricity source, 12 months of consumption with real seasonality, and its associated CO2e emissions. Useful for validating the energy certification pipeline before connecting a real BMS/IoT device.",
+      "itemLabel": "Asset",
+      "itemPlaceholder": "Select an asset",
+      "loadingItems": "Loading assets...",
+      "noItems": "No assets found",
+      "loadItemsError": "Error loading assets",
+      "yearLabel": "Year to simulate",
+      "cancel": "Cancel",
+      "run": "Generate",
+      "running": "Generating...",
+      "runError": "Error generating the simulation",
+      "successTitle": "Simulation complete",
+      "successMessage": "Source \"{source}\" was created with 12 months of consumption and emissions.",
+      "totalConsumption": "Total consumption",
+      "totalEmissions": "Total emissions",
+      "year": "Year",
+      "monthlyRecords": "monthly records",
+      "close": "Close",
+      "step": {
+        "source": "Source",
+        "consumption": "Consumption",
+        "emissions": "Emissions",
+        "registry": "Registry",
+        "certification": "Certification"
+      },
+      "chart": {
+        "kwh": "Consumption",
+        "co2e": "CO2e"
+      },
+      "eventRow": {
+        "source": "Energy source registered",
+        "consumption": "{month} consumption recorded",
+        "emission": "{month} emission calculated"
+      },
+      "certification": {
+        "title": "Blockchain certification",
+        "pending": "A representative month will be certified once data generation finishes.",
+        "running": "Anchoring evidence on blockchain…",
+        "successTitle": "Evidence anchored",
+        "successBody": "Certified by {verifier} · publicly verifiable evidence",
+        "viewOnChecker": "View on blockchain checker",
+        "notVerifiedTitle": "Certification pending",
+        "notVerifiedBody": "This organization hasn't completed KYC — without identity verification, real blockchain evidence can't be anchored. All 25 data records were still created successfully.",
+        "errorTitle": "Certification failed"
+      }
     }
   },
   "settingsHub": {

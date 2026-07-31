@@ -29,7 +29,8 @@ import { useTranslations, useLocale } from 'next-intl';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import type { EnergySourceRecord, EnergyConsumptionRecord, EmissionRecord } from '@/domain/energy/EnergyTypes';
 import EnergySourcesGlobalMapLazy from '@/components/maps/EnergySourcesGlobalMapLazy';
-import { CARRIER_COLORS } from '@/components/maps/EnergySourcesGlobalMap';
+import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
+import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
 
 // ── Datia palette ────────────────────────────────────────────────────────────
 
@@ -189,6 +190,10 @@ function SourcesMapTab({
         onClose={closeDrawer}
         consumption={consumption}
       />
+
+      <Group justify="flex-end" mb="sm">
+        <BmsSimulatorButton />
+      </Group>
 
       {/* KPI strip */}
       <SimpleGrid cols={{ base: 2, sm: 4 }} mb="md">

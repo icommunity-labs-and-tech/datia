@@ -1034,6 +1034,55 @@
     },
     "mapPopup": {
       "renewable": "{share}% renovable"
+    },
+    "bmsSimulator": {
+      "trigger": "Simular datos BMS",
+      "title": "Simulador de datos BMS",
+      "description": "Genera un año completo de lecturas realistas de un sistema BMS (Building Management System) para un activo: fuente eléctrica, 12 meses de consumo con estacionalidad real y sus emisiones de CO₂e asociadas. Útil para validar el pipeline de certificación energética antes de conectar un BMS/IoT real.",
+      "itemLabel": "Activo",
+      "itemPlaceholder": "Selecciona un activo",
+      "loadingItems": "Cargando activos...",
+      "noItems": "No se encontraron activos",
+      "loadItemsError": "Error al cargar los activos",
+      "yearLabel": "Año a simular",
+      "cancel": "Cancelar",
+      "run": "Generar",
+      "running": "Generando...",
+      "runError": "Error al generar la simulación",
+      "successTitle": "Simulación completada",
+      "successMessage": "Se ha creado la fuente \"{source}\" con 12 meses de consumo y emisiones.",
+      "totalConsumption": "Consumo total",
+      "totalEmissions": "Emisiones totales",
+      "year": "Año",
+      "monthlyRecords": "registros mensuales",
+      "close": "Cerrar",
+      "step": {
+        "source": "Fuente",
+        "consumption": "Consumo",
+        "emissions": "Emisiones",
+        "registry": "Registro",
+        "certification": "Certificación"
+      },
+      "chart": {
+        "kwh": "Consumo",
+        "co2e": "CO₂e"
+      },
+      "eventRow": {
+        "source": "Fuente de energía registrada",
+        "consumption": "Consumo de {month} registrado",
+        "emission": "Emisión de {month} calculada"
+      },
+      "certification": {
+        "title": "Certificación en blockchain",
+        "pending": "Se certificará un mes representativo al finalizar la generación de datos.",
+        "running": "Anclando evidencia en blockchain…",
+        "successTitle": "Evidencia anclada",
+        "successBody": "Certificado por {verifier} · evidencia verificable públicamente",
+        "viewOnChecker": "Ver en el checker de blockchain",
+        "notVerifiedTitle": "Certificación pendiente",
+        "notVerifiedBody": "Esta organización no ha completado el KYC — sin verificación de identidad no se puede anclar evidencia real en blockchain. Los 25 registros de datos sí se han creado correctamente.",
+        "errorTitle": "No se pudo certificar"
+      }
     }
   },
   "settingsHub": {
