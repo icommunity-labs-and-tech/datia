@@ -5,6 +5,22 @@ import './mocks/hooks';
 import './mocks/actions';
 // prisma-repositories mock removed - Effect.ts has been eliminated
 
+// jsdom does not implement matchMedia, and Mantine reads it on mount, so any
+// component rendered inside a MantineProvider throws without this stub.
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: (query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: vi.fn(),    // deprecated, still called by some libs
+    removeListener: vi.fn(), // deprecated, still called by some libs
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }),
+});
+
 // Mock CSS imports
 vi.mock('../components/Box.css', () => ({}));
 vi.mock('../components/charts/KpiGroup.css', () => ({}));

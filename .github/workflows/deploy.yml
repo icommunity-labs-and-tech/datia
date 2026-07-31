@@ -1,0 +1,106 @@
+name: Deploy
+
+# Pushes to main build an immutable image and roll it out to Cloud Run.
+# Keyless auth via Workload Identity Federation — no service account JSON key.
+#
+# main deploys straight to production; there is no staging environment.
+#
+# Registry note: deploy.sh pushed to gcr.io/<project>/digipass-datia with an
+# implicit :latest. This publishes to Artifact Registry in europe-southwest1
+# instead — same registry and region as every other service in this project, so
+# the image now lives in the same region as the service, and every revision
+# references an immutable sha-<commit> tag that makes rollback an exact pin.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-digipass-datia
+  cancel-in-progress: false
+
+env:
+  PROJECT_ID: icommunity-1727620636012
+  REGION: europe-southwest1
+  SERVICE: digipass-datia
+  IMAGE_BASE: europe-southwest1-docker.pkg.dev/icommunity-1727620636012/cloud-run-source-deploy/datia/digipass-datia
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write # required to mint the OIDC token WIF exchanges
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # See ci.yml: --legacy-peer-deps is required because of the
+      # @mantine/charts / recharts peer conflict.
+      - run: npm ci --legacy-peer-deps
+
+      - run: npx prisma generate
+
+      # Gate the rollout on the test suite. Production should never receive an
+      # image whose tests were not run against this exact commit.
+      - run: npx vitest run
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: projects/818627151997/locations/global/workloadIdentityPools/github/providers/github
+          service_account: gh-deploy-datia@icommunity-1727620636012.iam.gserviceaccount.com
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          platforms: linux/amd64
+          tags: |
+            ${{ env.IMAGE_BASE }}:sha-${{ github.sha }}
+            ${{ env.IMAGE_BASE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Only --image is passed, so existing env vars, secret refs and scaling
+      # settings on the service are preserved untouched.
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy "$SERVICE" \
+            --project "$PROJECT_ID" \
+            --region "$REGION" \
+            --image "$IMAGE_BASE:sha-${{ github.sha }}" \
+            --revision-suffix "s${GITHUB_SHA::7}-${{ github.run_number }}" \
+            --quiet
+
+      # `run deploy` only routes traffic automatically when the service is not
+      # already pinned to a named revision. This puts the service back into
+      # "always serve the latest ready revision" mode so a stale pin cannot
+      # silently survive a deploy.
+      - name: Ensure traffic follows the new revision
+        run: |
+          gcloud run services update-traffic "$SERVICE" \
+            --project "$PROJECT_ID" \
+            --region "$REGION" \
+            --to-latest \
+            --quiet
+
+      - name: Report serving revision
+        run: |
+          gcloud run services describe "$SERVICE" \
+            --project "$PROJECT_ID" --region "$REGION" \
+            --format="table(status.traffic[].revisionName, status.traffic[].percent)"
