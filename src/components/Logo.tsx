@@ -4,7 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 interface LogoProps {
-  href?: string;
+  /** Pass null to render the mark without a link. */
+  href?: string | null;
   width?: number;
   height?: number;
   className?: string;
