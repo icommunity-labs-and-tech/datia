@@ -132,7 +132,9 @@
     },
     "roles": {
       "administrator": "Administrador"
-    }
+    },
+    "loadingStatusTypes": "Cargando tipos de estado disponibles...",
+    "newTag": "Nueva etiqueta"
   },
   "tables": {
     "noData": "No hay datos disponibles",

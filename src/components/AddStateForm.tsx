@@ -223,8 +223,8 @@ export default function AddStateForm({
     return (
       <Center py="xl">
         <Stack align="center" gap="xs">
-          <Loader size="sm" aria-label="Cargando tipos de estado..." />
-          <Text size="sm" c="dimmed">Cargando tipos de estado disponibles...</Text>
+          <Loader size="sm" aria-label={tForms('loadingStatusTypes')} />
+          <Text size="sm" c="dimmed">{tForms('loadingStatusTypes')}</Text>
         </Stack>
       </Center>
     );

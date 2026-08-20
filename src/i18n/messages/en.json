@@ -132,7 +132,9 @@
     },
     "roles": {
       "administrator": "Administrator"
-    }
+    },
+    "loadingStatusTypes": "Loading available status types...",
+    "newTag": "New tag"
   },
   "tables": {
     "noData": "No data available",
@@ -270,7 +272,11 @@
       "newState": "New State",
       "loadingProducts": "Loading assets…",
       "dontCopy": "Don't copy",
-      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved."
+      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved.",
+      "evidenceSizeExceeded": "The estimated evidence size exceeds the maximum of",
+      "totalEstimated": "Estimated total:",
+      "aboveLimit": "above",
+      "imageDetails": "Image details:"
     }
   },
   "dates": {
