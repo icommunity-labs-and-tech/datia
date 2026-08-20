@@ -47,21 +47,22 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
     { href: '/dashboard', icon: IconHome2, label: t('home'), exact: true },
     ...(showPassport ? [{ href: '/dashboard/items', icon: IconPackage, label: t('assets') }] : []),
     ...(showEnergy ? [{ href: '/dashboard/energy', icon: IconBolt, label: t('energy') }] : []),
-    { href: '/dashboard/settings', icon: IconSettings, label: t('settings') },
     { href: '/dashboard/api', icon: IconCode, label: t('api') },
+    // On mobile there is no avatar menu, so organisation settings live here.
+    { href: '/dashboard/settings', icon: IconSettings, label: t('settings') },
   ];
 
   return (
     <Stack gap={0} h="100%">
       {/* Logo */}
-      <Box p="md" pb="xs">
+      <Box p="md" pb="sm">
         <Logo
           href="/dashboard"
-          width={110}
-          height={36}
+          width={104}
+          height={32}
           priority
-          src={logoUrl ?? undefined}
-          alt="Logo"
+          src={logoUrl ?? '/logo-datia.svg'}
+          alt="datia"
         />
       </Box>
 
@@ -76,13 +77,13 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
               component={Link}
               href={href}
               label={label}
-              leftSection={<Icon size={18} stroke={1.5} />}
+              leftSection={<Icon size={18} stroke={1.6} />}
               active={isActive(href, exact)}
               onClick={onNavClick}
               styles={(theme) => ({
                 root: {
                   borderRadius: theme.radius.md,
-                  fontWeight: isActive(href, exact) ? 600 : 400,
+                  fontWeight: isActive(href, exact) ? 600 : 450,
                 },
               })}
             />
@@ -100,7 +101,7 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
               component={Link}
               href="/dashboard/organizations"
               label={t('organizations')}
-              leftSection={<IconBuilding size={18} stroke={1.5} />}
+              leftSection={<IconBuilding size={18} stroke={1.6} />}
               active={isActive('/dashboard/organizations')}
               onClick={onNavClick}
               rightSection={
@@ -122,8 +123,8 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
           target="_blank"
           rel="noopener noreferrer"
           label={t('appCustomer')}
-          leftSection={<IconUserCircle size={18} stroke={1.5} />}
-          rightSection={<IconExternalLink size={14} stroke={1.5} />}
+          leftSection={<IconUserCircle size={18} stroke={1.6} />}
+          rightSection={<IconExternalLink size={14} stroke={1.6} />}
           styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
         />
       </ScrollArea>

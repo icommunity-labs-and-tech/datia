@@ -2,17 +2,11 @@ import { cookies } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import SettingsHub from './SettingsHub';
+import OrganizationSettings from './OrganizationSettings';
 
 export const dynamic = 'force-dynamic';
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ tab?: string }>;
-}) {
-  const params = await searchParams;
-
+export default async function SettingsPage() {
   const cookieStore = await cookies();
   const token = cookieStore.get(adminAuthConfig.cookieName)?.value;
   let user: any = null;
@@ -38,5 +32,5 @@ export default async function SettingsPage({
     }
   }
 
-  return <SettingsHub defaultTab={params.tab ?? 'states'} user={user} />;
+  return <OrganizationSettings user={user} />;
 }

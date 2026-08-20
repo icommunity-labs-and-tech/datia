@@ -7,6 +7,7 @@ import { changePassword } from '@/actions/users';
 
 export default function ChangePasswordForm() {
   const tCommon = useTranslations('common');
+  const t = useTranslations('profile.password');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [formData, setFormData] = useState({
@@ -29,13 +30,13 @@ export default function ChangePasswordForm() {
       const result = await changePassword(formDataObj);
 
       if (result.success) {
-        setMessage({ type: 'success', text: result.message || 'Contraseña actualizada correctamente' });
+        setMessage({ type: 'success', text: result.message || t('success') });
         setFormData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       } else {
-        setMessage({ type: 'error', text: result.error || 'Error al cambiar la contraseña' });
+        setMessage({ type: 'error', text: result.error || t('error') });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Error inesperado al cambiar la contraseña' });
+      setMessage({ type: 'error', text: t('unexpectedError') });
     } finally {
       setIsSubmitting(false);
     }
@@ -62,35 +63,35 @@ export default function ChangePasswordForm() {
         )}
 
         <PasswordInput
-          label="Contraseña actual"
+          label={t('current')}
           name="currentPassword"
           value={formData.currentPassword}
           onChange={handleInputChange}
-          placeholder="Ingresa tu contraseña actual"
+          placeholder={t('currentPlaceholder')}
           required
         />
 
         <PasswordInput
-          label="Nueva contraseña"
+          label={t('new')}
           name="newPassword"
           value={formData.newPassword}
           onChange={handleInputChange}
-          placeholder="Ingresa tu nueva contraseña"
+          placeholder={t('newPlaceholder')}
           required
           minLength={6}
           description={tCommon('passwordMinLength')}
         />
 
         <PasswordInput
-          label="Confirmar nueva contraseña"
+          label={t('confirm')}
           name="confirmPassword"
           value={formData.confirmPassword}
           onChange={handleInputChange}
-          placeholder="Confirma tu nueva contraseña"
+          placeholder={t('confirmPlaceholder')}
           required
           error={
             formData.newPassword && formData.confirmPassword && formData.newPassword !== formData.confirmPassword
-              ? 'Las contraseñas no coinciden'
+              ? t('mismatch')
               : undefined
           }
         />
@@ -100,7 +101,7 @@ export default function ChangePasswordForm() {
           disabled={!isFormValid || isSubmitting}
           style={{ alignSelf: 'flex-start' }}
         >
-          {isSubmitting ? 'Cambiando contraseña...' : 'Cambiar contraseña'}
+          {isSubmitting ? t('submitting') : t('submit')}
         </Button>
       </Stack>
     </form>

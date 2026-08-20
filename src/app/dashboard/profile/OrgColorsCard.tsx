@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, Alert, Button, Loader, SimpleGrid, Group, Text, Title, TextInput, ActionIcon } from '@mantine/core';
+import { ActionIcon, Alert, Button, Card, ColorInput, Group, Image as MantineImage, SimpleGrid, Stack, Text } from '@mantine/core';
+import { IconArrowBackUp, IconPalette, IconCircleCheck, IconAlertTriangle, IconEye } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { updateOrgBranding } from '@/actions/organizations/update-org-branding';
 import LoginPreview from '@/components/auth/LoginPreview';
 
@@ -36,104 +36,114 @@ export default function OrgColorsCard({ logoUrl, orgName, initialColorPrimary, i
     }
   };
 
+  const swatch = (
+    label: string,
+    hint: string,
+    value: string,
+    onChangeValue: (next: string) => void,
+    onReset: () => void,
+    placeholder?: string
+  ) => (
+    <Stack gap={4}>
+      <Text size="sm" fw={600}>{label}</Text>
+      <Text size="xs" c="dimmed">{hint}</Text>
+      <Group gap="xs" wrap="nowrap">
+        <ColorInput
+          value={value}
+          onChange={onChangeValue}
+          placeholder={placeholder}
+          size="xs"
+          w={150}
+          format="hex"
+          withEyeDropper={false}
+          styles={{ input: { fontFamily: 'var(--mantine-font-family-monospace)' } }}
+        />
+        <ActionIcon
+          variant="subtle"
+          color="gray"
+          onClick={onReset}
+          aria-label={t('branding.colorsReset')}
+          title={t('branding.colorsReset')}
+        >
+          <IconArrowBackUp size={16} stroke={1.7} />
+        </ActionIcon>
+      </Group>
+    </Stack>
+  );
+
   return (
-    <Card mb="md">
-        <Title order={6} mb="sm">{t('branding.colors')}</Title>
-
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
-          <div>
-            {logoUrl && (
-              <div style={{ marginBottom: 16, padding: 12, borderRadius: 8, background: 'var(--mantine-color-default-hover)', border: '1px solid var(--mantine-color-default-border)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: 120 }}>
-                <Image src={logoUrl} alt="Logo" width={120} height={40} style={{ objectFit: 'contain', maxWidth: '100%' }} unoptimized />
-              </div>
-            )}
-
-            <div style={{ marginBottom: 16 }}>
-              <Text size="sm" fw={600} c="dimmed" mb={4}>
-                {t('branding.colorPrimary')}
-                <Text component="span" size="xs" c="dimmed" fw={400} display="block">{t('branding.colorPrimaryHint')}</Text>
-              </Text>
-              <Group gap="xs">
-                <input
-                  type="color"
-                  value={colorPrimary}
-                  onChange={e => setColorPrimary(e.target.value)}
-                  style={{ width: 40, height: 36, border: '1px solid var(--mantine-color-default-border)', borderRadius: 8, cursor: 'pointer', padding: 2 }}
-                />
-                <TextInput
-                  value={colorPrimary}
-                  onChange={e => setColorPrimary(e.target.value)}
-                  maxLength={7}
-                  size="xs"
-                  w={100}
-                  styles={{ input: { fontFamily: 'monospace' } }}
-                />
-                <ActionIcon variant="subtle" color="gray" onClick={() => setColorPrimary('#1752CC')} title={t('branding.colorsReset')}>
-                  <i className="bi bi-arrow-counterclockwise" />
-                </ActionIcon>
-              </Group>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <Text size="sm" fw={600} c="dimmed" mb={4}>
-                {t('branding.colorSecondary')}
-                <Text component="span" size="xs" c="dimmed" fw={400} display="block">{t('branding.colorSecondaryHint')}</Text>
-              </Text>
-              <Group gap="xs">
-                <input
-                  type="color"
-                  value={colorSecondary || colorPrimary}
-                  onChange={e => setColorSecondary(e.target.value)}
-                  style={{ width: 40, height: 36, border: '1px solid var(--mantine-color-default-border)', borderRadius: 8, cursor: 'pointer', padding: 2 }}
-                />
-                <TextInput
-                  value={colorSecondary}
-                  onChange={e => setColorSecondary(e.target.value)}
-                  maxLength={7}
-                  placeholder="#opcional"
-                  size="xs"
-                  w={100}
-                  styles={{ input: { fontFamily: 'monospace' } }}
-                />
-                <ActionIcon variant="subtle" color="gray" onClick={() => setColorSecondary('')} title={t('branding.colorsReset')}>
-                  <i className="bi bi-arrow-counterclockwise" />
-                </ActionIcon>
-              </Group>
-            </div>
-
-            <Group gap="sm">
-              <Button
-                size="xs"
-                onClick={handleSave}
-                disabled={saving}
-                leftSection={saving ? <Loader size="xs" color="white" /> : <i className="bi bi-palette" />}
-              >
-                {saving ? t('branding.colorsSaving') : t('branding.colorsSave')}
-              </Button>
-              {feedback && (
-                <Alert
-                  color={feedback.type === 'success' ? 'green' : 'red'}
-                  py={4} px={12}
-                  icon={<i className={`bi bi-${feedback.type === 'success' ? 'check-circle' : 'exclamation-triangle'}`} />}
-                >
-                  {feedback.message}
-                </Alert>
-              )}
-            </Group>
-          </div>
-
-          <div>
-            <Text size="sm" c="dimmed" mb="xs">
-              <i className="bi bi-eye" style={{ marginRight: 4 }} />Preview
-            </Text>
-            <LoginPreview
-              logoUrl={logoUrl}
-              orgName={orgName}
-              colorPrimary={colorPrimary}
-              colorSecondary={colorSecondary}
+    <Card p="lg" radius="md">
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+        <Stack gap="lg">
+          {logoUrl && (
+            <MantineImage
+              src={logoUrl}
+              alt={orgName}
+              h={40}
+              w="auto"
+              fit="contain"
+              style={{
+                alignSelf: 'flex-start',
+                background: 'var(--mantine-color-gray-0)',
+                borderRadius: 8,
+                padding: 10,
+              }}
             />
-          </div>
-        </SimpleGrid>
+          )}
+
+          {swatch(
+            t('branding.colorPrimary'),
+            t('branding.colorPrimaryHint'),
+            colorPrimary,
+            setColorPrimary,
+            () => setColorPrimary('#1752CC')
+          )}
+
+          {swatch(
+            t('branding.colorSecondary'),
+            t('branding.colorSecondaryHint'),
+            colorSecondary,
+            setColorSecondary,
+            () => setColorSecondary(''),
+            '#opcional'
+          )}
+
+          <Group gap="sm">
+            <Button
+              size="xs"
+              onClick={handleSave}
+              loading={saving}
+              leftSection={<IconPalette size={15} stroke={1.7} />}
+            >
+              {t('branding.colorsSave')}
+            </Button>
+          </Group>
+
+          {feedback && (
+            <Alert
+              variant="light"
+              radius="md"
+              color={feedback.type === 'success' ? 'green' : 'red'}
+              icon={feedback.type === 'success' ? <IconCircleCheck size={16} /> : <IconAlertTriangle size={16} />}
+            >
+              <Text size="sm">{feedback.message}</Text>
+            </Alert>
+          )}
+        </Stack>
+
+        <Stack gap="xs">
+          <Group gap={6} c="dimmed">
+            <IconEye size={14} stroke={1.7} />
+            <Text size="sm">Preview</Text>
+          </Group>
+          <LoginPreview
+            logoUrl={logoUrl}
+            orgName={orgName}
+            colorPrimary={colorPrimary}
+            colorSecondary={colorSecondary}
+          />
+        </Stack>
+      </SimpleGrid>
     </Card>
   );
 }

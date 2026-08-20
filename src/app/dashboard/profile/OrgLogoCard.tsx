@@ -1,9 +1,9 @@
 'use client';
 
-import { Card, Alert, Button, Loader, Group, Text, Title } from '@mantine/core';
+import { Alert, Button, Card, Group, Image as MantineImage, Stack, Text } from '@mantine/core';
+import { IconUpload, IconTrash, IconPhoto, IconInfoCircle, IconCircleCheck, IconAlertTriangle } from '@tabler/icons-react';
 import { useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { updateOrgLogo } from '@/actions/organizations/update-org-logo';
 import { deleteOrgLogo } from '@/actions/organizations/delete-org-logo';
 
@@ -51,31 +51,33 @@ export default function OrgLogoCard({ logoUrl, onLogoChange }: Props) {
   };
 
   return (
-    <Card mb="md">
-        <Title order={6} mb="sm">{t('branding.currentLogo')}</Title>
-
+    <Card p="lg" radius="md">
+      <Stack gap="md">
         {logoUrl ? (
-          <div className="mb-3">
-            <Image
-              src={logoUrl}
-              alt="Logo de la organización"
-              width={180}
-              height={60}
-              style={{ objectFit: 'contain', background: '#f8f9fa', borderRadius: 8, padding: 8 }}
-              unoptimized
-            />
-          </div>
+          <MantineImage
+            src={logoUrl}
+            alt={t('branding.currentLogo')}
+            h={60}
+            w="auto"
+            fit="contain"
+            style={{
+              alignSelf: 'flex-start',
+              background: 'var(--mantine-color-gray-0)',
+              borderRadius: 8,
+              padding: 8,
+            }}
+          />
         ) : (
-          <Text size="sm" c="dimmed" mb="sm">
-            <i className="bi bi-image" style={{ marginRight: 4 }} />
-            {t('branding.noLogo')}
-          </Text>
+          <Group gap={6} c="dimmed">
+            <IconPhoto size={15} stroke={1.7} />
+            <Text size="sm">{t('branding.noLogo')}</Text>
+          </Group>
         )}
 
-        <Text size="sm" c="dimmed" mb="sm">
-          <i className="bi bi-info-circle" style={{ marginRight: 4 }} />
-          {t('branding.formatHint')}
-        </Text>
+        <Group gap={6} wrap="nowrap" align="flex-start">
+          <IconInfoCircle size={14} stroke={1.7} style={{ marginTop: 2, flexShrink: 0, color: 'var(--mantine-color-gray-5)' }} />
+          <Text size="xs" c="dimmed">{t('branding.formatHint')}</Text>
+        </Group>
 
         <Group gap="xs">
           <input
@@ -89,10 +91,11 @@ export default function OrgLogoCard({ logoUrl, onLogoChange }: Props) {
             variant="default"
             size="xs"
             onClick={() => fileInputRef.current?.click()}
-            disabled={uploading || deleting}
-            leftSection={uploading ? <Loader size="xs" /> : <i className="bi bi-upload" />}
+            loading={uploading}
+            disabled={deleting}
+            leftSection={<IconUpload size={15} stroke={1.7} />}
           >
-            {uploading ? t('branding.uploading') : t('branding.uploadLogo')}
+            {t('branding.uploadLogo')}
           </Button>
 
           {logoUrl && (
@@ -101,24 +104,26 @@ export default function OrgLogoCard({ logoUrl, onLogoChange }: Props) {
               color="red"
               size="xs"
               onClick={handleDelete}
-              disabled={uploading || deleting}
-              leftSection={deleting ? <Loader size="xs" /> : <i className="bi bi-trash" />}
+              loading={deleting}
+              disabled={uploading}
+              leftSection={<IconTrash size={15} stroke={1.7} />}
             >
-              {deleting ? t('branding.deleting') : t('branding.deleteLogo')}
+              {t('branding.deleteLogo')}
             </Button>
           )}
         </Group>
 
         {feedback && (
           <Alert
+            variant="light"
+            radius="md"
             color={feedback.type === 'success' ? 'green' : 'red'}
-            mt="md"
-            py={8}
-            icon={<i className={`bi bi-${feedback.type === 'success' ? 'check-circle' : 'exclamation-triangle'}`} />}
+            icon={feedback.type === 'success' ? <IconCircleCheck size={16} /> : <IconAlertTriangle size={16} />}
           >
-            {feedback.message}
+            <Text size="sm">{feedback.message}</Text>
           </Alert>
         )}
+      </Stack>
     </Card>
   );
 }
