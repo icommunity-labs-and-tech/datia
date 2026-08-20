@@ -197,6 +197,16 @@ test.describe('UX journey — public passport', () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test('energy certification report', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto(`/customer/item/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+
+    await page.getByRole('tab', { name: /certificación energética|energy certification/i }).click();
+    await expect(page.getByText(/co₂e certificado|certified co₂e/i)).toBeVisible();
+    await shot(page, 'desktop', '12-energy-report');
+    await expectNoHorizontalScroll(page);
+  });
+
   test('the old energy portal folds into the passport', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
 
