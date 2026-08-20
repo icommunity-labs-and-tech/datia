@@ -6,6 +6,7 @@ import L from 'leaflet';
 import { LeafletMapConfig } from '@/lib/geolocation/maps';
 import type { GeolocationCoordinates } from '@/lib/geolocation/types';
 import { extractGeolocationField } from '@/lib/template-helpers';
+import { IconCalendar, IconListNumbers, IconMap, IconMapPin, IconTag } from '@tabler/icons-react';
 
 // Fix para los iconos de Leaflet en Next.js - solo ejecutar en cliente
 if (typeof window !== 'undefined') {
@@ -201,7 +202,7 @@ export default function ItemStatesMap({ states }: ItemStatesMapProps) {
   if (statesWithLocations.length === 0) {
     return (
       <div className="text-center py-4 text-muted">
-        <i className="bi bi-map me-2"></i>
+        <IconMap size={15} stroke={1.7} style={{ marginRight: 8, verticalAlign: -2 }} />
         No hay estados con geolocalización para mostrar en el mapa.
       </div>
     );
@@ -293,7 +294,7 @@ export default function ItemStatesMap({ states }: ItemStatesMapProps) {
                   <strong>{state.title}</strong>
                   {state.statusType && (
                     <div className="small text-muted mb-2">
-                      <i className="bi bi-tag me-1"></i>
+                      <IconTag size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
                       {state.statusType.name}
                     </div>
                   )}
@@ -301,15 +302,15 @@ export default function ItemStatesMap({ states }: ItemStatesMapProps) {
                     <div className="mb-2">{state.description}</div>
                   )}
                   <div className="small text-muted">
-                    <i className="bi bi-calendar me-1"></i>
+                    <IconCalendar size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
                     {createdAt}
                   </div>
                   <div className="small text-muted mt-1">
-                    <i className="bi bi-geo-alt me-1"></i>
+                    <IconMapPin size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
                     {coords.lat.toFixed(6)}, {coords.lng.toFixed(6)}
                   </div>
                   <div className="small text-muted mt-1">
-                    <i className="bi bi-list-ol me-1"></i>
+                    <IconListNumbers size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
                     Estado #{index + 1}
                   </div>
                 </div>

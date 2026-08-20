@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   Alert,
+  Anchor,
   Badge,
   Button,
   Card,
@@ -11,7 +12,7 @@ import {
   Divider,
   Grid,
   Group,
-  Loader,
+  Skeleton,
   Stack,
   Text,
   ThemeIcon,
@@ -28,6 +29,7 @@ import {
   IconInfoCircle,
   IconShieldCheck,
   IconClock,
+  IconArrowLeft,
 } from '@tabler/icons-react';
 import { getItem, deleteItem, getItemDetails } from '@/actions/items';
 import { getStatesByItem } from '@/actions/states';
@@ -40,6 +42,8 @@ import ItemSpecificFields from '@/components/ItemSpecificFields';
 import ItemStatesMap from '@/components/ItemStatesMapClient';
 import CategoryInputField from '@/components/CategoryInputField';
 import AddStateForm from '@/components/AddStateForm';
+import PageHeader from '@/components/layout/PageHeader';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 interface StateRow {
@@ -75,6 +79,7 @@ function stateHasGeolocation(state: StateRow): boolean {
 
 export default function ItemDetailPage() {
   const t = useTranslations('itemDetail');
+  const tSidebar = useTranslations('sidebar');
   const { id } = useParams();
   const router = useRouter();
   const itemId = id as string;
@@ -145,9 +150,18 @@ export default function ItemDetailPage() {
 
   if (isLoading) {
     return (
-      <Center h={240}>
-        <Loader size="sm" />
-      </Center>
+      <Stack gap="md">
+        <Skeleton height={30} width={280} radius="sm" />
+        <Grid gutter="md">
+          <Grid.Col span={{ base: 12, md: 8 }}>
+            <Skeleton height={180} radius="md" mb="md" />
+            <Skeleton height={260} radius="md" />
+          </Grid.Col>
+          <Grid.Col span={{ base: 12, md: 4 }}>
+            <Skeleton height={200} radius="md" />
+          </Grid.Col>
+        </Grid>
+      </Stack>
     );
   }
 
@@ -166,62 +180,86 @@ export default function ItemDetailPage() {
   return (
     <>
       <Stack gap="md">
-        {/* ── Header ── */}
-        <Group justify="space-between" wrap="wrap">
-          <Title order={3}>{item.name}</Title>
-          <Group gap="xs">
-            <Button
-              variant="default"
-              size="xs"
-              leftSection={<IconQrcode size={15} />}
-              onClick={() => setShowQr(true)}
-            >
-              QR
-            </Button>
-            <Button
-              variant="default"
-              size="xs"
-              leftSection={<IconExternalLink size={15} />}
-              component="a"
-              href={`/customer/item/${encodeURIComponent(itemId)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t('passport')}
-            </Button>
-            <Button
+        <Anchor
+          component={Link}
+          href="/dashboard/items"
+          size="sm"
+          c="dimmed"
+          underline="never"
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}
+        >
+          <IconArrowLeft size={14} stroke={1.7} />
+          {tSidebar('assets')}
+        </Anchor>
+
+        <PageHeader
+          title={item.name}
+          description={item.description || undefined}
+          actions={
+            <>
+              <Button
+                variant="default"
+                size="xs"
+                leftSection={<IconQrcode size={15} />}
+                onClick={() => setShowQr(true)}
+              >
+                QR
+              </Button>
+              <Button
+                variant="default"
+                size="xs"
+                leftSection={<IconExternalLink size={15} />}
+                component="a"
+                href={`/customer/item/${encodeURIComponent(itemId)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {t('passport')}
+              </Button>
+              <Button
+                variant="light"
+                color="red"
+                size="xs"
+                leftSection={<IconTrash size={15} />}
+                onClick={openDeleteModalWithDetails}
+              >
+                {t('delete')}
+              </Button>
+            </>
+          }
+        >
+          <Group gap="xs" mt="xs">
+            <Badge
               variant="light"
-              color="red"
-              size="xs"
-              leftSection={<IconTrash size={15} />}
-              onClick={openDeleteModalWithDetails}
+              color={item.evidenceID ? 'green' : 'yellow'}
+              leftSection={
+                item.evidenceID ? <IconShieldCheck size={12} /> : <IconClock size={12} />
+              }
             >
-              {t('delete')}
-            </Button>
+              {item.evidenceID ? t('certified') : t('pendingBackup')}
+            </Badge>
+            {item.categories?.map((c: { id: string; name: string }) => (
+              <Badge key={c.id} size="sm" variant="light" color="gray">
+                {c.name}
+              </Badge>
+            ))}
           </Group>
-        </Group>
+        </PageHeader>
 
         <Grid gutter="md">
           {/* ── Left column: info + states ── */}
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="md">
               <Card>
-                {item.description ? (
-                  <Text size="sm" c="dimmed">{item.description}</Text>
-                ) : (
-                  <Text size="sm" c="dimmed" fs="italic">{t('noDescription')}</Text>
-                )}
-
                 {item.itemTemplate && item.templateFields && (
-                  <div style={{ marginTop: 16 }}>
+                  <>
                     <ItemSpecificFields
                       itemTemplate={Array.isArray(item.itemTemplate) ? item.itemTemplate : []}
                       templateFields={item.templateFields || {}}
                     />
-                  </div>
+                    <Divider my="md" />
+                  </>
                 )}
-
-                <Divider my="md" />
 
                 <CategoryInputField
                   itemId={itemId}
@@ -350,18 +388,6 @@ export default function ItemDetailPage() {
                       {backedCount}
                     </Text>
                   </Group>
-                  {item.categories?.length > 0 && (
-                    <>
-                      <Divider my={4} />
-                      <Group gap={4}>
-                        {item.categories.map((c: { id: string; name: string }) => (
-                          <Badge key={c.id} size="xs" color="datiaBlue" variant="light">
-                            {c.name}
-                          </Badge>
-                        ))}
-                      </Group>
-                    </>
-                  )}
                 </Stack>
               </Card>
             </Stack>

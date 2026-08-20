@@ -3,6 +3,7 @@
 import React from 'react';
 import { useLocale } from 'next-intl';
 import { StatusBadgeCell, DateCell, TextTruncateCell } from './GenericTable/Cells';
+import { IconMapPin } from '@tabler/icons-react';
 
 export interface FieldSchema {
   key: string;
@@ -45,7 +46,7 @@ export default function KeyValueList({
       // If it's a geolocation object but format is not custom, render coordinates as text
       return (
         <span className="text-muted">
-          <i className="bi bi-geo-alt me-1"></i>
+          <IconMapPin size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
           Lat: {value.lat.toFixed(6)}, Lng: {value.lng.toFixed(6)}
         </span>
       );

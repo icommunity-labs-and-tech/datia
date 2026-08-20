@@ -2,6 +2,7 @@
 
 import { Modal, ActionIcon, Center, Loader, Stack, Text, Group } from '@mantine/core';
 import { useState, useEffect } from 'react';
+import { IconPhoto, IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 
 interface ImageModalProps {
   show: boolean;
@@ -49,7 +50,7 @@ export default function ImageModal({ show, onHide, imageUrl, alt, title, imageUr
       centered
       title={
         <Group gap={6}>
-          <i className="bi bi-image" />
+          <IconPhoto size={17} stroke={1.7} />
           {title || 'Imagen'}
           {isGallery && (
             <Text component="span" size="sm" c="dimmed" fw={400}>
@@ -68,7 +69,7 @@ export default function ImageModal({ show, onHide, imageUrl, alt, title, imageUr
 
         {hasError ? (
           <Stack align="center" gap="xs" c="dimmed" style={{ minHeight: 400, justifyContent: 'center' }}>
-            <i className="bi bi-image" style={{ fontSize: '3rem' }} />
+            <IconPhoto size={48} stroke={1.4} />
             <Text c="dimmed">Error al cargar la imagen</Text>
           </Stack>
         ) : (
@@ -99,7 +100,7 @@ export default function ImageModal({ show, onHide, imageUrl, alt, title, imageUr
             style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.85 }}
             aria-label="Anterior"
           >
-            <i className="bi bi-chevron-left" />
+            <IconChevronLeft size={18} stroke={1.8} />
           </ActionIcon>
         )}
 
@@ -112,7 +113,7 @@ export default function ImageModal({ show, onHide, imageUrl, alt, title, imageUr
             style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', opacity: 0.85 }}
             aria-label="Siguiente"
           >
-            <i className="bi bi-chevron-right" />
+            <IconChevronRight size={18} stroke={1.8} />
           </ActionIcon>
         )}
       </div>
