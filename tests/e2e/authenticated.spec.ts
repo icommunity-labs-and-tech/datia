@@ -1,99 +1,105 @@
 import { test, expect } from '@playwright/test';
-import { loginAdmin, logoutUser } from './utils/auth';
+import { logoutUser, ADMIN_STORAGE_STATE } from './utils/auth';
+
+/**
+ * End-to-end behaviour of an authenticated admin across the three surfaces the
+ * redesigned UI exposes: assets, API and organisation settings.
+ *
+ * Labels are matched in both locales because the run's language depends on the
+ * NEXT_LOCALE cookie.
+ */
+
+test.use({ storageState: ADMIN_STORAGE_STATE });
 
 test.describe('Authenticated User Flow (Admin)', () => {
-  test.beforeEach(async ({ page }) => {
-    // Login antes de cada test
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
-    const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
-    await loginAdmin(page, email, password);
-  });
 
   test('should access dashboard after login', async ({ page }) => {
-    await page.goto('/dashboard');
-    
-    // Verificar que estamos autenticados
-    await expect(page).toHaveURL(/.*dashboard/);
-    await expect(page.getByText(/métricas/i)).toBeVisible();
+    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByRole('heading', { name: /inicio|home/i, level: 2 })).toBeVisible();
   });
 
-  test('should navigate between dashboard pages', async ({ page }) => {
-    // Navegar a estados
-    await page.goto('/dashboard/states');
-    await expect(page.getByText(/estados/i)).toBeVisible();
-    
-    // Navegar a items
-    await page.goto('/dashboard/items');
-    await expect(page.getByRole('heading', { name: /inventario de items/i, level: 4 })).toBeVisible();
+  test('should navigate between dashboard sections', async ({ page }) => {
+    await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('heading', { name: /activos|assets/i, level: 2 })).toBeVisible();
+
+    await page.goto('/dashboard/api', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('heading', { name: 'API', level: 2 })).toBeVisible();
+    await expect(page.getByRole('tab', { name: /documenta/i })).toBeVisible();
   });
 
-  test('should display user profile', async ({ page }) => {
+  test('should display organisation settings', async ({ page }) => {
+    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+
+    await expect(page.getByRole('heading', { name: /organizaci[óo]n|organisation/i }).first())
+      .toBeVisible();
+    await expect(page.getByRole('heading', { name: /tu cuenta|your account/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /contrase[ñn]a|password/i }).first())
+      .toBeVisible();
+  });
+
+  test('settings holds organisation config only', async ({ page }) => {
+    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+
+    // The old hub split this screen into States / Users / Organisation tabs.
+    await expect(page.getByRole('tab')).toHaveCount(0);
+    for (const hidden of ['/dashboard/users', '/dashboard/status-types']) {
+      await expect(page.locator(`a[href^="${hidden}"]`)).toHaveCount(0);
+    }
+  });
+
+  test('profile URL redirects to settings', async ({ page }) => {
     await page.goto('/dashboard/profile');
-    
-    // Verificar elementos del perfil
-    await expect(page.getByText(/información personal/i)).toBeVisible();
-    await expect(page.getByText(/cambio de contraseña/i)).toBeVisible();
+
+    await expect(page).toHaveURL(/\/dashboard\/settings$/);
+  });
+
+  test('should change the password form validation state', async ({ page }) => {
+    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+
+    const submit = page.getByRole('button', { name: /cambiar contrase[ñn]a|change password/i });
+    await expect(submit).toBeDisabled();
+
+    await page.getByLabel(/contrase[ñn]a actual|current password/i).fill('whatever123');
+    await page.getByLabel(/nueva contrase[ñn]a|new password/i).first().fill('newpassword123');
+    await page.getByLabel(/confirmar|confirm/i).fill('different456');
+
+    // Mismatch keeps the form locked and explains why.
+    await expect(page.getByText(/no coinciden|do not match/i)).toBeVisible();
+    await expect(submit).toBeDisabled();
   });
 
   test('should logout successfully', async ({ page }) => {
-    await page.goto('/dashboard');
-    
-    // Hacer logout
+    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+
     await logoutUser(page);
-    
-    // Verificar que redirige a login
-    await expect(page).toHaveURL(/.*login/);
-  });
 
-  test('should handle form interactions', async ({ page }) => {
-    await page.goto('/dashboard/profile');
-    
-    // Buscar switch de certificado digital
-    const certSwitch = page.getByRole('checkbox', { name: /firmar las incidencias con certificado digital/i });
-    if (await certSwitch.isVisible()) {
-      // Verificar que se puede interactuar
-      await expect(certSwitch).toBeEnabled();
-    }
-  });
-
-  test('should display loading states', async ({ page }) => {
-    await page.goto('/dashboard/items');
-    
-    // Verificar que se muestra loading inicialmente
-    const loadingElement = page.locator('.spinner-border, .loading, [role="status"]');
-    if (await loadingElement.isVisible()) {
-      await expect(loadingElement).toBeVisible();
-      
-      // Esperar a que termine de cargar
-      await page.waitForSelector('.spinner-border', { state: 'hidden' });
-    }
+    await expect(page).toHaveURL(/\/auth\/admin\/login/);
   });
 });
 
-test.describe('Data Management', () => {
+test.describe('Assets gallery', () => {
   test.beforeEach(async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
-    const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
-    await loginAdmin(page, email, password);
+    await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
   });
 
-  test('should display data tables', async ({ page }) => {
-    await page.goto('/dashboard/items');
-    
-    // Verificar que se muestra una tabla
-    const table = page.locator('table, .table');
-    if (await table.isVisible()) {
-      await expect(table).toBeVisible();
-    }
+  test('shows a count that matches the cards on screen', async ({ page }) => {
+    const cards = page.locator('a[href^="/dashboard/items/"]');
+    const count = await cards.count();
+
+    await expect(page.getByText(new RegExp(`\\b${count}\\b.*(activos?|assets?)`, 'i')).first())
+      .toBeVisible();
   });
 
-  test('should handle empty states', async ({ page }) => {
-    await page.goto('/dashboard/items');
-    
-    // Verificar mensaje cuando no hay datos
-    const emptyMessage = page.locator('text=No hay items, text=No data, text=Empty');
-    if (await emptyMessage.isVisible()) {
-      await expect(emptyMessage).toBeVisible();
-    }
+  test('search with no match offers a way back', async ({ page }) => {
+    await page.getByPlaceholder(/buscar|search/i).fill('zzz-no-match-zzz');
+
+    await expect(page.getByText(/ning[úu]n activo coincide|no asset matches/i)).toBeVisible();
+
+    const clear = page.getByRole('button', { name: /limpiar filtros|clear filters/i });
+    await clear.click();
+
+    await expect(page.locator('a[href^="/dashboard/items/"]').first()).toBeVisible();
   });
 });

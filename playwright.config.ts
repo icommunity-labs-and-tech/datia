@@ -21,17 +21,26 @@ export default defineConfig({
     actionTimeout: 10000, // Increase action timeout to 10 seconds
   },
   projects: [
+    // Signs in once and saves the session; browser projects depend on it so
+    // specs don't re-login per test and trip the login rate limiter.
+    {
+      name: 'setup',
+      testMatch: /auth\.setup\.ts/,
+    },
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      dependencies: ['setup'],
     },
     {
       name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
     },
     {
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
+      dependencies: ['setup'],
     },
     {
       name: 'certification-flow',
@@ -48,7 +57,13 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'E2E_SQLITE=1 DATABASE_URL=file:./playwright-e2e.db E2E_SQLITE_URL=file:./playwright-e2e.db npm run dev',
+    command: 'npm run dev',
+    // Inherited from the shell when set, so a run can point at its own database.
+    env: {
+      E2E_SQLITE: process.env.E2E_SQLITE ?? '1',
+      DATABASE_URL: process.env.DATABASE_URL ?? 'file:./playwright-e2e.db',
+      E2E_SQLITE_URL: process.env.E2E_SQLITE_URL ?? 'file:./playwright-e2e.db',
+    },
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
