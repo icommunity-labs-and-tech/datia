@@ -3,8 +3,9 @@
 import { useEffect, useState, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { StateData } from '../../types';
+import { Center, Stack, Text, ThemeIcon } from '@mantine/core';
+import { IconHistory } from '@tabler/icons-react';
 import { TimelineItem } from '../ui/TimelineItem';
-import { timelineStyles } from '../../styles/passportStyles';
 import { SequentialExecutor } from '../../utils/apiRetry';
 
 interface ItemHistorySectionProps {
@@ -80,22 +81,19 @@ export function ItemHistorySection({ states }: ItemHistorySectionProps) {
 
   if (!hasHistory) {
     return (
-      <div style={timelineStyles.emptyState}>
-        <div style={timelineStyles.emptyIcon}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '2rem', height: '2rem' }}>
-            <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-        </div>
-        <p style={{ fontSize: '1rem', margin: '0', lineHeight: '1.5' }}>
-          {t('noHistory')}
-        </p>
-      </div>
+      <Center py={48}>
+        <Stack align="center" gap="sm">
+          <ThemeIcon color="gray" variant="light" size={48} radius="xl">
+            <IconHistory size={24} stroke={1.5} />
+          </ThemeIcon>
+          <Text size="sm" c="dimmed" ta="center">{t('noHistory')}</Text>
+        </Stack>
+      </Center>
     );
   }
 
   return (
-    <div style={timelineStyles.container}>
-      <div style={timelineStyles.line} />
+    <Stack gap="sm">
       {states.map((state) => (
         <TimelineItem
           key={state.id}
@@ -103,6 +101,6 @@ export function ItemHistorySection({ states }: ItemHistorySectionProps) {
           loadStatus={getStateStatus(state.id)}
         />
       ))}
-    </div>
+    </Stack>
   );
 }

@@ -2,8 +2,27 @@
 
 import { useState } from 'react';
 import { Loader } from '@mantine/core';
+import {
+  IconMail,
+  IconLock,
+  IconEye,
+  IconEyeOff,
+  IconAlertTriangleFilled,
+  IconArrowRight,
+} from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import Image from 'next/image';
+
+/** Shared position for the leading icon inside a field. */
+const FIELD_ICON_STYLE = {
+  position: 'absolute',
+  left: 14,
+  top: '50%',
+  transform: 'translateY(-50%)',
+  color: '#94a3b8',
+  pointerEvents: 'none',
+} as const;
 
 export interface LoginPageLayoutProps {
   /** Left panel */
@@ -58,6 +77,7 @@ export default function LoginPageLayout({
   onSubmit,
 }: LoginPageLayoutProps) {
   const [pwVisible, setPwVisible] = useState(false);
+  const t = useTranslations('auth.login.admin');
   const roleIcon = 'bi-shield-check';
   const secondary = brandColorSecondary ?? brandColor;
   const panelBg = brandColorSecondary
@@ -178,10 +198,10 @@ export default function LoginPageLayout({
             {/* Email */}
             <div style={{ marginBottom: '1rem' }}>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.4rem', letterSpacing: '0.02em' }}>
-                Email
+                {t('emailLabel')}
               </label>
               <div style={{ position: 'relative' }}>
-                <i className="bi bi-envelope" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.9rem', pointerEvents: 'none' }} />
+                <IconMail size={16} stroke={1.7} style={FIELD_ICON_STYLE} />
                 <input
                   type="email" value={email} onChange={e => onEmailChange(e.target.value)}
                   placeholder={emailPlaceholder} required disabled={isLoading}
@@ -195,10 +215,10 @@ export default function LoginPageLayout({
             {/* Password */}
             <div style={{ marginBottom: '1.75rem' }}>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, color: '#475569', marginBottom: '0.4rem', letterSpacing: '0.02em' }}>
-                Contraseña
+                {t('passwordLabel')}
               </label>
               <div style={{ position: 'relative' }}>
-                <i className="bi bi-lock" style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', fontSize: '0.9rem', pointerEvents: 'none' }} />
+                <IconLock size={16} stroke={1.7} style={FIELD_ICON_STYLE} />
                 <input
                   type={pwVisible ? 'text' : 'password'} value={password}
                   onChange={e => onPasswordChange(e.target.value)}
@@ -208,15 +228,18 @@ export default function LoginPageLayout({
                   onBlur={e => e.target.style.borderColor = '#e2e8f0'}
                 />
                 <button type="button" onClick={() => setPwVisible(v => !v)}
-                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#94a3b8' }}>
-                  <i className={`bi ${pwVisible ? 'bi-eye-slash' : 'bi-eye'}`} style={{ fontSize: '0.9rem' }} />
+                  aria-label={t('togglePassword')}
+                  style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, color: '#94a3b8', display: 'flex' }}>
+                  {pwVisible
+                    ? <IconEyeOff size={16} stroke={1.7} />
+                    : <IconEye size={16} stroke={1.7} />}
                 </button>
               </div>
             </div>
 
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '0.6rem 0.9rem', marginBottom: '1.25rem', fontSize: '0.85rem', color: '#dc2626' }}>
-                <i className="bi bi-exclamation-triangle-fill" style={{ flexShrink: 0 }} />
+                <IconAlertTriangleFilled size={15} style={{ flexShrink: 0 }} />
                 {error}
               </div>
             )}
@@ -227,7 +250,7 @@ export default function LoginPageLayout({
             >
               {isLoading
                 ? <><Loader size="xs" color="white" />{accessingText}</>
-                : <>{accessText} <i className="bi bi-arrow-right" /></>
+                : <>{accessText} <IconArrowRight size={16} stroke={2} /></>
               }
             </button>
           </form>

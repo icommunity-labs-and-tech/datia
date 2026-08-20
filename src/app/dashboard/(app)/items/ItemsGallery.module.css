@@ -1,0 +1,13 @@
+.card {
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+.card:hover {
+  border-color: var(--mantine-color-datiaBlue-2);
+  box-shadow: var(--mantine-shadow-md);
+  transform: translateY(-2px);
+}

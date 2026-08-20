@@ -1,182 +1,155 @@
 'use client';
-/* eslint-disable @next/next/no-img-element */
 
-import { useState } from 'react';
+import {
+  Alert,
+  Badge,
+  Box,
+  Button,
+  Card,
+  Group,
+  Image,
+  Stack,
+  Tabs,
+  Text,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
+import {
+  IconArrowLeft,
+  IconPackage,
+  IconShieldCheck,
+  IconShieldOff,
+} from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ItemData, EnergyCertification } from '../types';
-import { ItemInfoSection } from './sections/ItemInfoSection';
-import { ItemHistorySection } from './sections/ItemHistorySection';
+import { ItemData } from '../types';
+import { ItemInfoSection, ItemHistorySection, EnergySection } from './sections';
 import { VerifiedBadge } from './ui';
-import { useMobileDetection } from '../hooks/useMobileDetection';
 import { formatDate } from '../utils/dateFormatters';
-import { passportStyles } from '../styles/passportStyles';
-
-function EnergyCertificationPanel({ certifications }: { certifications: EnergyCertification[] }) {
-  const totalCo2 = certifications.reduce((s, c) => s + c.co2eKg, 0);
-  const totalKwh = certifications.reduce((s, c) => s + c.consumptionKwh, 0);
-
-  return (
-    <div style={{ padding: '1rem 0' }}>
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 140, background: '#f0fdf4', borderRadius: 8, padding: '1rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#15803d' }}>{totalCo2.toFixed(2)}</div>
-          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>kg CO₂e certificados</div>
-        </div>
-        <div style={{ flex: 1, minWidth: 140, background: '#eff6ff', borderRadius: 8, padding: '1rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#1d4ed8' }}>{totalKwh.toFixed(2)}</div>
-          <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>kWh consumidos</div>
-        </div>
-      </div>
-
-      {certifications.map((cert) => (
-        <div key={cert.id} style={{ border: '1px solid #d1fae5', borderRadius: 8, padding: '1rem', marginBottom: '0.75rem', background: '#f9fafb' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-            <span style={{ fontWeight: 600, color: '#111827' }}>{cert.co2eKg.toFixed(3)} kg CO₂e</span>
-            <span style={{ fontSize: '0.75rem', background: '#d1fae5', color: '#065f46', borderRadius: 4, padding: '2px 8px' }}>
-              ✓ {cert.scope?.replace('_', ' ')}
-            </span>
-          </div>
-          <div style={{ fontSize: '0.8rem', color: '#6b7280', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem' }}>
-            <span>Período: {new Date(cert.periodStart).toLocaleDateString()} – {new Date(cert.periodEnd).toLocaleDateString()}</span>
-            <span>Consumo: {cert.consumptionKwh} kWh ({cert.energyCarrier})</span>
-            {cert.calculationMethodology && <span>Método: {cert.calculationMethodology}</span>}
-            {cert.verifierBody && <span>Verificador: {cert.verifierBody}</span>}
-            {cert.verificationStandard && <span>Estándar: {cert.verificationStandard}</span>}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 interface ItemPassportProps {
   item: ItemData;
-  onBack: () => void;
+  onBack?: () => void;
 }
 
 export function ItemPassport({ item, onBack }: ItemPassportProps) {
   const t = useTranslations('common');
   const tCustomer = useTranslations('customer');
+  const tPassport = useTranslations('customer.passport');
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'info' | 'history' | 'energy'>('info');
-  const isMobile = useMobileDetection();
 
-  const verifiedEmissions = item.energyCertifications?.filter(e => e.verificationStatus === 'VERIFIED') ?? [];
+  const verifiedEmissions = item.energyCertifications?.filter(
+    (e) => e.verificationStatus === 'VERIFIED'
+  ) ?? [];
   const showEnergy = verifiedEmissions.length > 0;
+  const isCertified = Boolean(item.evidenceID);
 
-  const handleBack = () => {
-    if (onBack) {
-      onBack();
-    } else {
-      router.push('/customer');
-    }
-  };
+  const handleBack = () => (onBack ? onBack() : router.push('/customer'));
 
   return (
-    <div style={passportStyles.container}>
-      <div style={passportStyles.header}>
-        <button style={passportStyles.backButton} onClick={handleBack}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '1rem', height: '1rem' }}>
-            <path d="M19 12H5M12 19l-7-7 7-7" />
-          </svg>
-          {t('actions.back')}
-        </button>
-        <h2 style={passportStyles.headerTitle}>{tCustomer('productInfo')}</h2>
-      </div>
+    <Stack gap="md">
+      <Button
+        variant="subtle"
+        color="gray"
+        size="xs"
+        leftSection={<IconArrowLeft size={15} stroke={1.7} />}
+        onClick={handleBack}
+        style={{ alignSelf: 'flex-start' }}
+      >
+        {t('actions.back')}
+      </Button>
 
-      <div style={passportStyles.card}>
-        {/* Item Header */}
-        <div style={passportStyles.itemHeader}>
-          <div style={passportStyles.itemImage}>
+      {/* ── Identity ── */}
+      <Card p={0} radius="md" style={{ overflow: 'hidden' }}>
+        <Group
+          gap="md"
+          p="md"
+          align="flex-start"
+          wrap="nowrap"
+          style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}
+        >
+          <Box w={72} h={72} style={{ flexShrink: 0 }}>
             {item.imageUrl ? (
-              <img src={item.imageUrl} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <Image src={item.imageUrl} alt={item.name} w={72} h={72} radius="md" fit="cover" />
             ) : (
-              <div style={passportStyles.placeholderImage}>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ width: '2rem', height: '2rem' }}>
-                  <path d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m-9-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
+              <ThemeIcon variant="light" color="gray" size={72} radius="md">
+                <IconPackage size={30} stroke={1.4} />
+              </ThemeIcon>
             )}
-          </div>
-          <div style={passportStyles.itemInfo}>
-            <h3
-              style={{
-                ...passportStyles.itemTitle,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              {item.name}
-              {item.evidenceID && <VerifiedBadge title={tCustomer('verifiedProduct')} />}
-            </h3>
-            <p style={passportStyles.itemDescription}>{item.description || t('noDescription')}</p>
-            <div style={passportStyles.itemMeta}>
-              <span>ID: {item.id}</span>
-              <span>{tCustomer('createdAt')} {formatDate(item.createdAt)}</span>
-            </div>
-          </div>
-        </div>
+          </Box>
 
-        {/* Navigation Tabs (solo escritorio) */}
-        {!isMobile && (
-          <div style={passportStyles.tabs}>
-            <button
-              style={{
-                ...passportStyles.tab,
-                ...(activeTab === 'info' ? passportStyles.tabActive : {}),
-              }}
-              onClick={() => setActiveTab('info')}
-            >
-              {tCustomer('tabInfo')}
-            </button>
-            <button
-              style={{
-                ...passportStyles.tab,
-                ...(activeTab === 'history' ? passportStyles.tabActive : {}),
-              }}
-              onClick={() => setActiveTab('history')}
-            >
+          <Stack gap={6} style={{ minWidth: 0, flex: 1 }}>
+            <Group gap={6} wrap="nowrap">
+              <Title order={3} style={{ minWidth: 0 }}>{item.name}</Title>
+              {isCertified && <VerifiedBadge title={tCustomer('verifiedProduct')} />}
+            </Group>
+
+            {item.category?.name && (
+              <Badge size="sm" variant="light" color="gray" style={{ alignSelf: 'flex-start' }}>
+                {item.category.name}
+              </Badge>
+            )}
+
+            <Text size="sm" c="dimmed">
+              {item.description || t('noDescription')}
+            </Text>
+          </Stack>
+        </Group>
+
+        <Group gap="xl" px="md" py="sm" wrap="wrap">
+          <Stack gap={0}>
+            <Text size="xs" c="dimmed">{tPassport('assetId')}</Text>
+            <Text size="xs" ff="monospace">{item.id}</Text>
+          </Stack>
+          <Stack gap={0}>
+            <Text size="xs" c="dimmed">{tCustomer('createdAt').replace(':', '')}</Text>
+            <Text size="xs" fw={550}>{formatDate(item.createdAt)}</Text>
+          </Stack>
+        </Group>
+      </Card>
+
+      {/* ── Certification status: the reason this page exists ── */}
+      <Alert
+        variant="light"
+        color={isCertified ? 'green' : 'yellow'}
+        radius="md"
+        icon={isCertified ? <IconShieldCheck size={18} /> : <IconShieldOff size={18} />}
+        title={isCertified ? tPassport('certifiedOnChain') : tPassport('notCertified')}
+      >
+        <Text size="sm">
+          {isCertified ? tPassport('certifiedDescription') : tPassport('notCertifiedDescription')}
+        </Text>
+      </Alert>
+
+      {/* ── Detail ── */}
+      <Card p="md" radius="md">
+        <Tabs defaultValue="info" keepMounted={false}>
+          <Tabs.List mb="md">
+            <Tabs.Tab value="info">{tCustomer('tabInfo')}</Tabs.Tab>
+            <Tabs.Tab value="history">
               {tCustomer('tabHistory')}
-            </button>
-            {showEnergy && (
-              <button
-                style={{
-                  ...passportStyles.tab,
-                  ...(activeTab === 'energy' ? passportStyles.tabActive : {}),
-                }}
-                onClick={() => setActiveTab('energy')}
-              >
-                🌿 {tCustomer('tabEnergy')}
-              </button>
-            )}
-          </div>
-        )}
-
-        {/* Tab / Mobile Content */}
-        <div style={passportStyles.tabContent}>
-          {isMobile ? (
-            <>
-              <ItemInfoSection item={item} isMobile={isMobile} />
-              <div style={{ height: '1rem' }} />
-              <ItemHistorySection states={item.states} />
-              {showEnergy && (
-                <>
-                  <div style={{ height: '1rem' }} />
-                  <EnergyCertificationPanel certifications={verifiedEmissions} />
-                </>
+              {item.states?.length > 0 && (
+                <Badge size="xs" variant="light" color="gray" ml={6}>
+                  {item.states.length}
+                </Badge>
               )}
-            </>
-          ) : (
-            <>
-              {activeTab === 'info' && <ItemInfoSection item={item} isMobile={isMobile} />}
-              {activeTab === 'history' && <ItemHistorySection states={item.states} />}
-              {activeTab === 'energy' && showEnergy && <EnergyCertificationPanel certifications={verifiedEmissions} />}
-            </>
+            </Tabs.Tab>
+            {showEnergy && <Tabs.Tab value="energy">{tCustomer('tabEnergy')}</Tabs.Tab>}
+          </Tabs.List>
+
+          <Tabs.Panel value="info">
+            <ItemInfoSection item={item} />
+          </Tabs.Panel>
+          <Tabs.Panel value="history">
+            <ItemHistorySection states={item.states} />
+          </Tabs.Panel>
+          {showEnergy && (
+            <Tabs.Panel value="energy">
+              <EnergySection certifications={verifiedEmissions} />
+            </Tabs.Panel>
           )}
-        </div>
-      </div>
-    </div>
+        </Tabs>
+      </Card>
+    </Stack>
   );
 }

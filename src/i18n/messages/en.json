@@ -18,7 +18,8 @@
       "loading": "Loading...",
       "saving": "Saving...",
       "saveChanges": "Save Changes",
-      "noData": "No data available"
+      "noData": "No data available",
+      "copy": "Copy"
     },
     "validation": {
       "required": "This field is required",
@@ -52,10 +53,6 @@
   },
   "sidebar": {
     "home": "Home",
-    "statusTypes": "States",
-    "products": "Assets",
-    "users": "Users",
-    "profile": "Profile",
     "organizations": "Organizations",
     "management": "MANAGEMENT",
     "developer": "DEVELOPER",
@@ -71,7 +68,27 @@
     "assets": "Assets",
     "energy": "Energy",
     "settings": "Settings",
-    "api": "API"
+    "api": "API",
+    "language": "Language",
+    "account": "Account",
+    "logout": "Log out",
+    "openMenu": "Open menu"
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Your organisation details, visual identity and account access.",
+    "organization": "Organisation",
+    "organizationHint": "How your organisation is identified in Datia.",
+    "signatureId": "Signature ID",
+    "account": "Your account"
+  },
+  "apps": {
+    "title": "Choose how you want to sign in",
+    "admin": "Admin dashboard",
+    "adminDescription": "Manage assets, certifications and your organisation settings.",
+    "customer": "Asset passport",
+    "customerDescription": "Look up an asset’s certified information with its code.",
+    "redirecting": "Redirecting..."
   },
   "forms": {
     "addItem": "Add asset",
@@ -288,7 +305,8 @@
           "unauthorized": "You must log in as an administrator to continue",
           "invalidCredentials": "Invalid credentials",
           "loginError": "Error logging in"
-        }
+        },
+        "togglePassword": "Show or hide the password"
       },
       "superadmin": {
         "title": "Datia",
@@ -454,7 +472,7 @@
     "productInfo": "Asset Information",
     "createdAt": "Created:",
     "tabInfo": "Information",
-    "tabHistory": "Digital Passport",
+    "tabHistory": "History",
     "verifiedProduct": "Asset verified on blockchain",
     "stateVerified": "State verified in blockchain",
     "productDetails": "Asset Details",
@@ -483,7 +501,26 @@
       "loading": "Loading...",
       "preparingError": "Preparing error page"
     },
-    "tabEnergy": "Energy Certification"
+    "tabEnergy": "Energy Certification",
+    "passport": {
+      "title": "Digital passport",
+      "assetId": "Asset ID",
+      "issuedBy": "Issued by",
+      "certifiedOnChain": "Certified on blockchain",
+      "notCertified": "Pending certification",
+      "certifiedDescription": "This asset’s identity and history are recorded on blockchain and publicly verifiable.",
+      "notCertifiedDescription": "This asset does not have a certified blockchain record yet.",
+      "states": "Recorded states",
+      "energy": {
+        "co2Certified": "kg CO₂e certified",
+        "kwhConsumed": "kWh consumed",
+        "period": "Period",
+        "consumption": "Consumption",
+        "method": "Method",
+        "verifier": "Verifier",
+        "standard": "Standard"
+      }
+    }
   },
   "states": {
     "title": "State",
@@ -613,7 +650,9 @@
     "capacityByCarrier": "Capacity by carrier",
     "sourcesWithCoords": "With GPS coordinates",
     "renewableSubtitle": "Average across sources",
-    "activity": "Activity"
+    "activity": "Activity",
+    "recentAssets": "Recent assets",
+    "viewAll": "View all"
   },
   "itemDetail": {
     "notFound": "Asset not found",
@@ -634,7 +673,13 @@
     "deleteEntityName": "Asset",
     "deleteError": "Error deleting asset",
     "deleteTitle": "Delete asset",
-    "deleteMessage": "Are you sure you want to delete the asset \"{name}\"?"
+    "deleteMessage": "Are you sure you want to delete the asset \"{name}\"?",
+    "qr": {
+      "title": "Asset QR code",
+      "titleNamed": "{name} QR",
+      "copyLink": "Copy link",
+      "downloadPng": "Download PNG"
+    }
   },
   "userDetail": {
     "title": "User: {name}",
@@ -716,6 +761,20 @@
       "noUrlError": "Could not obtain a verification URL. Please try again later.",
       "verifiedMessage": "Your organization is verified. You can now create items and certified states.",
       "needKycNote": "You will need to complete KYC to create certified items and states on blockchain."
+    },
+    "password": {
+      "current": "Current password",
+      "currentPlaceholder": "Enter your current password",
+      "new": "New password",
+      "newPlaceholder": "Enter your new password",
+      "confirm": "Confirm new password",
+      "confirmPlaceholder": "Confirm your new password",
+      "mismatch": "Passwords do not match",
+      "submit": "Change password",
+      "submitting": "Changing password...",
+      "success": "Password updated successfully",
+      "error": "Could not change the password",
+      "unexpectedError": "Unexpected error while changing the password"
     }
   },
   "developer": {
@@ -836,7 +895,12 @@
       "updateError": "Error updating webhook",
       "deleteError": "Error deleting webhook",
       "toggleError": "Error updating webhook status",
-      "headersInvalid": "Headers must be valid JSON"
+      "headersInvalid": "Headers must be valid JSON",
+      "delete": "Delete",
+      "deleteTitle": "Delete webhook",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate"
     },
     "events": {
       "whatAreEvents": "What are events?",
@@ -969,7 +1033,12 @@
     "lastState": "Last state",
     "noCategory": "No category",
     "certified": "Certified",
-    "pending": "Pending"
+    "pending": "Pending",
+    "title": "Assets",
+    "description": "Every asset gathers its state history and its blockchain certification.",
+    "count": "{count, plural, =0 {No assets} one {1 asset} other {# assets}}",
+    "noResults": "No asset matches your search",
+    "clearFilters": "Clear filters"
   },
   "energyHub": {
     "tabs": {
@@ -1081,12 +1150,9 @@
       }
     }
   },
-  "settingsHub": {
-    "states": "States",
-    "users": "Users",
-    "org": "Organization"
-  },
   "apiHub": {
+    "title": "API",
+    "description": "Docs, events, webhooks and credentials to integrate Datia.",
     "docs": "Documentation",
     "events": "Events",
     "webhooks": "Webhooks",

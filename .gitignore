@@ -75,3 +75,6 @@ scripts/update-demo-food-images.ts
 scripts/update-multi-sector-product-images.ts
 scripts/update-olive-oil-image.ts
 scripts/update-salmon-image.ts
+
+# Playwright stored sessions
+playwright/.auth/

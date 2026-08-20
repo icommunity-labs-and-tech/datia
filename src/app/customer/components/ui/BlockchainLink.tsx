@@ -1,5 +1,7 @@
 'use client';
 
+import { Group, Paper, Stack, Text } from '@mantine/core';
+import { IconLink, IconExternalLink } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
 interface BlockchainLinkProps {
@@ -10,64 +12,26 @@ interface BlockchainLinkProps {
 export function BlockchainLink({ href, label }: BlockchainLinkProps) {
   const t = useTranslations('customer');
   const displayLabel = label ?? t('blockchainCertification');
+
   return (
-    <a
+    <Paper
+      component="a"
       href={href}
       target="_blank"
       rel="noreferrer"
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '0.5rem',
-        padding: '0.5rem 0.75rem',
-        borderRadius: '6px',
-        border: '1px solid rgba(139, 92, 246, 0.3)',
-        background: 'linear-gradient(135deg, rgba(233, 213, 255, 0.4), rgba(216, 180, 254, 0.4))',
-        textDecoration: 'none',
-        transition: 'all 0.2s ease',
-        cursor: 'pointer',
-        minWidth: 0,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(233, 213, 255, 0.6), rgba(216, 180, 254, 0.6))';
-        e.currentTarget.style.transform = 'translateY(-1px)';
-        e.currentTarget.style.boxShadow = '0 2px 4px rgba(139, 92, 246, 0.2)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.background = 'linear-gradient(135deg, rgba(233, 213, 255, 0.4), rgba(216, 180, 254, 0.4))';
-        e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'none';
-      }}
+      p="xs"
+      radius="sm"
+      bg="var(--mantine-color-gray-0)"
+      style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
     >
-      <svg
-        viewBox="0 0 24 24"
-        width="14"
-        height="14"
-        style={{ color: '#7c3aed', flexShrink: 0 }}
-        fill="currentColor"
-      >
-        <title>Blockchain</title>
-        <path
-          d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-        />
-      </svg>
-      <span
-        style={{
-          fontSize: '0.8rem',
-          fontWeight: 500,
-          color: '#7c3aed',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          flex: 1,
-          minWidth: 0,
-        }}
-      >
-        {displayLabel}
-      </span>
-    </a>
+      <Group gap="xs" wrap="nowrap">
+        <IconLink size={15} stroke={1.7} color="var(--mantine-color-gray-6)" />
+        <Stack gap={0} style={{ minWidth: 0, flex: 1 }}>
+          <Text size="xs" c="dimmed">{t('blockchainCertification')}</Text>
+          <Text size="sm" fw={550} truncate>{displayLabel}</Text>
+        </Stack>
+        <IconExternalLink size={14} stroke={1.7} color="var(--mantine-color-gray-5)" />
+      </Group>
+    </Paper>
   );
 }

@@ -1,4 +1,12 @@
+import path from 'node:path';
 import { Page } from '@playwright/test';
+
+/**
+ * Session saved by tests/e2e/auth.setup.ts and reused by specs via
+ * `test.use({ storageState: ADMIN_STORAGE_STATE })`, so the suite signs in once
+ * instead of per test — the admin login allows 10 attempts per 15 minutes.
+ */
+export const ADMIN_STORAGE_STATE = path.join('playwright', '.auth', 'admin.json');
 
 export async function loginAdmin(page: Page, email: string, password: string) {
   // Use UI login for reliability with retry logic
@@ -6,7 +14,7 @@ export async function loginAdmin(page: Page, email: string, password: string) {
   await page.waitForSelector('input[type="email"]', { timeout: 10000 });
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', password);
-  await page.click('button:has-text("Acceder al Dashboard")');
+  await page.click('form button[type="submit"]');
   
   // Wait for navigation with retry logic
   try {
@@ -44,10 +52,8 @@ export async function loginUser(page: Page, email: string, password: string) {
 }
 
 export async function logoutUser(page: Page) {
-  // Look for the logout button by its title attribute or icon
-  const logoutButton = page.locator('button[title="Cerrar sesión"], button:has(i.bi-box-arrow-right)').first();
-  if (await logoutButton.isVisible()) {
-    await logoutButton.click();
-    await page.waitForURL(/\/(auth\/(admin|operator)\/login|apps)/);
-  }
+  // Logout lives inside the account menu in the top bar.
+  await page.getByRole('button', { name: /cuenta|account/i }).click();
+  await page.getByRole('menuitem', { name: /cerrar sesi[óo]n|log out/i }).click();
+  await page.waitForURL(/\/auth\/(admin|superadmin)\/login/);
 }

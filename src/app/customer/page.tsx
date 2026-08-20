@@ -1,68 +1,54 @@
 'use client';
 
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Button, Center, Group, Paper, Stack, Text, TextInput, ThemeIcon, Title } from '@mantine/core';
+import { IconQrcode, IconSearch } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
+import PassportShell from './components/PassportShell';
 
 export default function CustomerPage() {
   const t = useTranslations('customer');
   const router = useRouter();
+  const [code, setCode] = useState('');
 
-  // Scanner functionality is now handled by the unified scanner page
-
-  const handleManualInput = useCallback(async (code: string) => {
-    if (code.trim()) {
-      // Navegar directamente a la página del item
-      router.push(`/customer/item/${code}`);
-    }
-  }, [router]);
+  const handleSubmit = useCallback(
+    (event: React.FormEvent) => {
+      event.preventDefault();
+      const trimmed = code.trim();
+      if (trimmed) router.push(`/customer/item/${trimmed}`);
+    },
+    [code, router]
+  );
 
   return (
-    <div className="customer-container">
-      <div className="customer-content">
-        <div className="scan-section">
-          <div className="scan-card">
-            <div className="scan-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 9h6v12H3z"/>
-                <path d="M15 3h6v18h-6z"/>
-                <path d="M9 3h6v18H9z"/>
-              </svg>
-            </div>
-            <h2>{t('scanCode')}</h2>
-            <p>{t('scanDescription')}</p>
-            
-            <div className="scan-actions">
-              <div className="manual-input">
-                <input
-                  type="text"
-                  placeholder={t('manualInput')}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      handleManualInput(e.currentTarget.value);
-                    }
-                  }}
-                />
-                <button 
-                  className="manual-button"
-                  onClick={() => {
-                    const input = document.querySelector('.manual-input input') as HTMLInputElement;
-                    if (input) handleManualInput(input.value);
-                  }}
-                >
-                  {t('search')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+    <PassportShell>
+      <Center mih="60vh">
+        <Paper p="xl" radius="md" w="100%" maw={420}>
+          <Stack align="center" gap="xs" mb="lg">
+            <ThemeIcon color="datiaBlue" variant="light" size={56} radius="xl">
+              <IconQrcode size={28} stroke={1.5} />
+            </ThemeIcon>
+            <Title order={3} ta="center">{t('scanCode')}</Title>
+            <Text size="sm" c="dimmed" ta="center">{t('scanDescription')}</Text>
+          </Stack>
 
-        {/* Scanner functionality is now handled by the unified scanner page */}
-      </div>
-
-      <div className="customer-footer">
-        <p>{t('copyright')}</p>
-      </div>
-    </div>
+          <form onSubmit={handleSubmit}>
+            <Group gap="xs" wrap="nowrap" align="flex-end">
+              <TextInput
+                flex={1}
+                label={t('manualInput')}
+                value={code}
+                onChange={(event) => setCode(event.currentTarget.value)}
+                leftSection={<IconSearch size={15} stroke={1.7} />}
+              />
+              <Button type="submit" disabled={!code.trim()}>
+                {t('search')}
+              </Button>
+            </Group>
+          </form>
+        </Paper>
+      </Center>
+    </PassportShell>
   );
 }

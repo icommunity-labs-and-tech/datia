@@ -9,7 +9,6 @@ import '@/styles/legacy-utilities.css';
 import '@/app/globals.css';
 import Providers from '@/components/Providers';
 import RootContainer from '@/components/RootContainer';
-import CustomerCSS from '@/components/CustomerCSS';
 import { appConfig } from '@/config/app';
 import { getLocale } from '@/i18n/locale';
 import { NextIntlClientProvider } from 'next-intl';
@@ -36,7 +35,6 @@ export default async function RootLayout({
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <Providers>
-            <CustomerCSS />
             <a href="#main" className="visually-hidden-focusable">
               {t('skipToContent')}
             </a>

@@ -3,7 +3,13 @@ import { loginAdmin } from './utils/auth';
 import { prepareCleanPage, addTestDelay } from './utils/test-isolation';
 import { findRowByText, clickActionInRow, saveForm } from './utils/table';
 
-test.describe('Admin - Users CRUD', () => {
+/**
+ * SKIPPED — user and status-type management are hidden from the UI for now
+ * (see "UX journeys" in tests/e2e/README.md). The routes redirect to /dashboard,
+ * so these flows have no entry point. Re-enable by dropping `.skip` when the
+ * screens are exposed again.
+ */
+test.describe.skip('Admin - Users CRUD', () => {
   test.beforeEach(async ({ page }) => {
     await prepareCleanPage(page);
     const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';

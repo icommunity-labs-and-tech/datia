@@ -1,29 +1,39 @@
 import { test, expect } from '@playwright/test';
-import { loginAdmin } from './utils/auth';
+import { ADMIN_STORAGE_STATE } from './utils/auth';
+
+/**
+ * The dashboard overview leads with metric tiles. When the energy module is off
+ * they are the asset counters only; the energy tiles and the sources map appear
+ * for organisations that have it enabled.
+ */
 
 test.describe('Admin - KPIs & Activity', () => {
+  test.use({ storageState: ADMIN_STORAGE_STATE });
+
   test.beforeEach(async ({ page }) => {
-    const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
-    const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
-    await loginAdmin(page, email, password);
-    await page.goto('/dashboard');
+    await page.goto('/dashboard', { waitUntil: 'networkidle' });
   });
 
-  test('KPIs render and handle loading/empty states', async ({ page }) => {
-    const kpiCards = page.locator('[data-testid="kpi"], .kpi, .card');
-    await expect(kpiCards.first()).toBeVisible({ timeout: 10000 });
+  test('metric tiles render with values', async ({ page }) => {
+    const total = page.getByText(/activos totales|total assets/i);
+    await expect(total).toBeVisible();
 
-    // Loading skeleton/spinner optional
-    const loading = page.locator('.spinner-border, .loading, [role="status"]');
-    if (await loading.isVisible()) {
-      await expect(loading).toBeVisible();
+    // Each tile shows a number, not an empty placeholder.
+    const tile = total.locator('xpath=ancestor::*[contains(@class,"mantine-Paper-root")][1]');
+    await expect(tile).toContainText(/\d/);
+
+    await expect(page.getByText(/estados certificados|certified states/i).first()).toBeVisible();
+  });
+
+  test('recent assets panel links into the gallery', async ({ page }) => {
+    const panel = page.getByText(/activos recientes|recent assets/i);
+
+    // Only rendered when the organisation has assets.
+    if (await panel.isVisible()) {
+      await expect(page.getByRole('link', { name: /ver todos|view all/i })).toBeVisible();
+      await expect(page.locator('a[href^="/dashboard/items/"]').first()).toBeVisible();
+    } else {
+      await expect(page.getByText(/activos totales|total assets/i)).toBeVisible();
     }
   });
-
-  test('Monthly activity section renders', async ({ page }) => {
-    const activity = page.getByText(/actividad mensual|monthly activity|activity/i).first();
-    await expect(activity).toBeVisible({ timeout: 10000 });
-  });
 });
-
-

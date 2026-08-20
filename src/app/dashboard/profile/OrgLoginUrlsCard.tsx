@@ -1,6 +1,7 @@
 'use client';
 
-import { Card, Button, TextInput, Group, Text, Title } from '@mantine/core';
+import { Button, Card, Group, Stack, Text, TextInput } from '@mantine/core';
+import { IconCheck, IconCopy } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 
@@ -10,6 +11,7 @@ interface Props {
 
 export default function OrgLoginUrlsCard({ slug }: Props) {
   const t = useTranslations('profile');
+  const tActions = useTranslations('common.actions');
   const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
 
   const handleCopy = (url: string, key: string) => {
@@ -21,9 +23,11 @@ export default function OrgLoginUrlsCard({ slug }: Props) {
   const origin = typeof window !== 'undefined' ? window.location.origin : '';
 
   return (
-    <Card mb="md">
-        <Title order={6} mb={4}>{t('branding.loginUrls')}</Title>
-        <Text size="sm" c="dimmed" mb="md">{t('branding.loginUrlsDescription')}</Text>
+    <Card p="lg" radius="md">
+      <Stack gap={4} mb="md">
+        <Text size="sm" fw={600}>{t('branding.loginUrls')}</Text>
+        <Text size="sm" c="dimmed">{t('branding.loginUrlsDescription')}</Text>
+      </Stack>
 
         {(['admin'] as const).map(role => {
           const url = `${origin}/org/${slug}/${role}`;
@@ -44,9 +48,9 @@ export default function OrgLoginUrlsCard({ slug }: Props) {
                 size="sm"
                 style={{ whiteSpace: 'nowrap', minWidth: 90 }}
                 onClick={() => handleCopy(url, role)}
-                leftSection={<i className={`bi bi-${copiedUrl === role ? 'check' : 'clipboard'}`} />}
+                leftSection={copiedUrl === role ? <IconCheck size={15} stroke={1.7} /> : <IconCopy size={15} stroke={1.7} />}
               >
-                {copiedUrl === role ? t('branding.loginUrlCopied') : 'Copiar'}
+                {copiedUrl === role ? t('branding.loginUrlCopied') : tActions('copy')}
               </Button>
             </Group>
           );

@@ -8,7 +8,9 @@ import {
   Menu,
   Drawer,
   Anchor,
+  Avatar,
   Box,
+  Text,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Link from 'next/link';
@@ -17,7 +19,6 @@ import { usePathname } from '@/i18n/routing';
 import { useRouter } from 'next/navigation';
 import { useTransition, useCallback } from 'react';
 import {
-  IconUser,
   IconLogout,
   IconLanguage,
   IconHome2,
@@ -25,15 +26,17 @@ import {
   IconBolt,
   IconSettings,
   IconCode,
+  IconChevronDown,
 } from '@tabler/icons-react';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import DatiaNavbar from './DatiaNavbar';
 import Logo from '@/components/Logo';
 import type { OrgModules } from '@/app/dashboard/(app)/layout';
 
-const HEADER_HEIGHT = 56;
-const NAV_BG = '#181c2e';
-const NAV_BORDER = '#252a3d';
+const HEADER_HEIGHT = 60;
+const HAIRLINE = 'var(--mantine-color-gray-2)';
+const APP_BG = 'var(--mantine-color-gray-0)';
+const MUTED = 'var(--mantine-color-gray-6)';
 
 const LANGUAGES = [
   { code: 'es', label: 'Español', flag: '🇪🇸' },
@@ -59,7 +62,7 @@ export default function DatiaAppShell({
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
-  const { logout } = useAuthSeparated();
+  const { user, logout } = useAuthSeparated();
   const [isPending, startTransition] = useTransition();
 
   const handleLogout = useCallback(async () => {
@@ -93,6 +96,8 @@ export default function DatiaAppShell({
       ? pathname === href
       : pathname === href || pathname.startsWith(href + '/');
 
+  // Only content surfaces live in the top nav; account/organisation settings sit
+  // under the avatar menu so the bar stays down to what the product actually does.
   const mainLinks = [
     { href: '/dashboard', icon: IconHome2, label: tSidebar('home'), exact: true },
     ...(showPassport
@@ -101,11 +106,12 @@ export default function DatiaAppShell({
     ...(showEnergy
       ? [{ href: '/dashboard/energy', icon: IconBolt, label: tSidebar('energy'), exact: false }]
       : []),
-    { href: '/dashboard/settings', icon: IconSettings, label: tSidebar('settings'), exact: false },
     { href: '/dashboard/api', icon: IconCode, label: tSidebar('api'), exact: false },
   ];
 
-  // Dashboard home gets full-height map with no padding
+  const initials = (user?.name || user?.email || 'D').trim().charAt(0).toUpperCase();
+
+  // Dashboard home gets a full-height map with no padding
   const isDashboardHome = pathname === '/dashboard';
 
   return (
@@ -114,32 +120,28 @@ export default function DatiaAppShell({
 
       <AppShell header={{ height: HEADER_HEIGHT }} padding={0}>
         {/* ── Topbar ── */}
-        <AppShell.Header style={{ background: NAV_BG, borderBottom: `1px solid ${NAV_BORDER}` }}>
-          <Group h="100%" gap={0} wrap="nowrap">
+        <AppShell.Header
+          style={{ background: 'var(--mantine-color-white)', borderBottom: `1px solid ${HAIRLINE}` }}
+        >
+          <Group h="100%" gap={0} wrap="nowrap" px="md">
 
             {/* Logo */}
             <Box
-              px="md"
-              style={{
-                borderRight: `1px solid ${NAV_BORDER}`,
-                display: 'flex',
-                alignItems: 'center',
-                height: '100%',
-                flexShrink: 0,
-              }}
+              pr="lg"
+              style={{ display: 'flex', alignItems: 'center', height: '100%', flexShrink: 0 }}
             >
               <Logo
                 href="/dashboard"
-                width={110}
-                height={30}
+                width={104}
+                height={28}
                 priority
-                src={logoUrl ?? '/logo-datia-white.svg'}
+                src={logoUrl ?? '/logo-datia.svg'}
                 alt="datia"
               />
             </Box>
 
             {/* Desktop nav links */}
-            <Group gap={0} visibleFrom="sm" style={{ flex: 1, height: '100%' }}>
+            <Group gap={4} visibleFrom="sm" style={{ flex: 1, height: '100%' }}>
               {mainLinks.map(({ href, icon: Icon, label, exact }) => {
                 const active = isActive(href, exact);
                 return (
@@ -147,21 +149,23 @@ export default function DatiaAppShell({
                     key={href}
                     component={Link}
                     href={href}
+                    data-active={active || undefined}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
                       gap: 7,
-                      height: HEADER_HEIGHT,
-                      padding: '0 14px',
-                      color: active ? '#ffffff' : '#8892a4',
-                      borderBottom: `2px solid ${active ? '#F0930A' : 'transparent'}`,
+                      height: 36,
+                      padding: '0 12px',
+                      borderRadius: 8,
+                      color: active ? 'var(--mantine-color-datiaBlue-7)' : MUTED,
+                      background: active ? 'var(--mantine-color-datiaBlue-0)' : 'transparent',
                       textDecoration: 'none',
                       fontSize: 13.5,
                       fontWeight: active ? 600 : 500,
                       whiteSpace: 'nowrap',
                     }}
                   >
-                    <Icon size={15} stroke={1.5} />
+                    <Icon size={16} stroke={1.7} />
                     {label}
                   </Anchor>
                 );
@@ -169,17 +173,18 @@ export default function DatiaAppShell({
             </Group>
 
             {/* Right actions */}
-            <Group gap="xs" px="md" ml="auto" style={{ flexShrink: 0 }}>
-              <Menu shadow="md" width={160}>
+            <Group gap={6} ml="auto" style={{ flexShrink: 0 }}>
+              <Menu shadow="lg" width={168} position="bottom-end">
                 <Menu.Target>
                   <ActionIcon
                     variant="subtle"
-                    size="md"
-                    aria-label="Switch language"
+                    color="gray"
+                    size="lg"
+                    radius="md"
+                    aria-label={tSidebar('language')}
                     loading={isPending}
-                    style={{ color: '#8892a4' }}
                   >
-                    <IconLanguage size={18} stroke={1.5} />
+                    <IconLanguage size={19} stroke={1.6} />
                   </ActionIcon>
                 </Menu.Target>
                 <Menu.Dropdown>
@@ -195,34 +200,58 @@ export default function DatiaAppShell({
                 </Menu.Dropdown>
               </Menu>
 
-              <ActionIcon
-                component={Link}
-                href="/dashboard/settings?tab=org"
-                variant="subtle"
-                size="md"
-                aria-label="Profile"
-                style={{ color: '#8892a4' }}
-              >
-                <IconUser size={18} stroke={1.5} />
-              </ActionIcon>
-
-              <ActionIcon
-                variant="subtle"
-                size="md"
-                aria-label="Log out"
-                onClick={handleLogout}
-                style={{ color: '#8892a4' }}
-              >
-                <IconLogout size={18} stroke={1.5} />
-              </ActionIcon>
+              <Menu shadow="lg" width={230} position="bottom-end">
+                <Menu.Target>
+                  <Group
+                    gap={7}
+                    px={6}
+                    py={4}
+                    wrap="nowrap"
+                    component="button"
+                    aria-label={tSidebar('account')}
+                    style={{
+                      border: `1px solid ${HAIRLINE}`,
+                      borderRadius: 999,
+                      background: 'transparent',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Avatar size={26} radius="xl" color="datiaBlue" variant="filled">
+                      <Text fz={12} fw={700}>{initials}</Text>
+                    </Avatar>
+                    <IconChevronDown size={14} stroke={2} color="var(--mantine-color-gray-5)" />
+                  </Group>
+                </Menu.Target>
+                <Menu.Dropdown>
+                  <Menu.Label>
+                    <Text size="xs" fw={600} c="dark" truncate>
+                      {user?.name || user?.email || '—'}
+                    </Text>
+                  </Menu.Label>
+                  <Menu.Item
+                    component={Link}
+                    href="/dashboard/settings"
+                    leftSection={<IconSettings size={16} stroke={1.6} />}
+                  >
+                    {tSidebar('settings')}
+                  </Menu.Item>
+                  <Menu.Divider />
+                  <Menu.Item
+                    color="red"
+                    onClick={handleLogout}
+                    leftSection={<IconLogout size={16} stroke={1.6} />}
+                  >
+                    {tSidebar('logout')}
+                  </Menu.Item>
+                </Menu.Dropdown>
+              </Menu>
 
               <Burger
                 opened={mobileOpened}
                 onClick={toggleMobile}
                 hiddenFrom="sm"
                 size="sm"
-                color="#8892a4"
-                aria-label="Open menu"
+                aria-label={tSidebar('openMenu')}
               />
             </Group>
           </Group>
@@ -232,7 +261,7 @@ export default function DatiaAppShell({
         <Drawer
           opened={mobileOpened}
           onClose={closeMobile}
-          size={240}
+          size={260}
           padding={0}
           hiddenFrom="sm"
           zIndex={200}
@@ -241,8 +270,14 @@ export default function DatiaAppShell({
         </Drawer>
 
         {/* ── Main content ── */}
-        <AppShell.Main>
-          {isDashboardHome ? children : <Box p="md">{children}</Box>}
+        <AppShell.Main style={{ background: APP_BG }}>
+          {isDashboardHome ? (
+            children
+          ) : (
+            <Box px={{ base: 'md', sm: 'xl' }} py="lg" mx="auto" maw={1360}>
+              {children}
+            </Box>
+          )}
         </AppShell.Main>
       </AppShell>
     </>

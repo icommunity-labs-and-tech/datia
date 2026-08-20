@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Modal, Button, Group, Stack, Text } from '@mantine/core';
+import { IconQrcode, IconCopy, IconDownload } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 type ItemQrModalProps = {
   show: boolean;
@@ -11,6 +13,7 @@ type ItemQrModalProps = {
 };
 
 export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrModalProps) {
+  const t = useTranslations('itemDetail.qr');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -76,7 +79,7 @@ export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrMo
       opened={show}
       onClose={onHide}
       centered
-      title={<Group gap={6}><i className="bi bi-qr-code" />{itemName ? `QR de ${itemName}` : 'Código QR del item'}</Group>}
+      title={<Group gap={6}><IconQrcode size={17} stroke={1.7} />{itemName ? t('titleNamed', { name: itemName }) : t('title')}</Group>}
     >
       <Stack align="center" gap="xs">
         <canvas ref={canvasRef} style={{ width: 260, height: 260 }} />
@@ -84,11 +87,11 @@ export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrMo
         {error && <Text size="sm" c="red">{error}</Text>}
       </Stack>
       <Group justify="flex-end" mt="lg">
-        <Button variant="default" leftSection={<i className="bi bi-clipboard" />} onClick={handleCopyUrl}>
-          Copiar enlace
+        <Button variant="default" leftSection={<IconCopy size={15} stroke={1.7} />} onClick={handleCopyUrl}>
+          {t('copyLink')}
         </Button>
-        <Button leftSection={<i className="bi bi-download" />} onClick={handleDownload}>
-          Descargar PNG
+        <Button leftSection={<IconDownload size={15} stroke={1.7} />} onClick={handleDownload}>
+          {t('downloadPng')}
         </Button>
       </Group>
     </Modal>

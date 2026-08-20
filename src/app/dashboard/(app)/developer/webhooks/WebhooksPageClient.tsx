@@ -1,7 +1,36 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Button, Table, Modal, Form, Alert, Badge } from '@/components/legacy/bootstrap-compat';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  ActionIcon,
+  Alert,
+  Badge,
+  Button,
+  Center,
+  Checkbox,
+  Code,
+  Group,
+  Modal,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Switch,
+  Table,
+  Text,
+  TextInput,
+  Textarea,
+  ThemeIcon,
+  Tooltip as MantineTooltip,
+} from '@mantine/core';
+import {
+  IconWebhook,
+  IconChartLine,
+  IconPencil,
+  IconTrash,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconPlus,
+} from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { listWebhooks } from '@/actions/webhooks/list';
@@ -9,11 +38,8 @@ import { createWebhook } from '@/actions/webhooks/create';
 import { updateWebhook } from '@/actions/webhooks/update';
 import { deleteWebhook } from '@/actions/webhooks/delete';
 import { toggleWebhookActive } from '@/actions/webhooks/toggleActive';
-import Box from '@/components/Box';
-import LoadingOverlay from '@/components/Loading';
-import { Divider } from '@/components/Divider';
-import '@/components/GenericTable/Toolbar/Toolbar.css';
-import { colors, axisProps, gridProps, tooltipStyle } from '@/components/charts/theme';
+import SectionCard from '@/components/layout/SectionCard';
+import { axisProps, gridProps, tooltipStyle, seriesColor } from '@/components/charts/theme';
 
 interface Webhook {
   id: string;
@@ -29,38 +55,141 @@ interface Webhook {
   createdAt: Date;
 }
 
+interface FormState {
+  name: string;
+  url: string;
+  secret: string;
+  events: string[];
+  active: boolean;
+  headers: string;
+}
+
+const AVAILABLE_EVENTS = [
+  'item.created',
+  'state.created',
+  'energy_source_event',
+  'energy_consumption_event',
+  'co2_emission_event',
+  'co2_certification_event',
+  'maintenance_event',
+];
+
+const EMPTY_FORM: FormState = {
+  name: '',
+  url: '',
+  secret: '',
+  events: [],
+  active: true,
+  headers: '',
+};
+
+interface WebhookFormProps {
+  /** 'createModal' or 'editModal' — both forms share every field. */
+  namespace: 'createModal' | 'editModal';
+  value: FormState;
+  onChange: (value: FormState) => void;
+  onSubmit: (event: React.FormEvent) => void;
+  onCancel: () => void;
+  submitLabel: string;
+  submitting?: boolean;
+}
+
+function WebhookForm({
+  namespace,
+  value,
+  onChange,
+  onSubmit,
+  onCancel,
+  submitLabel,
+  submitting,
+}: WebhookFormProps) {
+  const t = useTranslations('developer.webhooks');
+  const field = (key: string) => t(`${namespace}.${key}` as never);
+  const set = <K extends keyof FormState>(key: K, next: FormState[K]) =>
+    onChange({ ...value, [key]: next });
+
+  return (
+    <form onSubmit={onSubmit}>
+      <Stack gap="md">
+        <TextInput
+          label={field('nameLabel')}
+          placeholder={namespace === 'createModal' ? field('namePlaceholder') : undefined}
+          value={value.name}
+          onChange={(e) => set('name', e.currentTarget.value)}
+          required
+          data-autofocus
+        />
+
+        <TextInput
+          type="url"
+          label={field('urlLabel')}
+          placeholder={namespace === 'createModal' ? field('urlPlaceholder') : undefined}
+          description={namespace === 'createModal' ? field('urlHelp') : undefined}
+          value={value.url}
+          onChange={(e) => set('url', e.currentTarget.value)}
+          required
+        />
+
+        <Checkbox.Group
+          label={field('eventsLabel')}
+          description={namespace === 'createModal' ? field('eventsHelp') : undefined}
+          value={value.events}
+          onChange={(events) => set('events', events)}
+        >
+          <Stack gap={6} mt={6}>
+            {AVAILABLE_EVENTS.map((event) => (
+              <Checkbox key={event} value={event} label={<Code>{event}</Code>} size="sm" />
+            ))}
+          </Stack>
+        </Checkbox.Group>
+
+        <TextInput
+          label={field('secretLabel')}
+          placeholder={field('secretPlaceholder')}
+          description={field('secretHelp')}
+          value={value.secret}
+          onChange={(e) => set('secret', e.currentTarget.value)}
+        />
+
+        <Textarea
+          label={field('headersLabel')}
+          placeholder={namespace === 'createModal' ? field('headersPlaceholder') : undefined}
+          description={namespace === 'createModal' ? field('headersHelp') : undefined}
+          rows={3}
+          autosize
+          minRows={3}
+          value={value.headers}
+          onChange={(e) => set('headers', e.currentTarget.value)}
+          styles={{ input: { fontFamily: 'var(--mantine-font-family-monospace)', fontSize: 13 } }}
+        />
+
+        <Switch
+          label={field('activeLabel')}
+          checked={value.active}
+          onChange={(e) => set('active', e.currentTarget.checked)}
+        />
+
+        <Group justify="flex-end" gap="xs">
+          <Button variant="default" onClick={onCancel}>{field('cancel')}</Button>
+          <Button type="submit" loading={submitting}>{submitLabel}</Button>
+        </Group>
+      </Stack>
+    </form>
+  );
+}
+
 export default function WebhooksPageClient() {
   const t = useTranslations('developer.webhooks');
-  const tCommon = useTranslations('common.actions');
   const [webhooks, setWebhooks] = useState<Webhook[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
+  const [createOpened, setCreateOpened] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<Webhook | null>(null);
+  const [webhookToDelete, setWebhookToDelete] = useState<Webhook | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    url: '',
-    secret: '',
-    events: [] as string[],
-    active: true,
-    headers: '',
-  });
+  const [formData, setFormData] = useState<FormState>(EMPTY_FORM);
 
-  const availableEvents = [
-    'item.created',
-    'state.created',
-    'energy_source_event',
-    'energy_consumption_event',
-    'co2_emission_event',
-    'co2_certification_event',
-    'maintenance_event',
-  ];
-
-  const loadWebhooks = async () => {
+  const loadWebhooks = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -68,39 +197,42 @@ export default function WebhooksPageClient() {
       if (result.success && result.data) {
         setWebhooks(result.data);
       } else {
-        const errorMsg = result.error || t('loadError');
-        console.error('Error loading webhooks:', errorMsg);
-        setError(errorMsg);
+        setError(result.error || t('loadError'));
       }
     } catch (err: any) {
-      const errorMsg = err?.message || t('loadError');
-      console.error('Exception loading webhooks:', err);
-      setError(errorMsg);
+      setError(err?.message || t('loadError'));
     } finally {
       setLoading(false);
     }
+  }, [t]);
+
+  useEffect(() => { loadWebhooks(); }, [loadWebhooks]);
+
+  const flashSuccess = (message: string) => {
+    setSuccess(message);
+    setTimeout(() => setSuccess(null), 3000);
   };
 
-  useEffect(() => {
-    loadWebhooks();
-  }, []);
+  /** Headers are entered as JSON; reject malformed input before submitting. */
+  const parseHeaders = (): Record<string, string> | null | undefined => {
+    if (!formData.headers.trim()) return null;
+    try {
+      return JSON.parse(formData.headers);
+    } catch {
+      setError(t('headersInvalid'));
+      return undefined;
+    }
+  };
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(null);
 
-    try {
-      let headersObj = null;
-      if (formData.headers.trim()) {
-        try {
-          headersObj = JSON.parse(formData.headers);
-        } catch {
-          setError(t('headersInvalid'));
-          return;
-        }
-      }
+    const headersObj = parseHeaders();
+    if (headersObj === undefined) return;
 
+    try {
       const result = await createWebhook({
         name: formData.name,
         url: formData.url,
@@ -111,15 +243,14 @@ export default function WebhooksPageClient() {
       });
 
       if (result.success) {
-        setSuccess(t('createSuccess'));
-        setShowCreateModal(false);
-        resetForm();
+        setCreateOpened(false);
+        setFormData(EMPTY_FORM);
         await loadWebhooks();
-        setTimeout(() => setSuccess(null), 3000);
+        flashSuccess(t('createSuccess'));
       } else {
         setError(result.error || t('createError'));
       }
-    } catch (err) {
+    } catch {
       setError(t('createError'));
     }
   };
@@ -134,7 +265,6 @@ export default function WebhooksPageClient() {
       active: webhook.active,
       headers: webhook.headers ? JSON.stringify(webhook.headers, null, 2) : '',
     });
-    setShowEditModal(true);
   };
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -144,17 +274,10 @@ export default function WebhooksPageClient() {
     setError(null);
     setSuccess(null);
 
-    try {
-      let headersObj = null;
-      if (formData.headers.trim()) {
-        try {
-          headersObj = JSON.parse(formData.headers);
-        } catch {
-          setError(t('headersInvalid'));
-          return;
-        }
-      }
+    const headersObj = parseHeaders();
+    if (headersObj === undefined) return;
 
+    try {
       const result = await updateWebhook(editingWebhook.id, {
         name: formData.name,
         url: formData.url,
@@ -165,35 +288,32 @@ export default function WebhooksPageClient() {
       });
 
       if (result.success) {
-        setSuccess(t('updateSuccess'));
-        setShowEditModal(false);
         setEditingWebhook(null);
-        resetForm();
+        setFormData(EMPTY_FORM);
         await loadWebhooks();
-        setTimeout(() => setSuccess(null), 3000);
+        flashSuccess(t('updateSuccess'));
       } else {
         setError(result.error || t('updateError'));
       }
-    } catch (err) {
+    } catch {
       setError(t('updateError'));
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('deleteConfirm'))) {
-      return;
-    }
+  const handleDelete = async () => {
+    if (!webhookToDelete) return;
+    const id = webhookToDelete.id;
+    setWebhookToDelete(null);
 
     try {
       const result = await deleteWebhook(id);
       if (result.success) {
-        setSuccess(t('deleteSuccess'));
         await loadWebhooks();
-        setTimeout(() => setSuccess(null), 3000);
+        flashSuccess(t('deleteSuccess'));
       } else {
         setError(result.error || t('deleteError'));
       }
-    } catch (err) {
+    } catch {
       setError(t('deleteError'));
     }
   };
@@ -203,35 +323,14 @@ export default function WebhooksPageClient() {
       const result = await toggleWebhookActive(id, !currentActive);
       if (result.success) {
         const status = !currentActive ? t('activated') : t('deactivated');
-        setSuccess(t('toggleSuccess', { status }));
         await loadWebhooks();
-        setTimeout(() => setSuccess(null), 3000);
+        flashSuccess(t('toggleSuccess', { status }));
       } else {
         setError(result.error || t('toggleError'));
       }
-    } catch (err) {
+    } catch {
       setError(t('toggleError'));
     }
-  };
-
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      url: '',
-      secret: '',
-      events: [],
-      active: true,
-      headers: '',
-    });
-  };
-
-  const toggleEvent = (event: string) => {
-    setFormData(prev => ({
-      ...prev,
-      events: prev.events.includes(event)
-        ? prev.events.filter(e => e !== event)
-        : [...prev.events, event],
-    }));
   };
 
   const formatDate = (date: Date | null) => {
@@ -240,39 +339,37 @@ export default function WebhooksPageClient() {
     return new Date(date).toLocaleString(locale);
   };
 
-  // Preparar datos para el gráfico de evolución de triggers de webhooks
+  // Whether each webhook fired in each period — a 0/1 line per webhook.
   const chartData = useMemo(() => {
     if (webhooks.length === 0) return { data: [], webhookNames: [] };
 
     const now = new Date();
-    const sortedWebhooks = [...webhooks].sort((a, b) => 
+    const sortedWebhooks = [...webhooks].sort((a, b) =>
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    // Obtener la fecha más antigua
     const oldestDate = new Date(sortedWebhooks[0].createdAt);
     oldestDate.setHours(0, 0, 0, 0);
     const daysDiff = Math.ceil((now.getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Crear períodos (semanas si hay más de 30 días, días si hay menos)
+
     const periodType = daysDiff > 30 ? 'week' : 'day';
     const periods: Array<{ period: string; date: Date; endDate: Date }> = [];
 
     const startDate = new Date(oldestDate);
     let periodNum = 1;
-    
+
     while (startDate <= now) {
       const locale = typeof window !== 'undefined' ? navigator.language : 'en-US';
-      const key = periodType === 'week' 
-        ? `Sem ${periodNum}`
+      const key = periodType === 'week'
+        ? `${t('period')} ${periodNum}`
         : startDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-      
+
       const endDate = periodType === 'week'
         ? new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)
         : new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-      
+
       periods.push({ period: key, date: new Date(startDate), endDate });
-      
+
       if (periodType === 'week') {
         startDate.setDate(startDate.getDate() + 7);
         periodNum++;
@@ -281,27 +378,15 @@ export default function WebhooksPageClient() {
       }
     }
 
-    // Mostrar si cada webhook se disparó en cada período
     const result = periods.map(({ period, date, endDate }) => {
       const periodData: { period: string; [key: string]: number | string } = { period };
 
       sortedWebhooks.forEach((webhook, index) => {
-        const webhookCreated = new Date(webhook.createdAt);
         const webhookKey = `webhook_${index}`;
-        
-        // Si el webhook fue creado antes o en este período
-        if (webhookCreated <= endDate) {
-          // Verificar si el webhook se disparó en este período
-          if (webhook.lastTriggeredAt) {
-            const triggerDate = new Date(webhook.lastTriggeredAt);
-            // Si se disparó en este período, mostrar 1, sino 0
-            periodData[webhookKey] = (triggerDate >= date && triggerDate < endDate) ? 1 : 0;
-          } else {
-            // Webhook creado pero nunca disparado
-            periodData[webhookKey] = 0;
-          }
+        if (new Date(webhook.createdAt) <= endDate && webhook.lastTriggeredAt) {
+          const triggerDate = new Date(webhook.lastTriggeredAt);
+          periodData[webhookKey] = triggerDate >= date && triggerDate < endDate ? 1 : 0;
         } else {
-          // Webhook aún no creado en este período
           periodData[webhookKey] = 0;
         }
       });
@@ -309,169 +394,176 @@ export default function WebhooksPageClient() {
       return periodData;
     });
 
-    // Obtener nombres de webhooks para la leyenda
     const webhookNames = sortedWebhooks.map((webhook, index) => ({
       key: `webhook_${index}`,
-      name: webhook.name
+      name: webhook.name,
     }));
 
     return { data: result, webhookNames };
-  }, [webhooks]);
-
-  if (loading) {
-    return <LoadingOverlay />;
-  }
+  }, [webhooks, t]);
 
   return (
-    <>
-      <Box>
-        <h6 className="mb-2">{t('whatAreWebhooks')}</h6>
-        <Divider />
-        <p className="mb-0 text-muted">
-          {t('webhooksDescription')}
-        </p>
-      </Box>
+    <Stack gap="md">
+      <SectionCard icon={IconWebhook} title={t('whatAreWebhooks')}>
+        <Text size="sm" c="dimmed">{t('webhooksDescription')}</Text>
+      </SectionCard>
 
-      <Box>
-        <div className="table-toolbar">
-          <div className="title-section">
-            <i className="bi bi-box-arrow-up-right-fill"></i>
-            <h4>{t('title')}</h4>
-          </div>
-          <div className="controls-section">
-            <Button variant="primary" onClick={() => setShowCreateModal(true)}>
-              <span className="d-none d-md-inline">{t('createWebhook')}</span>
-              <span className="d-md-none">+</span>
-            </Button>
-          </div>
-        </div>
-
+      <SectionCard
+        icon={IconWebhook}
+        title={t('title')}
+        actions={
+          <Button
+            size="xs"
+            leftSection={<IconPlus size={14} stroke={1.7} />}
+            onClick={() => { setFormData(EMPTY_FORM); setCreateOpened(true); }}
+          >
+            {t('createWebhook')}
+          </Button>
+        }
+      >
         {error && (
-          <Alert variant="danger" onClose={() => setError(null)} dismissible className="mb-3">
+          <Alert color="red" variant="light" withCloseButton onClose={() => setError(null)} mb="md">
             {error}
           </Alert>
         )}
-
         {success && (
-          <Alert variant="success" onClose={() => setSuccess(null)} dismissible className="mb-3">
+          <Alert color="green" variant="light" withCloseButton onClose={() => setSuccess(null)} mb="md">
             {success}
           </Alert>
         )}
 
-        <Divider />
-
-        {webhooks.length === 0 ? (
-          <div className="text-center py-5">
-            <i className="bi bi-box-arrow-up-right" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
-            <p className="mt-3 text-muted">{t('noWebhooks')}</p>
-          </div>
+        {loading ? (
+          <Stack gap="xs">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} height={38} radius="sm" />
+            ))}
+          </Stack>
+        ) : webhooks.length === 0 ? (
+          <Center py={48}>
+            <Stack align="center" gap="sm">
+              <ThemeIcon color="gray" variant="light" size={48} radius="xl">
+                <IconWebhook size={24} stroke={1.5} />
+              </ThemeIcon>
+              <Text size="sm" c="dimmed">{t('noWebhooks')}</Text>
+            </Stack>
+          </Center>
         ) : (
-          <Table responsive striped className="custom-table">
-            <thead>
-              <tr>
-                <th>{t('table.name')}</th>
-                <th>{t('table.url')}</th>
-                <th>{t('table.events')}</th>
-                <th>{t('table.status')}</th>
-                <th>{t('table.lastExecution')}</th>
-                <th>{t('table.failures')}</th>
-                <th>{t('table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {webhooks.map((webhook) => (
-                <tr key={webhook.id}>
-                  <td>{webhook.name}</td>
-                  <td>
-                    <code className="text-truncate d-inline-block" style={{ maxWidth: '200px' }}>
-                      {webhook.url}
-                    </code>
-                  </td>
-                  <td>
-                    {webhook.events.map(event => (
-                      <Badge key={event} bg="secondary" className="me-1">
-                        {event}
+          <ScrollArea>
+            <Table striped highlightOnHover verticalSpacing="xs" miw={900}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>{t('table.name')}</Table.Th>
+                  <Table.Th>{t('table.url')}</Table.Th>
+                  <Table.Th>{t('table.events')}</Table.Th>
+                  <Table.Th>{t('table.status')}</Table.Th>
+                  <Table.Th>{t('table.lastExecution')}</Table.Th>
+                  <Table.Th>{t('table.failures')}</Table.Th>
+                  <Table.Th />
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {webhooks.map((webhook) => (
+                  <Table.Tr key={webhook.id}>
+                    <Table.Td><Text size="sm" fw={550}>{webhook.name}</Text></Table.Td>
+                    <Table.Td>
+                      <Text size="xs" ff="monospace" truncate maw={200} title={webhook.url}>
+                        {webhook.url}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={4}>
+                        {webhook.events.map((event) => (
+                          <Badge key={event} size="xs" variant="light" color="gray">
+                            {event}
+                          </Badge>
+                        ))}
+                      </Group>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge size="sm" variant="light" color={webhook.active ? 'green' : 'gray'}>
+                        {webhook.active ? t('active') : t('inactive')}
                       </Badge>
-                    ))}
-                  </td>
-                  <td>
-                    {webhook.active ? (
-                      <Badge bg="success">{t('active')}</Badge>
-                    ) : (
-                      <Badge bg="secondary">{t('inactive')}</Badge>
-                    )}
-                  </td>
-                  <td>
-                    {webhook.lastTriggeredAt ? (
-                      <div>
-                        <div>{formatDate(webhook.lastTriggeredAt)}</div>
-                        <small className={webhook.lastSuccessAt ? 'text-success' : 'text-danger'}>
-                          {webhook.lastSuccessAt ? t('success') : t('error')}
-                        </small>
-                      </div>
-                    ) : (
-                      t('never')
-                    )}
-                  </td>
-                  <td>
-                    {webhook.failureCount > 0 ? (
-                      <Badge bg="danger">{webhook.failureCount}</Badge>
-                    ) : (
-                      '-'
-                    )}
-                  </td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      className="me-1"
-                      onClick={() => handleEdit(webhook)}
-                    >
-                      <i className="bi bi-pencil"></i>
-                    </Button>
-                    <Button
-                      variant={webhook.active ? 'outline-warning' : 'outline-success'}
-                      size="sm"
-                      className="me-1"
-                      onClick={() => handleToggleActive(webhook.id, webhook.active)}
-                    >
-                      <i className={`bi ${webhook.active ? 'bi-pause' : 'bi-play'}`}></i>
-                    </Button>
-                    <Button
-                      variant="outline-danger"
-                      size="sm"
-                      onClick={() => handleDelete(webhook.id)}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+                    </Table.Td>
+                    <Table.Td>
+                      {webhook.lastTriggeredAt ? (
+                        <Stack gap={0}>
+                          <Text size="xs">{formatDate(webhook.lastTriggeredAt)}</Text>
+                          <Text size="xs" c={webhook.lastSuccessAt ? 'green' : 'red'}>
+                            {webhook.lastSuccessAt ? t('success') : t('error')}
+                          </Text>
+                        </Stack>
+                      ) : (
+                        <Text size="xs" c="dimmed">{t('never')}</Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      {webhook.failureCount > 0 ? (
+                        <Badge size="sm" variant="light" color="red">{webhook.failureCount}</Badge>
+                      ) : (
+                        <Text size="sm" c="dimmed">—</Text>
+                      )}
+                    </Table.Td>
+                    <Table.Td>
+                      <Group gap={2} wrap="nowrap">
+                        <MantineTooltip label={t('edit')}>
+                          <ActionIcon
+                            variant="subtle"
+                            color="gray"
+                            size="sm"
+                            aria-label={t('edit')}
+                            onClick={() => handleEdit(webhook)}
+                          >
+                            <IconPencil size={15} stroke={1.7} />
+                          </ActionIcon>
+                        </MantineTooltip>
+                        <MantineTooltip label={webhook.active ? t('deactivate') : t('activate')}>
+                          <ActionIcon
+                            variant="subtle"
+                            color={webhook.active ? 'yellow' : 'green'}
+                            size="sm"
+                            aria-label={webhook.active ? t('deactivate') : t('activate')}
+                            onClick={() => handleToggleActive(webhook.id, webhook.active)}
+                          >
+                            {webhook.active
+                              ? <IconPlayerPause size={15} stroke={1.7} />
+                              : <IconPlayerPlay size={15} stroke={1.7} />}
+                          </ActionIcon>
+                        </MantineTooltip>
+                        <MantineTooltip label={t('delete')}>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            size="sm"
+                            aria-label={t('delete')}
+                            onClick={() => setWebhookToDelete(webhook)}
+                          >
+                            <IconTrash size={15} stroke={1.7} />
+                          </ActionIcon>
+                        </MantineTooltip>
+                      </Group>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
         )}
-      </Box>
+      </SectionCard>
 
-      {webhooks.length > 0 && chartData.data.length > 0 && (
-        <Box>
-          <div className="table-toolbar">
-            <div className="title-section">
-              <i className="bi bi-graph-up"></i>
-              <h4>{t('triggersEvolution')}</h4>
-            </div>
-          </div>
-          <Divider />
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={chartData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      {!loading && webhooks.length > 0 && chartData.data.length > 0 && (
+        <SectionCard icon={IconChartLine} title={t('triggersEvolution')}>
+          <ResponsiveContainer width="100%" height={340}>
+            <LineChart data={chartData.data} margin={{ top: 5, right: 16, left: 0, bottom: 5 }}>
               <CartesianGrid {...gridProps} />
               <XAxis dataKey="period" {...axisProps} />
-              <YAxis 
-                {...axisProps} 
+              <YAxis
+                {...axisProps}
                 domain={[0, 1]}
                 ticks={[0, 1]}
-                tickFormatter={(value) => value === 1 ? t('triggered') : t('notTriggered')}
+                width={100}
+                tickFormatter={(value) => (value === 1 ? t('triggered') : t('notTriggered'))}
               />
-              <Tooltip 
+              <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(value: number, name: string) => {
                   const webhookIndex = parseInt(name.replace('webhook_', ''));
@@ -480,207 +572,80 @@ export default function WebhooksPageClient() {
                 }}
                 labelFormatter={(label) => `${t('period')} ${label}`}
               />
-              <Legend 
+              <Legend
                 formatter={(value) => {
-                  const webhookIndex = parseInt(value.replace('webhook_', ''));
+                  const webhookIndex = parseInt(String(value).replace('webhook_', ''));
                   return chartData.webhookNames[webhookIndex]?.name || value;
                 }}
               />
-              {chartData.webhookNames.map((webhook, index) => {
-                const webhookKey = webhook.key;
-                const hue = (index * 137.508) % 360;
-                const color = `hsl(${hue}, 70%, 50%)`;
-                
-                return (
-                  <Line 
-                    key={webhookKey}
-                    type="monotone" 
-                    dataKey={webhookKey}
-                    stroke={color}
-                    strokeWidth={2}
-                    name={webhookKey}
-                    dot={{ fill: color, strokeWidth: 2, r: 3 }}
-                    connectNulls={false}
-                  />
-                );
-              })}
+              {chartData.webhookNames.map((webhook, index) => (
+                <Line
+                  key={webhook.key}
+                  type="monotone"
+                  dataKey={webhook.key}
+                  stroke={seriesColor(index)}
+                  strokeWidth={2}
+                  name={webhook.key}
+                  dot={{ fill: seriesColor(index), strokeWidth: 2, r: 3 }}
+                  connectNulls={false}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
-        </Box>
+        </SectionCard>
       )}
 
-      {/* Create Modal */}
-      <Modal show={showCreateModal} onHide={() => { setShowCreateModal(false); resetForm(); }} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{t('createModal.title')}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleCreate}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.nameLabel')}</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                required
-                placeholder={t('createModal.namePlaceholder')}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.urlLabel')}</Form.Label>
-              <Form.Control
-                type="url"
-                value={formData.url}
-                onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                required
-                placeholder={t('createModal.urlPlaceholder')}
-              />
-              <Form.Text className="text-muted">
-                {t('createModal.urlHelp')}
-              </Form.Text>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.eventsLabel')}</Form.Label>
-              <div>
-                {availableEvents.map(event => (
-                  <Form.Check
-                    key={event}
-                    type="checkbox"
-                    id={`create-${event}`}
-                    label={event}
-                    checked={formData.events.includes(event)}
-                    onChange={() => toggleEvent(event)}
-                  />
-                ))}
-              </div>
-              <Form.Text className="text-muted">
-                {t('createModal.eventsHelp')}
-              </Form.Text>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.secretLabel')}</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.secret}
-                onChange={(e) => setFormData(prev => ({ ...prev, secret: e.target.value }))}
-                placeholder={t('createModal.secretPlaceholder')}
-              />
-              <Form.Text className="text-muted">
-                {t('createModal.secretHelp')}
-              </Form.Text>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.headersLabel')}</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={formData.headers}
-                onChange={(e) => setFormData(prev => ({ ...prev, headers: e.target.value }))}
-                placeholder={t('createModal.headersPlaceholder')}
-              />
-              <Form.Text className="text-muted">
-                {t('createModal.headersHelp')}
-              </Form.Text>
-            </Form.Group>
-            <Form.Check
-              type="switch"
-              id="create-active"
-              label={t('createModal.activeLabel')}
-              checked={formData.active}
-              onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => { setShowCreateModal(false); resetForm(); }}>
+      <Modal
+        opened={createOpened}
+        onClose={() => { setCreateOpened(false); setFormData(EMPTY_FORM); }}
+        title={t('createModal.title')}
+        size="lg"
+      >
+        <WebhookForm
+          namespace="createModal"
+          value={formData}
+          onChange={setFormData}
+          onSubmit={handleCreate}
+          onCancel={() => { setCreateOpened(false); setFormData(EMPTY_FORM); }}
+          submitLabel={t('createModal.create')}
+        />
+      </Modal>
+
+      <Modal
+        opened={editingWebhook !== null}
+        onClose={() => { setEditingWebhook(null); setFormData(EMPTY_FORM); }}
+        title={t('editModal.title')}
+        size="lg"
+      >
+        <WebhookForm
+          namespace="editModal"
+          value={formData}
+          onChange={setFormData}
+          onSubmit={handleUpdate}
+          onCancel={() => { setEditingWebhook(null); setFormData(EMPTY_FORM); }}
+          submitLabel={t('editModal.save')}
+        />
+      </Modal>
+
+      {/* Delete confirmation — replaces the native confirm() dialog */}
+      <Modal
+        opened={webhookToDelete !== null}
+        onClose={() => setWebhookToDelete(null)}
+        title={t('deleteTitle')}
+      >
+        <Stack gap="md">
+          <Text size="sm">{t('deleteConfirm')}</Text>
+          {webhookToDelete && <Code>{webhookToDelete.name}</Code>}
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={() => setWebhookToDelete(null)}>
               {t('createModal.cancel')}
             </Button>
-            <Button variant="primary" type="submit">
-              {t('createModal.create')}
+            <Button color="red" onClick={handleDelete} leftSection={<IconTrash size={15} />}>
+              {t('delete')}
             </Button>
-          </Modal.Footer>
-        </Form>
+          </Group>
+        </Stack>
       </Modal>
-
-      {/* Edit Modal */}
-      <Modal show={showEditModal} onHide={() => { setShowEditModal(false); setEditingWebhook(null); resetForm(); }} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{t('editModal.title')}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleUpdate}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('editModal.nameLabel')}</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('editModal.urlLabel')}</Form.Label>
-              <Form.Control
-                type="url"
-                value={formData.url}
-                onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('editModal.eventsLabel')}</Form.Label>
-              <div>
-                {availableEvents.map(event => (
-                  <Form.Check
-                    key={event}
-                    type="checkbox"
-                    id={`edit-${event}`}
-                    label={event}
-                    checked={formData.events.includes(event)}
-                    onChange={() => toggleEvent(event)}
-                  />
-                ))}
-              </div>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('editModal.secretLabel')}</Form.Label>
-              <Form.Control
-                type="text"
-                value={formData.secret}
-                onChange={(e) => setFormData(prev => ({ ...prev, secret: e.target.value }))}
-                placeholder={t('editModal.secretPlaceholder')}
-              />
-              <Form.Text className="text-muted">
-                {t('editModal.secretHelp')}
-              </Form.Text>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('editModal.headersLabel')}</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={formData.headers}
-                onChange={(e) => setFormData(prev => ({ ...prev, headers: e.target.value }))}
-              />
-            </Form.Group>
-            <Form.Check
-              type="switch"
-              id="edit-active"
-              label={t('editModal.activeLabel')}
-              checked={formData.active}
-              onChange={(e) => setFormData(prev => ({ ...prev, active: e.target.checked }))}
-            />
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => { setShowEditModal(false); setEditingWebhook(null); resetForm(); }}>
-              {t('editModal.cancel')}
-            </Button>
-            <Button variant="primary" type="submit">
-              {t('editModal.save')}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-    </>
+    </Stack>
   );
 }
-

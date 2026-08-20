@@ -12,17 +12,18 @@ import {
   TextInput,
   Select,
   Center,
-  Loader,
   Paper,
-  Avatar,
+  Skeleton,
   ThemeIcon,
-  Anchor,
+  Button,
 } from '@mantine/core';
 import { IconSearch, IconPackage } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getItems } from '@/actions/items';
 import { getCategoriesWithItemCount } from '@/actions/categories';
+import PageHeader from '@/components/layout/PageHeader';
+import classes from './ItemsGallery.module.css';
 
 interface Item {
   id: string;
@@ -43,48 +44,61 @@ function ItemCard({ item }: { item: Item }) {
     <Card
       component={Link}
       href={`/dashboard/items/${item.id}`}
-      withBorder
-      padding="sm"
+      padding={0}
       radius="md"
-      style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
+      className={classes.card}
     >
       {item.imageUrl ? (
-        <Card.Section>
-          <Image src={item.imageUrl} height={140} alt={item.name} fit="cover" />
-        </Card.Section>
+        <Image src={item.imageUrl} height={150} alt={item.name} fit="cover" />
       ) : (
-        <Card.Section>
-          <Center h={140} bg="var(--mantine-color-default-hover)">
-            <ThemeIcon color="datiaBlue" variant="light" size={64} radius="xl">
-              <Text fw={700} fz="xl">{firstLetter}</Text>
-            </ThemeIcon>
-          </Center>
-        </Card.Section>
+        <Center h={150} bg="var(--mantine-color-gray-1)">
+          <ThemeIcon color="datiaBlue" variant="light" size={56} radius="xl">
+            <Text fw={700} fz="xl">{firstLetter}</Text>
+          </ThemeIcon>
+        </Center>
       )}
 
-      <Stack gap={6} mt="sm">
-        <Text fw={600} size="sm" lineClamp={1}>{item.name}</Text>
-
-        <Group gap={4}>
-          <Badge size="xs" color="datiaBlue" variant="light">
-            {category?.name ?? t('noCategory')}
-          </Badge>
+      <Stack gap={8} p="md">
+        <Group justify="space-between" wrap="nowrap" gap="xs">
+          <Text fw={600} size="sm" lineClamp={1}>{item.name}</Text>
           {lastState && (
             <Badge
               size="xs"
+              variant="light"
               color={lastState.backed ? 'green' : 'yellow'}
-              variant="dot"
+              style={{ flexShrink: 0 }}
             >
               {lastState.backed ? t('certified') : t('pending')}
             </Badge>
           )}
         </Group>
 
-        {item.description && (
-          <Text size="xs" c="dimmed" lineClamp={2}>{item.description}</Text>
-        )}
+        <Text size="xs" c="dimmed" lineClamp={2} style={{ minHeight: '2.4em' }}>
+          {item.description || ' '}
+        </Text>
+
+        <Text size="xs" c="dimmed" fw={550} tt="uppercase" lts={0.3}>
+          {category?.name ?? t('noCategory')}
+        </Text>
       </Stack>
     </Card>
+  );
+}
+
+function GallerySkeleton() {
+  return (
+    <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, md: 4 }} spacing="md">
+      {Array.from({ length: 8 }).map((_, i) => (
+        <Card key={i} padding={0} radius="md">
+          <Skeleton height={150} radius={0} />
+          <Stack gap={8} p="md">
+            <Skeleton height={12} width="70%" radius="sm" />
+            <Skeleton height={10} radius="sm" />
+            <Skeleton height={10} width="40%" radius="sm" />
+          </Stack>
+        </Card>
+      ))}
+    </SimpleGrid>
   );
 }
 
@@ -137,41 +151,56 @@ export default function ItemsGallery() {
     ...categories.map((c) => ({ value: c.id, label: c.name })),
   ];
 
-  if (loading) {
-    return (
-      <Center h={240}>
-        <Loader size="sm" />
-      </Center>
-    );
-  }
+  const hasFilters = Boolean(search.trim() || categoryFilter);
+  const clearFilters = () => { setSearch(''); setCategoryFilter(null); };
 
   return (
-    <Stack gap="md">
-      <Group>
-        <TextInput
-          flex={1}
-          placeholder={t('searchPlaceholder')}
-          leftSection={<IconSearch size={16} />}
-          value={search}
-          onChange={(e) => setSearch(e.currentTarget.value)}
-        />
-        <Select
-          data={categoryOptions}
-          value={categoryFilter ?? ''}
-          onChange={(v) => setCategoryFilter(v || null)}
-          style={{ width: 200 }}
-          clearable={false}
-        />
-      </Group>
+    <>
+      <PageHeader
+        title={t('title')}
+        description={t('description')}
+        actions={
+          <Group gap="xs" wrap="nowrap">
+            <TextInput
+              w={{ base: 160, sm: 240 }}
+              placeholder={t('searchPlaceholder')}
+              leftSection={<IconSearch size={15} stroke={1.7} />}
+              value={search}
+              onChange={(e) => setSearch(e.currentTarget.value)}
+            />
+            <Select
+              data={categoryOptions}
+              value={categoryFilter ?? ''}
+              onChange={(v) => setCategoryFilter(v || null)}
+              w={180}
+              clearable={false}
+              aria-label={t('allCategories')}
+            />
+          </Group>
+        }
+      >
+        {!loading && (
+          <Text size="sm" c="dimmed" mt="xs">
+            {t('count', { count: filtered.length })}
+          </Text>
+        )}
+      </PageHeader>
 
-      {filtered.length === 0 ? (
-        <Paper withBorder p="xl" radius="md">
+      {loading ? (
+        <GallerySkeleton />
+      ) : filtered.length === 0 ? (
+        <Paper p={48} radius="md">
           <Center>
-            <Stack align="center" gap="xs">
-              <ThemeIcon color="gray" variant="light" size={48} radius="xl">
-                <IconPackage size={24} />
+            <Stack align="center" gap="sm">
+              <ThemeIcon color="gray" variant="light" size={52} radius="xl">
+                <IconPackage size={26} stroke={1.5} />
               </ThemeIcon>
-              <Text c="dimmed">{t('noItems')}</Text>
+              <Text c="dimmed">{hasFilters ? t('noResults') : t('noItems')}</Text>
+              {hasFilters && (
+                <Button variant="light" size="xs" onClick={clearFilters}>
+                  {t('clearFilters')}
+                </Button>
+              )}
             </Stack>
           </Center>
         </Paper>
@@ -182,6 +211,6 @@ export default function ItemsGallery() {
           ))}
         </SimpleGrid>
       )}
-    </Stack>
+    </>
   );
 }

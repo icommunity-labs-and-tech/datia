@@ -21,6 +21,7 @@ import { listStatusTypes } from '@/actions/statusTypes';
 import { createState } from '@/actions/states';
 import GeolocationMap from './GeolocationMapClient';
 import { parseTemplate, generateFieldLabel } from '@/lib/template-helpers';
+import { IconDeviceFloppy } from '@tabler/icons-react';
 
 interface StatusType {
   id: string;
@@ -301,7 +302,7 @@ export default function AddStateForm({
           color="green"
           size="md"
           disabled={isSubmitting || !selectedStatusType}
-          leftSection={isSubmitting ? <Loader size="xs" color="white" /> : <i className="bi bi-floppy" />}
+          leftSection={<IconDeviceFloppy size={15} stroke={1.7} />}
         >
           {isSubmitting ? 'Creando estado...' : 'Guardar Estado'}
         </Button>

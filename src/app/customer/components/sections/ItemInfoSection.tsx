@@ -1,69 +1,89 @@
 'use client';
 
+import { Box, Group, Stack, Text, Title } from '@mantine/core';
 import { useTranslations } from 'next-intl';
 import { ItemData } from '../../types';
 import { EvidenceVerification } from '../EvidenceVerification';
-import { passportStyles } from '../../styles/passportStyles';
 import GeolocationMap from '@/components/GeolocationMapClient';
 
 interface ItemInfoSectionProps {
   item: ItemData;
-  isMobile: boolean;
 }
 
-export function ItemInfoSection({ item, isMobile }: ItemInfoSectionProps) {
-  const t = useTranslations('customer');
+function isGeolocation(value: unknown): value is { lat: number; lng: number } {
   return (
-    <div>
-      <div style={passportStyles.infoSection}>
-        <h4 style={passportStyles.infoSectionTitle}>{t('productDetails')}</h4>
-        <div style={passportStyles.infoGrid}>
-          <div style={isMobile ? passportStyles.infoItemMobile : passportStyles.infoItem}>
-            <span style={passportStyles.label}>{t('category')}</span>
-            <span style={passportStyles.value}>{item.category?.name || 'N/A'}</span>
-          </div>
-        </div>
-      </div>
+    !!value &&
+    typeof value === 'object' &&
+    !Array.isArray(value) &&
+    'lat' in value &&
+    'lng' in value &&
+    typeof (value as { lat: unknown }).lat === 'number' &&
+    typeof (value as { lng: unknown }).lng === 'number'
+  );
+}
 
-      {item.templateFields && Object.keys(item.templateFields).length > 0 && (
-        <div style={passportStyles.infoSection}>
-          <h4 style={passportStyles.infoSectionTitle}>{t('specifications')}</h4>
-          <div style={passportStyles.infoGrid}>
-            {Object.entries(item.templateFields).map(([key, value]: [string, unknown]) => {
-              const isGeolocation =
-                value &&
-                typeof value === 'object' &&
-                !Array.isArray(value) &&
-                'lat' in (value as object) &&
-                'lng' in (value as object) &&
-                typeof (value as { lat: unknown }).lat === 'number' &&
-                typeof (value as { lng: unknown }).lng === 'number';
+/** Label/value row that stacks on narrow screens instead of squeezing. */
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <Group
+      justify="space-between"
+      align="flex-start"
+      gap={4}
+      wrap="wrap"
+      py={8}
+      style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}
+    >
+      <Text size="sm" c="dimmed">{label}</Text>
+      <Box style={{ maxWidth: '100%' }}>
+        {typeof children === 'string' ? (
+          <Text size="sm" fw={550}>{children}</Text>
+        ) : (
+          children
+        )}
+      </Box>
+    </Group>
+  );
+}
 
-              return (
-                <div key={key} style={isMobile ? passportStyles.infoItemMobile : passportStyles.infoItem}>
-                  <span style={passportStyles.label}>{key}:</span>
-                  <span style={passportStyles.value}>
-                    {isGeolocation ? (
-                      <div style={{ marginTop: '0.5rem' }}>
-                        <GeolocationMap
-                          value={{ lat: (value as { lat: number }).lat, lng: (value as { lng: number }).lng }}
-                          readOnly={true}
-                        />
-                      </div>
-                    ) : (
-                      String(value)
-                    )}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Stack gap={4}>
+      <Title order={5} c="dimmed" tt="uppercase" fz={11} lts={0.6}>{title}</Title>
+      {children}
+    </Stack>
+  );
+}
+
+export function ItemInfoSection({ item }: ItemInfoSectionProps) {
+  const t = useTranslations('customer');
+  const specs = item.templateFields ? Object.entries(item.templateFields) : [];
+
+  return (
+    <Stack gap="xl">
+      <Section title={t('productDetails')}>
+        <Field label={t('category').replace(':', '')}>
+          {item.category?.name || '—'}
+        </Field>
+      </Section>
+
+      {specs.length > 0 && (
+        <Section title={t('specifications')}>
+          {specs.map(([key, value]) => (
+            <Field key={key} label={key}>
+              {isGeolocation(value) ? (
+                <Box w={{ base: '100%', xs: 320 }} mt={6}>
+                  <GeolocationMap value={value} readOnly />
+                </Box>
+              ) : (
+                String(value)
+              )}
+            </Field>
+          ))}
+        </Section>
       )}
 
       {item.evidenceID && (
-        <div style={passportStyles.infoSection}>
-          <h4 style={passportStyles.infoSectionTitle}>{t('productCertification')}</h4>
+        <Section title={t('productCertification')}>
           <EvidenceVerification
             evidenceId={item.evidenceID}
             type="item"
@@ -71,8 +91,8 @@ export function ItemInfoSection({ item, isMobile }: ItemInfoSectionProps) {
             createdAt={item.createdAt}
             createdBy={item.createdBy}
           />
-        </div>
+        </Section>
       )}
-    </div>
+    </Stack>
   );
 }

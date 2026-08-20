@@ -7,6 +7,7 @@ import { Button, Alert, Loader } from '@mantine/core';
 import L from 'leaflet';
 import { LeafletMapConfig } from '@/lib/geolocation/maps';
 import type { GeolocationCoordinates } from '@/lib/geolocation/types';
+import { IconInfoCircle, IconMapPin } from '@tabler/icons-react';
 
 // Fix para los iconos de Leaflet en Next.js - solo ejecutar en cliente
 if (typeof window !== 'undefined') {
@@ -165,14 +166,14 @@ export default function GeolocationMap({
               </>
             ) : (
               <>
-                <i className="bi bi-geo-alt me-2"></i>
+                <IconMapPin size={13} stroke={1.7} style={{ marginRight: 8, verticalAlign: -2 }} />
                 Usar mi ubicación actual
               </>
             )}
           </Button>
           {coords && (
             <div className="d-flex align-items-center text-muted small">
-              <i className="bi bi-info-circle me-1"></i>
+              <IconInfoCircle size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
               Lat: {coords.lat.toFixed(6)}, Lng: {coords.lng.toFixed(6)}
             </div>
           )}
@@ -181,7 +182,7 @@ export default function GeolocationMap({
 
       {readOnly && coords && (
         <div className="mb-2 text-muted small">
-          <i className="bi bi-geo-alt me-1"></i>
+          <IconMapPin size={13} stroke={1.7} style={{ marginRight: 4, verticalAlign: -2 }} />
           Lat: {coords.lat.toFixed(6)}, Lng: {coords.lng.toFixed(6)}
         </div>
       )}

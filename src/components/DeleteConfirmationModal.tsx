@@ -3,6 +3,7 @@
 import React from 'react';
 import { Modal, Button, Alert, Group, Loader, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
+import { IconTrash } from '@tabler/icons-react';
 
 interface CascadeInfo {
   statusTypesDeleted?: number;
@@ -113,7 +114,7 @@ export default function DeleteConfirmationModal({
       opened={show}
       onClose={onHide}
       centered
-      title={<Group gap={6}><i className="bi bi-trash3" />{title}</Group>}
+      title={<Group gap={6}><IconTrash size={17} stroke={1.7} />{title}</Group>}
     >
       <Text size="sm">{message}</Text>
       {renderCascadeWarning()}

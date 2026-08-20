@@ -43,6 +43,11 @@ export type ItemData = {
   updatedAt: string;
   evidenceID?: string | null;
   createdBy?: { name: string; email: string } | null;
+  organization?: {
+    name: string;
+    logoUrl: string | null;
+    brandColorPrimary: string | null;
+  } | null;
   category: {
     id: string;
     name: string;

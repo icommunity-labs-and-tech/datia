@@ -8,10 +8,13 @@ import {
   Group,
   ThemeIcon,
   Title,
-  Alert,
   Stack,
   Progress,
   SimpleGrid,
+  Button,
+  Center,
+  Anchor,
+  Badge,
 } from '@mantine/core';
 import { useMediaQuery } from '@mantine/hooks';
 import {
@@ -20,8 +23,11 @@ import {
   IconCloudFog,
   IconLeaf,
   IconMap,
-  IconInfoCircle,
+  IconArrowRight,
+  IconCertificate,
+  IconHistory,
 } from '@tabler/icons-react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { DashboardKPIs } from '@/types/dashboard';
 import type { EnergySummary } from '@/actions/dashboard/getEnergySummary';
@@ -33,11 +39,57 @@ interface DashboardMantineProps {
   kpis: DashboardKPIs;
   energySummary: EnergySummary;
   energySources: EnergySourceRecord[];
+  /** When the energy module is off, its metrics and map stay out of the way. */
+  energyEnabled?: boolean;
+  recentItems?: RecentItem[];
 }
 
-export default function DashboardMantine({ kpis, energySummary, energySources }: DashboardMantineProps) {
+interface RecentItem {
+  id: string;
+  name: string;
+  categoryName: string | null;
+  certified: boolean;
+}
+
+interface StatTileProps {
+  icon: React.ElementType;
+  color: string;
+  label: string;
+  value: string | number;
+  hint: string;
+}
+
+/** Flat metric tile — one accent per tile, numbers carry the emphasis. */
+function StatTile({ icon: Icon, color, label, value, hint }: StatTileProps) {
+  return (
+    <Paper p="md" radius="md">
+      <Group gap={8} mb={10}>
+        <ThemeIcon color={color} variant="light" size={26} radius="sm">
+          <Icon size={14} stroke={1.7} />
+        </ThemeIcon>
+        <Text size="xs" c="dimmed" tt="uppercase" fw={650} lts={0.4}>
+          {label}
+        </Text>
+      </Group>
+      <Text fw={700} fz={26} lh={1.1} style={{ fontVariantNumeric: 'tabular-nums' }}>
+        {value}
+      </Text>
+      <Text size="xs" c="dimmed" mt={2} lineClamp={1}>{hint}</Text>
+    </Paper>
+  );
+}
+
+export default function DashboardMantine({
+  kpis,
+  energySummary,
+  energySources,
+  energyEnabled = false,
+  recentItems = [],
+}: DashboardMantineProps) {
   const t = useTranslations('dashboard');
   const tHub = useTranslations('energyHub');
+  const tSidebar = useTranslations('sidebar');
+  const tItems = useTranslations('itemsPage');
   const isMobile = useMediaQuery('(max-width: 62em)');
 
   const co2Tonnes = (energySummary.co2eKgThisMonth / 1000).toFixed(3);
@@ -46,7 +98,8 @@ export default function DashboardMantine({ kpis, energySummary, energySources }:
       ? `${(energySummary.kwhThisMonth / 1000).toFixed(1)} MWh`
       : `${energySummary.kwhThisMonth.toFixed(0)} kWh`;
 
-  const hasMappedSources = energySources.some((s) => s.latitude != null && s.longitude != null);
+  const hasMappedSources =
+    energyEnabled && energySources.some((s) => s.latitude != null && s.longitude != null);
 
   // Capacity by carrier for the right-panel chart
   const capacityByCarrier = energySources.reduce<Record<string, number>>((acc, src) => {
@@ -65,20 +118,178 @@ export default function DashboardMantine({ kpis, energySummary, energySources }:
 
   const maxKw = carrierData[0]?.kw ?? 1;
 
+  const renderTiles = (cols: Record<string, number>) => (
+    <SimpleGrid cols={cols} spacing="sm">
+      <StatTile
+        icon={IconPackage}
+        color="datiaBlue"
+        label={t('kpis.totalItems.title')}
+        value={kpis.totalPassports}
+        hint={t('kpis.totalItems.subtitle')}
+      />
+      <StatTile
+        icon={IconCertificate}
+        color="green"
+        label={t('kpis.backupRate.title')}
+        value={`${kpis.backupRate.toFixed(0)}%`}
+        hint={t('kpis.backupRate.subtitle', {
+          backed: kpis.backedPassports,
+          total: kpis.totalPassports,
+        })}
+      />
+      <StatTile
+        icon={IconHistory}
+        color="gray"
+        label={t('kpis.statesThisMonth.title')}
+        value={kpis.statesThisMonth}
+        hint={t('kpis.statesThisMonth.subtitle')}
+      />
+      {energyEnabled && (
+        <>
+          <StatTile
+            icon={IconBolt}
+            color="datiaAmber"
+            label={t('kwhThisMonth')}
+            value={kwhDisplay}
+            hint={`${energySummary.totalSources} ${t('totalSources')}`}
+          />
+          <StatTile
+            icon={IconCloudFog}
+            color="gray"
+            label={t('co2ThisMonth')}
+            value={`${co2Tonnes} t`}
+            hint="CO₂e Scope 2"
+          />
+          <StatTile
+            icon={IconLeaf}
+            color="green"
+            label={t('renewableAvg')}
+            value={
+              energySummary.avgRenewableShare != null
+                ? `${energySummary.avgRenewableShare}%`
+                : '—'
+            }
+            hint={t('renewableSubtitle')}
+          />
+        </>
+      )}
+    </SimpleGrid>
+  );
+
+  const activityPanel = (
+    <Paper p="md" radius="md">
+      <Text fw={600} size="sm" mb="sm">{t('activity')}</Text>
+      <Stack gap={8}>
+        {[
+          [t('kpis.backupRate.title'), `${kpis.backupRate.toFixed(1)}%`],
+          [t('kpis.statesThisMonth.title'), kpis.statesThisMonth],
+          ...(energyEnabled
+            ? ([
+                [t('totalSources'), energySummary.totalSources],
+                [t('sourcesWithCoords'), energySummary.sourcesWithCoords],
+              ] as Array<[string, string | number]>)
+            : []),
+        ].map(([label, value]) => (
+          <Group key={String(label)} justify="space-between">
+            <Text size="sm" c="dimmed">{label}</Text>
+            <Text size="sm" fw={600} style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</Text>
+          </Group>
+        ))}
+      </Stack>
+    </Paper>
+  );
+
+  // Either the energy module is off, or it has no mapped sources yet — a blank
+  // world map helps nobody, so show a calmer overview instead.
+  if (!hasMappedSources) {
+    return (
+      <Box px={{ base: 'md', sm: 'xl' }} py="lg" mx="auto" maw={1360}>
+        <Title order={2} mb="lg">{tSidebar('home')}</Title>
+
+        {renderTiles({ base: 1, xs: 2, md: 3 })}
+
+        <SimpleGrid cols={{ base: 1, md: energyEnabled ? 2 : 1 }} spacing="lg" mt="lg">
+          {recentItems.length > 0 && (
+            <Paper p="md" radius="md">
+              <Group justify="space-between" mb="sm" wrap="nowrap">
+                <Text fw={600} size="sm">{t('recentAssets')}</Text>
+                <Anchor component={Link} href="/dashboard/items" size="xs" fw={550}>
+                  {t('viewAll')}
+                </Anchor>
+              </Group>
+              <Stack gap={2}>
+                {recentItems.map((item) => (
+                  <Anchor
+                    key={item.id}
+                    component={Link}
+                    href={`/dashboard/items/${item.id}`}
+                    underline="never"
+                    c="inherit"
+                    px={8}
+                    py={7}
+                    style={{ borderRadius: 8 }}
+                  >
+                    <Group justify="space-between" wrap="nowrap" gap="sm">
+                      <Stack gap={0} style={{ minWidth: 0 }}>
+                        <Text size="sm" fw={550} truncate>{item.name}</Text>
+                        {item.categoryName && (
+                          <Text size="xs" c="dimmed" truncate>{item.categoryName}</Text>
+                        )}
+                      </Stack>
+                      <Badge
+                        size="xs"
+                        variant="light"
+                        color={item.certified ? 'green' : 'yellow'}
+                        style={{ flexShrink: 0 }}
+                      >
+                        {item.certified ? tItems('certified') : tItems('pending')}
+                      </Badge>
+                    </Group>
+                  </Anchor>
+                ))}
+              </Stack>
+            </Paper>
+          )}
+
+          {energyEnabled && (
+            <Paper p="xl" radius="md">
+              <Center h="100%">
+                <Stack align="center" gap="sm" maw={360}>
+                  <ThemeIcon color="gray" variant="light" size={48} radius="xl">
+                    <IconMap size={24} stroke={1.5} />
+                  </ThemeIcon>
+                  <Text size="sm" c="dimmed" ta="center">{t('noSourcesOnMap')}</Text>
+                  <Button
+                    component={Link}
+                    href="/dashboard/energy"
+                    variant="light"
+                    size="xs"
+                    rightSection={<IconArrowRight size={14} />}
+                  >
+                    {tSidebar('energy')}
+                  </Button>
+                </Stack>
+              </Center>
+            </Paper>
+          )}
+        </SimpleGrid>
+      </Box>
+    );
+  }
+
   return (
     <Flex
       direction={{ base: 'column', md: 'row' }}
-      p={14}
-      gap={14}
+      p={16}
+      gap={16}
       style={{
-        minHeight: isMobile ? undefined : 'calc(100vh - var(--app-shell-header-height, 56px))',
-        maxHeight: isMobile ? undefined : 'calc(100vh - var(--app-shell-header-height, 56px))',
+        minHeight: isMobile ? undefined : 'calc(100vh - var(--app-shell-header-height, 60px))',
+        maxHeight: isMobile ? undefined : 'calc(100vh - var(--app-shell-header-height, 60px))',
         overflow: isMobile ? undefined : 'hidden',
       }}
     >
       {/* ── Map ¾ ── */}
       <Paper
-        withBorder
         radius="md"
         style={{
           flex: isMobile ? undefined : 3,
@@ -90,12 +301,12 @@ export default function DashboardMantine({ kpis, energySummary, energySources }:
         }}
       >
         <Group
-          p="sm"
-          pb="xs"
-          style={{ borderBottom: '1px solid var(--mantine-color-default-border)', flexShrink: 0 }}
+          px="md"
+          py="sm"
+          style={{ borderBottom: '1px solid var(--mantine-color-gray-2)', flexShrink: 0 }}
         >
           <ThemeIcon color="datiaBlue" variant="light" size={26} radius="sm">
-            <IconMap size={15} />
+            <IconMap size={14} stroke={1.7} />
           </ThemeIcon>
           <Title order={5}>{t('energyMap')}</Title>
           <Text size="xs" c="dimmed" ml="auto">
@@ -104,13 +315,7 @@ export default function DashboardMantine({ kpis, energySummary, energySources }:
         </Group>
 
         <Box style={{ flex: 1, minHeight: isMobile ? 280 : 0 }}>
-          {!hasMappedSources ? (
-            <Alert icon={<IconInfoCircle size={16} />} color="datiaBlue" variant="light" m="md">
-              {t('noSourcesOnMap')}
-            </Alert>
-          ) : (
-            <EnergySourcesGlobalMapLazy sources={energySources} height="100%" />
-          )}
+          <EnergySourcesGlobalMapLazy sources={energySources} height="100%" />
         </Box>
       </Paper>
 
@@ -119,105 +324,32 @@ export default function DashboardMantine({ kpis, energySummary, energySources }:
         style={{
           flex: 1,
           overflowY: isMobile ? undefined : 'auto',
-          minWidth: isMobile ? undefined : 260,
+          minWidth: isMobile ? undefined : 280,
         }}
         gap="sm"
       >
+        {renderTiles({ base: 2 })}
 
-        {/* KPIs 2×2 */}
-        <SimpleGrid cols={2} spacing="xs">
-          <Paper withBorder p="sm" radius="md">
-            <ThemeIcon color="datiaBlue" variant="light" size={24} radius="sm" mb={4}>
-              <IconPackage size={13} />
-            </ThemeIcon>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5} lh={1}>
-              {t('kpis.totalItems.title')}
-            </Text>
-            <Text fw={800} fz="xl" c="datiaBlue" lh={1.1} mt={2}>{kpis.totalPassports}</Text>
-            <Text size="xs" c="dimmed">{t('kpis.totalItems.subtitle')}</Text>
-          </Paper>
-
-          <Paper withBorder p="sm" radius="md">
-            <ThemeIcon color="datiaAmber" variant="light" size={24} radius="sm" mb={4}>
-              <IconBolt size={13} />
-            </ThemeIcon>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5} lh={1}>
-              {t('kwhThisMonth')}
-            </Text>
-            <Text fw={800} fz="xl" c="datiaAmber.6" lh={1.1} mt={2}>{kwhDisplay}</Text>
-            <Text size="xs" c="dimmed">{energySummary.totalSources} {t('totalSources')}</Text>
-          </Paper>
-
-          <Paper withBorder p="sm" radius="md">
-            <ThemeIcon color="gray" variant="light" size={24} radius="sm" mb={4}>
-              <IconCloudFog size={13} />
-            </ThemeIcon>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5} lh={1}>
-              {t('co2ThisMonth')}
-            </Text>
-            <Text fw={800} fz="xl" c="dimmed" lh={1.1} mt={2}>{co2Tonnes} t</Text>
-            <Text size="xs" c="dimmed">CO₂e Scope 2</Text>
-          </Paper>
-
-          <Paper withBorder p="sm" radius="md">
-            <ThemeIcon color="green" variant="light" size={24} radius="sm" mb={4}>
-              <IconLeaf size={13} />
-            </ThemeIcon>
-            <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.5} lh={1}>
-              {t('renewableAvg')}
-            </Text>
-            <Text fw={800} fz="xl" c="green" lh={1.1} mt={2}>
-              {energySummary.avgRenewableShare != null
-                ? `${energySummary.avgRenewableShare}%`
-                : '—'}
-            </Text>
-            <Text size="xs" c="dimmed">{t('renewableSubtitle')}</Text>
-          </Paper>
-        </SimpleGrid>
-
-        {/* Capacity by carrier */}
         {carrierData.length > 0 && (
-          <Paper withBorder p="sm" radius="md">
-            <Text fw={600} size="sm" mb="xs">{t('capacityByCarrier')}</Text>
-            <Stack gap={8}>
+          <Paper p="md" radius="md">
+            <Text fw={600} size="sm" mb="sm">{t('capacityByCarrier')}</Text>
+            <Stack gap={10}>
               {carrierData.map(({ carrier, kw, color }) => (
-                <Stack key={carrier} gap={3}>
+                <Stack key={carrier} gap={4}>
                   <Group justify="space-between">
                     <Text size="xs" c="dimmed">{tHub(`carriers.${carrier}`)}</Text>
                     <Text size="xs" fw={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
                       {kw >= 1000 ? `${(kw / 1000).toFixed(1)} MW` : `${kw.toFixed(0)} kW`}
                     </Text>
                   </Group>
-                  <Progress value={(kw / maxKw) * 100} size={6} color={color} radius="xl" />
+                  <Progress value={(kw / maxKw) * 100} size={5} color={color} radius="xl" />
                 </Stack>
               ))}
             </Stack>
           </Paper>
         )}
 
-        {/* Activity */}
-        <Paper withBorder p="sm" radius="md">
-          <Text fw={600} size="sm" mb="xs">{t('activity')}</Text>
-          <Stack gap={6}>
-            <Group justify="space-between">
-              <Text size="sm" c="dimmed">{t('kpis.backupRate.title')}</Text>
-              <Text size="sm" fw={600}>{kpis.backupRate.toFixed(1)}%</Text>
-            </Group>
-            <Group justify="space-between">
-              <Text size="sm" c="dimmed">{t('kpis.statesThisMonth.title')}</Text>
-              <Text size="sm" fw={600}>{kpis.statesThisMonth}</Text>
-            </Group>
-            <Group justify="space-between">
-              <Text size="sm" c="dimmed">{t('totalSources')}</Text>
-              <Text size="sm" fw={600}>{energySummary.totalSources}</Text>
-            </Group>
-            <Group justify="space-between">
-              <Text size="sm" c="dimmed">{t('sourcesWithCoords')}</Text>
-              <Text size="sm" fw={600}>{energySummary.sourcesWithCoords}</Text>
-            </Group>
-          </Stack>
-        </Paper>
-
+        {activityPanel}
       </Stack>
     </Flex>
   );

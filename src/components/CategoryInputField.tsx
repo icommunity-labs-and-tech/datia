@@ -2,6 +2,7 @@
 
 import { Alert } from '@mantine/core';
 import { useCategoryInput, type Category } from '@/hooks/useCategoryInput';
+import { IconTag } from '@tabler/icons-react';
 
 interface CategoryInputFieldProps {
   itemId: string;
@@ -80,7 +81,7 @@ export default function CategoryInputField({
               lineHeight: '1.2',
             }}
           >
-            <i className="bi bi-tag-fill" style={{ fontSize: '0.75rem', color: '#6c757d' }}></i>
+            <IconTag size={12} stroke={1.8} color="var(--mantine-color-gray-6)" />
             <span>{cat.name}</span>
             {!disabled && (
               <button
