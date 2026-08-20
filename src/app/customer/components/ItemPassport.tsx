@@ -23,7 +23,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ItemData } from '../types';
-import { ItemInfoSection, ItemHistorySection, EnergySection } from './sections';
+import { ItemInfoSection, ItemHistorySection, EnergyReportSection } from './sections';
 import { VerifiedBadge } from './ui';
 import { formatDate } from '../utils/dateFormatters';
 
@@ -38,10 +38,7 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
   const tPassport = useTranslations('customer.passport');
   const router = useRouter();
 
-  const verifiedEmissions = item.energyCertifications?.filter(
-    (e) => e.verificationStatus === 'VERIFIED'
-  ) ?? [];
-  const showEnergy = verifiedEmissions.length > 0;
+  const showEnergy = (item.energyCertifications?.length ?? 0) > 0;
   const isCertified = Boolean(item.evidenceID);
 
   const handleBack = () => (onBack ? onBack() : router.push('/customer'));
@@ -145,7 +142,7 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
           </Tabs.Panel>
           {showEnergy && (
             <Tabs.Panel value="energy">
-              <EnergySection certifications={verifiedEmissions} />
+              <EnergyReportSection itemId={item.id} />
             </Tabs.Panel>
           )}
         </Tabs>

@@ -197,6 +197,18 @@ test.describe('UX journey — public passport', () => {
     await expectNoHorizontalScroll(page);
   });
 
+  test('the old energy portal folds into the passport', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+
+    // Printed QR codes point at /customer/item/<id>, so that is the URL that
+    // survives; /energy/* only forwards old links now.
+    await page.goto(`/energy/${PASSPORT_ITEM_ID}`);
+    await expect(page).toHaveURL(new RegExp(`/customer/item/${PASSPORT_ITEM_ID}$`));
+
+    await page.goto('/energy');
+    await expect(page).toHaveURL(/\/customer$/);
+  });
+
   test('unknown code shows a recoverable error', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
     await page.goto('/customer/item/does-not-exist', { waitUntil: 'networkidle' });

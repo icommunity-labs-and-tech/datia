@@ -520,6 +520,45 @@
         "verifier": "Verifier",
         "standard": "Standard"
       }
+    },
+    "energyReport": {
+      "title": "Energy certification",
+      "subtitle": "Consumption and carbon footprint certified under ESPR / ISO 14067.",
+      "noData": "This asset has no energy certification data yet.",
+      "loadError": "Could not load the certification data",
+      "kpis": {
+        "co2": "Certified CO₂e",
+        "energy": "Energy consumed",
+        "renewable": "Renewable energy",
+        "certified": "Certified emissions",
+        "sources": "{count, plural, =0 {No sources} one {1 registered source} other {# registered sources}}"
+      },
+      "charts": {
+        "monthly": "Monthly consumption",
+        "byScope": "CO₂e by GHG scope",
+        "noEmissions": "No certified emissions"
+      },
+      "source": {
+        "renewable": "{share}% renewable",
+        "guarantee": "Guarantee of origin"
+      },
+      "consumption": {
+        "period": "Period",
+        "consumption": "Consumption",
+        "stage": "Stage",
+        "standard": "Measurement standard"
+      },
+      "emission": {
+        "co2": "CO₂e",
+        "scope": "Scope",
+        "methodology": "Methodology",
+        "factor": "Emission factor",
+        "factorSource": "Factor source",
+        "gwp": "GWP",
+        "verifier": "Verifier",
+        "verificationStandard": "Verification standard"
+      },
+      "footer": "Data certified under ESPR / ISO 14067"
     }
   },
   "states": {
@@ -1079,7 +1118,8 @@
       "renewableShare": "% Renewable",
       "withGo": "With GO",
       "noCoordinates": "Add GPS coordinates to your energy sources to see them on the map.",
-      "onMap": "On map"
+      "onMap": "On map",
+      "publicReport": "View public report"
     },
     "consumptionTab": {
       "totalRecorded": "Total recorded consumption ({count} records)",

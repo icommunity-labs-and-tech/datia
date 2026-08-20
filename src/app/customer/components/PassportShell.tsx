@@ -35,7 +35,7 @@ export default function PassportShell({ organization, children }: PassportShellP
           borderTop: `3px solid ${accent}`,
         }}
       >
-        <Container size={720} px="md">
+        <Container size={900} px="md">
           <Group h={56} justify="space-between" wrap="nowrap">
             <Group gap="sm" wrap="nowrap" style={{ minWidth: 0 }}>
               {organization?.logoUrl ? (
@@ -57,12 +57,12 @@ export default function PassportShell({ organization, children }: PassportShellP
         </Container>
       </Box>
 
-      <Container size={720} px="md" py="lg" style={{ flex: 1, width: '100%' }}>
+      <Container size={900} px="md" py="lg" style={{ flex: 1, width: '100%' }}>
         {children}
       </Container>
 
       <Box py="md" style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
-        <Container size={720} px="md">
+        <Container size={900} px="md">
           <Stack gap={2} align="center">
             {organization?.name && (
               <Text size="xs" c="dimmed">

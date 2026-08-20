@@ -17,6 +17,8 @@ import {
   Title,
   Divider,
   SimpleGrid,
+  ActionIcon,
+  Tooltip as MantineTooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -24,6 +26,7 @@ import {
   IconBolt,
   IconCloudFog,
   IconInfoCircle,
+  IconExternalLink,
 } from '@tabler/icons-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -260,11 +263,30 @@ function SourcesMapTab({
                       )}
                     </Group>
                   </Stack>
-                  {source.capacityKw != null && (
-                    <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                      {source.capacityKw} kW
-                    </Text>
-                  )}
+                  <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+                    {source.capacityKw != null && (
+                      <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                        {source.capacityKw} kW
+                      </Text>
+                    )}
+                    {/* The public report is where a customer sees this source's
+                        certification — reachable from the asset it belongs to. */}
+                    <MantineTooltip label={t('mapTab.publicReport')}>
+                      <ActionIcon
+                        component="a"
+                        href={`/customer/item/${encodeURIComponent(source.itemId)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="subtle"
+                        color="gray"
+                        size="sm"
+                        aria-label={t('mapTab.publicReport')}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <IconExternalLink size={14} stroke={1.7} />
+                      </ActionIcon>
+                    </MantineTooltip>
+                  </Group>
                 </Group>
                 {source.renewableShare != null && (
                   <Progress value={source.renewableShare} size={4} color="green" mt={6} radius="xl" />

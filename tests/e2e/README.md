@@ -20,6 +20,9 @@ Los recorridos cubren:
 - **Móvil** (390×844): inicio → drawer → activos → configuración.
 - **Entidades ocultas**: `/dashboard/users` y `/dashboard/status-types` redirigen y
   ningún enlace de la aplicación apunta a ellas.
+- **Pasaporte público**: `/customer/item/<id>` con su informe energético, y que
+  `/energy/*` redirige ahí. Los QR impresos apuntan a `/customer/item/<id>`, así
+  que ese recorrido protege una URL que no se puede romper.
 
 Además de las capturas, cada parada comprueba que la página no genera scroll
 horizontal y que la barra superior no crece más allá de las secciones de contenido.
