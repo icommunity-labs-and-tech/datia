@@ -18,7 +18,8 @@
       "loading": "Cargando...",
       "saving": "Guardando...",
       "saveChanges": "Guardar Cambios",
-      "noData": "No hay datos disponibles"
+      "noData": "No hay datos disponibles",
+      "copy": "Copiar"
     },
     "validation": {
       "required": "Este campo es obligatorio",
@@ -52,10 +53,6 @@
   },
   "sidebar": {
     "home": "Inicio",
-    "statusTypes": "Estados",
-    "products": "Activos",
-    "users": "Usuarios",
-    "profile": "Perfil",
     "organizations": "Organizaciones",
     "management": "GESTIÓN",
     "developer": "DESARROLLADOR",
@@ -71,7 +68,27 @@
     "assets": "Activos",
     "energy": "Energía",
     "settings": "Configuración",
-    "api": "API"
+    "api": "API",
+    "language": "Idioma",
+    "account": "Cuenta",
+    "logout": "Cerrar sesión",
+    "openMenu": "Abrir menú"
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Datos de tu organización, identidad visual y acceso a tu cuenta.",
+    "organization": "Organización",
+    "organizationHint": "Identificación de tu organización en Datia.",
+    "signatureId": "ID de firma",
+    "account": "Tu cuenta"
+  },
+  "apps": {
+    "title": "Elige cómo quieres entrar",
+    "admin": "Panel de administración",
+    "adminDescription": "Gestiona activos, certificaciones y la configuración de tu organización.",
+    "customer": "Pasaporte del activo",
+    "customerDescription": "Consulta la información certificada de un activo con su código.",
+    "redirecting": "Redirigiendo..."
   },
   "forms": {
     "addItem": "Añadir activo",
@@ -292,7 +309,8 @@
           "unauthorized": "Debes iniciar sesión como administrador para continuar",
           "invalidCredentials": "Credenciales inválidas",
           "loginError": "Error al iniciar sesión"
-        }
+        },
+        "togglePassword": "Mostrar u ocultar la contraseña"
       },
       "superadmin": {
         "title": "Datia",
@@ -458,7 +476,7 @@
     "productInfo": "Información del activo",
     "createdAt": "Creado:",
     "tabInfo": "Información",
-    "tabHistory": "Pasaporte Digital",
+    "tabHistory": "Historial",
     "verifiedProduct": "Activo verificado en blockchain",
     "stateVerified": "Estado verificado en blockchain",
     "productDetails": "Detalles del activo",
@@ -487,7 +505,26 @@
       "loading": "Cargando...",
       "preparingError": "Preparando página de error"
     },
-    "tabEnergy": "Certificación Energética"
+    "tabEnergy": "Certificación Energética",
+    "passport": {
+      "title": "Pasaporte digital",
+      "assetId": "ID del activo",
+      "issuedBy": "Emitido por",
+      "certifiedOnChain": "Certificado en blockchain",
+      "notCertified": "Pendiente de certificar",
+      "certifiedDescription": "La identidad y el historial de este activo están registrados en blockchain y son verificables públicamente.",
+      "notCertifiedDescription": "Este activo aún no tiene un registro certificado en blockchain.",
+      "states": "Estados registrados",
+      "energy": {
+        "co2Certified": "kg CO₂e certificados",
+        "kwhConsumed": "kWh consumidos",
+        "period": "Período",
+        "consumption": "Consumo",
+        "method": "Método",
+        "verifier": "Verificador",
+        "standard": "Estándar"
+      }
+    }
   },
   "states": {
     "title": "Estado",
@@ -617,7 +654,9 @@
     "capacityByCarrier": "Capacidad por carrier",
     "sourcesWithCoords": "Con coordenadas GPS",
     "renewableSubtitle": "Media de las fuentes",
-    "activity": "Actividad"
+    "activity": "Actividad",
+    "recentAssets": "Activos recientes",
+    "viewAll": "Ver todos"
   },
   "itemDetail": {
     "notFound": "Activo no encontrado",
@@ -638,7 +677,13 @@
     "deleteEntityName": "Activo",
     "deleteError": "Error al eliminar el activo",
     "deleteTitle": "Eliminar activo",
-    "deleteMessage": "¿Estás seguro de que quieres eliminar el activo \"{name}\"?"
+    "deleteMessage": "¿Estás seguro de que quieres eliminar el activo \"{name}\"?",
+    "qr": {
+      "title": "Código QR del activo",
+      "titleNamed": "QR de {name}",
+      "copyLink": "Copiar enlace",
+      "downloadPng": "Descargar PNG"
+    }
   },
   "userDetail": {
     "title": "Usuario: {name}",
@@ -720,6 +765,20 @@
       "noUrlError": "No se pudo obtener una URL de verificación. Por favor, intenta más tarde.",
       "verifiedMessage": "Tu organización está verificada. Ya puedes crear items y estados certificados.",
       "needKycNote": "Necesitarás completar el KYC para crear items y estados certificados en blockchain."
+    },
+    "password": {
+      "current": "Contraseña actual",
+      "currentPlaceholder": "Ingresa tu contraseña actual",
+      "new": "Nueva contraseña",
+      "newPlaceholder": "Ingresa tu nueva contraseña",
+      "confirm": "Confirmar nueva contraseña",
+      "confirmPlaceholder": "Confirma tu nueva contraseña",
+      "mismatch": "Las contraseñas no coinciden",
+      "submit": "Cambiar contraseña",
+      "submitting": "Cambiando contraseña...",
+      "success": "Contraseña actualizada correctamente",
+      "error": "Error al cambiar la contraseña",
+      "unexpectedError": "Error inesperado al cambiar la contraseña"
     }
   },
   "developer": {
@@ -840,7 +899,12 @@
       "updateError": "Error al actualizar webhook",
       "deleteError": "Error al eliminar webhook",
       "toggleError": "Error al actualizar estado del webhook",
-      "headersInvalid": "Los headers deben ser un JSON válido"
+      "headersInvalid": "Los headers deben ser un JSON válido",
+      "delete": "Eliminar",
+      "deleteTitle": "Eliminar webhook",
+      "edit": "Editar",
+      "activate": "Activar",
+      "deactivate": "Desactivar"
     },
     "events": {
       "whatAreEvents": "¿Qué son los eventos?",
@@ -973,7 +1037,12 @@
     "lastState": "Último estado",
     "noCategory": "Sin categoría",
     "certified": "Certificado",
-    "pending": "Pendiente"
+    "pending": "Pendiente",
+    "title": "Activos",
+    "description": "Cada activo reúne su historial de estados y su certificación en blockchain.",
+    "count": "{count, plural, =0 {Sin activos} one {1 activo} other {# activos}}",
+    "noResults": "Ningún activo coincide con la búsqueda",
+    "clearFilters": "Limpiar filtros"
   },
   "energyHub": {
     "tabs": {
@@ -1085,12 +1154,9 @@
       }
     }
   },
-  "settingsHub": {
-    "states": "Estados",
-    "users": "Usuarios",
-    "org": "Organización"
-  },
   "apiHub": {
+    "title": "API",
+    "description": "Documentación, eventos, webhooks y credenciales para integrar Datia.",
     "docs": "Documentación",
     "events": "Eventos",
     "webhooks": "Webhooks",
