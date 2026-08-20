@@ -1,15 +1,27 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Button, Table, Modal, Badge, Form } from '@/components/legacy/bootstrap-compat';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  Badge,
+  Button,
+  Center,
+  Code,
+  Modal,
+  Select,
+  Skeleton,
+  Stack,
+  Table,
+  Text,
+  ThemeIcon,
+  ScrollArea,
+  Group,
+} from '@mantine/core';
+import { IconCalendarEvent, IconChartLine, IconEye } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { listEvents } from '@/actions/events/list';
 import { listEventsByType } from '@/actions/events/listByType';
-import Box from '@/components/Box';
-import LoadingOverlay from '@/components/Loading';
-import { Divider } from '@/components/Divider';
-import '@/components/GenericTable/Toolbar/Toolbar.css';
+import SectionCard from '@/components/layout/SectionCard';
 import { colors, axisProps, gridProps, tooltipStyle } from '@/components/charts/theme';
 
 interface EventLog {
@@ -21,22 +33,27 @@ interface EventLog {
   createdAt: Date;
 }
 
+/** One accent per event type, so table badges and chart lines agree. */
+function eventColor(eventType: string) {
+  if (eventType === 'item.created') return { badge: 'datiaBlue', line: colors.blue };
+  if (eventType === 'state.created') return { badge: 'cyan', line: colors.sky };
+  return { badge: 'gray', line: colors.amber };
+}
+
 export default function EventsPageClient() {
   const t = useTranslations('developer.events');
-  const tCommon = useTranslations('common.actions');
   const [events, setEvents] = useState<EventLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<EventLog | null>(null);
-  const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [filterType, setFilterType] = useState<string>('all');
 
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     setLoading(true);
     try {
-      const result = filterType === 'all' 
+      const result = filterType === 'all'
         ? await listEvents(100)
         : await listEventsByType(filterType, 100);
-      
+
       if (result.success && result.data) {
         setEvents(result.data);
       }
@@ -45,62 +62,46 @@ export default function EventsPageClient() {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    loadEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterType]);
 
-  const handleViewDetails = (event: EventLog) => {
-    setSelectedEvent(event);
-    setShowDetailsModal(true);
-  };
+  useEffect(() => { loadEvents(); }, [loadEvents]);
 
   const formatDate = (date: Date) => {
     const locale = typeof window !== 'undefined' ? navigator.language : 'en-US';
     return new Date(date).toLocaleString(locale);
   };
 
-  const getEventBadgeVariant = (eventType: string) => {
-    if (eventType === 'item.created') return 'primary';
-    if (eventType === 'state.created') return 'info';
-    return 'secondary';
-  };
-
-  // Preparar datos para el gráfico de evolución de eventos
+  // Event volume over time, bucketed by week when the range is long.
   const chartData = useMemo(() => {
     if (events.length === 0) return { data: [], eventTypes: [] };
 
     const now = new Date();
-    const sortedEvents = [...events].sort((a, b) => 
+    const sortedEvents = [...events].sort((a, b) =>
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    // Obtener la fecha más antigua
     const oldestDate = new Date(sortedEvents[0].createdAt);
     oldestDate.setHours(0, 0, 0, 0);
     const daysDiff = Math.ceil((now.getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    // Crear períodos (semanas si hay más de 30 días, días si hay menos)
+
     const periodType = daysDiff > 30 ? 'week' : 'day';
     const periods: Array<{ period: string; date: Date; endDate: Date }> = [];
 
     const startDate = new Date(oldestDate);
     let periodNum = 1;
-    
+
     while (startDate <= now) {
       const locale = typeof window !== 'undefined' ? navigator.language : 'en-US';
-      const key = periodType === 'week' 
-        ? `Sem ${periodNum}`
+      const key = periodType === 'week'
+        ? `${t('period')} ${periodNum}`
         : startDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-      
+
       const endDate = periodType === 'week'
         ? new Date(startDate.getTime() + 7 * 24 * 60 * 60 * 1000)
         : new Date(startDate.getTime() + 24 * 60 * 60 * 1000);
-      
+
       periods.push({ period: key, date: new Date(startDate), endDate });
-      
+
       if (periodType === 'week') {
         startDate.setDate(startDate.getDate() + 7);
         periodNum++;
@@ -109,124 +110,117 @@ export default function EventsPageClient() {
       }
     }
 
-    // Obtener tipos de eventos únicos
     const eventTypes = Array.from(new Set(events.map(e => e.eventType)));
 
-    // Contar eventos por tipo y período
     const result = periods.map(({ period, date, endDate }) => {
       const periodData: { period: string; [key: string]: number | string } = { period };
 
       eventTypes.forEach(eventType => {
-        const eventsInPeriod = sortedEvents.filter(event => {
+        periodData[eventType] = sortedEvents.filter(event => {
           const eventDate = new Date(event.createdAt);
           return event.eventType === eventType && eventDate >= date && eventDate < endDate;
-        });
-        
-        periodData[eventType] = eventsInPeriod.length;
+        }).length;
       });
 
       return periodData;
     });
 
     return { data: result, eventTypes };
-  }, [events]);
+  }, [events, t]);
 
-  if (loading) {
-    return <LoadingOverlay />;
-  }
+  const filterSelect = (
+    <Select
+      value={filterType}
+      onChange={(value) => setFilterType(value ?? 'all')}
+      size="xs"
+      w={190}
+      allowDeselect={false}
+      aria-label={t('filter.all')}
+      data={[
+        { value: 'all', label: t('filter.all') },
+        { value: 'item.created', label: t('filter.itemCreated') },
+        { value: 'state.created', label: t('filter.stateCreated') },
+      ]}
+    />
+  );
 
   return (
-    <>
-      <Box>
-        <h6 className="mb-2">{t('whatAreEvents')}</h6>
-        <Divider />
-        <p className="mb-0 text-muted">
-          {t('eventsDescription')}
-        </p>
-      </Box>
+    <Stack gap="md">
+      <SectionCard icon={IconCalendarEvent} title={t('whatAreEvents')}>
+        <Text size="sm" c="dimmed">{t('eventsDescription')}</Text>
+      </SectionCard>
 
-      <Box>
-        <div className="table-toolbar">
-          <div className="title-section">
-            <i className="bi bi-calendar-event-fill"></i>
-            <h4>{t('title')}</h4>
-          </div>
-          <div className="controls-section">
-            <Form.Select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              style={{ width: 'auto' }}
-            >
-              <option value="all">{t('filter.all')}</option>
-              <option value="item.created">{t('filter.itemCreated')}</option>
-              <option value="state.created">{t('filter.stateCreated')}</option>
-            </Form.Select>
-          </div>
-        </div>
-
-        <Divider />
-
-        {events.length === 0 ? (
-          <div className="text-center py-5">
-            <i className="bi bi-calendar-event" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
-            <p className="mt-3 text-muted">{t('noEvents')}</p>
-          </div>
+      <SectionCard icon={IconCalendarEvent} title={t('title')} actions={filterSelect}>
+        {loading ? (
+          <Stack gap="xs">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} height={38} radius="sm" />
+            ))}
+          </Stack>
+        ) : events.length === 0 ? (
+          <Center py={48}>
+            <Stack align="center" gap="sm">
+              <ThemeIcon color="gray" variant="light" size={48} radius="xl">
+                <IconCalendarEvent size={24} stroke={1.5} />
+              </ThemeIcon>
+              <Text size="sm" c="dimmed">{t('noEvents')}</Text>
+            </Stack>
+          </Center>
         ) : (
-          <Table responsive striped className="custom-table">
-            <thead>
-              <tr>
-                <th>{t('table.type')}</th>
-                <th>{t('table.entity')}</th>
-                <th>{t('table.entityId')}</th>
-                <th>{t('table.date')}</th>
-                <th>{t('table.actions')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {events.map((event) => (
-                <tr key={event.id}>
-                  <td>
-                    <Badge bg={getEventBadgeVariant(event.eventType)}>
-                      {event.eventType}
-                    </Badge>
-                  </td>
-                  <td>{event.entityType}</td>
-                  <td>
-                    <code>{event.entityId}</code>
-                  </td>
-                  <td>{formatDate(event.createdAt)}</td>
-                  <td>
-                    <Button
-                      variant="outline-primary"
-                      size="sm"
-                      onClick={() => handleViewDetails(event)}
-                    >
-                      <i className="bi bi-eye me-1"></i>
-                      {t('viewDetails')}
-                    </Button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <ScrollArea>
+            <Table striped highlightOnHover verticalSpacing="xs" miw={640}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>{t('table.type')}</Table.Th>
+                  <Table.Th>{t('table.entity')}</Table.Th>
+                  <Table.Th>{t('table.entityId')}</Table.Th>
+                  <Table.Th>{t('table.date')}</Table.Th>
+                  <Table.Th />
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {events.map((event) => (
+                  <Table.Tr key={event.id}>
+                    <Table.Td>
+                      <Badge size="sm" variant="light" color={eventColor(event.eventType).badge}>
+                        {event.eventType}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm">{event.entityType}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Code>{event.entityId}</Code>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">{formatDate(event.createdAt)}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Button
+                        variant="subtle"
+                        size="compact-xs"
+                        leftSection={<IconEye size={13} stroke={1.7} />}
+                        onClick={() => setSelectedEvent(event)}
+                      >
+                        {t('viewDetails')}
+                      </Button>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
         )}
-      </Box>
+      </SectionCard>
 
-      {events.length > 0 && chartData.data.length > 0 && (
-        <Box>
-          <div className="table-toolbar">
-            <div className="title-section">
-              <i className="bi bi-graph-up"></i>
-              <h4>{t('evolution')}</h4>
-            </div>
-          </div>
-          <Divider />
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={chartData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      {!loading && events.length > 0 && chartData.data.length > 0 && (
+        <SectionCard icon={IconChartLine} title={t('evolution')}>
+          <ResponsiveContainer width="100%" height={340}>
+            <LineChart data={chartData.data} margin={{ top: 5, right: 16, left: 0, bottom: 5 }}>
               <CartesianGrid {...gridProps} />
               <XAxis dataKey="period" {...axisProps} />
               <YAxis {...axisProps} allowDecimals={false} />
-              <Tooltip 
+              <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(value: number) => {
                   const eventText = value !== 1 ? t('eventsPlural') : t('event');
@@ -235,74 +229,57 @@ export default function EventsPageClient() {
                 labelFormatter={(label) => `${t('period')} ${label}`}
               />
               <Legend />
-              {chartData.eventTypes.map((eventType, index) => {
-                const hue = (index * 137.508) % 360;
-                const color = `hsl(${hue}, 70%, 50%)`;
-                const variant = getEventBadgeVariant(eventType);
-                const lineColor = variant === 'primary' ? colors.blue : variant === 'info' ? colors.sky : colors.amber;
-                
-                return (
-                  <Line 
-                    key={eventType}
-                    type="monotone" 
-                    dataKey={eventType}
-                    stroke={lineColor}
-                    strokeWidth={2}
-                    name={eventType}
-                    dot={{ fill: lineColor, strokeWidth: 2, r: 4 }}
-                  />
-                );
-              })}
+              {chartData.eventTypes.map((eventType) => (
+                <Line
+                  key={eventType}
+                  type="monotone"
+                  dataKey={eventType}
+                  stroke={eventColor(eventType).line}
+                  strokeWidth={2}
+                  name={eventType}
+                  dot={{ fill: eventColor(eventType).line, strokeWidth: 2, r: 3 }}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
-        </Box>
+        </SectionCard>
       )}
 
-      {/* Details Modal */}
-      <Modal show={showDetailsModal} onHide={() => { setShowDetailsModal(false); setSelectedEvent(null); }} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{t('detailsModal.title')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {selectedEvent && (
-            <>
-              <div className="mb-3">
-                <strong>{t('detailsModal.eventType')}</strong>
-                <div>
-                  <Badge bg={getEventBadgeVariant(selectedEvent.eventType)}>
-                    {selectedEvent.eventType}
-                  </Badge>
-                </div>
-              </div>
-              <div className="mb-3">
-                <strong>{t('detailsModal.entityType')}</strong>
-                <div>{selectedEvent.entityType}</div>
-              </div>
-              <div className="mb-3">
-                <strong>{t('detailsModal.entityId')}</strong>
-                <div><code>{selectedEvent.entityId}</code></div>
-              </div>
-              <div className="mb-3">
-                <strong>{t('detailsModal.date')}</strong>
-                <div>{formatDate(selectedEvent.createdAt)}</div>
-              </div>
-              <div className="mb-3">
-                <strong>{t('detailsModal.data')}</strong>
-                <pre className="bg-light p-3 rounded" style={{ maxHeight: '400px', overflow: 'auto' }}>
-                  <code>{JSON.stringify(selectedEvent.data, null, 2)}</code>
-                </pre>
-              </div>
-            </>
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => { setShowDetailsModal(false); setSelectedEvent(null); }}>
-            {t('detailsModal.close')}
-          </Button>
-        </Modal.Footer>
+      <Modal
+        opened={selectedEvent !== null}
+        onClose={() => setSelectedEvent(null)}
+        title={t('detailsModal.title')}
+        size="lg"
+      >
+        {selectedEvent && (
+          <Stack gap="md">
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">{t('detailsModal.eventType').replace(':', '')}</Text>
+              <Badge size="sm" variant="light" color={eventColor(selectedEvent.eventType).badge}>
+                {selectedEvent.eventType}
+              </Badge>
+            </Group>
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">{t('detailsModal.entityType').replace(':', '')}</Text>
+              <Text size="sm" fw={550}>{selectedEvent.entityType}</Text>
+            </Group>
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">{t('detailsModal.entityId').replace(':', '')}</Text>
+              <Code>{selectedEvent.entityId}</Code>
+            </Group>
+            <Group justify="space-between">
+              <Text size="sm" c="dimmed">{t('detailsModal.date').replace(':', '')}</Text>
+              <Text size="sm" fw={550}>{formatDate(selectedEvent.createdAt)}</Text>
+            </Group>
+            <Stack gap={6}>
+              <Text size="sm" c="dimmed">{t('detailsModal.data').replace(':', '')}</Text>
+              <Code block mah={360} style={{ overflow: 'auto' }}>
+                {JSON.stringify(selectedEvent.data, null, 2)}
+              </Code>
+            </Stack>
+          </Stack>
+        )}
       </Modal>
-    </>
+    </Stack>
   );
 }
-
-

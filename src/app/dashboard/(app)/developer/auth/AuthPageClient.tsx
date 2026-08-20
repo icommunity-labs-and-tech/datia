@@ -1,18 +1,43 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import { Button, Modal, Form, Alert, Badge, Table } from '@/components/legacy/bootstrap-compat';
+import { useState, useEffect, useMemo, useCallback } from 'react';
+import {
+  Alert,
+  Badge,
+  Button,
+  Center,
+  Code,
+  CopyButton,
+  Group,
+  Modal,
+  ScrollArea,
+  Skeleton,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  ThemeIcon,
+  ActionIcon,
+  Tooltip as MantineTooltip,
+} from '@mantine/core';
+import { DateInput } from '@mantine/dates';
+import {
+  IconKey,
+  IconChartLine,
+  IconTrash,
+  IconPlus,
+  IconCheck,
+  IconCopy,
+  IconAlertTriangle,
+} from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { createApiToken } from '@/actions/api-tokens/create';
 import { listApiTokens } from '@/actions/api-tokens/list';
 import { deleteApiToken } from '@/actions/api-tokens/delete';
 import { getCallsByToken } from '@/actions/api-calls/getCallsByToken';
-import Box from '@/components/Box';
-import LoadingOverlay from '@/components/Loading';
-import { Divider } from '@/components/Divider';
-import '@/components/GenericTable/Toolbar/Toolbar.css';
-import { colors, axisProps, gridProps, tooltipStyle } from '@/components/charts/theme';
+import SectionCard from '@/components/layout/SectionCard';
+import { axisProps, gridProps, tooltipStyle, seriesColor } from '@/components/charts/theme';
 
 interface ApiToken {
   id: string;
@@ -25,21 +50,19 @@ interface ApiToken {
 
 export default function AuthPageClient() {
   const t = useTranslations('developer.auth');
-  const tCommon = useTranslations('common.actions');
   const [tokens, setTokens] = useState<ApiToken[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiCalls, setApiCalls] = useState<Record<string, Array<{ createdAt: Date; statusCode: number }>>>({});
-  const [loadingCalls, setLoadingCalls] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [createOpened, setCreateOpened] = useState(false);
   const [newTokenName, setNewTokenName] = useState('');
-  const [newTokenExpiresAt, setNewTokenExpiresAt] = useState('');
+  const [newTokenExpiresAt, setNewTokenExpiresAt] = useState<Date | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [newToken, setNewToken] = useState<string | null>(null);
-  const [showTokenModal, setShowTokenModal] = useState(false);
+  const [tokenToDelete, setTokenToDelete] = useState<ApiToken | null>(null);
 
-  const loadTokens = async () => {
+  const loadTokens = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -47,80 +70,51 @@ export default function AuthPageClient() {
       if (result.success && result.data) {
         setTokens(result.data);
       } else {
-        const errorMsg = result.error || t('loadError');
-        console.error('Error loading tokens:', errorMsg);
-        setError(errorMsg);
+        setError(result.error || t('loadError'));
       }
     } catch (err: any) {
-      const errorMsg = err?.message || t('loadError');
-      console.error('Exception loading tokens:', err);
-      setError(errorMsg);
+      setError(err?.message || t('loadError'));
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
 
-  const loadApiCalls = async () => {
+  const loadApiCalls = useCallback(async () => {
     if (tokens.length === 0) return;
-    
-    setLoadingCalls(true);
+
+    const now = new Date();
+    const oldestToken = tokens.reduce((oldest, token) => {
+      const tokenDate = new Date(token.createdAt);
+      return tokenDate < oldest ? tokenDate : oldest;
+    }, new Date(tokens[0].createdAt));
+
+    const startDate = new Date(oldestToken);
+    startDate.setHours(0, 0, 0, 0);
+
     try {
-      const now = new Date();
-      const oldestToken = tokens.reduce((oldest, token) => {
-        const tokenDate = new Date(token.createdAt);
-        return tokenDate < oldest ? tokenDate : oldest;
-      }, new Date(tokens[0].createdAt));
-      
-      const startDate = new Date(oldestToken);
-      startDate.setHours(0, 0, 0, 0);
-      
-      console.log('🔍 loadApiCalls - Cargando llamadas desde:', startDate.toISOString());
-      console.log('🔍 loadApiCalls - Tokens a consultar:', tokens.length);
-      
-      const callsByToken: Record<string, Array<{ createdAt: Date; statusCode: number }>> = {};
-      
-      for (const token of tokens) {
-        const result = await getCallsByToken({
-          apiTokenId: token.id,
-          startDate,
-          endDate: now,
-        });
-        
-        console.log(`🔍 Token "${token.name}" - Success: ${result.success}, Llamadas: ${result.data?.length || 0}`);
-        
-        if (result.success && result.data) {
-          callsByToken[token.id] = result.data.map(call => ({
-            createdAt: new Date(call.createdAt),
-            statusCode: call.statusCode,
-          }));
-        } else {
-          console.error(`❌ Error para token ${token.name}:`, result.error);
-        }
-      }
-      
-      console.log('🔍 loadApiCalls - Total tokens con datos:', Object.keys(callsByToken).length);
-      console.log('🔍 loadApiCalls - callsByToken:', Object.entries(callsByToken).map(([id, calls]) => 
-        `${id.substring(0, 8)}: ${calls.length} llamadas`
-      ));
-      
-      setApiCalls(callsByToken);
+      const entries = await Promise.all(
+        tokens.map(async (token) => {
+          const result = await getCallsByToken({ apiTokenId: token.id, startDate, endDate: now });
+          const calls = result.success && result.data
+            ? result.data.map((call) => ({
+                createdAt: new Date(call.createdAt),
+                statusCode: call.statusCode,
+              }))
+            : [];
+          return [token.id, calls] as const;
+        })
+      );
+      setApiCalls(Object.fromEntries(entries));
     } catch (err) {
       console.error('Error loading API calls:', err);
-    } finally {
-      setLoadingCalls(false);
     }
-  };
+  }, [tokens]);
+
+  useEffect(() => { loadTokens(); }, [loadTokens]);
 
   useEffect(() => {
-    loadTokens();
-  }, []);
-
-  useEffect(() => {
-    if (tokens.length > 0 && !loading) {
-      loadApiCalls();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tokens.length, loading]);
+    if (tokens.length > 0 && !loading) loadApiCalls();
+  }, [tokens.length, loading, loadApiCalls]);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,39 +123,36 @@ export default function AuthPageClient() {
     setSuccess(null);
 
     try {
-      // Si se especifica una fecha, establecer la hora a 00:00 del día indicado
       let expiresAt: Date | null = null;
       if (newTokenExpiresAt) {
-        const date = new Date(newTokenExpiresAt);
-        date.setHours(0, 0, 0, 0);
-        expiresAt = date;
+        expiresAt = new Date(newTokenExpiresAt);
+        expiresAt.setHours(0, 0, 0, 0);
       }
       const result = await createApiToken(newTokenName, expiresAt);
 
       if (result.success && result.data) {
         setNewToken(result.data.token);
-        setShowCreateModal(false);
-        setShowTokenModal(true);
+        setCreateOpened(false);
         setNewTokenName('');
-        setNewTokenExpiresAt('');
+        setNewTokenExpiresAt(null);
         await loadTokens();
       } else {
         setError(result.error || t('createError'));
       }
-    } catch (err) {
+    } catch {
       setError(t('createError'));
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDelete = async (tokenId: string) => {
-    if (!confirm(t('deleteConfirm'))) {
-      return;
-    }
+  const handleDelete = async () => {
+    if (!tokenToDelete) return;
+    const id = tokenToDelete.id;
+    setTokenToDelete(null);
 
     try {
-      const result = await deleteApiToken(tokenId);
+      const result = await deleteApiToken(id);
       if (result.success) {
         setSuccess(t('deleteSuccess'));
         await loadTokens();
@@ -169,7 +160,7 @@ export default function AuthPageClient() {
       } else {
         setError(result.error || t('deleteError'));
       }
-    } catch (err) {
+    } catch {
       setError(t('deleteError'));
     }
   };
@@ -180,50 +171,36 @@ export default function AuthPageClient() {
     return new Date(date).toLocaleString(locale);
   };
 
-  const isExpired = (expiresAt: Date | null) => {
-    if (!expiresAt) return false;
-    return new Date(expiresAt) < new Date();
-  };
+  const isExpired = (expiresAt: Date | null) =>
+    expiresAt ? new Date(expiresAt) < new Date() : false;
 
-  // Preparar datos para el gráfico de líneas (una línea por token)
+  // One line per token, bucketed by week when the range is long.
   const chartData = useMemo(() => {
     if (tokens.length === 0) return { data: [], tokenNames: [] };
 
-    console.log('📊 chartData - Recalculando gráfico');
-    console.log('📊 chartData - apiCalls keys:', Object.keys(apiCalls).map(k => k.substring(0, 8)));
-    console.log('📊 chartData - Total llamadas por token:', Object.entries(apiCalls).map(([id, calls]) => 
-      `${id.substring(0, 8)}: ${calls.length}`
-    ));
-
     const now = new Date();
-    const sortedTokens = [...tokens].sort((a, b) => 
+    const sortedTokens = [...tokens].sort((a, b) =>
       new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
     );
 
-    // Obtener la fecha más antigua (creación del primer token)
     const oldestDate = new Date(sortedTokens[0].createdAt);
     oldestDate.setHours(0, 0, 0, 0);
     const daysDiff = Math.ceil((now.getTime() - oldestDate.getTime()) / (1000 * 60 * 60 * 24));
-    
-    console.log('📊 chartData - Rango de fechas:', oldestDate.toISOString().split('T')[0], 'a', now.toISOString().split('T')[0]);
-    console.log('📊 chartData - Días de diferencia:', daysDiff);
-    
-    // Crear períodos (semanas si hay más de 30 días, días si hay menos)
+
     const periodType = daysDiff > 30 ? 'week' : 'day';
     const periods: Array<{ period: string; date: Date }> = [];
 
-    // Generar períodos
     const startDate = new Date(oldestDate);
     let periodNum = 1;
-    
+
     while (startDate <= now) {
       const locale = typeof window !== 'undefined' ? navigator.language : 'en-US';
-      const key = periodType === 'week' 
-        ? `Sem ${periodNum}`
+      const key = periodType === 'week'
+        ? `${t('period')} ${periodNum}`
         : startDate.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
-      
+
       periods.push({ period: key, date: new Date(startDate) });
-      
+
       if (periodType === 'week') {
         startDate.setDate(startDate.getDate() + 7);
         periodNum++;
@@ -232,31 +209,21 @@ export default function AuthPageClient() {
       }
     }
 
-    // Para cada período, calcular el número de llamadas de cada token
     const result = periods.map(({ period, date }) => {
       const periodData: { period: string; [key: string]: number | string } = { period };
-      
-      // Calcular la fecha de fin del período
       const endDate = periodType === 'week'
         ? new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000)
         : new Date(date.getTime() + 24 * 60 * 60 * 1000);
 
       sortedTokens.forEach((token, index) => {
-        const tokenCreated = new Date(token.createdAt);
         const tokenKey = `token_${index}`;
-        
-        // Si el token fue creado antes o en este período
-        if (tokenCreated <= endDate) {
-          // Contar llamadas en este período
+        if (new Date(token.createdAt) <= endDate) {
           const calls = apiCalls[token.id] || [];
-          const callsInPeriod = calls.filter(call => {
+          periodData[tokenKey] = calls.filter((call) => {
             const callDate = new Date(call.createdAt);
             return callDate >= date && callDate < endDate;
-          });
-          
-          periodData[tokenKey] = callsInPeriod.length;
+          }).length;
         } else {
-          // Token aún no creado en este período
           periodData[tokenKey] = 0;
         }
       });
@@ -264,123 +231,126 @@ export default function AuthPageClient() {
       return periodData;
     });
 
-    // Obtener nombres de tokens para la leyenda
     const tokenNames = sortedTokens.map((token, index) => ({
       key: `token_${index}`,
-      name: token.name
+      name: token.name,
     }));
 
     return { data: result, tokenNames };
-  }, [tokens, apiCalls]);
+  }, [tokens, apiCalls, t]);
 
-  if (loading) {
-    return <LoadingOverlay />;
-  }
+  const curlExample = `curl -X POST ${typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'}/api/v1/items \\
+  -H "Authorization: Bearer ${newToken}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"id": "ITEM-001", "name": "Turbina T-100", "description": "..."}'`;
 
   return (
-    <>
-      <Box>
-        <h6 className="mb-2">{t('whatAreTokens')}</h6>
-        <Divider />
-        <p className="mb-0 text-muted">
-          {t('tokensDescription')}
-        </p>
-      </Box>
+    <Stack gap="md">
+      <SectionCard icon={IconKey} title={t('whatAreTokens')}>
+        <Text size="sm" c="dimmed">{t('tokensDescription')}</Text>
+      </SectionCard>
 
-      <Box>
-        <div className="table-toolbar">
-          <div className="title-section">
-            <i className="bi bi-key-fill"></i>
-            <h4>{t('title')}</h4>
-          </div>
-          <div className="controls-section">
-            <Button variant="primary" onClick={() => setShowCreateModal(true)}>
-              <span className="d-none d-md-inline">{t('createToken')}</span>
-              <span className="d-md-none">+</span>
+      <SectionCard
+        icon={IconKey}
+        title={t('title')}
+        actions={
+          <Button
+            size="xs"
+            leftSection={<IconPlus size={14} stroke={1.7} />}
+            onClick={() => setCreateOpened(true)}
+          >
+            {t('createToken')}
           </Button>
-          </div>
-        </div>
-
+        }
+      >
         {error && (
-          <Alert variant="danger" onClose={() => setError(null)} dismissible className="mb-3">
+          <Alert color="red" variant="light" withCloseButton onClose={() => setError(null)} mb="md">
             {error}
           </Alert>
         )}
-
         {success && (
-          <Alert variant="success" onClose={() => setSuccess(null)} dismissible className="mb-3">
+          <Alert color="green" variant="light" withCloseButton onClose={() => setSuccess(null)} mb="md">
             {success}
           </Alert>
         )}
 
-        <Divider />
-
-        {tokens.length === 0 ? (
-          <div className="text-center py-5">
-            <i className="bi bi-key" style={{ fontSize: '3rem', color: '#6c757d' }}></i>
-            <p className="mt-3 text-muted">{t('noTokens')}</p>
-          </div>
+        {loading ? (
+          <Stack gap="xs">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} height={38} radius="sm" />
+            ))}
+          </Stack>
+        ) : tokens.length === 0 ? (
+          <Center py={48}>
+            <Stack align="center" gap="sm">
+              <ThemeIcon color="gray" variant="light" size={48} radius="xl">
+                <IconKey size={24} stroke={1.5} />
+              </ThemeIcon>
+              <Text size="sm" c="dimmed">{t('noTokens')}</Text>
+            </Stack>
+          </Center>
         ) : (
-          <Table responsive striped className="custom-table">
-              <thead>
-                <tr>
-                  <th>{t('table.name')}</th>
-                  <th>{t('table.created')}</th>
-                  <th>{t('table.lastUsed')}</th>
-                  <th>{t('table.expires')}</th>
-                  <th>{t('table.status')}</th>
-                  <th>{t('table.actions')}</th>
-                </tr>
-              </thead>
-              <tbody>
+          <ScrollArea>
+            <Table striped highlightOnHover verticalSpacing="xs" miw={720}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>{t('table.name')}</Table.Th>
+                  <Table.Th>{t('table.created')}</Table.Th>
+                  <Table.Th>{t('table.lastUsed')}</Table.Th>
+                  <Table.Th>{t('table.expires')}</Table.Th>
+                  <Table.Th>{t('table.status')}</Table.Th>
+                  <Table.Th />
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {tokens.map((token) => (
-                  <tr key={token.id}>
-                    <td>{token.name}</td>
-                    <td>{formatDate(token.createdAt)}</td>
-                    <td>{formatDate(token.lastUsedAt)}</td>
-                    <td>{token.expiresAt ? formatDate(token.expiresAt) : t('never')}</td>
-                    <td>
-                      {isExpired(token.expiresAt) ? (
-                        <Badge bg="danger">{t('expired')}</Badge>
-                      ) : (
-                        <Badge bg="success">{t('active')}</Badge>
-                      )}
-                    </td>
-                    <td>
-                        <Button
-                          variant="outline-danger"
+                  <Table.Tr key={token.id}>
+                    <Table.Td><Text size="sm" fw={550}>{token.name}</Text></Table.Td>
+                    <Table.Td><Text size="sm" c="dimmed">{formatDate(token.createdAt)}</Text></Table.Td>
+                    <Table.Td><Text size="sm" c="dimmed">{formatDate(token.lastUsedAt)}</Text></Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">
+                        {token.expiresAt ? formatDate(token.expiresAt) : t('never')}
+                      </Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Badge
+                        size="sm"
+                        variant="light"
+                        color={isExpired(token.expiresAt) ? 'red' : 'green'}
+                      >
+                        {isExpired(token.expiresAt) ? t('expired') : t('active')}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <MantineTooltip label={t('delete')}>
+                        <ActionIcon
+                          variant="subtle"
+                          color="red"
                           size="sm"
-                          onClick={() => handleDelete(token.id)}
-                          title={t('delete')}
+                          aria-label={t('delete')}
+                          onClick={() => setTokenToDelete(token)}
                         >
-                          <i className="bi bi-trash"></i>
-                        </Button>
-                    </td>
-                  </tr>
+                          <IconTrash size={15} stroke={1.7} />
+                        </ActionIcon>
+                      </MantineTooltip>
+                    </Table.Td>
+                  </Table.Tr>
                 ))}
-              </tbody>
-          </Table>
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
         )}
-      </Box>
+      </SectionCard>
 
-      {tokens.length > 0 && chartData.data.length > 0 && (
-        <Box>
-          <div className="table-toolbar">
-            <div className="title-section">
-              <i className="bi bi-graph-up"></i>
-              <h4>{t('usageEvolution')}</h4>
-            </div>
-          </div>
-          <Divider />
-          <ResponsiveContainer width="100%" height={400}>
-            <LineChart data={chartData.data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+      {!loading && tokens.length > 0 && chartData.data.length > 0 && (
+        <SectionCard icon={IconChartLine} title={t('usageEvolution')}>
+          <ResponsiveContainer width="100%" height={340}>
+            <LineChart data={chartData.data} margin={{ top: 5, right: 16, left: 0, bottom: 5 }}>
               <CartesianGrid {...gridProps} />
               <XAxis dataKey="period" {...axisProps} />
-                <YAxis 
-                  {...axisProps} 
-                  allowDecimals={false}
-                />
-              <Tooltip 
+              <YAxis {...axisProps} allowDecimals={false} />
+              <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(value: number, name: string) => {
                   const tokenIndex = parseInt(name.replace('token_', ''));
@@ -390,129 +360,126 @@ export default function AuthPageClient() {
                 }}
                 labelFormatter={(label) => `${t('period')} ${label}`}
               />
-              <Legend 
+              <Legend
                 formatter={(value) => {
-                  const tokenIndex = parseInt(value.replace('token_', ''));
+                  const tokenIndex = parseInt(String(value).replace('token_', ''));
                   return chartData.tokenNames[tokenIndex]?.name || value;
                 }}
               />
-              {chartData.tokenNames.map((token, index) => {
-                const tokenKey = token.key;
-                // Generar color único para cada token
-                const hue = (index * 137.508) % 360; // Golden angle para distribución de colores
-                const color = `hsl(${hue}, 70%, 50%)`;
-                
-                return (
-                  <Line 
-                    key={tokenKey}
-                    type="monotone" 
-                    dataKey={tokenKey}
-                    stroke={color}
-                    strokeWidth={2}
-                    name={tokenKey}
-                    dot={{ fill: color, strokeWidth: 2, r: 3 }}
-                    connectNulls={false}
-                  />
-                );
-              })}
+              {chartData.tokenNames.map((token, index) => (
+                <Line
+                  key={token.key}
+                  type="monotone"
+                  dataKey={token.key}
+                  stroke={seriesColor(index)}
+                  strokeWidth={2}
+                  name={token.key}
+                  dot={{ fill: seriesColor(index), strokeWidth: 2, r: 3 }}
+                  connectNulls={false}
+                />
+              ))}
             </LineChart>
           </ResponsiveContainer>
-        </Box>
+        </SectionCard>
       )}
 
-      {/* Create Token Modal */}
-      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>{t('createModal.title')}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleCreate}>
-          <Modal.Body>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.nameLabel')}</Form.Label>
-              <Form.Control
-                type="text"
-                value={newTokenName}
-                onChange={(e) => setNewTokenName(e.target.value)}
-                required
-                placeholder={t('createModal.namePlaceholder')}
-              />
-              <Form.Text className="text-muted">
-                {t('createModal.nameHelp')}
-              </Form.Text>
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>{t('createModal.expiresLabel')}</Form.Label>
-              <Form.Control
-                type="date"
-                value={newTokenExpiresAt}
-                onChange={(e) => setNewTokenExpiresAt(e.target.value)}
-              />
-              <Form.Text className="text-muted">
-                {t('createModal.expiresHelp')}
-              </Form.Text>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
+      {/* Create token */}
+      <Modal opened={createOpened} onClose={() => setCreateOpened(false)} title={t('createModal.title')}>
+        <form onSubmit={handleCreate}>
+          <Stack gap="md">
+            <TextInput
+              label={t('createModal.nameLabel')}
+              description={t('createModal.nameHelp')}
+              placeholder={t('createModal.namePlaceholder')}
+              value={newTokenName}
+              onChange={(e) => setNewTokenName(e.currentTarget.value)}
+              required
+              data-autofocus
+            />
+            <DateInput
+              label={t('createModal.expiresLabel')}
+              description={t('createModal.expiresHelp')}
+              value={newTokenExpiresAt}
+              onChange={(value) => setNewTokenExpiresAt(value as Date | null)}
+              clearable
+            />
+            <Group justify="flex-end" gap="xs">
+              <Button variant="default" onClick={() => setCreateOpened(false)}>
+                {t('createModal.cancel')}
+              </Button>
+              <Button type="submit" loading={creating} disabled={!newTokenName.trim()}>
+                {t('createModal.create')}
+              </Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
+
+      {/* Reveal the token exactly once */}
+      <Modal
+        opened={newToken !== null}
+        onClose={() => setNewToken(null)}
+        title={t('tokenCreated.title')}
+        size="lg"
+      >
+        <Stack gap="md">
+          <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={16} />}>
+            <Text size="sm">
+              <strong>{t('tokenCreated.important')}</strong> {t('tokenCreated.warning')}
+            </Text>
+          </Alert>
+
+          <Stack gap={6}>
+            <Text size="sm" fw={550}>{t('tokenCreated.tokenLabel')}</Text>
+            <Group gap="xs" wrap="nowrap" align="flex-start">
+              <Code block style={{ flex: 1, wordBreak: 'break-all' }}>{newToken}</Code>
+              <CopyButton value={newToken ?? ''} timeout={2000}>
+                {({ copied, copy }) => (
+                  <Button
+                    variant={copied ? 'light' : 'default'}
+                    color={copied ? 'green' : undefined}
+                    size="xs"
+                    onClick={copy}
+                    leftSection={copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {t('tokenCreated.copy')}
+                  </Button>
+                )}
+              </CopyButton>
+            </Group>
+          </Stack>
+
+          <Stack gap={6}>
+            <Text size="sm" fw={550}>{t('tokenCreated.exampleTitle')}</Text>
+            <Code block>{curlExample}</Code>
+          </Stack>
+
+          <Group justify="flex-end">
+            <Button onClick={() => setNewToken(null)}>{t('tokenCreated.understood')}</Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Delete confirmation — replaces the native confirm() dialog */}
+      <Modal
+        opened={tokenToDelete !== null}
+        onClose={() => setTokenToDelete(null)}
+        title={t('delete')}
+      >
+        <Stack gap="md">
+          <Text size="sm">{t('deleteConfirm')}</Text>
+          {tokenToDelete && <Code>{tokenToDelete.name}</Code>}
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={() => setTokenToDelete(null)}>
               {t('createModal.cancel')}
             </Button>
-            <Button variant="primary" type="submit" disabled={creating}>
-              {creating ? t('createModal.creating') : t('createModal.create')}
+            <Button color="red" onClick={handleDelete} leftSection={<IconTrash size={15} />}>
+              {t('delete')}
             </Button>
-          </Modal.Footer>
-        </Form>
+          </Group>
+        </Stack>
       </Modal>
-
-      {/* Show New Token Modal */}
-      <Modal show={showTokenModal} onHide={() => setShowTokenModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>{t('tokenCreated.title')}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant="warning">
-            <strong>{t('tokenCreated.important')}</strong> {t('tokenCreated.warning')}
-          </Alert>
-          <Form.Group className="mb-3">
-            <Form.Label>{t('tokenCreated.tokenLabel')}</Form.Label>
-            <Form.Control
-              type="text"
-              value={newToken || ''}
-              readOnly
-              className="font-monospace"
-              style={{ fontSize: '0.9rem' }}
-            />
-            <Button
-              variant="outline-secondary"
-              size="sm"
-              className="mt-2"
-              onClick={() => {
-                navigator.clipboard.writeText(newToken || '');
-                setSuccess(t('copySuccess'));
-              }}
-            >
-              <i className="bi bi-clipboard me-2"></i>
-              {t('tokenCreated.copy')}
-            </Button>
-          </Form.Group>
-          <div className="mt-3">
-            <h6>{t('tokenCreated.exampleTitle')}</h6>
-            <pre className="bg-light p-3 rounded">
-              <code>
-                {`curl -X POST ${typeof window !== 'undefined' ? window.location.origin : 'https://tu-dominio.com'}/api/v1/items \\
-  -H "Authorization: Bearer ${newToken}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"id": "ITEM-001", "name": "Mi Item", "description": "Descripción"}'`}
-              </code>
-            </pre>
-          </div>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="primary" onClick={() => setShowTokenModal(false)}>
-            {t('tokenCreated.understood')}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-    </>
+    </Stack>
   );
 }
-

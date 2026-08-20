@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { Center, Loader } from '@mantine/core';
+import PageHeader from '@/components/layout/PageHeader';
 
 const ApiDocsClient = dynamic(() => import('../developer/api/ApiDocsPageClient'), { ssr: false, loading: () => <Center h={200}><Loader /></Center> });
 const EventsPageClient = dynamic(() => import('../developer/events/EventsPageClient'), { ssr: false, loading: () => <Center h={200}><Loader /></Center> });
@@ -19,35 +20,38 @@ function ApiHubContent() {
   const t = useTranslations('apiHub');
 
   return (
-    <Tabs defaultValue={defaultTab} keepMounted={false}>
-      <Tabs.List mb="md">
-        <Tabs.Tab value="docs" leftSection={<IconBook size={16} />}>
-          {t('docs')}
-        </Tabs.Tab>
-        <Tabs.Tab value="events" leftSection={<IconCalendarEvent size={16} />}>
-          {t('events')}
-        </Tabs.Tab>
-        <Tabs.Tab value="webhooks" leftSection={<IconWebhook size={16} />}>
-          {t('webhooks')}
-        </Tabs.Tab>
-        <Tabs.Tab value="auth" leftSection={<IconKey size={16} />}>
-          {t('auth')}
-        </Tabs.Tab>
-      </Tabs.List>
+    <>
+      <PageHeader title={t('title')} description={t('description')} />
+      <Tabs defaultValue={defaultTab} keepMounted={false}>
+        <Tabs.List mb="md">
+          <Tabs.Tab value="docs" leftSection={<IconBook size={16} />}>
+            {t('docs')}
+          </Tabs.Tab>
+          <Tabs.Tab value="events" leftSection={<IconCalendarEvent size={16} />}>
+            {t('events')}
+          </Tabs.Tab>
+          <Tabs.Tab value="webhooks" leftSection={<IconWebhook size={16} />}>
+            {t('webhooks')}
+          </Tabs.Tab>
+          <Tabs.Tab value="auth" leftSection={<IconKey size={16} />}>
+            {t('auth')}
+          </Tabs.Tab>
+        </Tabs.List>
 
-      <Tabs.Panel value="docs">
-        <ApiDocsClient />
-      </Tabs.Panel>
-      <Tabs.Panel value="events">
-        <EventsPageClient />
-      </Tabs.Panel>
-      <Tabs.Panel value="webhooks">
-        <WebhooksPageClient />
-      </Tabs.Panel>
-      <Tabs.Panel value="auth">
-        <AuthPageClient />
-      </Tabs.Panel>
-    </Tabs>
+        <Tabs.Panel value="docs">
+          <ApiDocsClient />
+        </Tabs.Panel>
+        <Tabs.Panel value="events">
+          <EventsPageClient />
+        </Tabs.Panel>
+        <Tabs.Panel value="webhooks">
+          <WebhooksPageClient />
+        </Tabs.Panel>
+        <Tabs.Panel value="auth">
+          <AuthPageClient />
+        </Tabs.Panel>
+      </Tabs>
+    </>
   );
 }
 

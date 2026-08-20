@@ -2,24 +2,23 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { Center, Loader, Stack, Text } from '@mantine/core';
+import { useTranslations } from 'next-intl';
 
 export default function HomePage() {
+  const t = useTranslations('apps');
   const router = useRouter();
 
   useEffect(() => {
-    // Redirigir a la página de selección de aplicaciones
     router.push('/apps');
   }, [router]);
 
-  // Mostrar loading mientras se determina la redirección
   return (
-    <div className="d-flex justify-content-center align-items-center min-vh-100">
-      <div className="text-center">
-        <div className="spinner-border text-primary" role="status">
-          <span className="visually-hidden">Redirigiendo...</span>
-        </div>
-        <p className="mt-3 text-muted">Redirigiendo...</p>
-      </div>
-    </div>
+    <Center mih="100vh" bg="var(--mantine-color-gray-0)">
+      <Stack align="center" gap="sm">
+        <Loader size="sm" />
+        <Text size="sm" c="dimmed">{t('redirecting')}</Text>
+      </Stack>
+    </Center>
   );
 }

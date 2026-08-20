@@ -1,149 +1,149 @@
 'use client';
 
+import { Anchor, Badge, Button, Code, List, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import {
+  IconCode,
+  IconBolt,
+  IconBox,
+  IconKey,
+  IconExternalLink,
+  IconInfoCircle,
+  IconCirclePlus,
+  IconRosetteDiscountCheck,
+  IconSearch,
+  IconShieldCheck,
+  IconClockHour4,
+  IconDatabaseOff,
+  IconCircleCheck,
+} from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import Box from '@/components/Box';
-import { Divider } from '@/components/Divider';
-import '@/components/GenericTable/Toolbar/Toolbar.css';
+import SectionCard from '@/components/layout/SectionCard';
+
+const CAPABILITIES = [
+  { icon: IconCirclePlus, key: 'createProducts' },
+  { icon: IconRosetteDiscountCheck, key: 'addStates' },
+  { icon: IconSearch, key: 'queryData' },
+  { icon: IconKey, key: 'tokenAuth' },
+] as const;
+
+const SANDBOX_FEATURES = [
+  { icon: IconShieldCheck, key: 'noRealData' },
+  { icon: IconClockHour4, key: 'ephemeral' },
+  { icon: IconDatabaseOff, key: 'noDb' },
+  { icon: IconCircleCheck, key: 'realStatusTypes' },
+] as const;
+
+interface FeatureProps {
+  icon: React.ElementType;
+  color: string;
+  title: string;
+  description: string;
+}
+
+function Feature({ icon: Icon, color, title, description }: FeatureProps) {
+  return (
+    <Stack gap={2}>
+      <ThemeIcon variant="light" color={color} size={26} radius="sm" mb={2}>
+        <Icon size={14} stroke={1.7} />
+      </ThemeIcon>
+      <Text size="sm" fw={600}>{title}</Text>
+      <Text size="xs" c="dimmed">{description}</Text>
+    </Stack>
+  );
+}
 
 export default function ApiDocsPageClient() {
   const t = useTranslations('developer.api');
 
-  const capabilities = [
-    { icon: 'bi-plus-circle', key: 'createProducts' },
-    { icon: 'bi-patch-check', key: 'addStates' },
-    { icon: 'bi-search', key: 'queryData' },
-    { icon: 'bi-key', key: 'tokenAuth' },
-  ] as const;
-
-  const sandboxFeatures = [
-    { icon: 'bi-shield-check', key: 'noRealData' },
-    { icon: 'bi-clock-history', key: 'ephemeral' },
-    { icon: 'bi-database-slash', key: 'noDb' },
-    { icon: 'bi-check2-circle', key: 'realStatusTypes' },
-  ] as const;
+  const openDocs = (
+    <Button
+      component="a"
+      href="/api/v1/docs"
+      target="_blank"
+      rel="noopener noreferrer"
+      size="xs"
+      rightSection={<IconExternalLink size={14} stroke={1.7} />}
+    >
+      {t('openDocs')}
+    </Button>
+  );
 
   return (
-    <>
-      {/* Intro */}
-      <Box>
-        <div className="d-flex align-items-start gap-3 mb-3">
-          <div
-            className="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
-            style={{ width: 48, height: 48, background: 'var(--bs-info)', opacity: 0.9 }}
-          >
-            <i className="bi bi-code-slash text-white fs-4" />
-          </div>
-          <div>
-            <h5 className="mb-1">{t('title')}</h5>
-            <p className="text-muted mb-0">{t('subtitle')}</p>
-          </div>
-        </div>
-        <Divider />
-        <p className="text-muted mb-4">{t('description')}</p>
-        <a
-          href="/api/v1/docs"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn btn-info text-white px-4"
-        >
-          <i className="bi bi-box-arrow-up-right me-2" />
-          {t('openDocs')}
-        </a>
-      </Box>
+    <Stack gap="md">
+      <SectionCard icon={IconCode} title={t('title')} description={t('subtitle')} actions={openDocs}>
+        <Text size="sm" c="dimmed">{t('description')}</Text>
+      </SectionCard>
 
-      {/* Capabilities */}
-      <Box>
-        <div className="table-toolbar mb-0">
-          <div className="title-section">
-            <i className="bi bi-lightning-charge" />
-            <h4>{t('capabilities.title')}</h4>
-          </div>
-        </div>
-        <Divider />
-        <div className="row g-3">
-          {capabilities.map(({ icon, key }) => (
-            <div key={key} className="col-12 col-sm-6">
-              <div className="d-flex align-items-start gap-2">
-                <i className={`bi ${icon} text-info mt-1 flex-shrink-0`} />
-                <div>
-                  <strong className="d-block">{t(`capabilities.${key}.title`)}</strong>
-                  <small className="text-muted">{t(`capabilities.${key}.description`)}</small>
-                </div>
-              </div>
-            </div>
+      <SectionCard icon={IconBolt} title={t('capabilities.title')}>
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+          {CAPABILITIES.map(({ icon, key }) => (
+            <Feature
+              key={key}
+              icon={icon}
+              color="datiaBlue"
+              title={t(`capabilities.${key}.title`)}
+              description={t(`capabilities.${key}.description`)}
+            />
           ))}
-        </div>
-      </Box>
+        </SimpleGrid>
+      </SectionCard>
 
-      {/* Sandbox */}
-      <Box>
-        <div className="table-toolbar mb-0">
-          <div className="title-section">
-            <i className="bi bi-box" />
-            <h4>{t('sandbox.title')}</h4>
-          </div>
-          <div className="controls-section">
-            <span className="badge bg-success">{t('sandbox.badge')}</span>
-          </div>
-        </div>
-        <Divider />
-        <p className="text-muted mb-4">{t('sandbox.description')}</p>
-        <div className="row g-3 mb-4">
-          {sandboxFeatures.map(({ icon, key }) => (
-            <div key={key} className="col-12 col-sm-6">
-              <div className="d-flex align-items-start gap-2">
-                <i className={`bi ${icon} text-success mt-1 flex-shrink-0`} />
-                <div>
-                  <strong className="d-block">{t(`sandbox.features.${key}.title`)}</strong>
-                  <small className="text-muted">{t(`sandbox.features.${key}.description`)}</small>
-                </div>
-              </div>
-            </div>
+      <SectionCard
+        icon={IconBox}
+        color="green"
+        title={t('sandbox.title')}
+        description={t('sandbox.description')}
+        actions={<Badge variant="light" color="green">{t('sandbox.badge')}</Badge>}
+      >
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb="xl">
+          {SANDBOX_FEATURES.map(({ icon, key }) => (
+            <Feature
+              key={key}
+              icon={icon}
+              color="green"
+              title={t(`sandbox.features.${key}.title`)}
+              description={t(`sandbox.features.${key}.description`)}
+            />
           ))}
-        </div>
+        </SimpleGrid>
 
-        <h6 className="mb-3">{t('sandbox.howTo.title')}</h6>
-        <ol className="mb-4 ps-3 d-flex flex-column gap-2">
+        <Title order={5} mb="sm">{t('sandbox.howTo.title')}</Title>
+        <List type="ordered" size="sm" c="dimmed" spacing="xs" mb="lg">
           {(['step1', 'step2', 'step3', 'step4'] as const).map((step) => (
-            <li key={step} className="text-muted small">
+            <List.Item key={step}>
               <span dangerouslySetInnerHTML={{ __html: t.raw(`sandbox.howTo.${step}`) as string }} />
-            </li>
+            </List.Item>
           ))}
-        </ol>
+        </List>
 
-        <a
+        <Button
+          component="a"
           href="/api/v1/docs"
           target="_blank"
           rel="noopener noreferrer"
-          className="btn btn-success px-4"
+          color="green"
+          size="xs"
+          rightSection={<IconExternalLink size={14} stroke={1.7} />}
+          style={{ alignSelf: 'flex-start' }}
         >
-          <i className="bi bi-box-arrow-up-right me-2" />
           {t('sandbox.howTo.cta')}
-        </a>
-      </Box>
+        </Button>
+      </SectionCard>
 
-      {/* Authentication reminder */}
-      <Box>
-        <div className="table-toolbar mb-0">
-          <div className="title-section">
-            <i className="bi bi-key" />
-            <h4>{t('auth.title')}</h4>
-          </div>
-        </div>
-        <Divider />
-        <p className="text-muted mb-3">{t('auth.description')}</p>
-        <div className="bg-dark rounded-3 p-3 font-monospace small text-white">
-          Authorization: Bearer {'<tu-token>'}
-        </div>
-        <p className="text-muted mt-3 mb-0 small">
-          <i className="bi bi-info-circle me-1" />
-          {t('auth.hint')}
-          {' '}
-          <a href="/dashboard/developer/auth" className="text-info">
+      <SectionCard icon={IconKey} title={t('auth.title')} description={t('auth.description')}>
+        <Code block>{'Authorization: Bearer <API_TOKEN>'}</Code>
+        <Text size="xs" c="dimmed" mt="sm">
+          <IconInfoCircle
+            size={13}
+            stroke={1.7}
+            style={{ verticalAlign: -2, marginRight: 4 }}
+          />
+          {t('auth.hint')}{' '}
+          <Anchor href="/dashboard/api?tab=auth" size="xs">
             {t('auth.hintLink')}
-          </a>
-        </p>
-      </Box>
-    </>
+          </Anchor>
+        </Text>
+      </SectionCard>
+    </Stack>
   );
 }
