@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ItemPassport } from '../../components/ItemPassport';
-import { ItemData } from '../../types';
+import { Button, Center, Loader, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { IconAlertCircle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
+import { ItemPassport } from '../../components/ItemPassport';
+import PassportShell from '../../components/PassportShell';
+import { ItemData } from '../../types';
 
 export default function ItemPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations('customer');
@@ -25,16 +28,16 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
   useEffect(() => {
     const fetchItemData = async () => {
       if (!itemId) return;
-      
+
       try {
         setLoading(true);
         setError(null);
-        
+
         const response = await fetch(`/api/customer/item/${itemId}`);
         if (!response.ok) {
           throw new Error(t('productNotFound'));
         }
-        
+
         const data = await response.json();
         setItemData(data);
       } catch (err) {
@@ -48,98 +51,45 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
     fetchItemData();
   }, [itemId]);
 
-  const handleBack = () => {
-    router.push('/customer');
-  };
-
   if (loading) {
     return (
-      <div className="customer-container">
-        <div className="customer-content">
-          <div className="loading-section">
-            <div className="loading-card">
-              <div className="loading-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="animate-spin">
-                  <path d="M21 12a9 9 0 11-6.219-8.56"/>
-                </svg>
-              </div>
-              <h2>{t('loading')}</h2>
-              <p>{t('loadingProduct')}</p>
-            </div>
-          </div>
-        </div>
-        <div className="customer-footer">
-          <p>{t('copyright')}</p>
-        </div>
-      </div>
+      <PassportShell>
+        <Center py={80}>
+          <Stack align="center" gap="sm">
+            <Loader size="sm" />
+            <Text size="sm" c="dimmed">{t('loadingProduct')}</Text>
+          </Stack>
+        </Center>
+      </PassportShell>
     );
   }
 
-  if (error) {
+  if (error || !itemData) {
     return (
-      <div className="customer-container">
-        <div className="customer-content">
-          <div className="error-section">
-            <div className="error-card">
-              <div className="error-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M15 9l-6 6M9 9l6 6"/>
-                </svg>
-              </div>
-              <h3>{t('error.title')}</h3>
-              <p>{error}</p>
-              <button className="retry-button" onClick={() => router.push('/customer')}>
+      <PassportShell>
+        <Paper p="xl" radius="md">
+          <Center>
+            <Stack align="center" gap="sm" maw={380}>
+              <ThemeIcon color="red" variant="light" size={52} radius="xl">
+                <IconAlertCircle size={26} stroke={1.5} />
+              </ThemeIcon>
+              <Title order={4} ta="center">{t('productNotFound')}</Title>
+              <Text size="sm" c="dimmed" ta="center">
+                {error || t('productNotFoundMessage')}
+              </Text>
+              <Button variant="light" size="xs" onClick={() => router.push('/customer')}>
                 {t('error.backToScanner')}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="customer-footer">
-          <p>{t('copyright')}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!itemData) {
-    return (
-      <div className="customer-container">
-        <div className="customer-content">
-          <div className="error-section">
-            <div className="error-card">
-              <div className="error-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <path d="M15 9l-6 6M9 9l6 6"/>
-                </svg>
-              </div>
-              <h3>{t('productNotFound')}</h3>
-              <p>{t('productNotFoundMessage')}</p>
-              <button className="retry-button" onClick={() => router.push('/customer')}>
-                {t('error.backToScanner')}
-              </button>
-            </div>
-          </div>
-        </div>
-        <div className="customer-footer">
-          <p>{t('copyright')}</p>
-        </div>
-      </div>
+              </Button>
+            </Stack>
+          </Center>
+        </Paper>
+      </PassportShell>
     );
   }
 
   return (
-    <div className="customer-container">
-      <div className="customer-content">
-        <div className="passport-section">
-          <ItemPassport item={itemData} onBack={handleBack} />
-        </div>
-      </div>
-
-      <div className="customer-footer">
-        <p>{t('copyright')}</p>
-      </div>
-    </div>
+    <PassportShell organization={itemData.organization}>
+      <ItemPassport item={itemData} onBack={() => router.push('/customer')} />
+    </PassportShell>
   );
 }

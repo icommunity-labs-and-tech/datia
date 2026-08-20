@@ -26,6 +26,13 @@ export async function GET(
         id: code,
       },
       include: {
+        Organization: {
+          select: {
+            nombre: true,
+            logoUrl: true,
+            brandColorPrimary: true,
+          },
+        },
         ItemCategory: {
           include: {
             Category: true
@@ -87,6 +94,13 @@ export async function GET(
       updatedAt: item.updatedAt,
       evidenceID: (item as any).evidenceID || null,
       createdBy: item.User || null,
+      organization: item.Organization
+        ? {
+            name: item.Organization.nombre,
+            logoUrl: item.Organization.logoUrl,
+            brandColorPrimary: item.Organization.brandColorPrimary,
+          }
+        : null,
       category: item.ItemCategory.length > 0 ? {
         id: item.ItemCategory[0].Category.id,
         name: item.ItemCategory[0].Category.name,

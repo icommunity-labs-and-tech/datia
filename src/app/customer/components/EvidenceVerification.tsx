@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Alert, Group, Loader, SimpleGrid, Text } from '@mantine/core';
+import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { SignerBadge, BlockchainLink } from './ui';
 import { retryFetch } from '../utils/apiRetry';
@@ -74,33 +76,25 @@ export function EvidenceVerification({ evidenceId, type, entityId, createdAt: _c
 
   if (loading) {
     return (
-      <div style={{ padding: '1rem', textAlign: 'center', color: '#64748b' }}>
-        <div style={{ display: 'inline-block' }}>
-          <svg viewBox="0 0 24 24" width="20" height="20" className="animate-spin" style={{ color: '#3b82f6' }}>
-            <path d="M21 12a9 9 0 11-6.219-8.56" fill="none" stroke="currentColor" strokeWidth="2" />
-          </svg>
-        </div>
-        <p style={{ margin: '0.5rem 0 0', fontSize: '0.875rem' }}>{t('verifyingEvidence')}</p>
-      </div>
+      <Group gap="xs" py="sm">
+        <Loader size="xs" />
+        <Text size="sm" c="dimmed">{t('verifyingEvidence')}</Text>
+      </Group>
     );
   }
 
   if (error) {
     return (
-      <div style={{
-        padding: '1rem',
-        textAlign: 'center',
-        backgroundColor: 'rgba(254, 226, 226, 0.5)',
-        borderRadius: '8px',
-        border: '1px solid rgba(239, 68, 68, 0.3)'
-      }}>
-        <div style={{ color: '#ef4444', fontSize: '0.875rem', fontWeight: '500', marginBottom: '0.5rem' }}>
-          {t('certificationError')}
-        </div>
-        <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
-          {error}
-        </div>
-      </div>
+      <Alert
+        color="red"
+        variant="light"
+        radius="md"
+        icon={<IconAlertTriangle size={16} />}
+        title={t('certificationError')}
+        mt="sm"
+      >
+        <Text size="xs">{error}</Text>
+      </Alert>
     );
   }
 
@@ -109,15 +103,9 @@ export function EvidenceVerification({ evidenceId, type, entityId, createdAt: _c
   }
 
   return (
-    <div style={{ marginTop: '1rem' }}>
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '0.5rem',
-      }}>
-        {createdBy && <SignerBadge name={createdBy.name} />}
-        {majorNetwork?.url && <BlockchainLink href={majorNetwork.url} />}
-      </div>
-    </div>
+    <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="xs" mt="sm">
+      {createdBy && <SignerBadge name={createdBy.name} />}
+      {majorNetwork?.url && <BlockchainLink href={majorNetwork.url} label={majorNetwork.name} />}
+    </SimpleGrid>
   );
 }

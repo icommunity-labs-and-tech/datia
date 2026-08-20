@@ -1,6 +1,5 @@
-export { TimestampBadge } from './TimestampBadge';
-export { BlockchainLink } from './BlockchainLink';
 export { VerifiedBadge } from './VerifiedBadge';
+export { TimestampBadge } from './TimestampBadge';
 export { SignerBadge } from './SignerBadge';
-export { StatusCard } from './StatusCard';
+export { BlockchainLink } from './BlockchainLink';
 export { TimelineItem } from './TimelineItem';
