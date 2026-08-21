@@ -1,7 +1,6 @@
 import { cookies } from 'next/headers';
 import DashboardMantine from '../DashboardMantine';
 import { getDashboardKPIs, getEnergySummary } from '@/actions/dashboard';
-import { listEnergySources } from '@/actions/energy/list-sources';
 import { getItems } from '@/actions/items';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
@@ -25,10 +24,9 @@ async function isEnergyEnabled(): Promise<boolean> {
 }
 
 export default async function DashboardIndexPage() {
-  const [kpis, energySummary, sourcesResult, energyEnabled, items] = await Promise.all([
+  const [kpis, energySummary, energyEnabled, items] = await Promise.all([
     getDashboardKPIs(),
     getEnergySummary(),
-    listEnergySources(),
     isEnergyEnabled(),
     getItems().catch(() => []),
   ]);
@@ -44,7 +42,6 @@ export default async function DashboardIndexPage() {
     <DashboardMantine
       kpis={kpis}
       energySummary={energySummary}
-      energySources={sourcesResult ?? []}
       energyEnabled={energyEnabled}
       recentItems={recentItems}
     />
