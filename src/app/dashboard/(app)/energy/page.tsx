@@ -1,28 +1,18 @@
-import EnergyHubClient from '@/components/energy/EnergyHubClient';
-import { listEnergySources } from '@/actions/energy/list-sources';
-import { listEnergyConsumption } from '@/actions/energy/list-consumption';
-import { listEmissions } from '@/actions/energy/list-emissions';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function EnergyHubPage({
+/**
+ * The energy views used to be tabs of a single hub. They are routes of their
+ * own now, so this entry point — and any ?tab= link still in circulation —
+ * forwards to the matching view.
+ */
+export default async function EnergyIndexPage({
   searchParams,
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const params = await searchParams;
-  const [sources, consumption, emissions] = await Promise.all([
-    listEnergySources(),
-    listEnergyConsumption(),
-    listEmissions(),
-  ]);
+  const { tab } = await searchParams;
 
-  return (
-    <EnergyHubClient
-      sources={sources ?? []}
-      consumption={consumption ?? []}
-      emissions={emissions ?? []}
-      defaultTab={params.tab ?? 'map'}
-    />
-  );
+  if (tab === 'consumption') redirect('/dashboard/energy/consumption');
+  if (tab === 'emissions') redirect('/dashboard/energy/emissions');
+  redirect('/dashboard/energy/sources');
 }

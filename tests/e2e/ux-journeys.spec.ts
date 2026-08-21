@@ -58,13 +58,15 @@ test.describe('UX journey — desktop', () => {
     await shot(page, 'desktop', '02-home');
     await expectNoHorizontalScroll(page);
 
-    // The top nav is content-only: Home, Assets, (Energy), API.
+    // The top nav carries content surfaces only: Home, Assets, the energy views
+    // when that module is on, and API. Settings lives in the account menu.
     const nav = page.locator('header a[href^="/dashboard"]');
     const navHrefs = await nav.evaluateAll((els) =>
       els.map((e) => (e as HTMLAnchorElement).getAttribute('href'))
     );
-    expect(navHrefs.length, `top nav should stay small, got ${navHrefs.join(', ')}`)
-      .toBeLessThanOrEqual(5);
+    expect(navHrefs, 'the home entry is always present').toContain('/dashboard');
+    expect(navHrefs, 'settings is reached from the account menu, not the nav')
+      .not.toContain('/dashboard/settings');
     for (const hidden of HIDDEN_ROUTES) {
       expect(navHrefs, `${hidden} must not be linked from the top nav`).not.toContain(hidden);
     }
@@ -226,5 +228,29 @@ test.describe('UX journey — public passport', () => {
     await expect(page.getByRole('button', { name: /volver al scanner|back to scanner/i })).toBeVisible();
     await shot(page, 'desktop', '11-passport-not-found');
     await expectNoHorizontalScroll(page);
+  });
+});
+
+test.describe('Vistas de energía', () => {
+  test.use({ viewport: DESKTOP, storageState: ADMIN_STORAGE_STATE });
+
+  test('each energy view is a route of its own', async ({ page }) => {
+    // They used to be tabs of one hub that loaded all three datasets at once.
+    for (const view of ['sources', 'consumption', 'emissions']) {
+      await page.goto(`/dashboard/energy/${view}`, { waitUntil: 'networkidle' });
+      await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
+      await expectNoHorizontalScroll(page);
+    }
+  });
+
+  test('links to the former hub still resolve', async ({ page }) => {
+    await page.goto('/dashboard/energy');
+    await expect(page).toHaveURL(/\/dashboard\/energy\/sources$/);
+
+    await page.goto('/dashboard/energy?tab=consumption');
+    await expect(page).toHaveURL(/\/dashboard\/energy\/consumption$/);
+
+    await page.goto('/dashboard/energy?tab=emissions');
+    await expect(page).toHaveURL(/\/dashboard\/energy\/emissions$/);
   });
 });

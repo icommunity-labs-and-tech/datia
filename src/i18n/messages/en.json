@@ -1125,7 +1125,8 @@
       "withGo": "With GO",
       "noCoordinates": "Add GPS coordinates to your energy sources to see them on the map.",
       "onMap": "On map",
-      "publicReport": "View public report"
+      "publicReport": "View public report",
+      "description": "Energy sources across the estate, with capacity, renewable share and location."
     },
     "consumptionTab": {
       "totalRecorded": "Total recorded consumption ({count} records)",
@@ -1133,7 +1134,8 @@
       "source": "Source",
       "period": "Period",
       "consumption": "Consumption",
-      "stage": "Stage"
+      "stage": "Stage",
+      "description": "Consumption recorded per source and period, with its lifecycle stage."
     },
     "emissionsTab": {
       "verifiedOf": "{verified} of {total} verified",
@@ -1141,7 +1143,8 @@
       "date": "Date",
       "scope": "Scope",
       "state": "Status",
-      "emissionFactor": "Emission factor"
+      "emissionFactor": "Emission factor",
+      "description": "Calculated CO₂e emissions and their third-party verification status."
     },
     "mapPopup": {
       "renewable": "{share}% renewable"
@@ -1194,7 +1197,10 @@
         "notVerifiedBody": "This organization hasn't completed KYC — without identity verification, real blockchain evidence can't be anchored. All 25 data records were still created successfully.",
         "errorTitle": "Certification failed"
       }
-    }
+    },
+    "navSources": "Sources",
+    "navConsumption": "Consumption",
+    "navEmissions": "Emissions"
   },
   "apiHub": {
     "title": "API",

@@ -1,8 +1,13 @@
 'use client';
 
+/**
+ * The three energy views. Each one is a route of its own
+ * (/dashboard/energy/{sources,consumption,emissions}) so a visit only loads
+ * the data that view needs.
+ */
+
 import { useState } from 'react';
 import {
-  Tabs,
   Grid,
   Paper,
   Text,
@@ -160,7 +165,7 @@ function SourceDrawer({
 
 // ── Tab: Sources Map ─────────────────────────────────────────────────────────
 
-function SourcesMapTab({
+export function EnergySourcesMap({
   sources,
   consumption,
 }: {
@@ -302,7 +307,7 @@ function SourcesMapTab({
 
 // ── Tab: Consumption ─────────────────────────────────────────────────────────
 
-function ConsumptionTab({
+export function EnergyConsumption({
   consumption,
   sources,
 }: {
@@ -389,7 +394,7 @@ function ConsumptionTab({
 
 // ── Tab: Emissions ────────────────────────────────────────────────────────────
 
-function EmissionsTab({ emissions }: { emissions: EmissionRecord[] }) {
+export function EnergyEmissions({ emissions }: { emissions: EmissionRecord[] }) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
   const totalCo2Kg = emissions.reduce((s, r) => s + r.co2eKg, 0);
@@ -477,44 +482,5 @@ function EmissionsTab({ emissions }: { emissions: EmissionRecord[] }) {
         </Table>
       </Paper>
     </Stack>
-  );
-}
-
-// ── Root Hub ─────────────────────────────────────────────────────────────────
-
-interface EnergyHubClientProps {
-  sources: EnergySourceRecord[];
-  consumption: EnergyConsumptionRecord[];
-  emissions: EmissionRecord[];
-  defaultTab?: string;
-}
-
-export default function EnergyHubClient({ sources, consumption, emissions, defaultTab = 'map' }: EnergyHubClientProps) {
-  const t = useTranslations('energyHub');
-
-  return (
-    <Tabs defaultValue={defaultTab} keepMounted={false}>
-      <Tabs.List mb="md">
-        <Tabs.Tab value="map" leftSection={<IconMap size={16} />}>
-          {t('tabs.map')}
-        </Tabs.Tab>
-        <Tabs.Tab value="consumption" leftSection={<IconBolt size={16} />}>
-          {t('tabs.consumption')}
-        </Tabs.Tab>
-        <Tabs.Tab value="emissions" leftSection={<IconCloudFog size={16} />}>
-          {t('tabs.emissions')}
-        </Tabs.Tab>
-      </Tabs.List>
-
-      <Tabs.Panel value="map">
-        <SourcesMapTab sources={sources} consumption={consumption} />
-      </Tabs.Panel>
-      <Tabs.Panel value="consumption">
-        <ConsumptionTab consumption={consumption} sources={sources} />
-      </Tabs.Panel>
-      <Tabs.Panel value="emissions">
-        <EmissionsTab emissions={emissions} />
-      </Tabs.Panel>
-    </Tabs>
   );
 }

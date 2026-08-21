@@ -24,6 +24,8 @@ import {
   IconHome2,
   IconPackage,
   IconBolt,
+  IconMap,
+  IconCloudFog,
   IconSettings,
   IconCode,
   IconChevronDown,
@@ -59,6 +61,7 @@ export default function DatiaAppShell({
 }: MantineAppShellProps) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure(false);
   const tSidebar = useTranslations('sidebar');
+  const tEnergy = useTranslations('energyHub');
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
@@ -98,13 +101,19 @@ export default function DatiaAppShell({
 
   // Only content surfaces live in the top nav; account/organisation settings sit
   // under the avatar menu so the bar stays down to what the product actually does.
+  // The energy views are separate routes, so each is its own nav entry. They
+  // stay behind the module flag: an organisation without energy keeps a short bar.
   const mainLinks = [
     { href: '/dashboard', icon: IconHome2, label: tSidebar('home'), exact: true },
     ...(showPassport
       ? [{ href: '/dashboard/items', icon: IconPackage, label: tSidebar('assets'), exact: false }]
       : []),
     ...(showEnergy
-      ? [{ href: '/dashboard/energy', icon: IconBolt, label: tSidebar('energy'), exact: false }]
+      ? [
+          { href: '/dashboard/energy/sources', icon: IconMap, label: tEnergy('navSources'), exact: false },
+          { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
+          { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
+        ]
       : []),
     { href: '/dashboard/api', icon: IconCode, label: tSidebar('api'), exact: false },
   ];

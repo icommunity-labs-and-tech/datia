@@ -1125,7 +1125,8 @@
       "withGo": "Con GO",
       "noCoordinates": "Añade coordenadas GPS a las fuentes de energía para verlas en el mapa.",
       "onMap": "En mapa",
-      "publicReport": "Ver informe público"
+      "publicReport": "Ver informe público",
+      "description": "Fuentes de energía del parque, con su potencia, origen renovable y ubicación."
     },
     "consumptionTab": {
       "totalRecorded": "Consumo total registrado ({count} registros)",
@@ -1133,7 +1134,8 @@
       "source": "Fuente",
       "period": "Periodo",
       "consumption": "Consumo",
-      "stage": "Fase"
+      "stage": "Fase",
+      "description": "Consumo registrado por fuente y periodo, con su etapa del ciclo de vida."
     },
     "emissionsTab": {
       "verifiedOf": "{verified} de {total} verificados",
@@ -1141,7 +1143,8 @@
       "date": "Fecha",
       "scope": "Scope",
       "state": "Estado",
-      "emissionFactor": "Factor emisión"
+      "emissionFactor": "Factor emisión",
+      "description": "Emisiones de CO₂e calculadas y su estado de verificación por tercero."
     },
     "mapPopup": {
       "renewable": "{share}% renovable"
@@ -1194,7 +1197,10 @@
         "notVerifiedBody": "Esta organización no ha completado el KYC — sin verificación de identidad no se puede anclar evidencia real en blockchain. Los 25 registros de datos sí se han creado correctamente.",
         "errorTitle": "No se pudo certificar"
       }
-    }
+    },
+    "navSources": "Fuentes",
+    "navConsumption": "Consumo",
+    "navEmissions": "Emisiones"
   },
   "apiHub": {
     "title": "API",
