@@ -1200,7 +1200,8 @@
     },
     "navSources": "Sources",
     "navConsumption": "Consumption",
-    "navEmissions": "Emissions"
+    "navEmissions": "Emissions",
+    "latestRecords": "Latest {count} of {total} records"
   },
   "apiHub": {
     "title": "API",
