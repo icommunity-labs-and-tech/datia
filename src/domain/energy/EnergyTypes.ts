@@ -145,3 +145,26 @@ export class EnergyNotFoundError extends Error {
     this.name = 'EnergyNotFoundError';
   }
 }
+
+/** One month of an aggregated series, keyed as YYYY-MM so the client formats it. */
+export interface MonthlyPoint {
+  month: string;
+  value: number;
+}
+
+/**
+ * Totals computed over every record of the organisation, not over the page the
+ * table shows. The listing is paginated; these figures are not.
+ */
+export interface EnergyConsumptionTotals {
+  records: number;
+  totalKwh: number;
+  monthly: MonthlyPoint[];
+}
+
+export interface EmissionTotals {
+  records: number;
+  verified: number;
+  totalCo2eKg: number;
+  monthly: MonthlyPoint[];
+}

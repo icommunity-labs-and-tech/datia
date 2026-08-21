@@ -7,6 +7,8 @@ import type {
   CreateEnergySourceInput,
   CreateEnergyConsumptionInput,
   CreateEmissionRecordInput,
+  EnergyConsumptionTotals,
+  EmissionTotals,
 } from './EnergyTypes';
 import { EnergyValidationError } from './EnergyTypes';
 
@@ -15,6 +17,8 @@ export interface EnergyService {
   listSources(organizationId: string, pagination?: CursorPaginationParams): Promise<CursorPaginationResult<EnergySourceRecord>>;
   createConsumption(organizationId: string, input: CreateEnergyConsumptionInput): Promise<EnergyConsumptionRecord>;
   listConsumption(organizationId: string, pagination?: CursorPaginationParams): Promise<CursorPaginationResult<EnergyConsumptionRecord>>;
+  getConsumptionTotals(organizationId: string): Promise<EnergyConsumptionTotals>;
+  getEmissionTotals(organizationId: string): Promise<EmissionTotals>;
   createEmission(organizationId: string, input: CreateEmissionRecordInput): Promise<EmissionRecord>;
   listEmissions(organizationId: string, pagination?: CursorPaginationParams): Promise<CursorPaginationResult<EmissionRecord>>;
 }
@@ -43,6 +47,14 @@ export function createEnergyServiceImpl({ energyRepository }: { energyRepository
 
     async listConsumption(organizationId, pagination) {
       return energyRepository.findConsumptionByOrganization(organizationId, 20, pagination);
+    },
+
+    async getConsumptionTotals(organizationId) {
+      return energyRepository.getConsumptionTotals(organizationId);
+    },
+
+    async getEmissionTotals(organizationId) {
+      return energyRepository.getEmissionTotals(organizationId);
     },
 
     async createEmission(organizationId, input) {

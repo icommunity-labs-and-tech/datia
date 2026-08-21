@@ -1,8 +1,13 @@
 'use client';
 
+/**
+ * The three energy views. Each one is a route of its own
+ * (/dashboard/energy/{sources,consumption,emissions}) so a visit only loads
+ * the data that view needs.
+ */
+
 import { useState } from 'react';
 import {
-  Tabs,
   Grid,
   Paper,
   Text,
@@ -17,6 +22,8 @@ import {
   Title,
   Divider,
   SimpleGrid,
+  ActionIcon,
+  Tooltip as MantineTooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
@@ -24,13 +31,26 @@ import {
   IconBolt,
   IconCloudFog,
   IconInfoCircle,
+  IconExternalLink,
 } from '@tabler/icons-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import type { EnergySourceRecord, EnergyConsumptionRecord, EmissionRecord } from '@/domain/energy/EnergyTypes';
+import type {
+  EnergySourceRecord,
+  EnergyConsumptionRecord,
+  EmissionRecord,
+  EnergyConsumptionTotals,
+  EmissionTotals,
+} from '@/domain/energy/EnergyTypes';
 import EnergySourcesGlobalMapLazy from '@/components/maps/EnergySourcesGlobalMapLazy';
 import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
 import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
+
+/** Renders a YYYY-MM key in the reader's locale. */
+function monthLabel(month: string, locale: string) {
+  const [year, m] = month.split('-').map(Number);
+  return new Date(year, m - 1, 1).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
+}
 
 // ── Datia palette ────────────────────────────────────────────────────────────
 
@@ -157,7 +177,7 @@ function SourceDrawer({
 
 // ── Tab: Sources Map ─────────────────────────────────────────────────────────
 
-function SourcesMapTab({
+export function EnergySourcesMap({
   sources,
   consumption,
 }: {
@@ -260,11 +280,30 @@ function SourcesMapTab({
                       )}
                     </Group>
                   </Stack>
-                  {source.capacityKw != null && (
-                    <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
-                      {source.capacityKw} kW
-                    </Text>
-                  )}
+                  <Group gap={4} wrap="nowrap" style={{ flexShrink: 0 }}>
+                    {source.capacityKw != null && (
+                      <Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
+                        {source.capacityKw} kW
+                      </Text>
+                    )}
+                    {/* The public report is where a customer sees this source's
+                        certification — reachable from the asset it belongs to. */}
+                    <MantineTooltip label={t('mapTab.publicReport')}>
+                      <ActionIcon
+                        component="a"
+                        href={`/customer/item/${encodeURIComponent(source.itemId)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        variant="subtle"
+                        color="gray"
+                        size="sm"
+                        aria-label={t('mapTab.publicReport')}
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <IconExternalLink size={14} stroke={1.7} />
+                      </ActionIcon>
+                    </MantineTooltip>
+                  </Group>
                 </Group>
                 {source.renewableShare != null && (
                   <Progress value={source.renewableShare} size={4} color="green" mt={6} radius="xl" />
@@ -280,27 +319,25 @@ function SourcesMapTab({
 
 // ── Tab: Consumption ─────────────────────────────────────────────────────────
 
-function ConsumptionTab({
+export function EnergyConsumption({
   consumption,
   sources,
+  totals,
 }: {
   consumption: EnergyConsumptionRecord[];
   sources: EnergySourceRecord[];
+  totals: EnergyConsumptionTotals;
 }) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
   const sourceMap = Object.fromEntries(sources.map((s) => [s.id, s]));
-  const totalKwh = consumption.reduce((s, c) => s + c.consumptionKwh, 0);
 
-  const byMonth = consumption
-    .sort((a, b) => new Date(a.periodStart).getTime() - new Date(b.periodStart).getTime())
-    .reduce<Record<string, number>>((acc, c) => {
-      const label = new Date(c.periodStart).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
-      acc[label] = (acc[label] ?? 0) + c.consumptionKwh;
-      return acc;
-    }, {});
-
-  const chartData = Object.entries(byMonth).map(([label, kWh]) => ({ label, kWh: +kWh.toFixed(0) }));
+  // Summary and chart come from the totals, which cover every record; the table
+  // below shows the most recent page.
+  const chartData = totals.monthly.map(({ month, value }) => ({
+    label: monthLabel(month, locale),
+    kWh: +value.toFixed(0),
+  }));
 
   return (
     <Stack gap="md">
@@ -309,8 +346,12 @@ function ConsumptionTab({
           <IconBolt size={20} />
         </ThemeIcon>
         <Stack gap={0}>
-          <Text fw={700} fz="xl">{totalKwh >= 1000 ? `${(totalKwh / 1000).toFixed(2)} MWh` : `${totalKwh.toFixed(0)} kWh`}</Text>
-          <Text size="xs" c="dimmed">{t('consumptionTab.totalRecorded', { count: consumption.length })}</Text>
+          <Text fw={700} fz="xl">
+            {totals.totalKwh >= 1000
+              ? `${(totals.totalKwh / 1000).toFixed(2)} MWh`
+              : `${totals.totalKwh.toFixed(0)} kWh`}
+          </Text>
+          <Text size="xs" c="dimmed">{t('consumptionTab.totalRecorded', { count: totals.records })}</Text>
         </Stack>
       </Group>
 
@@ -330,6 +371,11 @@ function ConsumptionTab({
       )}
 
       <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
+        {consumption.length < totals.records && (
+          <Text size="xs" c="dimmed" px="md" pt="sm">
+            {t('latestRecords', { count: consumption.length, total: totals.records })}
+          </Text>
+        )}
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -340,7 +386,7 @@ function ConsumptionTab({
             </Table.Tr>
           </Table.Thead>
           <Table.Tbody>
-            {consumption.slice(0, 50).map((c) => (
+            {consumption.map((c) => (
               <Table.Tr key={c.id}>
                 <Table.Td>
                   <Text size="sm" fw={500}>{sourceMap[c.energySourceId]?.name ?? c.energySourceId.slice(0, 8)}</Text>
@@ -367,21 +413,20 @@ function ConsumptionTab({
 
 // ── Tab: Emissions ────────────────────────────────────────────────────────────
 
-function EmissionsTab({ emissions }: { emissions: EmissionRecord[] }) {
+export function EnergyEmissions({
+  emissions,
+  totals,
+}: {
+  emissions: EmissionRecord[];
+  totals: EmissionTotals;
+}) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
-  const totalCo2Kg = emissions.reduce((s, r) => s + r.co2eKg, 0);
-  const verified = emissions.filter((r) => r.verificationStatus === 'VERIFIED').length;
 
-  const byMonth = emissions
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
-    .reduce<Record<string, number>>((acc, r) => {
-      const label = new Date(r.createdAt).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
-      acc[label] = (acc[label] ?? 0) + r.co2eKg;
-      return acc;
-    }, {});
-
-  const chartData = Object.entries(byMonth).map(([label, kg]) => ({ label, co2eKg: +kg.toFixed(2) }));
+  const chartData = totals.monthly.map(({ month, value }) => ({
+    label: monthLabel(month, locale),
+    co2eKg: +value.toFixed(2),
+  }));
 
   return (
     <Stack gap="md">
@@ -390,9 +435,9 @@ function EmissionsTab({ emissions }: { emissions: EmissionRecord[] }) {
           <IconCloudFog size={20} />
         </ThemeIcon>
         <Stack gap={0}>
-          <Text fw={700} fz="xl">{(totalCo2Kg / 1000).toFixed(3)} tCO₂e</Text>
+          <Text fw={700} fz="xl">{(totals.totalCo2eKg / 1000).toFixed(3)} tCO₂e</Text>
           <Text size="xs" c="dimmed">
-            {t('emissionsTab.verifiedOf', { verified, total: emissions.length })}
+            {t('emissionsTab.verifiedOf', { verified: totals.verified, total: totals.records })}
           </Text>
         </Stack>
       </Group>
@@ -413,6 +458,11 @@ function EmissionsTab({ emissions }: { emissions: EmissionRecord[] }) {
       )}
 
       <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
+        {emissions.length < totals.records && (
+          <Text size="xs" c="dimmed" px="md" pt="sm">
+            {t('latestRecords', { count: emissions.length, total: totals.records })}
+          </Text>
+        )}
         <Table striped highlightOnHover>
           <Table.Thead>
             <Table.Tr>
@@ -455,44 +505,5 @@ function EmissionsTab({ emissions }: { emissions: EmissionRecord[] }) {
         </Table>
       </Paper>
     </Stack>
-  );
-}
-
-// ── Root Hub ─────────────────────────────────────────────────────────────────
-
-interface EnergyHubClientProps {
-  sources: EnergySourceRecord[];
-  consumption: EnergyConsumptionRecord[];
-  emissions: EmissionRecord[];
-  defaultTab?: string;
-}
-
-export default function EnergyHubClient({ sources, consumption, emissions, defaultTab = 'map' }: EnergyHubClientProps) {
-  const t = useTranslations('energyHub');
-
-  return (
-    <Tabs defaultValue={defaultTab} keepMounted={false}>
-      <Tabs.List mb="md">
-        <Tabs.Tab value="map" leftSection={<IconMap size={16} />}>
-          {t('tabs.map')}
-        </Tabs.Tab>
-        <Tabs.Tab value="consumption" leftSection={<IconBolt size={16} />}>
-          {t('tabs.consumption')}
-        </Tabs.Tab>
-        <Tabs.Tab value="emissions" leftSection={<IconCloudFog size={16} />}>
-          {t('tabs.emissions')}
-        </Tabs.Tab>
-      </Tabs.List>
-
-      <Tabs.Panel value="map">
-        <SourcesMapTab sources={sources} consumption={consumption} />
-      </Tabs.Panel>
-      <Tabs.Panel value="consumption">
-        <ConsumptionTab consumption={consumption} sources={sources} />
-      </Tabs.Panel>
-      <Tabs.Panel value="emissions">
-        <EmissionsTab emissions={emissions} />
-      </Tabs.Panel>
-    </Tabs>
   );
 }

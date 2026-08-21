@@ -132,7 +132,9 @@
     },
     "roles": {
       "administrator": "Administrador"
-    }
+    },
+    "loadingStatusTypes": "Cargando tipos de estado disponibles...",
+    "newTag": "Nueva etiqueta"
   },
   "tables": {
     "noData": "No hay datos disponibles",
@@ -524,6 +526,45 @@
         "verifier": "Verificador",
         "standard": "Estándar"
       }
+    },
+    "energyReport": {
+      "title": "Certificación energética",
+      "subtitle": "Consumo y huella de carbono certificados según ESPR / ISO 14067.",
+      "noData": "Este activo aún no tiene datos de certificación energética.",
+      "loadError": "No se pudieron cargar los datos de certificación",
+      "kpis": {
+        "co2": "CO₂e certificado",
+        "energy": "Energía consumida",
+        "renewable": "Energía renovable",
+        "certified": "Emisiones certificadas",
+        "sources": "{count, plural, =0 {Sin fuentes} one {1 fuente registrada} other {# fuentes registradas}}"
+      },
+      "charts": {
+        "monthly": "Consumo mensual",
+        "byScope": "CO₂e por scope GHG",
+        "noEmissions": "Sin emisiones certificadas"
+      },
+      "source": {
+        "renewable": "{share}% renovable",
+        "guarantee": "Garantía de origen"
+      },
+      "consumption": {
+        "period": "Período",
+        "consumption": "Consumo",
+        "stage": "Etapa",
+        "standard": "Estándar de medida"
+      },
+      "emission": {
+        "co2": "CO₂e",
+        "scope": "Scope",
+        "methodology": "Metodología",
+        "factor": "Factor de emisión",
+        "factorSource": "Fuente del factor",
+        "gwp": "GWP",
+        "verifier": "Verificador",
+        "verificationStandard": "Estándar de verificación"
+      },
+      "footer": "Datos certificados según ESPR / ISO 14067"
     }
   },
   "states": {
@@ -1083,7 +1124,9 @@
       "renewableShare": "% Renovable",
       "withGo": "Con GO",
       "noCoordinates": "Añade coordenadas GPS a las fuentes de energía para verlas en el mapa.",
-      "onMap": "En mapa"
+      "onMap": "En mapa",
+      "publicReport": "Ver informe público",
+      "description": "Fuentes de energía del parque, con su potencia, origen renovable y ubicación."
     },
     "consumptionTab": {
       "totalRecorded": "Consumo total registrado ({count} registros)",
@@ -1091,7 +1134,8 @@
       "source": "Fuente",
       "period": "Periodo",
       "consumption": "Consumo",
-      "stage": "Fase"
+      "stage": "Fase",
+      "description": "Consumo registrado por fuente y periodo, con su etapa del ciclo de vida."
     },
     "emissionsTab": {
       "verifiedOf": "{verified} de {total} verificados",
@@ -1099,7 +1143,8 @@
       "date": "Fecha",
       "scope": "Scope",
       "state": "Estado",
-      "emissionFactor": "Factor emisión"
+      "emissionFactor": "Factor emisión",
+      "description": "Emisiones de CO₂e calculadas y su estado de verificación por tercero."
     },
     "mapPopup": {
       "renewable": "{share}% renovable"
@@ -1152,7 +1197,11 @@
         "notVerifiedBody": "Esta organización no ha completado el KYC — sin verificación de identidad no se puede anclar evidencia real en blockchain. Los 25 registros de datos sí se han creado correctamente.",
         "errorTitle": "No se pudo certificar"
       }
-    }
+    },
+    "navSources": "Fuentes",
+    "navConsumption": "Consumo",
+    "navEmissions": "Emisiones",
+    "latestRecords": "Últimos {count} registros de {total}"
   },
   "apiHub": {
     "title": "API",

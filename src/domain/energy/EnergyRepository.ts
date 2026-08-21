@@ -6,6 +6,8 @@ import type {
   CreateEnergySourceInput,
   CreateEnergyConsumptionInput,
   CreateEmissionRecordInput,
+  EnergyConsumptionTotals,
+  EmissionTotals,
 } from './EnergyTypes';
 
 export interface EnergyRepository {
@@ -17,6 +19,8 @@ export interface EnergyRepository {
   // Energy Consumption — filtered by org via energySourceId → EnergySource → Item
   createConsumption(organizationId: string, input: CreateEnergyConsumptionInput): Promise<EnergyConsumptionRecord>;
   findConsumptionByOrganization(organizationId: string, limit?: number, pagination?: CursorPaginationParams): Promise<CursorPaginationResult<EnergyConsumptionRecord>>;
+  getConsumptionTotals(organizationId: string): Promise<EnergyConsumptionTotals>;
+  getEmissionTotals(organizationId: string): Promise<EmissionTotals>;
   findConsumptionById(organizationId: string, id: string): Promise<EnergyConsumptionRecord | null>;
 
   // Emission Records — filtered by org via energyConsumptionId → … → Item

@@ -13,6 +13,8 @@ import {
   IconHome2,
   IconPackage,
   IconBolt,
+  IconMap,
+  IconCloudFog,
   IconSettings,
   IconCode,
   IconBuilding,
@@ -35,6 +37,7 @@ interface DatiaNavbarProps {
 export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavbarProps) {
   const pathname = usePathname();
   const t = useTranslations('sidebar');
+  const tEnergy = useTranslations('energyHub');
   const { user, loading } = useAuthSeparated();
 
   const showPassport = modules?.passport !== false;
@@ -46,7 +49,13 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
   const mainLinks = [
     { href: '/dashboard', icon: IconHome2, label: t('home'), exact: true },
     ...(showPassport ? [{ href: '/dashboard/items', icon: IconPackage, label: t('assets') }] : []),
-    ...(showEnergy ? [{ href: '/dashboard/energy', icon: IconBolt, label: t('energy') }] : []),
+    ...(showEnergy
+      ? [
+          { href: '/dashboard/energy/sources', icon: IconMap, label: tEnergy('navSources') },
+          { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption') },
+          { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions') },
+        ]
+      : []),
     { href: '/dashboard/api', icon: IconCode, label: t('api') },
     // On mobile there is no avatar menu, so organisation settings live here.
     { href: '/dashboard/settings', icon: IconSettings, label: t('settings') },

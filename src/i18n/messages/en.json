@@ -132,7 +132,9 @@
     },
     "roles": {
       "administrator": "Administrator"
-    }
+    },
+    "loadingStatusTypes": "Loading available status types...",
+    "newTag": "New tag"
   },
   "tables": {
     "noData": "No data available",
@@ -270,7 +272,11 @@
       "newState": "New State",
       "loadingProducts": "Loading assets…",
       "dontCopy": "Don't copy",
-      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved."
+      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved.",
+      "evidenceSizeExceeded": "The estimated evidence size exceeds the maximum of",
+      "totalEstimated": "Estimated total:",
+      "aboveLimit": "above",
+      "imageDetails": "Image details:"
     }
   },
   "dates": {
@@ -520,6 +526,45 @@
         "verifier": "Verifier",
         "standard": "Standard"
       }
+    },
+    "energyReport": {
+      "title": "Energy certification",
+      "subtitle": "Consumption and carbon footprint certified under ESPR / ISO 14067.",
+      "noData": "This asset has no energy certification data yet.",
+      "loadError": "Could not load the certification data",
+      "kpis": {
+        "co2": "Certified CO₂e",
+        "energy": "Energy consumed",
+        "renewable": "Renewable energy",
+        "certified": "Certified emissions",
+        "sources": "{count, plural, =0 {No sources} one {1 registered source} other {# registered sources}}"
+      },
+      "charts": {
+        "monthly": "Monthly consumption",
+        "byScope": "CO₂e by GHG scope",
+        "noEmissions": "No certified emissions"
+      },
+      "source": {
+        "renewable": "{share}% renewable",
+        "guarantee": "Guarantee of origin"
+      },
+      "consumption": {
+        "period": "Period",
+        "consumption": "Consumption",
+        "stage": "Stage",
+        "standard": "Measurement standard"
+      },
+      "emission": {
+        "co2": "CO₂e",
+        "scope": "Scope",
+        "methodology": "Methodology",
+        "factor": "Emission factor",
+        "factorSource": "Factor source",
+        "gwp": "GWP",
+        "verifier": "Verifier",
+        "verificationStandard": "Verification standard"
+      },
+      "footer": "Data certified under ESPR / ISO 14067"
     }
   },
   "states": {
@@ -1079,7 +1124,9 @@
       "renewableShare": "% Renewable",
       "withGo": "With GO",
       "noCoordinates": "Add GPS coordinates to your energy sources to see them on the map.",
-      "onMap": "On map"
+      "onMap": "On map",
+      "publicReport": "View public report",
+      "description": "Energy sources across the estate, with capacity, renewable share and location."
     },
     "consumptionTab": {
       "totalRecorded": "Total recorded consumption ({count} records)",
@@ -1087,7 +1134,8 @@
       "source": "Source",
       "period": "Period",
       "consumption": "Consumption",
-      "stage": "Stage"
+      "stage": "Stage",
+      "description": "Consumption recorded per source and period, with its lifecycle stage."
     },
     "emissionsTab": {
       "verifiedOf": "{verified} of {total} verified",
@@ -1095,7 +1143,8 @@
       "date": "Date",
       "scope": "Scope",
       "state": "Status",
-      "emissionFactor": "Emission factor"
+      "emissionFactor": "Emission factor",
+      "description": "Calculated CO₂e emissions and their third-party verification status."
     },
     "mapPopup": {
       "renewable": "{share}% renewable"
@@ -1148,7 +1197,11 @@
         "notVerifiedBody": "This organization hasn't completed KYC — without identity verification, real blockchain evidence can't be anchored. All 25 data records were still created successfully.",
         "errorTitle": "Certification failed"
       }
-    }
+    },
+    "navSources": "Sources",
+    "navConsumption": "Consumption",
+    "navEmissions": "Emissions",
+    "latestRecords": "Latest {count} of {total} records"
   },
   "apiHub": {
     "title": "API",

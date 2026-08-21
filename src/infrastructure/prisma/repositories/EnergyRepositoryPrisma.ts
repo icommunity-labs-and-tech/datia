@@ -66,6 +66,26 @@ const orgViaItem = (organizationId: string) => ({ Item: { organizationId } });
 const orgViaSource = (organizationId: string) => ({ EnergySource: orgViaItem(organizationId) });
 const orgViaConsumption = (organizationId: string) => ({ EnergyConsumption: orgViaSource(organizationId) });
 
+
+/** Groups rows into a YYYY-MM series so the client formats the label locally. */
+function toMonthlySeries<T>(
+  rows: T[],
+  getDate: (row: T) => Date,
+  getValue: (row: T) => number
+) {
+  const byMonth = new Map<string, number>();
+  for (const row of rows) {
+    const date = getDate(row);
+    const month = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    byMonth.set(month, (byMonth.get(month) ?? 0) + getValue(row));
+  }
+  // Sorted by the month itself: rows arrive ordered by creation date, which is
+  // not the same order as the period they measure.
+  return [...byMonth]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([month, value]) => ({ month, value }));
+}
+
 export const energyRepository: EnergyRepository = {
   async createSource(organizationId, input: CreateEnergySourceInput) {
     const r = await prisma.energySource.create({
@@ -177,5 +197,58 @@ export const energyRepository: EnergyRepository = {
       where: { id, ...orgViaConsumption(organizationId) },
     });
     return r ? toEmission(r) : null;
+  },
+
+  /**
+   * Aggregates over every record of the organisation. The listing methods above
+   * are paginated on purpose; these totals are what the summary must show, so
+   * the figure on screen is never a page total wearing the label of a real one.
+   */
+  async getConsumptionTotals(organizationId) {
+    const where = orgViaSource(organizationId);
+    const [aggregate, rows] = await Promise.all([
+      prisma.energyConsumption.aggregate({ where, _count: true, _sum: { consumptionKwh: true } }),
+      prisma.energyConsumption.findMany({
+        where,
+        select: { periodStart: true, consumptionKwh: true },
+        orderBy: { periodStart: 'asc' },
+      }),
+    ]);
+
+    return {
+      records: aggregate._count,
+      totalKwh: aggregate._sum.consumptionKwh ?? 0,
+      monthly: toMonthlySeries(rows, (r) => r.periodStart, (r) => r.consumptionKwh),
+    };
+  },
+
+  async getEmissionTotals(organizationId) {
+    const where = orgViaConsumption(organizationId);
+    const [aggregate, verified, rows] = await Promise.all([
+      prisma.emissionRecord.aggregate({ where, _count: true, _sum: { co2eKg: true } }),
+      prisma.emissionRecord.count({ where: { ...where, verificationStatus: 'VERIFIED' } }),
+      // Grouped by the period the emission measures, not by when the record was
+      // written: otherwise a bulk import collapses the whole series into one month.
+      prisma.emissionRecord.findMany({
+        where,
+        select: {
+          co2eKg: true,
+          createdAt: true,
+          EnergyConsumption: { select: { periodStart: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+    ]);
+
+    return {
+      records: aggregate._count,
+      verified,
+      totalCo2eKg: aggregate._sum.co2eKg ?? 0,
+      monthly: toMonthlySeries(
+        rows,
+        (r) => r.EnergyConsumption?.periodStart ?? r.createdAt,
+        (r) => r.co2eKg
+      ),
+    };
   },
 };

@@ -3,6 +3,7 @@
 import { Alert } from '@mantine/core';
 import { useCategoryInput, type Category } from '@/hooks/useCategoryInput';
 import { IconTag } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 
 interface CategoryInputFieldProps {
   itemId: string;
@@ -17,6 +18,7 @@ export default function CategoryInputField({
   onUpdate,
   disabled = false,
 }: CategoryInputFieldProps) {
+  const t = useTranslations('forms');
   const {
     categories,
     filteredSuggestions,
@@ -104,7 +106,7 @@ export default function CategoryInputField({
             <input
               ref={inputRef}
               type="text"
-              placeholder="New tag"
+              placeholder={t('newTag')}
               value={inputValue}
               onChange={handleInputChange}
               onKeyDown={handleInputKeyDown}
