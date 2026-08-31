@@ -15,12 +15,26 @@
  *   API_TOKEN  Bearer token              (required)
  *   ITEM_ID    Item/product ID           (required)
  *   YEAR       Simulation year           (default: last year)
+ *   PROFILE    grid | solar              (default: grid)
  *   DRY_RUN    Print payloads, no calls  (default: unset)
+ *
+ * Re-running for the same item, year and profile reuses the existing source and
+ * skips months already recorded, so a repeated run does not double-count the
+ * energy.
  *
  * Usage:
  *   API_TOKEN=xxx ITEM_ID=yyy npx tsx scripts/simulate-bms.ts
+ *   API_TOKEN=xxx ITEM_ID=yyy PROFILE=solar npx tsx scripts/simulate-bms.ts
  *   API_TOKEN=xxx ITEM_ID=yyy DRY_RUN=1 npx tsx scripts/simulate-bms.ts
  */
+
+import {
+  bmsGuaranteeOfOrigin,
+  bmsMonthlyKwh,
+  bmsSensorReadings,
+  bmsSourceName,
+  resolveBmsProfile,
+} from '../src/lib/energy/bmsProfiles';
 
 // ── Config ─────────────────────────────────────────────────────────────────
 
@@ -30,16 +44,11 @@ const ITEM_ID = process.env.ITEM_ID ?? '';
 const YEAR = parseInt(process.env.YEAR ?? String(new Date().getFullYear() - 1), 10);
 const DRY_RUN = Boolean(process.env.DRY_RUN);
 
-// IEA Spain 2023 grid emission factor for SCOPE_2 electricity (kgCO₂e/kWh)
-const EMISSION_FACTOR = 0.233;
-const EMISSION_FACTOR_SOURCE = 'IEA Spain 2023';
-
-// Base monthly consumption (kWh) for a mid-size industrial asset
-const BASE_KWH = 8_500;
-
-// Seasonal multipliers — based on REE demand patterns for Spain
-// Peaks in Jan/Feb (heating) and Jul/Aug (cooling)
-const SEASONAL = [1.10, 1.05, 0.95, 0.88, 0.85, 0.92, 1.15, 1.12, 0.95, 0.90, 0.98, 1.08];
+// Profile carries the emission factors, seasonal curve and renewable metadata,
+// shared with the in-app simulator so both produce the same numbers.
+const PROFILE = resolveBmsProfile(process.env.PROFILE);
+const EMISSION_FACTOR = PROFILE.emissionFactor;
+const EMISSION_FACTOR_SOURCE = PROFILE.emissionFactorSource;
 
 const MONTH_NAMES = [
   'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -50,11 +59,6 @@ const MONTH_NAMES = [
 
 function isoDate(year: number, month: number, day: number): string {
   return new Date(Date.UTC(year, month, day)).toISOString();
-}
-
-// ±5 % random noise to make readings look real
-function withNoise(value: number): number {
-  return parseFloat((value * (0.95 + Math.random() * 0.10)).toFixed(2));
 }
 
 async function post(path: string, body: object): Promise<any> {
@@ -85,6 +89,52 @@ async function post(path: string, body: object): Promise<any> {
   return json.data ?? json;
 }
 
+async function get(path: string): Promise<any> {
+  if (DRY_RUN) return { data: [] };
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: { 'Authorization': `Bearer ${API_TOKEN}` },
+  });
+  if (!res.ok) throw new Error(`GET ${path} → ${res.status} ${res.statusText}`);
+  return res.json();
+}
+
+/**
+ * Walks the paginated list looking for a source already registered for this
+ * item under the profile's name. The list endpoint has no item filter, so the
+ * match happens here.
+ */
+async function findExistingSource(name: string): Promise<{ id: string } | null> {
+  let cursor: string | undefined;
+  for (let page = 0; page < 20; page++) {
+    const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';
+    const body = await get(`/api/v1/energy/source${qs}`);
+    const rows: any[] = body.data ?? [];
+    const hit = rows.find((r) => r.name === name && r.itemId === ITEM_ID);
+    if (hit) return hit;
+    cursor = body.pagination?.nextCursor ?? body.nextCursor;
+    if (!cursor || rows.length === 0) return null;
+  }
+  return null;
+}
+
+/** Months already metered for a source, as `YYYY-MM` keys. */
+async function existingMonths(sourceId: string): Promise<Set<string>> {
+  const months = new Set<string>();
+  let cursor: string | undefined;
+  for (let page = 0; page < 20; page++) {
+    const qs = new URLSearchParams({ energySourceId: sourceId });
+    if (cursor) qs.set('cursor', cursor);
+    const body = await get(`/api/v1/energy/consumption?${qs}`);
+    const rows: any[] = body.data ?? [];
+    for (const r of rows) {
+      if (r.energySourceId === sourceId) months.add(String(r.periodStart).slice(0, 7));
+    }
+    cursor = body.pagination?.nextCursor ?? body.nextCursor;
+    if (!cursor || rows.length === 0) break;
+  }
+  return months;
+}
+
 // ── Validation ─────────────────────────────────────────────────────────────
 
 function validateConfig() {
@@ -113,19 +163,36 @@ async function main() {
   console.log(`  ITEM_ID   : ${ITEM_ID}`);
   console.log(`  YEAR      : ${YEAR}`);
   console.log(`  DRY_RUN   : ${DRY_RUN}`);
+  console.log(`  PERFIL    : ${PROFILE.id} — ${PROFILE.generationTechnology}, ${PROFILE.renewableShare} % renovable`);
   console.log(`  Factor CO₂: ${EMISSION_FACTOR} kgCO₂e/kWh (${EMISSION_FACTOR_SOURCE})\n`);
 
-  // ── Step 1: register energy source (once) ──────────────────────────────
+  // ── Step 1: register energy source (once, reused across runs) ──────────
   console.log('── Paso 1: Registrar fuente de energía ────────────────');
-  const source = await post('/api/v1/energy/source', {
-    name: `Red eléctrica — Simulación BMS ${YEAR}`,
-    energyCarrier: 'ELECTRICITY',
-    generationTechnology: 'Grid',
-    countryOfOrigin: 'ES',
-    gridEmissionFactor: EMISSION_FACTOR,
-    itemId: ITEM_ID,
-  });
-  console.log(`  ✅ EnergySource: ${source.id}\n`);
+  const sourceName = bmsSourceName(PROFILE, YEAR);
+  const found = await findExistingSource(sourceName);
+  let source: { id: string };
+  if (found) {
+    source = found;
+    console.log(`  ♻️  Fuente ya existente, se reutiliza: ${source.id}\n`);
+  } else {
+    source = await post('/api/v1/energy/source', {
+      name: sourceName,
+      energyCarrier: PROFILE.energyCarrier,
+      generationTechnology: PROFILE.generationTechnology,
+      capacityKw: PROFILE.capacityKw ?? undefined,
+      countryOfOrigin: 'ES',
+      renewableShare: PROFILE.renewableShare,
+      guaranteeOfOriginId: bmsGuaranteeOfOrigin(PROFILE, ITEM_ID, YEAR),
+      gridEmissionFactor: EMISSION_FACTOR,
+      itemId: ITEM_ID,
+    });
+    console.log(`  ✅ EnergySource: ${source.id}\n`);
+  }
+
+  const alreadyMetered = await existingMonths(source.id);
+  if (alreadyMetered.size) {
+    console.log(`  ♻️  ${alreadyMetered.size} mes(es) ya registrados, se omiten\n`);
+  }
 
   // ── Step 2 & 3: 12 monthly readings ───────────────────────────────────
   console.log('── Paso 2+3: Lecturas mensuales + cálculo CO₂ ─────────\n');
@@ -138,8 +205,17 @@ async function main() {
     emissionId: string;
   }> = [];
 
+  let skipped = 0;
+
   for (let m = 0; m < 12; m++) {
-    const kwh = withNoise(BASE_KWH * SEASONAL[m]);
+    const monthKey = `${YEAR}-${String(m + 1).padStart(2, '0')}`;
+    if (alreadyMetered.has(monthKey)) {
+      skipped++;
+      console.log(`  ${MONTH_NAMES[m].padEnd(12)} ${'—'.padStart(8)}       ya registrado, se omite`);
+      continue;
+    }
+
+    const kwh = bmsMonthlyKwh(PROFILE, m);
     const co2eKg = parseFloat((kwh * EMISSION_FACTOR).toFixed(3));
     const periodStart = isoDate(YEAR, m, 1);
     const periodEnd = isoDate(YEAR, m + 1, 0); // last day of month
@@ -152,19 +228,24 @@ async function main() {
       consumptionKwh: kwh,
       consumptionMj: parseFloat((kwh * 3.6).toFixed(2)),
       lifecycleStage: 'USE',
-      measurementStandard: 'IEC 62053',
-      operatingConditions: { season: SEASONAL[m] >= 1.0 ? 'peak' : 'off-peak' },
+      measurementStandard: PROFILE.measurementStandard,
+      operatingConditions: {
+        profile: PROFILE.id,
+        season: PROFILE.seasonal[m] >= 1.0 ? 'peak' : 'off-peak',
+        // Sensor telemetry the BMS reports alongside the meter reading.
+        ...bmsSensorReadings(PROFILE, m, kwh),
+      },
     });
 
     // POST emission
     const emission = await post('/api/v1/emissions', {
       energyConsumptionId: consumption.id,
       co2eKg,
-      scope: 'SCOPE_2',
-      systemBoundary: 'CRADLE_TO_GATE',
+      scope: PROFILE.scope,
+      systemBoundary: PROFILE.systemBoundary,
       emissionFactor: EMISSION_FACTOR,
       emissionFactorSource: EMISSION_FACTOR_SOURCE,
-      calculationMethodology: 'GHG Protocol Corporate Standard',
+      calculationMethodology: PROFILE.calculationMethodology,
       gwpCharacterizationFactors: 'IPCC AR6',
       functionalUnit: 'kWh',
     });
@@ -190,6 +271,7 @@ async function main() {
   console.log(`  Emisiones totales: ${totalCo2.toFixed(3)} kgCO₂e  (${(totalCo2 / 1000).toFixed(3)} tCO₂e)`);
   console.log(`  Fuente de energía: ${source.id}`);
   console.log(`  Registros creados: ${results.length} consumos + ${results.length} emisiones`);
+  if (skipped) console.log(`  Meses omitidos   : ${skipped} (ya estaban registrados)`);
 
   if (!DRY_RUN) {
     console.log('\n── Siguiente paso: certificar una emisión ───────────────');
