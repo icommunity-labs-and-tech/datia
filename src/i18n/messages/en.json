@@ -1163,8 +1163,6 @@
       "run": "Generate",
       "running": "Generating...",
       "runError": "Error generating the simulation",
-      "successTitle": "Simulation complete",
-      "successMessage": "Source \"{source}\" was created with 12 months of consumption and emissions.",
       "totalConsumption": "Total consumption",
       "totalEmissions": "Total emissions",
       "year": "Year",
@@ -1172,10 +1170,9 @@
       "close": "Close",
       "step": {
         "source": "Source",
-        "consumption": "Consumption",
-        "emissions": "Emissions",
         "registry": "Registry",
-        "certification": "Certification"
+        "certification": "Certification",
+        "readings": "Readings"
       },
       "chart": {
         "kwh": "Consumption",
@@ -1184,18 +1181,43 @@
       "eventRow": {
         "source": "Energy source registered",
         "consumption": "{month} consumption recorded",
-        "emission": "{month} emission calculated"
+        "emission": "{month} emission calculated",
+        "readings": "{month}: {count} daily readings recorded"
       },
       "certification": {
         "title": "Blockchain certification",
         "pending": "A representative month will be certified once data generation finishes.",
-        "running": "Anchoring evidence on blockchain…",
         "successTitle": "Evidence anchored",
         "successBody": "Certified by {verifier} · publicly verifiable evidence",
         "viewOnChecker": "View on blockchain checker",
         "notVerifiedTitle": "Certification pending",
         "notVerifiedBody": "This organization hasn't completed KYC — without identity verification, real blockchain evidence can't be anchored. All 25 data records were still created successfully.",
-        "errorTitle": "Certification failed"
+        "errorTitle": "Certification failed",
+        "pendingTitle": "Evidence issued, anchoring pending",
+        "pendingBody": "iBS has registered the evidence and is writing the transaction to the chain. Until it confirms, the state does not count as certified.",
+        "anchoredOn": "Anchored on {network}",
+        "mirrors": "mirrored on {count} further chain(s)",
+        "subject": "{period} · {co2e} kg CO₂e",
+        "aggregate": "Aggregates {readings} daily readings · {kwh} kWh over the period."
+      },
+      "profileLabel": "Source profile",
+      "profile": {
+        "grid": {
+          "label": "Grid electricity",
+          "hint": "Grid supply: 22% renewable, 0.233 kgCO₂e/kWh (IEA Spain 2023), scope 2."
+        },
+        "solar": {
+          "label": "On-site photovoltaic",
+          "hint": "Self-generation: 100% renewable with guarantee of origin, 0.041 kgCO₂e/kWh lifecycle (IPCC AR6), scope 3."
+        }
+      },
+      "reusedTitle": "Simulation already recorded",
+      "reusedMessage": "Source \"{source}\" already held data for that year, so it was reused instead of duplicated.",
+      "anchors": {
+        "title": "Blockchain anchoring",
+        "progress": "{done} of {total} anchored",
+        "legend": "Each month issues its evidence and the chain confirms it seconds later. Green ones are anchored: click to verify them.",
+        "legendSelectable": "Each month aggregates its daily readings into a single evidence. Green ones are anchored: click any to inspect it."
       }
     },
     "navSources": "Sources",

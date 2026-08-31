@@ -1163,8 +1163,6 @@
       "run": "Generar",
       "running": "Generando...",
       "runError": "Error al generar la simulación",
-      "successTitle": "Simulación completada",
-      "successMessage": "Se ha creado la fuente \"{source}\" con 12 meses de consumo y emisiones.",
       "totalConsumption": "Consumo total",
       "totalEmissions": "Emisiones totales",
       "year": "Año",
@@ -1172,10 +1170,9 @@
       "close": "Cerrar",
       "step": {
         "source": "Fuente",
-        "consumption": "Consumo",
-        "emissions": "Emisiones",
         "registry": "Registro",
-        "certification": "Certificación"
+        "certification": "Certificación",
+        "readings": "Lecturas"
       },
       "chart": {
         "kwh": "Consumo",
@@ -1184,18 +1181,43 @@
       "eventRow": {
         "source": "Fuente de energía registrada",
         "consumption": "Consumo de {month} registrado",
-        "emission": "Emisión de {month} calculada"
+        "emission": "Emisión de {month} calculada",
+        "readings": "{month}: {count} lecturas diarias registradas"
       },
       "certification": {
         "title": "Certificación en blockchain",
         "pending": "Se certificará un mes representativo al finalizar la generación de datos.",
-        "running": "Anclando evidencia en blockchain…",
         "successTitle": "Evidencia anclada",
         "successBody": "Certificado por {verifier} · evidencia verificable públicamente",
         "viewOnChecker": "Ver en el checker de blockchain",
         "notVerifiedTitle": "Certificación pendiente",
         "notVerifiedBody": "Esta organización no ha completado el KYC — sin verificación de identidad no se puede anclar evidencia real en blockchain. Los 25 registros de datos sí se han creado correctamente.",
-        "errorTitle": "No se pudo certificar"
+        "errorTitle": "No se pudo certificar",
+        "pendingTitle": "Evidencia emitida, pendiente de anclaje",
+        "pendingBody": "iBS ha registrado la evidencia y está escribiendo la transacción en la cadena. Hasta que confirme, el estado no figura como certificado.",
+        "anchoredOn": "Anclada en {network}",
+        "mirrors": "replicada en {count} cadena(s) más",
+        "subject": "{period} · {co2e} kg CO₂e",
+        "aggregate": "Agrega {readings} lecturas diarias · {kwh} kWh en el periodo."
+      },
+      "profileLabel": "Perfil de la fuente",
+      "profile": {
+        "grid": {
+          "label": "Red eléctrica",
+          "hint": "Suministro de red: 22 % renovable, 0,233 kgCO₂e/kWh (IEA España 2023), alcance 2."
+        },
+        "solar": {
+          "label": "Autoconsumo fotovoltaico",
+          "hint": "Generación propia: 100 % renovable con garantía de origen, 0,041 kgCO₂e/kWh de ciclo de vida (IPCC AR6), alcance 3."
+        }
+      },
+      "reusedTitle": "Simulación ya registrada",
+      "reusedMessage": "La fuente \"{source}\" ya tenía datos para ese año, así que se han reutilizado en lugar de duplicarlos.",
+      "anchors": {
+        "title": "Anclaje en blockchain",
+        "progress": "{done} de {total} ancladas",
+        "legend": "Cada mes emite su evidencia y se confirma en cadena unos segundos después. En verde, las ya ancladas: pulsa para verificarlas.",
+        "legendSelectable": "Cada mes agrega sus lecturas diarias en una sola evidencia. En verde, las ancladas en cadena: pulsa cualquiera para inspeccionarla."
       }
     },
     "navSources": "Fuentes",
