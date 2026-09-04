@@ -1083,7 +1083,15 @@
     "description": "Every asset gathers its state history and its blockchain certification.",
     "count": "{count, plural, =0 {No assets} one {1 asset} other {# assets}}",
     "noResults": "No asset matches your search",
-    "clearFilters": "Clear filters"
+    "clearFilters": "Clear filters",
+    "installation": "{count, plural, one {1 asset} other {# assets}}",
+    "unlocated": "{count, plural, one {1 unlocated} other {# unlocated}}",
+    "allInstallations": "Show all",
+    "unnamedInstallation": "Unnamed installation",
+    "unlocatedInstallation": "Unlocated",
+    "certifiedRatio": "{certified} of {total} certified",
+    "installationEnergy": "{sources} source(s) · {capacity}",
+    "installationSources": "Energy sources"
   },
   "energyHub": {
     "tabs": {
@@ -1119,14 +1127,9 @@
       "noConsumption": "No consumption data recorded."
     },
     "mapTab": {
-      "sources": "Sources",
-      "capacity": "Capacity",
       "renewableShare": "% Renewable",
-      "withGo": "With GO",
-      "noCoordinates": "Add GPS coordinates to your energy sources to see them on the map.",
       "onMap": "On map",
-      "publicReport": "View public report",
-      "description": "Energy sources across the estate, with capacity, renewable share and location."
+      "publicReport": "View public report"
     },
     "consumptionTab": {
       "totalRecorded": "Total recorded consumption ({count} records)",
@@ -1220,7 +1223,6 @@
         "legendSelectable": "Each month aggregates its daily readings into a single evidence. Green ones are anchored: click any to inspect it."
       }
     },
-    "navSources": "Sources",
     "navConsumption": "Consumption",
     "navEmissions": "Emissions",
     "latestRecords": "Latest {count} of {total} records"

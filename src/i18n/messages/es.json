@@ -1083,7 +1083,15 @@
     "description": "Cada activo reúne su historial de estados y su certificación en blockchain.",
     "count": "{count, plural, =0 {Sin activos} one {1 activo} other {# activos}}",
     "noResults": "Ningún activo coincide con la búsqueda",
-    "clearFilters": "Limpiar filtros"
+    "clearFilters": "Limpiar filtros",
+    "installation": "{count, plural, one {1 activo} other {# activos}}",
+    "unlocated": "{count, plural, one {1 sin ubicar} other {# sin ubicar}}",
+    "allInstallations": "Ver todas",
+    "unnamedInstallation": "Instalación sin nombre",
+    "unlocatedInstallation": "Sin ubicar",
+    "certifiedRatio": "{certified} de {total} certificados",
+    "installationEnergy": "{sources} fuente(s) · {capacity}",
+    "installationSources": "Fuentes de energía"
   },
   "energyHub": {
     "tabs": {
@@ -1119,14 +1127,9 @@
       "noConsumption": "Sin datos de consumo registrados."
     },
     "mapTab": {
-      "sources": "Fuentes",
-      "capacity": "Capacidad",
       "renewableShare": "% Renovable",
-      "withGo": "Con GO",
-      "noCoordinates": "Añade coordenadas GPS a las fuentes de energía para verlas en el mapa.",
       "onMap": "En mapa",
-      "publicReport": "Ver informe público",
-      "description": "Fuentes de energía del parque, con su potencia, origen renovable y ubicación."
+      "publicReport": "Ver informe público"
     },
     "consumptionTab": {
       "totalRecorded": "Consumo total registrado ({count} registros)",
@@ -1220,7 +1223,6 @@
         "legendSelectable": "Cada mes agrega sus lecturas diarias en una sola evidencia. En verde, las ancladas en cadena: pulsa cualquiera para inspeccionarla."
       }
     },
-    "navSources": "Fuentes",
     "navConsumption": "Consumo",
     "navEmissions": "Emisiones",
     "latestRecords": "Últimos {count} registros de {total}"

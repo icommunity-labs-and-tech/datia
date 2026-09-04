@@ -13,7 +13,6 @@ import {
   IconHome2,
   IconPackage,
   IconBolt,
-  IconMap,
   IconCloudFog,
   IconSettings,
   IconCode,
@@ -51,7 +50,6 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
     ...(showPassport ? [{ href: '/dashboard/items', icon: IconPackage, label: t('assets') }] : []),
     ...(showEnergy
       ? [
-          { href: '/dashboard/energy/sources', icon: IconMap, label: tEnergy('navSources') },
           { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption') },
           { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions') },
         ]
