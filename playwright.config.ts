@@ -2,6 +2,9 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // Report captures run on demand against the demo dataset, not as part of the
+  // suite; see playwright.capture.config.ts.
+  testIgnore: '**/_capture.spec.ts',
   globalSetup: './tests/e2e/global-setup.ts',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,

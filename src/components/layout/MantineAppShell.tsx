@@ -24,7 +24,6 @@ import {
   IconHome2,
   IconPackage,
   IconBolt,
-  IconMap,
   IconCloudFog,
   IconSettings,
   IconCode,
@@ -110,7 +109,6 @@ export default function DatiaAppShell({
       : []),
     ...(showEnergy
       ? [
-          { href: '/dashboard/energy/sources', icon: IconMap, label: tEnergy('navSources'), exact: false },
           { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
           { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
         ]

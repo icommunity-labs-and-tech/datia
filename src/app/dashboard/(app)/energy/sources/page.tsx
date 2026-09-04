@@ -1,23 +1,12 @@
-import { EnergySourcesMap } from '@/components/energy/EnergyViews';
-import { listEnergySources } from '@/actions/energy/list-sources';
-import { listEnergyConsumption } from '@/actions/energy/list-consumption';
-import PageHeader from '@/components/layout/PageHeader';
-import { getTranslations } from 'next-intl/server';
+import { redirect } from 'next/navigation';
 
-export const dynamic = 'force-dynamic';
-
-export default async function EnergySourcesPage() {
-  const t = await getTranslations('energyHub');
-  // The map plots each source and its consumption; emissions are not needed here.
-  const [sources, consumption] = await Promise.all([
-    listEnergySources(),
-    listEnergyConsumption(),
-  ]);
-
-  return (
-    <>
-      <PageHeader title={t('tabs.map')} description={t('mapTab.description')} />
-      <EnergySourcesMap sources={sources ?? []} consumption={consumption ?? []} />
-    </>
-  );
+/**
+ * Sources no longer have a page of their own: they live inside the installation
+ * their asset belongs to. Both views plotted the same sites, and a source is the
+ * energy side of an asset rather than a separate thing.
+ *
+ * The redirect keeps old links and bookmarks working.
+ */
+export default function EnergySourcesPage() {
+  redirect('/dashboard/items');
 }

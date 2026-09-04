@@ -115,6 +115,9 @@ export const itemRepository: ItemRepository = {
             },
           },
           State: statesConfig,
+          // The only place name Datia holds today: assets carry coordinates but
+          // no site name, and the source attached to one declares it.
+          EnergySource: { select: { location: true }, take: 1 },
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -133,6 +136,10 @@ export const itemRepository: ItemRepository = {
           categoryId: categoryName, // Primera categoría para compatibilidad con export
           categoryName: categoryName,
           categories: categories, // Array con múltiples categorías
+          siteName: r.EnergySource?.find((e: any) => e.location)?.location ?? null,
+          // Position lives inside the category's template, so it travels with
+          // the item's template fields rather than as a column of its own.
+          templateFields: r.templateFields ?? null,
           imageUrl: r.imageUrl ?? null,
           states: r.State ?? [],
         };
