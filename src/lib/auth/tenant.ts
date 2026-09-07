@@ -37,8 +37,29 @@ export class TenantContextNotFoundError extends Error {
  */
 export async function getCurrentTenant(): Promise<TenantContext> {
   const cookieStore = await cookies();
-  
-  // Verificar super admin token primero
+
+  // El token de admin va primero, y el orden importa: las dos sesiones usan
+  // cookies distintas y pueden convivir en el mismo navegador. Un
+  // superadministrador que además haya entrado al panel de una organización
+  // lleva ambas, y resolviendo primero la de superadmin toda operación con
+  // ámbito de organización quedaba sin organización y fallaba, aunque su sesión
+  // de admin fuese perfectamente válida.
+  //
+  // Quien tiene sesión de admin está actuando sobre una organización concreta;
+  // eso es lo que el ámbito necesita saber. Los privilegios de
+  // superadministrador no se pierden: `isSuperAdmin` mira su propia cookie.
+  const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
+  if (adminToken) {
+    const payload = await verifyAdminJWT(adminToken);
+    if (payload?.organizationId) {
+      return {
+        organizationId: payload.organizationId,
+        userRole: payload.role,
+        userId: payload.id,
+      };
+    }
+  }
+
   const superAdminToken = cookieStore.get(superadminAuthConfig.cookieName)?.value;
   if (superAdminToken) {
     const payload = await verifySuperAdminJWT(superAdminToken);
@@ -50,9 +71,9 @@ export async function getCurrentTenant(): Promise<TenantContext> {
       };
     }
   }
-  
-  // Verificar admin token
-  const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
+
+  // Una sesión de admin sin organización: válida para identificar al usuario,
+  // insuficiente para operar sobre datos de una organización.
   if (adminToken) {
     const payload = await verifyAdminJWT(adminToken);
     if (payload) {
@@ -74,9 +95,15 @@ export async function getCurrentTenant(): Promise<TenantContext> {
  * Verifica si el usuario actual es SUPER_ADMIN
  */
 export async function isSuperAdmin(): Promise<boolean> {
+  // Mira su propia cookie en lugar de deducirlo del tenant: desde que el ámbito
+  // de organización prefiere la sesión de admin, deducirlo de ahí le quitaría
+  // los privilegios a un superadministrador que además tenga sesión de admin.
   try {
-    const tenant = await getCurrentTenant();
-    return tenant.userRole === 'SUPER_ADMIN';
+    const cookieStore = await cookies();
+    const token = cookieStore.get(superadminAuthConfig.cookieName)?.value;
+    if (!token) return false;
+    const payload = await verifySuperAdminJWT(token);
+    return payload?.role === 'SUPER_ADMIN';
   } catch {
     return false;
   }
