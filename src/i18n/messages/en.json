@@ -697,7 +697,31 @@
     "renewableSubtitle": "Average across sources",
     "activity": "Activity",
     "recentAssets": "Recent assets",
-    "viewAll": "View all"
+    "viewAll": "View all",
+    "chart": {
+      "title": "Energy and carbon footprint",
+      "subtitle": "Consumption and emissions per closed month, by reporting period",
+      "energy": "Energy",
+      "emissions": "CO₂e",
+      "noData": "No readings recorded yet"
+    },
+    "stat": {
+      "vsPrevious": "against the previous month",
+      "tracked": "Assets tracked",
+      "coverage": "Certification coverage",
+      "carbon": "Last month footprint",
+      "coverageHint": "{certified} of {total} records proven on chain",
+      "trackedHint": "{certified} certified states · {pending} pending",
+      "inProgress": "Month in progress: {kwh} kWh"
+    },
+    "scope": {
+      "title": "Emissions by scope",
+      "subtitle": "Split under the GHG Protocol",
+      "SCOPE_1": "Scope 1 · direct",
+      "SCOPE_2": "Scope 2 · electricity",
+      "SCOPE_3": "Scope 3 · value chain",
+      "subtitleWithPeriod": "GHG Protocol · {period}"
+    }
   },
   "itemDetail": {
     "notFound": "Asset not found",

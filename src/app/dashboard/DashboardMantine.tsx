@@ -5,7 +5,6 @@ import {
   Paper,
   Text,
   Group,
-  ThemeIcon,
   Title,
   Stack,
   SimpleGrid,
@@ -13,22 +12,22 @@ import {
   Badge,
 } from '@mantine/core';
 import {
-  IconPackage,
   IconBolt,
   IconCloudFog,
-  IconLeaf,
   IconMap,
   IconArrowRight,
-  IconCertificate,
-  IconHistory,
 } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
+import CertificationChart, { TrendStat } from '@/components/dashboard/CertificationChart';
+import ScopeBreakdown from '@/components/dashboard/ScopeBreakdown';
+import type { CertificationTrend } from '@/actions/dashboard/getCertificationTrend';
 import type { DashboardKPIs } from '@/types/dashboard';
 import type { EnergySummary } from '@/actions/dashboard/getEnergySummary';
 
 interface DashboardMantineProps {
   kpis: DashboardKPIs;
+  trend?: CertificationTrend;
   energySummary: EnergySummary;
   /** When the energy module is off, its metrics stay out of the way. */
   energyEnabled?: boolean;
@@ -42,41 +41,22 @@ interface RecentItem {
   certified: boolean;
 }
 
-interface StatTileProps {
-  icon: React.ElementType;
-  color: string;
-  label: string;
-  value: string | number;
-  hint: string;
-}
-
-/** Flat metric tile — one accent per tile, numbers carry the emphasis. */
-function StatTile({ icon: Icon, color, label, value, hint }: StatTileProps) {
-  return (
-    <Paper p="md" radius="md">
-      <Group gap={8} mb={10}>
-        <ThemeIcon color={color} variant="light" size={26} radius="sm">
-          <Icon size={14} stroke={1.7} />
-        </ThemeIcon>
-        <Text size="xs" c="dimmed" tt="uppercase" fw={650} lts={0.4}>
-          {label}
-        </Text>
-      </Group>
-      <Text fw={700} fz={26} lh={1.1} style={{ fontVariantNumeric: 'tabular-nums' }}>
-        {value}
-      </Text>
-      <Text size="xs" c="dimmed" mt={2} lineClamp={1}>{hint}</Text>
-    </Paper>
-  );
+/** Renders a `YYYY-MM` key in the reader's locale. */
+function monthName(month: string, locale: string) {
+  if (!month) return '';
+  const [year, m] = month.split('-').map(Number);
+  return new Date(year, m - 1, 1).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
 }
 
 export default function DashboardMantine({
   kpis,
+  trend,
   energySummary,
   energyEnabled = false,
   recentItems = [],
 }: DashboardMantineProps) {
   const t = useTranslations('dashboard');
+  const locale = useLocale();
   const tEnergy = useTranslations('energyHub');
   const tSidebar = useTranslations('sidebar');
   const tItems = useTranslations('itemsPage');
@@ -87,69 +67,57 @@ export default function DashboardMantine({
       ? `${(energySummary.kwhThisMonth / 1000).toFixed(1)} MWh`
       : `${energySummary.kwhThisMonth.toFixed(0)} kWh`;
 
-  const renderTiles = (cols: Record<string, number>) => (
-    <SimpleGrid cols={cols} spacing="sm">
-      <StatTile
-        icon={IconPackage}
-        color="datiaBlue"
-        label={t('kpis.totalItems.title')}
-        value={kpis.totalPassports}
-        hint={t('kpis.totalItems.subtitle')}
-      />
-      <StatTile
-        icon={IconCertificate}
-        color="green"
-        label={t('kpis.backupRate.title')}
-        value={`${kpis.backupRate.toFixed(0)}%`}
-        hint={t('kpis.backupRate.subtitle', {
-          backed: kpis.backedPassports,
-          total: kpis.totalPassports,
-        })}
-      />
-      <StatTile
-        icon={IconHistory}
-        color="gray"
-        label={t('kpis.statesThisMonth.title')}
-        value={kpis.statesThisMonth}
-        hint={t('kpis.statesThisMonth.subtitle')}
-      />
-      {energyEnabled && (
-        <>
-          <StatTile
-            icon={IconBolt}
-            color="datiaAmber"
-            label={t('kwhThisMonth')}
-            value={kwhDisplay}
-            hint={`${energySummary.totalSources} ${t('totalSources')}`}
-          />
-          <StatTile
-            icon={IconCloudFog}
-            color="gray"
-            label={t('co2ThisMonth')}
-            value={`${co2Tonnes} t`}
-            hint="CO₂e Scope 2"
-          />
-          <StatTile
-            icon={IconLeaf}
-            color="green"
-            label={t('renewableAvg')}
-            value={
-              energySummary.avgRenewableShare != null
-                ? `${energySummary.avgRenewableShare}%`
-                : '—'
-            }
-            hint={t('renewableSubtitle')}
-          />
-        </>
-      )}
-    </SimpleGrid>
-  );
-
   return (
     <Box px={{ base: 'md', sm: 'xl' }} py="lg" mx="auto" maw={1360}>
       <Title order={2} mb="lg">{tSidebar('home')}</Title>
 
-      {renderTiles({ base: 1, xs: 2, md: 3 })}
+      {/* Three figures, each with the ground it stands on, in place of six
+          standalone numbers that answered no question. */}
+      <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing="md" mb="lg">
+        <TrendStat
+          label={t('stat.tracked')}
+          value={kpis.totalPassports.toLocaleString()}
+          hint={t('stat.trackedHint', {
+            certified: kpis.backedPassports,
+            pending: kpis.pendingPassports,
+          })}
+        />
+        {trend && (
+          <TrendStat
+            label={t('stat.coverage')}
+            value={`${trend.coverage}%`}
+            hint={t('stat.coverageHint', {
+              certified: Math.round((trend.coverage / 100) * trend.totalRecords).toLocaleString(locale),
+              total: trend.totalRecords.toLocaleString(locale),
+            })}
+          />
+        )}
+        {trend?.monthly.length ? (
+          <TrendStat
+            label={t('stat.carbon')}
+            value={(trend.monthly.at(-1)!.co2eKg / 1000).toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            unit="t CO₂e"
+            change={trend.co2eChange}
+            hint={
+              trend.currentMonth
+                ? t('stat.inProgress', { kwh: trend.currentMonth.kwh.toLocaleString() })
+                : undefined
+            }
+          />
+        ) : null}
+      </SimpleGrid>
+
+      {trend && energyEnabled && (
+        <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg" mb="lg">
+          <Box style={{ gridColumn: 'span 2' }}>
+            <CertificationChart data={trend.monthly} />
+          </Box>
+          <ScopeBreakdown
+            slices={trend.byScope}
+            period={`${monthName(trend.from, locale)} – ${monthName(trend.to, locale)}`}
+          />
+        </SimpleGrid>
+      )}
 
       <SimpleGrid cols={{ base: 1, md: energyEnabled ? 2 : 1 }} spacing="lg" mt="lg">
         {recentItems.length > 0 && (
