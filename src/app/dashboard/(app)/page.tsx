@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import DashboardMantine from '../DashboardMantine';
-import { getDashboardKPIs, getEnergySummary } from '@/actions/dashboard';
+import { getDashboardKPIs, getEnergySummary, getCertificationTrend } from '@/actions/dashboard';
 import { getItems } from '@/actions/items';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
@@ -24,11 +24,14 @@ async function isEnergyEnabled(): Promise<boolean> {
 }
 
 export default async function DashboardIndexPage() {
-  const [kpis, energySummary, energyEnabled, items] = await Promise.all([
+  const [kpis, energySummary, energyEnabled, items, trend] = await Promise.all([
     getDashboardKPIs(),
     getEnergySummary(),
     isEnergyEnabled(),
     getItems().catch(() => []),
+    // The series the page is built around; an organisation without the module
+    // simply has none, and the layout falls back to the catalogue.
+    getCertificationTrend().catch(() => undefined),
   ]);
 
   const recentItems = items.slice(0, 5).map((item) => ({
@@ -41,6 +44,7 @@ export default async function DashboardIndexPage() {
   return (
     <DashboardMantine
       kpis={kpis}
+      trend={trend}
       energySummary={energySummary}
       energyEnabled={energyEnabled}
       recentItems={recentItems}

@@ -697,7 +697,31 @@
     "renewableSubtitle": "Media de las fuentes",
     "activity": "Actividad",
     "recentAssets": "Activos recientes",
-    "viewAll": "Ver todos"
+    "viewAll": "Ver todos",
+    "chart": {
+      "title": "Energía y huella de carbono",
+      "subtitle": "Consumo y emisiones por mes cerrado, con su periodo de referencia",
+      "energy": "Energía",
+      "emissions": "CO₂e",
+      "noData": "Todavía no hay lecturas registradas"
+    },
+    "stat": {
+      "vsPrevious": "respecto al mes anterior",
+      "tracked": "Activos en seguimiento",
+      "coverage": "Cobertura de certificación",
+      "carbon": "Huella del último mes",
+      "coverageHint": "{certified} de {total} registros con prueba en cadena",
+      "trackedHint": "{certified} estados certificados · {pending} pendientes",
+      "inProgress": "Mes en curso: {kwh} kWh"
+    },
+    "scope": {
+      "title": "Emisiones por alcance",
+      "subtitle": "Reparto según el Protocolo GHG",
+      "SCOPE_1": "Alcance 1 · directas",
+      "SCOPE_2": "Alcance 2 · electricidad",
+      "SCOPE_3": "Alcance 3 · cadena de valor",
+      "subtitleWithPeriod": "Protocolo GHG · {period}"
+    }
   },
   "itemDetail": {
     "notFound": "Activo no encontrado",
