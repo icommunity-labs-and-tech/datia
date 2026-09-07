@@ -281,7 +281,10 @@ async function main() {
           statusTypeId: typeId[cfg.type],
           title: cfg.title,
           description: `${cfg.title} — ${a.name}`,
-          evidenceID: stateEvidence(),
+          // A pending state has no evidence yet: the real flow writes
+          // 'pending' until iBS answers. Inventing an `evd_` id here made the
+          // confirmation sweep retry a reference iBS rejects with 400, forever.
+          evidenceID: pending ? 'pending' : stateEvidence(),
           backed: !pending,
           backedAt: pending ? null : new Date(when.getTime() + 42 * 60000),
           templateConfig: templateFor(step, a, site, when),

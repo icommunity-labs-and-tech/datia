@@ -7,6 +7,7 @@ import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRep
 import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
 import { EnergyValidationError } from '@/domain/energy/EnergyTypes';
 import { validateConsumptionOwnership } from '../energy/_validate';
+import { anchorEmissionById } from '@/lib/energy/anchor-service';
 
 const schema = z.object({
   energyConsumptionId: z.string(),
@@ -53,7 +54,28 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: record }, { status: 201 });
+    // Certification is the system's job, not the caller's: the record is
+    // anchored as it is written, without a second request asking for it.
+    // Best-effort on purpose — iBS answers in a few hundred milliseconds, and if
+    // it cannot, the reading is still stored and a later sweep anchors it.
+    // Making a client's meter unable to write because a third party is down
+    // would be a worse failure than a proof that arrives late.
+    const anchor = await anchorEmissionById(auth.organizationId, record.id);
+
+    return NextResponse.json(
+      {
+        data: record,
+        certification: anchor?.evidenceID
+          ? {
+              // Issued, not yet on chain: iBS confirms seconds later through the
+              // `evidence.certified` webhook.
+              status: 'pending_anchor',
+              evidenceId: anchor.evidenceID,
+            }
+          : { status: 'pending', reason: anchor?.error ?? 'not_anchored_yet' },
+      },
+      { status: 201 }
+    );
   } catch (err) {
     if (err instanceof EnergyValidationError) {
       return NextResponse.json({ error: err.message }, { status: 422 });

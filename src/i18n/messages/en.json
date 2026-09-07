@@ -1155,7 +1155,7 @@
     "bmsSimulator": {
       "trigger": "Simulate BMS data",
       "title": "BMS Data Simulator",
-      "description": "Generates a full year of realistic BMS (Building Management System) readings for an asset: an electricity source, 12 months of consumption with real seasonality, and its associated CO2e emissions. Useful for validating the energy certification pipeline before connecting a real BMS/IoT device.",
+      "description": "Generates a full year of realistic BMS (Building Management System) readings for an asset: electricity source, 365 daily readings with real seasonality and their associated CO₂e emissions. Useful for validating the energy certification pipeline before connecting a real BMS/IoT feed.",
       "itemLabel": "Asset",
       "itemPlaceholder": "Select an asset",
       "loadingItems": "Loading assets...",
@@ -1221,7 +1221,8 @@
         "progress": "{done} of {total} anchored",
         "legend": "Each month issues its evidence and the chain confirms it seconds later. Green ones are anchored: click to verify them.",
         "legendSelectable": "Each month aggregates its daily readings into a single evidence. Green ones are anchored: click any to inspect it."
-      }
+      },
+      "demoNote": "The demo compresses a year into under a minute and anchors one evidence per month, so the whole cycle can be watched at once. In normal operation the platform certifies each record separately, automatically and without anyone having to ask."
     },
     "navConsumption": "Consumption",
     "navEmissions": "Emissions",
