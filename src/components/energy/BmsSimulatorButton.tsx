@@ -22,6 +22,7 @@ import {
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import {
+  IconInfoCircle,
   IconCpu,
   IconCheck,
   IconAlertCircle,
@@ -306,6 +307,9 @@ export default function BmsSimulatorButton() {
             <Box maw={480}>
               <Stack gap="md">
                 <Text size="sm" c="dimmed">{t('description')}</Text>
+                <Alert variant="light" color="gray" icon={<IconInfoCircle size={16} />}>
+                  <Text size="xs">{t('demoNote')}</Text>
+                </Alert>
                 <Select
                   label={t('itemLabel')}
                   placeholder={loadingItems ? t('loadingItems') : t('itemPlaceholder')}
