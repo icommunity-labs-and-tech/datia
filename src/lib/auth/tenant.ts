@@ -109,26 +109,14 @@ export async function isSuperAdmin(): Promise<boolean> {
   }
 }
 
-// Thread-local storage for API routes
-let apiOrganizationId: string | null = null;
-
-/**
- * Establece el organizationId para el contexto actual (solo para API routes)
- * @internal
- */
-export function setApiOrganizationId(orgId: string | null): void {
-  apiOrganizationId = orgId;
-}
-
 /**
  * Obtiene el organizationId obligatorio (falla si es SUPER_ADMIN sin org especificada)
+ *
+ * Solo lee la sesión de la petición. Las rutas de la API autentican con token y
+ * pasan la organización como parámetro: aquí hubo una variable de módulo para
+ * eso, y la compartían todas las peticiones concurrentes de la instancia (#30).
  */
 export async function requireOrganizationId(): Promise<string> {
-  // Check API context first (for API routes)
-  if (apiOrganizationId) {
-    return apiOrganizationId;
-  }
-  
   const tenant = await getCurrentTenant();
   
   if (!tenant.organizationId) {

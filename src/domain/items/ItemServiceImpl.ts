@@ -3,7 +3,6 @@ import { ItemCreationRollbackError, ItemInputError, ItemAlreadyExistsError, Orga
 import type { ItemRepository } from './ItemRepository';
 import type { UserRepository } from '../users/UserRepository';
 import type { EvidenceService } from '../evidence/EvidenceService';
-import { requireOrganizationId } from '@/lib/auth/tenant';
 import { revalidatePath } from 'next/cache';
 import { createItemWithEvidence } from './ItemCreationHelper';
 
@@ -15,11 +14,8 @@ export function createItemServiceImpl(deps: {
   const { itemRepository: itemRepo, userRepository: userRepo, evidenceService: evidence } = deps;
 
   return {
-    async createItem(data: CreateItemRequest): Promise<ItemResponse> {
+    async createItem(organizationId: string, data: CreateItemRequest): Promise<ItemResponse> {
       try {
-        // Get organizationId from context
-        const organizationId = await requireOrganizationId();
-        
         // 1. Validate policies - check if item already exists
         try {
           const existingItem = await itemRepo.getById(data.customId, organizationId);
@@ -38,6 +34,7 @@ export function createItemServiceImpl(deps: {
         const result = await createItemWithEvidence(
           { itemRepository: itemRepo, userRepository: userRepo, evidenceService: evidence },
           {
+            organizationId,
             id: data.customId,
             name: data.name,
             description: data.description,
@@ -45,6 +42,7 @@ export function createItemServiceImpl(deps: {
             imageUrl: data.imageUrl ?? null,
             templateFields: data.templateFields ?? null,
             itemTemplate: data.itemTemplate ?? [],
+            createdByUserId: data.createdByUserId,
           }
         );
 

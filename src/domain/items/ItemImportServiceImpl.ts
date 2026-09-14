@@ -1,7 +1,6 @@
 import { ItemImportService, type ParsedItemRow, type ItemImportResult, ItemImportValidationError, type ImportItemRow } from './ItemImportService';
 import type { ItemRepository } from './ItemRepository';
 import type { CategoryRepository } from '../categories/CategoryRepository';
-import { requireOrganizationId } from '@/lib/auth/tenant';
 
 export function createItemImportServiceImpl(deps: {
   itemRepository: ItemRepository;
@@ -10,7 +9,7 @@ export function createItemImportServiceImpl(deps: {
   const { itemRepository: itemRepo, categoryRepository: categoryRepo } = deps;
 
   return {
-    async importItemsFromParsedRows(rows: ParsedItemRow[]): Promise<ItemImportResult> {
+    async importItemsFromParsedRows(organizationId: string, rows: ParsedItemRow[]): Promise<ItemImportResult> {
       if (!rows.length) {
         return { createdCount: 0 };
       }
@@ -47,8 +46,6 @@ export function createItemImportServiceImpl(deps: {
           errors
         );
       }
-
-      const organizationId = await requireOrganizationId();
 
       // Check for existing items
       const existingConflicts: string[] = [];

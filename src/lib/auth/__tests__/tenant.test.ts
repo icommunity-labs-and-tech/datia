@@ -91,6 +91,14 @@ describe('requireOrganizationId', () => {
     cookieJar.set('admin-auth-token', 'admin-ok');
     await expect(requireOrganizationId()).resolves.toBe('org-1');
   });
+
+  it('reads only the session, so no organisation can leak between requests', async () => {
+    // It used to return an organisation the API route parked in module state, so
+    // a request with no cookie at all could land on another tenant's data (#30).
+    const tenant = await import('../tenant');
+    expect('setApiOrganizationId' in tenant).toBe(false);
+    await expect(requireOrganizationId()).rejects.toThrow();
+  });
 });
 
 describe('isSuperAdmin', () => {

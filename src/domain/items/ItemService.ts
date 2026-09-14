@@ -13,6 +13,11 @@ export interface CreateItemRequest {
   imageUrl?: string;
   templateFields?: Record<string, any>;
   itemTemplate?: any;
+  /**
+   * Who creates the item. Omitted: the signed-in user. `null`: nobody — an API
+   * token belongs to the organization, not to a person.
+   */
+  createdByUserId?: string | null;
 }
 
 export interface ItemResponse {
@@ -25,6 +30,7 @@ export interface ItemResponse {
 
 export interface ItemService {
   createItem(
+    organizationId: string,
     data: CreateItemRequest
   ): Promise<ItemResponse>;
 }

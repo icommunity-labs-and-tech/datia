@@ -32,6 +32,7 @@ export class ItemImportValidationError extends Error {
 
 export interface ItemImportService {
   importItemsFromParsedRows(
+    organizationId: string,
     rows: ParsedItemRow[],
   ): Promise<ItemImportResult>;
 }
