@@ -2,11 +2,12 @@ import { ItemRepository } from './ItemRepository';
 import { UserRepository } from '../users/UserRepository';
 import { EvidenceService } from '../evidence/EvidenceService';
 import { ItemCreationRollbackError, ItemInputError, OrganizationNotVerifiedError } from './errors';
-import { requireOrganizationId } from '@/lib/auth/tenant';
 import { getCurrentUserWithDetails } from '@/lib/auth/shared/session';
 import { prisma } from '@/lib/prisma';
 
 export interface CreateItemWithEvidenceInput {
+  /** Always passed in: never read from ambient request state (#30). */
+  organizationId: string;
   id: string;
   name: string;
   description: string;
@@ -14,7 +15,8 @@ export interface CreateItemWithEvidenceInput {
   imageUrl?: string | null;
   templateFields?: Record<string, any> | null;
   itemTemplate?: any[];
-  createdByUserId?: string; // Opcional, si no se proporciona se obtiene del contexto
+  /** Omitted: the signed-in user. `null`: no creator (API calls). */
+  createdByUserId?: string | null;
 }
 
 export interface CreateItemWithEvidenceResult {
@@ -40,12 +42,11 @@ export async function createItemWithEvidence(
 ): Promise<CreateItemWithEvidenceResult> {
   const { itemRepository: itemRepo, userRepository: userRepo, evidenceService: evidence } = deps;
 
-  // Get organizationId from context
-  const organizationId = await requireOrganizationId();
+  const { organizationId } = input;
 
   // Get current user if not provided
   let userId = input.createdByUserId;
-  if (!userId) {
+  if (userId === undefined) {
     const currentUser = await getCurrentUserWithDetails();
     if (!currentUser?.id) {
       throw new ItemInputError('name', 'No se pudo obtener el usuario actual');

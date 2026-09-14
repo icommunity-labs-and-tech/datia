@@ -1,5 +1,6 @@
 'use server';
 
+import { requireOrganizationId } from '@/lib/auth/tenant';
 import { createItemImportServiceImpl } from '@/domain/items/ItemImportServiceImpl';
 import { ItemImportValidationError, type ParsedItemRow } from '@/domain/items/ItemImportService';
 import { parseCsv } from '@/lib/csv';
@@ -38,7 +39,7 @@ export async function importItemsFromCsv(formData: FormData): Promise<ImportItem
       itemRepository,
       categoryRepository,
     });
-    const result = await itemImportService.importItemsFromParsedRows(rows);
+    const result = await itemImportService.importItemsFromParsedRows(await requireOrganizationId(), rows);
     return {
       success: true,
       createdCount: result.createdCount,

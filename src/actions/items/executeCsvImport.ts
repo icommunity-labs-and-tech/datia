@@ -180,6 +180,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
         await createItemWithEvidence(
           { itemRepository, userRepository, evidenceService },
           {
+            organizationId,
             id: row.id.trim(),
             name: row.name.trim(),
             description: row.description || '',

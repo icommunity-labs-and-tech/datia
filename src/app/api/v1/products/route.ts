@@ -334,17 +334,12 @@ export async function POST(request: NextRequest) {
       evidenceService,
     });
 
-    // Set organizationId context for this API request
-    const { setApiOrganizationId } = await import('@/lib/auth/tenant');
-    setApiOrganizationId(organizationId);
-
-    try {
-      const result = await itemService.createItem(createRequest);
-      return NextResponse.json(result, { status: 201 });
-    } finally {
-      // Clear API context after request
-      setApiOrganizationId(null);
-    }
+    // The organization comes from the token and travels with the call. It used
+    // to be parked in module state for the length of the request, where every
+    // concurrent request on the instance read it as its own (#30). A token has
+    // no person behind it, so the item has no creator.
+    const result = await itemService.createItem(organizationId, { ...createRequest, createdByUserId: null });
+    return NextResponse.json(result, { status: 201 });
   } catch (error) {
     // Map domain errors to HTTP responses
     if (error instanceof ItemInputError) {

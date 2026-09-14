@@ -60,6 +60,8 @@ export async function addItem(
       itemTemplate: templateFields || []
     };
 
+    const organizationId = await requireOrganizationId();
+
     // Build services
     const evidenceService = createEvidenceServiceImpl({ icommunityService });
     const itemService = createItemServiceImpl({
@@ -68,12 +70,11 @@ export async function addItem(
       evidenceService,
     });
 
-    const result = await itemService.createItem(request);
+    const result = await itemService.createItem(organizationId, request);
     
     // Emit event asynchronously (fire and forget)
     (async () => {
       try {
-        const organizationId = await requireOrganizationId();
         await eventRepository.create(organizationId, {
           eventType: 'item.created',
           entityType: 'item',
