@@ -2,6 +2,11 @@
 
 Documenta la estructura de evidencia utilizada para certificar registros de emisiones de CO₂ en la plataforma Datia, y el proceso de verificación que permite probar que los datos originales no han sido modificados tras la certificación.
 
+> **Septiembre de 2026:** las emisiones ya no esperan a `POST /certify`: se
+> certifican solas al escribirse. El flujo nuevo, los webhooks y lo que
+> queda pendiente están en [CERTIFICACION_AUTOMATICA.md](./CERTIFICACION_AUTOMATICA.md).
+> La estructura de la evidencia y la verificación de este documento siguen vigentes.
+
 ---
 
 ## 1. Contexto
