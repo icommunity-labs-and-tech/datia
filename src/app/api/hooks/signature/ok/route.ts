@@ -1,13 +1,5 @@
-import { NextResponse } from 'next/server';
-import { applySignatureStatusFromWebhook } from '@/lib/icommunity';
+import { handleSignatureWebhook } from '../handler';
 
 export async function POST(request: Request) {
-  try {
-    const body = await request.json();
-    await applySignatureStatusFromWebhook('ok', body);
-    return NextResponse.json({ success: true });
-  } catch (e) {
-    console.log("webhook signature ok: ", e)
-    return NextResponse.json({ success: false }, { status: 500 });
-  }
+  return handleSignatureWebhook(request);
 }

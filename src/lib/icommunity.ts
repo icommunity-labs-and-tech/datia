@@ -45,18 +45,7 @@ export interface ICommunityClient {
   createSignature(signatureName: string, okUrl?: string, koUrl?: string): Promise<{ signature_id: string; url?: string }>;
   retrySignature(signatureID: string): Promise<{ url?: string }>;
   createEvidence(signatureID: string, title: string, files: EvidenceFile[]): Promise<string>;
-  applySignatureStatusFromWebhook(status: 'ok' | 'ko', body: SignatureWebhookPayload): Promise<void>;
-  applyEvidenceCertifiedWebhook(body: EvidenceCertifiedWebhookPayload): Promise<void>;
 }
-
-export type SignatureWebhookPayload = {
-  data?: { signature_id?: string };
-  signature_id?: string;
-};
-
-export type EvidenceCertifiedWebhookPayload = {
-  data?: { evidence_id?: string; certification_timestamp?: string };
-};
 
 class CommunityApiClient implements ICommunityClient {
   async createSignature(signatureName: string, okUrl?: string, koUrl?: string): Promise<{ signature_id: string; url?: string }> {
@@ -100,30 +89,6 @@ class CommunityApiClient implements ICommunityClient {
     });
     return res.evidence_id || res.id || '';
   }
-
-  async applySignatureStatusFromWebhook(status: 'ok' | 'ko', body: SignatureWebhookPayload): Promise<void> {
-    const signatureId: string | undefined = body?.data?.signature_id || body?.signature_id;
-    if (!signatureId) throw new Error('signature_id missing in webhook payload');
-    const verificationStatus = status === 'ok' ? 'VERIFIED' : 'REJECTED';
-    // Update organization instead of user
-    await prisma.organization.updateMany({
-      where: { signatureID: signatureId },
-      data: { verificationStatus },
-    });
-  }
-
-  async applyEvidenceCertifiedWebhook(body: EvidenceCertifiedWebhookPayload): Promise<void> {
-    const evidenceId: string | undefined = body?.data?.evidence_id;
-    const ts: string | undefined = body?.data?.certification_timestamp;
-    if (!evidenceId) throw new Error('evidence_id missing in webhook payload');
-    await prisma.state.updateMany({
-      where: { evidenceID: evidenceId },
-      data: {
-        backed: true,
-        backedAt: ts ? new Date(ts) : new Date(),
-      },
-    });
-  }
 }
 
 let currentClient: ICommunityClient | null = null;
@@ -145,14 +110,3 @@ export async function createEvidence(signatureID: string, title: string, files: 
   const client = await getICommunityClient();
   return client.createEvidence(signatureID, title, files);
 }
-export async function applySignatureStatusFromWebhook(status: 'ok' | 'ko', body: SignatureWebhookPayload) {
-  const client = await getICommunityClient();
-  return client.applySignatureStatusFromWebhook(status, body);
-}
-
-export async function applyEvidenceCertifiedWebhook(body: EvidenceCertifiedWebhookPayload) {
-  const client = await getICommunityClient();
-  return client.applyEvidenceCertifiedWebhook(body);
-}
-
-

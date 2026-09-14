@@ -1,4 +1,4 @@
-import { ICommunityService, type EvidenceFile, type EvidenceData } from './ICommunityService';
+import { ICommunityService, type EvidenceFile, type EvidenceData, type SignatureData } from './ICommunityService';
 import { ICommunityConfigError, ICommunityHTTPError } from './errors';
 
 const BASE_URL = 'https://api.icommunitylabs.com/v2';
@@ -42,7 +42,7 @@ async function request<T>(path: string, init: RequestInit): Promise<T> {
 }
 
 async function requestWithRetry<T>(
-  operation: 'createEvidence' | 'createSignature' | 'retrySignature' | 'getEvidence',
+  operation: 'createEvidence' | 'createSignature' | 'retrySignature' | 'getEvidence' | 'getSignature',
   fn: () => Promise<T>,
   maxRetries: number = 3
 ): Promise<T> {
@@ -194,6 +194,29 @@ export function createICommunityService(): ICommunityService {
           }
           throw new ICommunityHTTPError(
             'getEvidence',
+            `Unexpected error: ${error}`
+          );
+        }
+      });
+    },
+
+    async getSignature(signatureId: string): Promise<SignatureData> {
+      return requestWithRetry('getSignature', async () => {
+        try {
+          // The id can come from a webhook body: encode it so it stays one path segment.
+          return await request<SignatureData>(`/signatures/${encodeURIComponent(signatureId)}`, { method: 'GET' });
+        } catch (error) {
+          if (error instanceof ICommunityConfigError) throw error;
+          if (error instanceof ICommunityHTTPError) {
+            throw new ICommunityHTTPError(
+              'getSignature',
+              error.message,
+              error.status,
+              error.response
+            );
+          }
+          throw new ICommunityHTTPError(
+            'getSignature',
             `Unexpected error: ${error}`
           );
         }

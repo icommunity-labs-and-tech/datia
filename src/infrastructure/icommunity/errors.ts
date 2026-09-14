@@ -8,7 +8,7 @@ export class ICommunityConfigError extends Error {
 
 export class ICommunityHTTPError extends Error {
   readonly _tag = 'ICommunityHTTPError';
-  constructor(public readonly operation: 'createEvidence' | 'createSignature' | 'retrySignature' | 'getEvidence', message: string, public readonly status?: number, public readonly response?: unknown) {
+  constructor(public readonly operation: 'createEvidence' | 'createSignature' | 'retrySignature' | 'getEvidence' | 'getSignature', message: string, public readonly status?: number, public readonly response?: unknown) {
     super(message);
     this.name = 'ICommunityHTTPError';
   }

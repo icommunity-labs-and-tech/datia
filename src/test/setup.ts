@@ -75,8 +75,6 @@ global.fetch = vi.fn();
 
 // Mock iCommunity client by default to avoid real prisma and network in route tests
 vi.mock('@/lib/icommunity', () => ({
-  applySignatureStatusFromWebhook: vi.fn(async () => {}),
-  applyEvidenceCertifiedWebhook: vi.fn(async () => {}),
 }));
 
 // Console error suppression for tests
