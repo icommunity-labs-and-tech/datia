@@ -1,0 +1,105 @@
+# Certificación automática de emisiones
+
+Desde septiembre de 2026 cada registro de emisión se certifica solo, en el
+momento en que se escribe. Antes era una segunda llamada explícita
+(`POST /api/v1/emissions/:id/certify`), y eso dejaba la trazabilidad en manos de
+quien integraba: unos registros certificados, otros no, sin que el sistema lo
+dijera. Ese endpoint sigue existiendo; lo que describe
+[EVIDENCE_AUDIT_MODEL.md](./EVIDENCE_AUDIT_MODEL.md) sobre la estructura de la
+evidencia y la verificación sigue siendo válido.
+
+## Decisiones
+
+- **Una evidencia por registro.** El volumen de hoy es pequeño y el coste por
+  evidencia, despreciable. No hay agregación diaria ni mensual en producción.
+- **Sin programador de tareas.** Un 201 de `POST /v2/evidences` es el compromiso
+  de iBS de que la evidencia se certificará: no hay que sondear. La transacción
+  llega segundos después e iBS avisa por webhook.
+- **La ingesta no espera a iBS.** Si iBS no responde, el registro se guarda
+  igualmente y queda pendiente. Que el contador de un cliente no pueda escribir
+  porque un tercero está caído sería un fallo mayor que una prueba que llega
+  tarde.
+
+## Flujo
+
+```
+Cliente            Datia                                  iBS
+  │─POST /api/v1/emissions─▶│                               │
+  │                         │ guarda EmissionRecord          │
+  │                         │ crea State (evidenceID 'pending', backed=false)
+  │                         │─POST /v2/evidences────────────▶│
+  │                         │◀─201 {evidenceID}─────────────│
+  │                         │ State.evidenceID = evidenceID  │
+  │◀─201 certification:     │                               │
+  │   pending_anchor        │                               │
+  │                         │        (unos 10–15 s después)  │
+  │                         │◀─webhook evidence.certified───│
+  │                         │─GET /v2/evidences/{id}────────▶│
+  │                         │◀─status certified, hash, red──│
+  │                         │ State backed=true + hash, red, │
+  │                         │ enlaces al checker y explorador│
+  │                         │ EmissionRecord VERIFIED        │
+  │                         │ EventLog co2_certification_event
+```
+
+El registro solo pasa a `VERIFIED` cuando la transacción está en cadena, no al
+recibir el 201.
+
+La respuesta de `POST /api/v1/emissions` lleva el estado de la certificación:
+
+| `certification` | Significa |
+|---|---|
+| `{ status: 'pending_anchor', evidenceId }` | Evidencia emitida; falta la confirmación de iBS |
+| `{ status: 'pending', reason: '<error>' }` | iBS falló; el `State` provisional se borra y el registro queda pendiente |
+| `{ status: 'pending', reason: 'not_anchored_yet' }` | La organización no puede firmar: sin `signatureID` o sin `verificationStatus = VERIFIED` |
+
+## Webhooks registrados en iBS
+
+Registrados en septiembre de 2026, con el PR #16, en la **cuenta de iBS que comparte con certypass**
+(ver issue #27). Al migrar Datia a su propia cuenta hay que volver a crearlos
+allí.
+
+| ID | Evento | Destino |
+|---|---|---|
+| `whk_BxipBpYmpjpWrgeUvg47Pn` | `evidence.certified` | `https://datia.icommunitylabs.com/api/hooks/evidence` |
+| `whk_Ljq3YzjsJjcMpPmSHeWW6h` | `signature.verification.success` | `https://datia.icommunitylabs.com/api/hooks/signature/ok` |
+| `whk_LpFUYUt2TdpMp975cDvZNd` | `signature.verification.failed` | `https://datia.icommunitylabs.com/api/hooks/signature/ko` |
+
+En esa misma cuenta existe `whk_hifo7df26EiAxqRKWo7CN3`, que es de certypass: no
+se toca.
+
+La API de webhooks (`GET/POST /v2/webhooks` con `{ name, url, events }`) no está
+en la documentación pública de iBS.
+
+### Qué se fía cada ruta
+
+- `/api/hooks/evidence` **no se fía del cuerpo**: solo toma el
+  `data.evidence_id` y vuelve a pedir la evidencia a iBS antes de marcar nada.
+  Un POST falso como mucho provoca una consulta.
+- `/api/hooks/signature/ok` y `/ko` **sí se fían del cuerpo** y no autentican
+  la llamada. Pendiente en la issue #33.
+
+## Reparación
+
+`src/lib/energy/anchor-service.ts` expone dos barridos para lo que se quede
+atrás: `anchorPendingEmissions` (registros que no llegaron a anclarse) y
+`confirmAnchoredEvidences` (evidencias cuyo webhook no llegó). Hoy **nada los
+dispara**: están envueltos en las acciones de `src/actions/energy/anchor-pending.ts`
+pero sin llamador. Pendiente en la issue #34.
+
+## El simulador BMS es otra cosa
+
+El simulador del Energy Hub es solo para demostraciones. Genera lecturas
+diarias y emite **una evidencia mensual agregada** (`emissionRecordIds` en el
+`templateConfig`) para que un año quepa en unos 30 segundos. No refleja cómo
+certifica la plataforma en producción, y el aviso del propio modal lo dice.
+
+## Ficheros
+
+| Fichero | Qué hace |
+|---|---|
+| `src/lib/energy/anchor-service.ts` | Anclaje por registro, barridos y `applyCertification` |
+| `src/app/api/v1/emissions/route.ts` | Ingesta; ancla tras guardar |
+| `src/app/api/hooks/evidence/route.ts` | Recibe `evidence.certified` |
+| `src/app/api/v1/emissions/__tests__/create.test.ts` | Ingesta y anclaje |
+| `src/app/api/hooks/evidence/__tests__/route.test.ts` | Webhook de evidencias |
