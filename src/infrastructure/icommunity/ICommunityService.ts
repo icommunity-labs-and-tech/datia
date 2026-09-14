@@ -33,6 +33,19 @@ export interface EvidenceData {
   certification?: EvidenceCertification;
 }
 
+/**
+ * Where a signature's KYC flow stands. Only `success` and `failed` are outcomes;
+ * `created` and `pending` mean the person has not finished yet.
+ */
+export type SignatureStatus = 'created' | 'pending' | 'success' | 'failed' | (string & {});
+
+export interface SignatureData {
+  id: string;
+  name?: string;
+  status?: SignatureStatus;
+  created_at?: string;
+}
+
 export interface ICommunityService {
   createEvidence(
     signatureID: string,
@@ -50,4 +63,7 @@ export interface ICommunityService {
   getEvidence(
     evidenceId: string
   ): Promise<EvidenceData>;
+  getSignature(
+    signatureId: string
+  ): Promise<SignatureData>;
 }
