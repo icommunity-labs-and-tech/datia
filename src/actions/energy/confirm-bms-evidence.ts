@@ -1,7 +1,7 @@
 'use server';
 
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import { prisma } from '@/lib/prisma';
 
@@ -121,7 +121,7 @@ async function readOne(evidenceID: string, organizationId: string): Promise<BmsE
       .catch(() => null);
   }
 
-  await eventRepository.create(organizationId, {
+  await recordEvent(organizationId, {
     eventType: 'co2_certification_event',
     entityType: 'State',
     entityId: state.id,

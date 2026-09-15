@@ -8,7 +8,7 @@ import { ItemInputError, ItemAlreadyExistsError, OrganizationNotVerifiedError, I
 import type { FormTemplate } from '@/components/GenericTable';
 import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 
 // Helper para bypass de auth en tests
@@ -75,7 +75,7 @@ export async function addItem(
     // Emit event asynchronously (fire and forget)
     (async () => {
       try {
-        await eventRepository.create(organizationId, {
+        await recordEvent(organizationId, {
           eventType: 'item.created',
           entityType: 'item',
           entityId: result.id,

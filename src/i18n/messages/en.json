@@ -931,7 +931,7 @@
         "eventsHelp": "Select the events this webhook will subscribe to",
         "secretLabel": "Secret (optional)",
         "secretPlaceholder": "Secret to verify requests",
-        "secretHelp": "Will be used to generate the HMAC-SHA256 signature in the X-Webhook-Signature header",
+        "secretHelp": "Signs every delivery: the X-Webhook-Signature header carries sha256= and the HMAC-SHA256 of \"timestamp.body\", with the timestamp from X-Webhook-Timestamp",
         "headersLabel": "Custom headers (optional JSON)",
         "headersPlaceholder": "{'Authorization': 'Bearer token', 'X-Custom-Header': 'value'}",
         "headersHelp": "Additional headers to include in each request (JSON format)",

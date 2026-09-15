@@ -4,7 +4,7 @@ import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { EnergyValidationError } from '@/domain/energy/EnergyTypes';
 import { validateSourceOwnership } from '../_validate';
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest) {
       periodEnd: new Date(parsed.data.periodEnd),
     });
 
-    await eventRepository.create(auth.organizationId, {
+    await recordEvent(auth.organizationId, {
       eventType: 'energy_consumption_event',
       entityType: 'EnergyConsumption',
       entityId: record.id,

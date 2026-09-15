@@ -10,7 +10,7 @@ import { ICommunityConfigError, ICommunityHTTPError } from '@/infrastructure/ico
 import { stateRepository } from '@/infrastructure/prisma/repositories/StateRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { statusTypeRepository } from '@/infrastructure/prisma/repositories/StatusTypeRepositoryPrisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 
 export async function createState(data: {
@@ -51,7 +51,7 @@ export async function createState(data: {
     (async () => {
       try {
         const organizationId = await requireOrganizationId();
-        await eventRepository.create(organizationId, {
+        await recordEvent(organizationId, {
           eventType: 'state.created',
           entityType: 'state',
           entityId: result.id,

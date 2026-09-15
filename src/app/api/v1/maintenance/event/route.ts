@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { prisma } from '@/lib/prisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { randomUUID } from 'crypto';
 
 const schema = z.object({
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  await eventRepository.create(auth.organizationId, {
+  await recordEvent(auth.organizationId, {
     eventType: 'maintenance_event',
     entityType: 'State',
     entityId: state.id,
