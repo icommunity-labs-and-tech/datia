@@ -46,6 +46,16 @@ Lista completa de variables de entorno necesarias para el proyecto.
 
 ---
 
+#### [MIGRACIONES.md](./MIGRACIONES.md)
+Cómo se crean y se aplican las migraciones de base de datos. El despliegue no las aplica.
+
+**Contiene:**
+- Lo que no se hace nunca contra producción (`prisma db push`, SQL a mano)
+- Procedimiento para aplicar una migración antes de mergear
+- Estado del historial tras ponerlo al día (septiembre de 2026)
+
+---
+
 ### 🚀 Features Implementadas
 
 #### [ADMIN_ITEM_EVIDENCE_FEATURE.md](./ADMIN_ITEM_EVIDENCE_FEATURE.md)
@@ -122,6 +132,7 @@ Evaluación técnica del estado del proyecto y recomendaciones de mantenimiento.
 
 **Configuración:**
 - [Variables de Entorno](./ENVIRONMENT_VARIABLES.md)
+- [Migraciones](./MIGRACIONES.md)
 
 **Features:**
 - [Admin Item Evidence](./ADMIN_ITEM_EVIDENCE_FEATURE.md)
