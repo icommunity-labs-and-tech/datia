@@ -22,9 +22,16 @@ const ORG_SLUG = 'datia';
  */
 const DEMO_ADMIN = {
   email: 'demo@datia.icommunitylabs.com',
-  password: process.env.DEMO_ADMIN_PASSWORD || 'DatiaDemo2026!',
+  // Not committed: it used to live here in clear and is still in the history.
+  password: process.env.DEMO_ADMIN_PASSWORD,
   name: 'Equipo Demo',
 };
+
+if (!DEMO_ADMIN.password) {
+  console.error('❌ Falta DEMO_ADMIN_PASSWORD: la contraseña de la cuenta de demostración ya no está en el repositorio.');
+  process.exit(1);
+}
+
 /** Stock-photo placeholders carried by the sample data. */
 const PLACEHOLDER_IMAGE = /picsum\.photos|placehold|via\.placeholder/i;
 
@@ -148,7 +155,7 @@ async function main() {
       },
     });
   }
-  console.log(`✅ Cuenta de demostración: ${DEMO_ADMIN.email} / ${DEMO_ADMIN.password}`);
+  console.log(`✅ Cuenta de demostración: ${DEMO_ADMIN.email}`);
 
   // ── 2. Assets: catalogue identities and imagery ───────────────────────────
   const items = await prisma.item.findMany({

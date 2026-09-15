@@ -15,7 +15,9 @@ const DIR = path.join('test-results', 'informe');
 const VIEWPORT = { width: 1440, height: 900 };
 
 const EMAIL = 'demo@datia.icommunitylabs.com';
-const PASSWORD = 'DatiaDemo2026!';
+// Same variable the demo seed reads; never committed.
+const PASSWORD = process.env.DEMO_ADMIN_PASSWORD ?? '';
+test.skip(!PASSWORD, 'DEMO_ADMIN_PASSWORD no está definida');
 
 /** Asset with the fullest history, used for the detail figure. */
 const FEATURED = '0739710e-f95d-55c3-8364-97e59c204517';
