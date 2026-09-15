@@ -1259,5 +1259,25 @@
     "events": "Eventos",
     "webhooks": "Webhooks",
     "auth": "Autenticación"
+  },
+  "support": {
+    "menuItem": "Contactar con soporte",
+    "title": "Contactar con soporte",
+    "intro": "Cuéntanos qué ha pasado o qué necesitas. El equipo de Datia recibirá tu mensaje junto con la página en la que estás.",
+    "subject": "Asunto",
+    "subjectPlaceholder": "Por ejemplo: no puedo certificar un activo",
+    "message": "Mensaje",
+    "messagePlaceholder": "Describe el problema con el mayor detalle posible",
+    "send": "Enviar",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "sentTitle": "Mensaje enviado",
+    "sentDescription": "Lo hemos recibido. El equipo de soporte lo revisará.",
+    "errors": {
+      "required": "Escribe un asunto y un mensaje.",
+      "tooLong": "El asunto o el mensaje son demasiado largos.",
+      "unauthorized": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
+      "unexpected": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+    }
   }
 }

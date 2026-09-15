@@ -25,3 +25,10 @@ export interface CreateSupportMessageInput {
   message: string;
   page: string | null;
 }
+
+/** Upper bounds for what a user can send, enforced by the form and the action. */
+export const SUPPORT_MESSAGE_LIMITS = {
+  subject: 150,
+  message: 5000,
+  page: 500,
+} as const;

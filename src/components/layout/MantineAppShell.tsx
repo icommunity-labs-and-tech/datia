@@ -28,9 +28,11 @@ import {
   IconSettings,
   IconCode,
   IconChevronDown,
+  IconLifebuoy,
 } from '@tabler/icons-react';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import DatiaNavbar from './DatiaNavbar';
+import SupportMessageModal from '@/components/support/SupportMessageModal';
 import Logo from '@/components/Logo';
 import type { OrgModules } from '@/app/dashboard/(app)/layout';
 
@@ -60,6 +62,8 @@ export default function DatiaAppShell({
 }: MantineAppShellProps) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure(false);
   const tSidebar = useTranslations('sidebar');
+  const tSupport = useTranslations('support');
+  const [supportOpened, { open: openSupport, close: closeSupport }] = useDisclosure(false);
   const tEnergy = useTranslations('energyHub');
   const locale = useLocale();
   const router = useRouter();
@@ -242,6 +246,12 @@ export default function DatiaAppShell({
                   >
                     {tSidebar('settings')}
                   </Menu.Item>
+                  <Menu.Item
+                    onClick={openSupport}
+                    leftSection={<IconLifebuoy size={16} stroke={1.6} />}
+                  >
+                    {tSupport('menuItem')}
+                  </Menu.Item>
                   <Menu.Divider />
                   <Menu.Item
                     color="red"
@@ -287,6 +297,8 @@ export default function DatiaAppShell({
           )}
         </AppShell.Main>
       </AppShell>
+
+      <SupportMessageModal opened={supportOpened} onClose={closeSupport} />
     </>
   );
 }
