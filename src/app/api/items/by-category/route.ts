@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSessionOrganization } from '@/lib/api/require-session';
 import { getItemsByCategory } from '@/actions/items';
 
 export async function GET(request: NextRequest) {
+  const session = await requireSessionOrganization();
+  if (session instanceof NextResponse) return session;
+
   try {
     const { searchParams } = new URL(request.url);
     const categoryId = (searchParams.get('categoryId') || '').trim();
