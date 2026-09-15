@@ -76,16 +76,20 @@ en la documentación pública de iBS.
 - `/api/hooks/evidence` **no se fía del cuerpo**: solo toma el
   `data.evidence_id` y vuelve a pedir la evidencia a iBS antes de marcar nada.
   Un POST falso como mucho provoca una consulta.
-- `/api/hooks/signature/ok` y `/ko` **sí se fían del cuerpo** y no autentican
-  la llamada. Pendiente en la issue #33.
+- `/api/hooks/signature/ok` y `/ko` tampoco se fían del cuerpo: toman la
+  `signature_id`, piden la firma a iBS (`GET /v2/signatures/{id}`) y solo
+  aplican `success` o `failed` si la id que devuelve iBS coincide (#33).
 
-## Reparación
+## Si algo se queda atrás
 
-`src/lib/energy/anchor-service.ts` expone dos barridos para lo que se quede
-atrás: `anchorPendingEmissions` (registros que no llegaron a anclarse) y
-`confirmAnchoredEvidences` (evidencias cuyo webhook no llegó). Hoy **nada los
-dispara**: están envueltos en las acciones de `src/actions/energy/anchor-pending.ts`
-pero sin llamador. Pendiente en la issue #34.
+No hay barridos ni tareas programadas: se decidió así en septiembre de 2026
+(#34). La certificación se apoya en los webhooks de iBS. Si un registro queda
+pendiente porque iBS falló al ingerirlo, o si un webhook no llega, la
+discrepancia se corrige a mano.
+
+`src/lib/energy/anchor-service.ts` conserva `anchorPendingEmissions` y
+`confirmAnchoredEvidences`, envueltos en `src/actions/energy/anchor-pending.ts`,
+pero nada los llama. Se revisarán en la limpieza de #24.
 
 ## El simulador BMS es otra cosa
 
