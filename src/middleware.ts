@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { routing } from './i18n/routing';
-
-const ADMIN_JWT_SECRET = process.env.DASHBOARD_JWT_SECRET || process.env.JWT_SECRET || 'fallback-admin-secret';
+import { getAdminJwtSecret } from './lib/auth/admin/config';
 
 function getLocale(request: NextRequest): string {
   const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
@@ -32,7 +31,8 @@ function getLocale(request: NextRequest): string {
 
 async function verifyAdminJWT(token: string) {
   try {
-    const secret = new TextEncoder().encode(ADMIN_JWT_SECRET);
+    // Throws in production without a secret; the catch below then denies the session.
+    const secret = new TextEncoder().encode(getAdminJwtSecret());
     const { payload } = await jwtVerify(token, secret, {
       issuer: 'datia-admin',
       audience: 'datia-dashboard',
@@ -60,7 +60,6 @@ export async function middleware(request: NextRequest) {
     '/api/auth/admin',
     '/favicon.ico',
     '/_next',
-    '/api/webhooks',
     '/api/docs',
     '/api/v1/docs',
     '/customer',
