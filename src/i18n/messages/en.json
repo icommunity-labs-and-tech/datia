@@ -1259,5 +1259,25 @@
     "events": "Events",
     "webhooks": "Webhooks",
     "auth": "Authentication"
+  },
+  "support": {
+    "menuItem": "Contact support",
+    "title": "Contact support",
+    "intro": "Tell us what happened or what you need. The Datia team will receive your message along with the page you are on.",
+    "subject": "Subject",
+    "subjectPlaceholder": "For example: I cannot certify an asset",
+    "message": "Message",
+    "messagePlaceholder": "Describe the problem in as much detail as you can",
+    "send": "Send",
+    "cancel": "Cancel",
+    "close": "Close",
+    "sentTitle": "Message sent",
+    "sentDescription": "We have received it. The support team will review it.",
+    "errors": {
+      "required": "Write a subject and a message.",
+      "tooLong": "The subject or the message is too long.",
+      "unauthorized": "Your session has expired. Please sign in again.",
+      "unexpected": "The message could not be sent. Please try again."
+    }
   }
 }
