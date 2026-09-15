@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
+import { requireSessionOrganization } from '@/lib/api/require-session';
 import { getBackupStatus } from '@/actions/dashboard';
 
 export async function GET() {
+  const session = await requireSessionOrganization();
+  if (session instanceof NextResponse) return session;
+
   try {
     const backupData = await getBackupStatus();
     return NextResponse.json(backupData);

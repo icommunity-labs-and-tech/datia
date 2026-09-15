@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getStorage } from '@/lib/storage';
 import { MAX_EVIDENCE_BYTES } from '@/lib/evidenceUtils';
 import { getDynamicAppUrl } from '@/lib/env';
-import { requireOrganizationId, TenantContextNotFoundError } from '@/lib/auth/tenant';
+import { requireSessionOrganization } from '@/lib/api/require-session';
 
 const LIMIT_BYTES = MAX_EVIDENCE_BYTES;
 
@@ -18,14 +18,8 @@ async function getSizeFromUrl(url: string): Promise<number> {
 export async function POST(req: NextRequest) {
   // Only the dashboard asks for this estimate. Without a session anyone could make
   // the server send requests to URLs of their choosing.
-  try {
-    await requireOrganizationId();
-  } catch (e) {
-    if (e instanceof TenantContextNotFoundError) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-    throw e;
-  }
+  const session = await requireSessionOrganization();
+  if (session instanceof NextResponse) return session;
 
   try {
     const { imageUrls = [], description = '' } = await req.json();

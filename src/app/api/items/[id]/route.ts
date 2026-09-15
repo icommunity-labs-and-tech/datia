@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { requireSessionOrganization } from '@/lib/api/require-session';
 import { getItem } from '@/actions/items';
 import { decodeUrlParam } from '@/lib/api/decode-param';
 
@@ -6,6 +7,9 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const session = await requireSessionOrganization();
+  if (session instanceof NextResponse) return session;
+
   try {
     const { id: rawId } = await params;
     const id = decodeUrlParam(rawId);

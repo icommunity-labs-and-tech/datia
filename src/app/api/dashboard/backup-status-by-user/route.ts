@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server';
+import { requireSessionOrganization } from '@/lib/api/require-session';
 import { getBackupStatusByUser } from '@/actions/states';
 
 export async function GET(request: Request) {
+  const session = await requireSessionOrganization();
+  if (session instanceof NextResponse) return session;
+
   try {
     const { searchParams } = new URL(request.url);
     const raw = Number(searchParams.get('months'));
