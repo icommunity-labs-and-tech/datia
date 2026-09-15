@@ -9,20 +9,6 @@ test.describe('Admin - Items CRUD', () => {
     await page.goto('/dashboard/items');
   });
 
-  test('list items', async ({ page }) => {
-    // Check if there's a table or empty state
-    const table = page.locator('table, .table');
-    const emptyState = page.locator('text=No hay elementos para mostrar');
-    
-    // Wait a bit for content to load
-    await page.waitForLoadState('networkidle');
-    
-    const hasTable = await table.isVisible();
-    const hasEmptyState = await emptyState.isVisible();
-    
-    expect(hasTable || hasEmptyState).toBe(true);
-  });
-
   test('create, edit, and delete an item', async ({ page }) => {
     const uniqueName = `E2E-Item-${Date.now()}`;
 

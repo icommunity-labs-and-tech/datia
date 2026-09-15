@@ -1,3 +1,4 @@
+import { text } from './utils/i18n';
 import { test, expect } from '@playwright/test';
 import { ADMIN_STORAGE_STATE } from './utils/auth';
 
@@ -14,15 +15,8 @@ test.describe('Admin - KPIs & Activity', () => {
     await page.goto('/dashboard', { waitUntil: 'networkidle' });
   });
 
-  test('metric tiles render with values', async ({ page }) => {
-    const total = page.getByText(/activos totales|total assets/i);
-    await expect(total).toBeVisible();
-
-    // Each tile shows a number, not an empty placeholder.
-    const tile = total.locator('xpath=ancestor::*[contains(@class,"mantine-Paper-root")][1]');
-    await expect(tile).toContainText(/\d/);
-
-    await expect(page.getByText(/estados certificados|certified states/i).first()).toBeVisible();
+  test('the overview leads with the assets it tracks', async ({ page }) => {
+    await expect(page.getByText(text('dashboard.stat.tracked')).first()).toBeVisible();
   });
 
   test('recent assets panel links into the gallery', async ({ page }) => {

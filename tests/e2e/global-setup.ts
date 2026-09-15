@@ -9,9 +9,13 @@ export default async function globalSetup() {
 
   if (isSqlite && shouldReset) {
     try {
-      // Remove existing sqlite file if present to force a clean start
+      // Remove existing sqlite file if present to force a clean start. Prisma
+      // resolves a relative `file:` URL against the schema's folder, not the
+      // working directory: `file:./playwright-e2e.db` is prisma/playwright-e2e.db.
+      // Deleting it relative to cwd removed nothing, and the push then failed on
+      // whatever stale database was already there.
       const dbPath = (process.env.E2E_SQLITE_URL || '').replace('file:', '') || 'playwright-e2e.db';
-      const abs = path.isAbsolute(dbPath) ? dbPath : path.join(process.cwd(), dbPath);
+      const abs = path.isAbsolute(dbPath) ? dbPath : path.join(process.cwd(), 'prisma', dbPath);
       if (fs.existsSync(abs)) {
         fs.unlinkSync(abs);
       }

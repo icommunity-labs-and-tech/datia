@@ -8,22 +8,23 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 const testSuites = [
-  'tests/e2e/auth-separated.spec.ts',
-  'tests/e2e/dashboard.spec.ts', 
-  'tests/e2e/admin.categories.spec.ts',
-  'tests/e2e/admin.users.spec.ts',
-  'tests/e2e/admin.states.spec.ts',
-  'tests/e2e/admin.items.spec.ts',
-  'tests/e2e/admin.evidence.spec.ts',
   'tests/e2e/admin.exports.spec.ts',
+  'tests/e2e/admin.items.spec.ts',
   'tests/e2e/admin.kpis.spec.ts',
-  'tests/e2e/operator.core.spec.ts',
-  'tests/e2e/operator.scanner.spec.ts',
+  'tests/e2e/admin.profile.spec.ts',
+  'tests/e2e/admin.states.spec.ts',
+  'tests/e2e/admin.users.spec.ts',
+  'tests/e2e/auth-separated.spec.ts',
+  'tests/e2e/auth.spec.ts',
+  'tests/e2e/authenticated.spec.ts',
+  'tests/e2e/basic.spec.ts',
   'tests/e2e/customer.passport.spec.ts',
-  'tests/e2e/checker.spec.ts',
+  'tests/e2e/dashboard.spec.ts',
+  'tests/e2e/profile.spec.ts',
   'tests/e2e/shared.a11y.spec.ts',
   'tests/e2e/shared.responsive.spec.ts',
-  'tests/e2e/authenticated.spec.ts',
+  'tests/e2e/simple.spec.ts',
+  'tests/e2e/ux-journeys.spec.ts',
 ];
 
 function runTestSuite(suite) {
@@ -53,7 +54,8 @@ function cleanupBetweenSuites() {
   console.log('\n🧹 Cleaning up between test suites...');
   
   // Clean up SQLite database
-  const dbPath = path.join(process.cwd(), 'playwright-e2e.db');
+  // Prisma resolves the relative file: URL against prisma/, not the working directory.
+  const dbPath = path.join(process.cwd(), 'prisma', 'playwright-e2e.db');
   if (fs.existsSync(dbPath)) {
     fs.unlinkSync(dbPath);
   }

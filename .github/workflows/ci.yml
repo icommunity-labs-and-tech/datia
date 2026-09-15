@@ -40,6 +40,72 @@ jobs:
 
       - run: npx vitest run
 
+  e2e:
+    name: E2E (chromium, SQLite)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # Same variables as `npm run test:e2e:sqlite:reset`: a throwaway SQLite
+      # database, recreated and seeded by tests/e2e/global-setup.ts.
+      E2E_SQLITE: '1'
+      E2E_SQLITE_RESET: '1'
+      DATABASE_URL: file:./playwright-e2e.db
+      E2E_SQLITE_URL: file:./playwright-e2e.db
+      ADMIN_E2E_EMAIL: admin@datia.icommunitylabs.com
+      ADMIN_E2E_PASSWORD: admin123
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci --legacy-peer-deps
+
+      - run: npx prisma generate
+      - run: npx prisma generate --schema prisma/schema.e2e.prisma
+
+      - run: npx playwright install --with-deps chromium
+
+      # certification-flow needs the real iBS API and stays out of CI.
+      - run: npx playwright test --project=chromium --reporter=list
+
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report
+            test-results
+          retention-days: 7
+
+  migrations:
+    name: Migration notice
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # Deploys do not apply migrations (docs/MIGRACIONES.md): someone has to run
+      # them against production before merging. This only makes that visible.
+      - name: Warn when the PR brings migrations
+        run: |
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- prisma/migrations)
+          if [ -n "$changed" ]; then
+            echo "::warning title=Este PR trae migraciones::El despliegue no las aplica. Aplícalas a mano en producción antes de mergear (docs/MIGRACIONES.md)."
+            {
+              echo '### Este PR trae migraciones'
+              echo
+              echo 'El despliegue no las aplica. Antes de mergear, sigue `docs/MIGRACIONES.md`.'
+              echo
+              echo "$changed" | sed 's/^/- /'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Sin migraciones en este PR."
+          fi
+
   image:
     name: Docker build
     runs-on: ubuntu-latest

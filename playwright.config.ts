@@ -32,6 +32,8 @@ export default defineConfig({
     },
     {
       name: 'chromium',
+      // Needs the real iBS API; it has its own project below.
+      testIgnore: ['**/_capture.spec.ts', '**/complete-state-certification.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
