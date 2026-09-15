@@ -12,8 +12,9 @@ npm run lint             # ESLint
 
 # Database (Prisma)
 npm run db:generate      # Generate Prisma client
-npm run db:push          # Push schema without migrations
-npm run db:migrate:dev   # Create & run migrations (dev)
+npm run db:migrate:dev   # Create & run migrations (dev database only)
+npm run db:migrate       # Apply pending migrations (prisma migrate deploy)
+# Production: never `prisma db push`. See docs/MIGRACIONES.md
 npm run db:studio        # Open Prisma Studio
 
 # Testing
