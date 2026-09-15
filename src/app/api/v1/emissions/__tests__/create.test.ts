@@ -33,6 +33,10 @@ vi.mock('@/infrastructure/prisma/repositories/EnergyRepositoryPrisma', () => ({
 vi.mock('@/infrastructure/prisma/repositories/EventRepositoryPrisma', () => ({
   eventRepository: { create: mockEventCreate },
 }));
+vi.mock('@/infrastructure/prisma/repositories/WebhookRepositoryPrisma', () => ({
+  // recordEvent sends events to subscribed webhooks; none here.
+  webhookRepository: { findByEvent: vi.fn(async () => []), updateTriggered: vi.fn(async () => {}) },
+}));
 vi.mock('@/lib/energy/anchor-service', () => ({
   anchorEmissionById: mockAnchorEmissionById,
 }));

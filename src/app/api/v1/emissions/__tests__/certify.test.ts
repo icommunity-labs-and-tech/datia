@@ -36,6 +36,10 @@ vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
 vi.mock('@/infrastructure/prisma/repositories/EventRepositoryPrisma', () => ({
   eventRepository: { create: vi.fn().mockResolvedValue({}) },
 }));
+vi.mock('@/infrastructure/prisma/repositories/WebhookRepositoryPrisma', () => ({
+  // recordEvent sends events to subscribed webhooks; none here.
+  webhookRepository: { findByEvent: vi.fn(async () => []), updateTriggered: vi.fn(async () => {}) },
+}));
 
 vi.mock('@/lib/http', () => ({
   getBaseUrl: vi.fn().mockResolvedValue('http://localhost:3000'),

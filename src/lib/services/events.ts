@@ -1,58 +1,76 @@
+import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
 import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookRepositoryPrisma';
-import { webhookTriggerService } from './webhook';
+import type { CreateEventLogInput, EventLogRecord } from '@/domain/events/EventRepository';
+import { webhookTriggerService, type WebhookPayload } from './webhook';
+
+const MAX_CONCURRENT_DELIVERIES = 5;
 
 /**
- * Trigger webhooks for a given event type
- * This function is fire-and-forget - it doesn't block the calling code
+ * Records an event and sends it to the organisation's active webhooks subscribed
+ * to its type. Every place that emits an event goes through here, so a webhook
+ * fires for whatever the events page lists (#35).
+ *
+ * Delivery is not awaited: it runs after the caller has answered. That holds up
+ * only because the Cloud Run service keeps CPU allocated outside requests
+ * (--no-cpu-throttling); with throttling the sends and their retries would stall.
  */
-export function triggerWebhooksForEvent(
-  eventType: string,
-  eventData: Record<string, any>,
-  organizationId: string
-) {
-  // Fire and forget
-  (async () => {
-    try {
-      // Find all active webhooks subscribed to this event
-      const webhooks = await webhookRepository.findByEvent(organizationId, eventType);
+export async function recordEvent(
+  organizationId: string,
+  input: CreateEventLogInput
+): Promise<EventLogRecord> {
+  const event = await eventRepository.create(organizationId, input);
+  void deliverEvent(event);
+  return event;
+}
 
-      // Trigger each webhook in parallel
-      if (webhooks.length > 0) {
-        const triggerPromises = webhooks.map(async (webhook) => {
+/**
+ * Sends one event to every subscribed webhook, at most five at a time. Failures
+ * are logged and counted on the webhook; they never reach the code that emitted
+ * the event.
+ */
+export async function deliverEvent(event: EventLogRecord): Promise<void> {
+  try {
+    const webhooks = await webhookRepository.findByEvent(event.organizationId, event.eventType);
+    if (webhooks.length === 0) return;
+
+    const payload: WebhookPayload = {
+      id: event.id,
+      event: event.eventType,
+      entityType: event.entityType,
+      entityId: event.entityId,
+      data: event.data,
+      timestamp: event.createdAt.toISOString(),
+      organizationId: event.organizationId,
+    };
+
+    for (let i = 0; i < webhooks.length; i += MAX_CONCURRENT_DELIVERIES) {
+      const batch = webhooks.slice(i, i + MAX_CONCURRENT_DELIVERIES);
+      await Promise.all(
+        batch.map(async (webhook) => {
+          let success = false;
           try {
             const result = await webhookTriggerService.triggerWebhook(
               webhook.url,
-              {
-                event: eventType,
-                data: eventData,
-                timestamp: new Date().toISOString(),
-                organizationId,
-              },
+              payload,
               webhook.secret,
               webhook.headers as Record<string, string> | null
             );
-
-            // Update webhook stats
-            await webhookRepository.updateTriggered(webhook.id, result.success);
-
-            return result;
-          } catch {
-            // On error, mark as failure
-            await webhookRepository.updateTriggered(webhook.id, false);
+            success = result.success;
+            if (!success) {
+              console.error(
+                `[webhooks] delivery failed webhook=${webhook.id} event=${event.eventType} id=${event.id} attempts=${result.attempts}: ${result.error}`
+              );
+            }
+          } catch (error) {
+            console.error(`[webhooks] delivery failed webhook=${webhook.id} id=${event.id}:`, error);
           }
-        });
-
-        // Limit concurrency to 5
-        const chunks = [];
-        for (let i = 0; i < triggerPromises.length; i += 5) {
-          chunks.push(triggerPromises.slice(i, i + 5));
-        }
-        for (const chunk of chunks) {
-          await Promise.all(chunk);
-        }
-      }
-    } catch (err) {
-      console.error('Error triggering webhooks:', err);
+          await webhookRepository
+            .updateTriggered(webhook.id, success)
+            .catch((error) => console.error(`[webhooks] could not record result for ${webhook.id}:`, error));
+        })
+      );
     }
-  })();
+  } catch (error) {
+    console.error(`[webhooks] could not deliver event ${event.id}:`, error);
+  }
 }

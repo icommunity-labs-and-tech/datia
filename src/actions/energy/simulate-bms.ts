@@ -4,7 +4,7 @@ import { requireOrganizationId } from '@/lib/auth/tenant';
 import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import {
   bmsGuaranteeOfOrigin,
   bmsSourceName,
@@ -71,7 +71,7 @@ export async function createBmsSource(
     itemId,
   });
 
-  await eventRepository.create(organizationId, {
+  await recordEvent(organizationId, {
     eventType: 'energy_source_event',
     entityType: 'EnergySource',
     entityId: source.id,

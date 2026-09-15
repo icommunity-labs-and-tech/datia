@@ -4,7 +4,7 @@ import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { prisma } from '@/lib/prisma';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { randomUUID } from 'crypto';
 
 const schema = z.object({
@@ -174,7 +174,7 @@ export async function POST(
       },
     });
 
-    await eventRepository.create(auth.organizationId, {
+    await recordEvent(auth.organizationId, {
       eventType: 'co2_certification_event',
       entityType: 'EmissionRecord',
       entityId: emission.id,

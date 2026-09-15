@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 
@@ -217,7 +217,7 @@ async function anchorOne(
     // calls back on `evidence.certified`, which is what marks this backed.
     await prisma.state.update({ where: { id: state.id }, data: { evidenceID } });
 
-    await eventRepository.create(organizationId, {
+    await recordEvent(organizationId, {
       eventType: 'co2_certification_event',
       entityType: 'State',
       entityId: state.id,
@@ -395,7 +395,7 @@ export async function applyCertification(evidenceID: string): Promise<boolean> {
       .catch(() => null);
   }
 
-  await eventRepository.create(state.Item.organizationId, {
+  await recordEvent(state.Item.organizationId, {
     eventType: 'co2_certification_event',
     entityType: 'State',
     entityId: state.id,

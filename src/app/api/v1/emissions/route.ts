@@ -4,7 +4,7 @@ import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { EnergyValidationError } from '@/domain/energy/EnergyTypes';
 import { validateConsumptionOwnership } from '../energy/_validate';
 import { anchorEmissionById } from '@/lib/energy/anchor-service';
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     const service = createEnergyServiceImpl({ energyRepository });
     const record = await service.createEmission(auth.organizationId, parsed.data);
 
-    await eventRepository.create(auth.organizationId, {
+    await recordEvent(auth.organizationId, {
       eventType: 'co2_emission_event',
       entityType: 'EmissionRecord',
       entityId: record.id,

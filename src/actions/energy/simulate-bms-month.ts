@@ -1,7 +1,7 @@
 'use server';
 
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
+import { recordEvent } from '@/lib/services/events';
 import { BMS_MONTH_NAMES } from '@/lib/energy/bmsMonthNames';
 import {
   bmsDailyKwh,
@@ -141,7 +141,7 @@ export async function createBmsMonthReadings(
   const totalCo2eKg = sum(readings.map((r) => r.co2eKg));
 
   // One event for the month, not 365: the registry should stay readable.
-  await eventRepository.create(organizationId, {
+  await recordEvent(organizationId, {
     eventType: 'energy_consumption_event',
     entityType: 'EnergySource',
     entityId: sourceId,
