@@ -11,9 +11,6 @@ import { userRepository } from '@/infrastructure/prisma/repositories/UserReposit
 import { recordEvent } from '@/lib/services/events';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 
-// Helper para bypass de auth en tests
-const isTestEnv = process.env.VITEST_WORKER_ID !== undefined;
-
 export async function addItem(
   formData: Record<string, any>,
   templateFields?: FormTemplate
@@ -41,13 +38,9 @@ export async function addItem(
       }
     }
 
-    let trimmedId = String(customId || '').trim();
+    const trimmedId = String(customId || '').trim();
     if (!trimmedId) {
-      if (isTestEnv) {
-        trimmedId = `test-item-${Date.now()}`;
-      } else {
-        throw new Error('El ID es obligatorio. Por favor, introduce un ID.');
-      }
+      throw new Error('El ID es obligatorio. Por favor, introduce un ID.');
     }
 
     const request: CreateItemRequest = {
