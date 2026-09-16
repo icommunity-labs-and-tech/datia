@@ -236,7 +236,8 @@ test.describe('Vistas de energía', () => {
 
   test('each energy view is a route of its own', async ({ page }) => {
     // They used to be tabs of one hub that loaded all three datasets at once.
-    for (const view of ['sources', 'consumption', 'emissions']) {
+    // Sources have no page of their own any more: they live in their installation.
+    for (const view of ['consumption', 'emissions']) {
       await page.goto(`/dashboard/energy/${view}`, { waitUntil: 'networkidle' });
       await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
       await expectNoHorizontalScroll(page);
@@ -244,8 +245,9 @@ test.describe('Vistas de energía', () => {
   });
 
   test('links to the former hub still resolve', async ({ page }) => {
+    // The hub's default view was sources, which now redirects to the assets page.
     await page.goto('/dashboard/energy');
-    await expect(page).toHaveURL(/\/dashboard\/energy\/sources$/);
+    await expect(page).toHaveURL(/\/dashboard\/items$/);
 
     await page.goto('/dashboard/energy?tab=consumption');
     await expect(page).toHaveURL(/\/dashboard\/energy\/consumption$/);

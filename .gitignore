@@ -78,3 +78,7 @@ scripts/update-salmon-image.ts
 
 # Playwright stored sessions
 playwright/.auth/
+
+# Base SQLite de e2e: global-setup la recrea en cada reset
+prisma/playwright-e2e.db
+prisma/playwright-e2e.db-journal

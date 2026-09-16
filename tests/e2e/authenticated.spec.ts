@@ -84,12 +84,15 @@ test.describe('Assets gallery', () => {
     await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
   });
 
-  test('shows a count that matches the cards on screen', async ({ page }) => {
-    const cards = page.locator('a[href^="/dashboard/items/"]');
-    const count = await cards.count();
+  test('opening an installation shows as many assets as its card says', async ({ page }) => {
+    // Installations come first; their assets appear once one is opened.
+    const card = page.locator('.mantine-Card-root').filter({ hasText: /\d+ (activos?|assets?)/i }).first();
+    await expect(card).toBeVisible();
+    const count = Number((await card.innerText()).match(/(\d+) (activos?|assets?)/i)![1]);
 
-    await expect(page.getByText(new RegExp(`\\b${count}\\b.*(activos?|assets?)`, 'i')).first())
-      .toBeVisible();
+    await card.click();
+
+    await expect(page.locator('a[href^="/dashboard/items/"]')).toHaveCount(count);
   });
 
   test('search with no match offers a way back', async ({ page }) => {
@@ -100,6 +103,7 @@ test.describe('Assets gallery', () => {
     const clear = page.getByRole('button', { name: /limpiar filtros|clear filters/i });
     await clear.click();
 
-    await expect(page.locator('a[href^="/dashboard/items/"]').first()).toBeVisible();
+    // Back to the installations, with the total count.
+    await expect(page.getByText(/\b\d+ (activos?|assets?)\b/i).first()).toBeVisible();
   });
 });

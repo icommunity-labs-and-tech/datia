@@ -1,3 +1,4 @@
+import { text } from './utils/i18n';
 import { test, expect } from '@playwright/test';
 import { logoutUser, ADMIN_STORAGE_STATE } from './utils/auth';
 
@@ -31,8 +32,8 @@ test.describe('Dashboard Flow', () => {
 
     await expect(page.getByRole('heading', { name: /inicio|home/i, level: 2 })).toBeVisible();
 
-    // The overview always leads with the assets metric.
-    await expect(page.getByText(/activos totales|total assets/i)).toBeVisible();
+    // The overview always leads with the assets it tracks.
+    await expect(page.getByText(text('dashboard.stat.tracked')).first()).toBeVisible();
   });
 
   test('should navigate to items page from the top bar', async ({ page }) => {
@@ -47,10 +48,9 @@ test.describe('Dashboard Flow', () => {
   test('should show the assets gallery once loaded', async ({ page }) => {
     await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
 
-    // Either cards or the empty state — never a stuck skeleton.
-    const cards = page.locator('a[href^="/dashboard/items/"]');
-    const empty = page.getByText(/no hay activos|no assets registered/i);
-    await expect(cards.first().or(empty)).toBeVisible();
+    // Installations come first; the count shows once loading is over, never a
+    // stuck skeleton.
+    await expect(page.getByText(/\b(\d+ activos?|\d+ assets?|sin activos|no assets)\b/i).first()).toBeVisible();
   });
 });
 
