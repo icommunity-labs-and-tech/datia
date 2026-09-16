@@ -15,7 +15,6 @@ COPY . .
 
 # Generar clientes Prisma
 RUN npx prisma generate
-RUN npx prisma generate --schema prisma/schema.e2e.prisma || echo "Warning: e2e schema generation failed, continuing..."
 
 RUN npm run build
 
