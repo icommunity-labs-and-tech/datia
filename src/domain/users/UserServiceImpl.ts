@@ -15,6 +15,14 @@ const toUserResponse = (u: any): UserResponse => ({
   notes: u.notes ?? null,
 });
 
+// Desde una organización solo se asigna ADMIN. El rol llega de un FormData sin
+// validar, y SUPER_ADMIN da acceso al panel de superadmin.
+function assertAssignableRole(role: unknown): void {
+  if (role !== 'ADMIN') {
+    throw new UserInputError('role', 'Rol no válido');
+  }
+}
+
 export function createUserServiceImpl(deps: {
   userRepository: UserRepository;
 }): UserService {
@@ -27,6 +35,8 @@ export function createUserServiceImpl(deps: {
         
         // auth
         await verifyAdminAuth();
+
+        assertAssignableRole(data.role);
 
         if (!data.email || !data.name) {
           throw new UserInputError(!data.email ? 'email' : 'name', 'Email y nombre son obligatorios');
@@ -70,6 +80,10 @@ export function createUserServiceImpl(deps: {
 
         if (!data.id) {
           throw new UserInputError('email', 'ID requerido');
+        }
+
+        if (data.role != null) {
+          assertAssignableRole(data.role);
         }
 
         if (data.email) {
