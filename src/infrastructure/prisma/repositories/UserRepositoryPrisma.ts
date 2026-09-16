@@ -104,15 +104,13 @@ export const userRepository: UserRepository = {
 
   async update(id: string, organizationId: string, changes: UpdateUserInput): Promise<UserRecord> {
     try {
-      // Verificar que el usuario pertenece a la organización (excepto SUPER_ADMIN)
-      const existing = await prisma.user.findFirst({ 
-        where: { 
-          id,
-          OR: [
-            { organizationId },
-            { organizationId: null, role: 'SUPER_ADMIN' } // SUPER_ADMIN puede ser actualizado
-          ]
-        }
+      // Verificar que el usuario pertenece a la organización. Un SUPER_ADMIN no
+      // tiene organización: solo se le encuentra si se busca sin organización
+      // (cambio de su propia contraseña), nunca desde la de otro.
+      const existing = await prisma.user.findFirst({
+        where: organizationId
+          ? { id, organizationId }
+          : { id, organizationId: null, role: 'SUPER_ADMIN' },
       });
       
       if (!existing) {
