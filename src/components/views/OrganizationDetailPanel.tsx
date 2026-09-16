@@ -193,12 +193,6 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
                     <td><code>{organization.slug}</code></td>
                   </tr>
                   <tr>
-                    <td><strong>Plan:</strong></td>
-                    <td>
-                      <Badge bg="secondary">{organization.plan}</Badge>
-                    </td>
-                  </tr>
-                  <tr>
                     <td><strong>Estado:</strong></td>
                     <td>
                       {organization.activa ? (

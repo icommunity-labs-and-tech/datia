@@ -9,8 +9,6 @@ import crypto from "crypto";
 export interface CreateOrganizationInput {
   // Datos de la organización
   nombre: string;
-  plan?: string;
-  sectorId?: string;
 
   // Datos del primer administrador
   adminName: string;
@@ -145,12 +143,10 @@ export async function createOrganizationWithAdmin(
           id: crypto.randomUUID(),
           nombre: input.nombre,
           slug: slug,
-          plan: input.plan || "basic",
           activa: true,
           signatureID: signatureID,
           kycURL: kycURL,
           verificationStatus: signatureID ? 'WAITING' : 'NOT_VERIFIED',
-          sectorId: input.sectorId || null,
           updatedAt: now,
         },
       });

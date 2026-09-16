@@ -59,7 +59,6 @@ async function main() {
         slug: DATIA_CONFIG.slug,
         dominio: DATIA_CONFIG.dominio,
         activa: true,
-        plan: 'basic',
         brandColorPrimary: DATIA_CONFIG.brandColorPrimary,
         brandColorSecondary: DATIA_CONFIG.brandColorSecondary,
         logoUrl: DATIA_CONFIG.logoUrl,

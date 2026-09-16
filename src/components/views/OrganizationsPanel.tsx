@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button, Modal, Form, Alert, Spinner, Card, Row, Col, Badge, Table } from '@/components/legacy/bootstrap-compat';
 import { createOrganizationWithAdmin, listOrganizations, type OrganizationListItem } from '@/actions/organizations';
-import { listSectors, type SectorListItem } from '@/actions/sectors';
 import Box from '@/components/Box';
 
 interface OrganizationsPanelProps {
@@ -24,11 +23,9 @@ export default function OrganizationsPanel({
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState<OrganizationListItem[]>([]);
-  const [sectors, setSectors] = useState<SectorListItem[]>([]);
 
   const [formData, setFormData] = useState({
     organizationName: '',
-    sectorId: '',
     adminName: '',
     adminEmail: '',
     language: 'es' as 'es' | 'en',
@@ -36,7 +33,6 @@ export default function OrganizationsPanel({
 
   useEffect(() => {
     loadOrganizations();
-    listSectors().then(setSectors).catch(console.error);
   }, []);
 
   const loadOrganizations = async () => {
@@ -64,7 +60,6 @@ export default function OrganizationsPanel({
     try {
       const result = await createOrganizationWithAdmin({
         nombre: formData.organizationName,
-        sectorId: formData.sectorId || undefined,
         adminName: formData.adminName,
         adminEmail: formData.adminEmail,
         language: formData.language,
@@ -78,7 +73,6 @@ export default function OrganizationsPanel({
         setSuccess(successMessage);
         setFormData({
           organizationName: '',
-          sectorId: '',
           adminName: '',
           adminEmail: '',
           language: 'es',
@@ -171,8 +165,6 @@ export default function OrganizationsPanel({
                 <tr>
                   <th>Nombre</th>
                   <th>Slug</th>
-                  <th>Sector</th>
-                  <th>Plan</th>
                   <th className="text-center">Usuarios</th>
                   <th className="text-center">Items</th>
                   <th className="text-center">Estados</th>
@@ -194,16 +186,6 @@ export default function OrganizationsPanel({
                     </td>
                     <td>
                       <code className="text-muted">{org.slug}</code>
-                    </td>
-                    <td>
-                      {org.sectorName ? (
-                        <Badge bg="info">{org.sectorName}</Badge>
-                      ) : (
-                        <span className="text-muted">-</span>
-                      )}
-                    </td>
-                    <td>
-                      <Badge bg="secondary">{org.plan}</Badge>
                     </td>
                     <td className="text-center">
                       <Badge bg="info">{org.userCount}</Badge>
@@ -386,28 +368,6 @@ export default function OrganizationsPanel({
                   />
                   <Form.Text className="text-muted">
                     Nombre completo de la empresa o cliente. El identificador único se generará automáticamente.
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Sector *
-                    <i className="bi bi-info-circle ms-2 text-muted" title="Sector de actividad de la organización"></i>
-                  </Form.Label>
-                  <Form.Select
-                    value={formData.sectorId}
-                    onChange={(e) => setFormData({ ...formData, sectorId: e.target.value })}
-                    required
-                  >
-                    <option value="">Selecciona un sector...</option>
-                    {sectors.map((sector) => (
-                      <option key={sector.id} value={sector.id}>
-                        {sector.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    El sector determina los ejemplos que se mostrarán en el tutorial del dashboard.
                   </Form.Text>
                 </Form.Group>
               </Card.Body>

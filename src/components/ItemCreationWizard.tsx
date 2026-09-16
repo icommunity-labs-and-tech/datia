@@ -9,7 +9,6 @@ import { useTranslations } from 'next-intl';
 import type { FormTemplate } from './GenericTable';
 import WizardImageField from './WizardImageField';
 import ImageConfigSection from './ImageConfigSection';
-import AIFillButton from './AIFillButton';
 import CategoryTagsInput from './CategoryTagsInput';
 
 type ItemCreationWizardProps = {
@@ -151,13 +150,6 @@ export default function ItemCreationWizard({
     } catch (e: any) {
       setError(e?.message || 'Error copiando datos del item');
     }
-  };
-
-  const handleAIDataFill = (aiData: Record<string, any>) => {
-    setFormState((prevState: Record<string, any>) => ({
-      ...prevState,
-      ...aiData
-    }));
   };
 
   const validateStep = (step: WizardStep): boolean => {
@@ -492,15 +484,6 @@ export default function ItemCreationWizard({
 
     return (
       <div>
-        <div className="mb-3">
-          <AIFillButton
-            itemName={formState?.name || ''}
-            itemDescription={formState?.description || ''}
-            fields={specificFields}
-            onDataFilled={handleAIDataFill}
-          />
-        </div>
-
         {specificFields.map((field) => {
           if (field.type === 'image') {
             return (

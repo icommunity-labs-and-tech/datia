@@ -12,7 +12,6 @@ export interface OrganizationDetail {
   id: string;
   nombre: string;
   slug: string;
-  plan: string;
   activa: boolean;
   dominio: string | null;
   configuracion: { modules?: OrgModuleConfig } | null;
@@ -55,7 +54,6 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
         id: true,
         nombre: true,
         slug: true,
-        plan: true,
         activa: true,
         dominio: true,
         configuracion: true,
@@ -124,7 +122,6 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
       id: organization.id,
       nombre: organization.nombre,
       slug: organization.slug,
-      plan: organization.plan,
       activa: organization.activa,
       dominio: organization.dominio,
       createdAt: organization.createdAt,

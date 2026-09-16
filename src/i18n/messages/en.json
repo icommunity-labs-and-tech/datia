@@ -445,18 +445,6 @@
       "continueProblems": "If you continue to have problems, please contact our technical support team."
     }
   },
-  "ai": {
-    "fillWithAI": "Fill with AI",
-    "consultingAI": "Consulting AI...",
-    "nameRequired": "Complete the item name to use AI",
-    "noFields": "No specific fields to fill",
-    "nameRequiredError": "Item name is required to use AI",
-    "processingError": "Error processing request",
-    "noDataFound": "AI could not find specific information for this item",
-    "noValidData": "No valid data received from AI",
-    "connectionError": "Error connecting to AI",
-    "fieldsCompleted": "{count} fields completed"
-  },
   "customer": {
     "scanCode": "Scan Code",
     "scanDescription": "Place the asset QR code in front of the camera",
