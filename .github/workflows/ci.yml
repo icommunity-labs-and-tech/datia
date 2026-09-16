@@ -32,11 +32,6 @@ jobs:
 
       - run: npx prisma generate
 
-      # The e2e client is a second, separate generated client that
-      # src/lib/prisma.ts imports unconditionally. Dockerfile.* generates both;
-      # without this, every test touching src/lib/prisma.ts fails with
-      # "Failed to resolve import ../generated/prisma-e2e".
-      - run: npx prisma generate --schema prisma/schema.e2e.prisma
 
       - run: npx vitest run
 
