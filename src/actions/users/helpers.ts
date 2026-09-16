@@ -1,15 +1,9 @@
+import { randomInt } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import { verifySuperAdminJWT } from '@/lib/auth/superadmin/jwt';
-import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
 
 export async function verifyAdminAuth() {
-  // Bypass in test environment
-  if (process.env.VITEST_WORKER_ID) {
-    return { id: 'admin-test', role: 'ADMIN' } as any;
-  }
-
   const cookieStore = await cookies();
   const token = cookieStore.get(adminAuthConfig.cookieName)?.value;
 
@@ -26,11 +20,6 @@ export async function verifyAdminAuth() {
 }
 
 export async function verifyUserAuth() {
-  // Bypass in test environment
-  if (process.env.VITEST_WORKER_ID) {
-    return { id: 'admin-test', role: 'ADMIN' } as any;
-  }
-
   const cookieStore = await cookies();
 
   const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
@@ -44,32 +33,7 @@ export async function verifyUserAuth() {
   throw new Error('No autorizado');
 }
 
-export async function verifySuperAdminAuth() {
-  // Bypass in test environment
-  if (process.env.VITEST_WORKER_ID) {
-    return { id: 'superadmin-test', role: 'SUPER_ADMIN' } as any;
-  }
-
-  const cookieStore = await cookies();
-  const token = cookieStore.get(superadminAuthConfig.cookieName)?.value;
-
-  if (!token) {
-    throw new Error('No autorizado');
-  }
-
-  const payload = await verifySuperAdminJWT(token);
-  if (!payload || payload.role !== 'SUPER_ADMIN') {
-    throw new Error('Solo los super administradores pueden realizar esta acción');
-  }
-
-  return payload;
-}
-
 export function generateTemporaryPassword(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < 8; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
+  return Array.from({ length: 12 }, () => chars[randomInt(chars.length)]).join('');
 }
