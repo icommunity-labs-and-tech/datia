@@ -445,18 +445,6 @@
       "continueProblems": "Si continúas teniendo problemas, por favor contacta a nuestro equipo de soporte técnico."
     }
   },
-  "ai": {
-    "fillWithAI": "Rellenar con IA",
-    "consultingAI": "Consultando IA...",
-    "nameRequired": "Completa el nombre del item para usar IA",
-    "noFields": "No hay campos específicos para rellenar",
-    "nameRequiredError": "El nombre del item es requerido para usar la IA",
-    "processingError": "Error al procesar la solicitud",
-    "noDataFound": "La IA no pudo encontrar información específica para este item",
-    "noValidData": "No se recibieron datos válidos de la IA",
-    "connectionError": "Error al conectar con la IA",
-    "fieldsCompleted": "Se completaron {count} campos"
-  },
   "customer": {
     "scanCode": "Escanear Código",
     "scanDescription": "Coloca el código QR del activo frente a la cámara",

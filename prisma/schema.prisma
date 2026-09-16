@@ -180,8 +180,6 @@ model Organization {
   slug              String             @unique
   dominio           String?            @unique
   activa            Boolean            @default(true)
-  plan              String             @default("basic")
-  limites           Json?
   configuracion      Json?
   signatureID        String?
   kycURL            String?
@@ -189,7 +187,6 @@ model Organization {
   brandColorPrimary  String?
   brandColorSecondary String?
   verificationStatus VerificationStatus @default(NOT_VERIFIED)
-  sectorId          String?
   createdAt         DateTime           @default(now())
   updatedAt          DateTime
   ApiCall           ApiCall[]
@@ -200,7 +197,6 @@ model Organization {
   Issue             Issue[]
   Item              Item[]
   Notification      Notification[]
-  Sector            Sector?            @relation(fields: [sectorId], references: [id])
   StatusType        StatusType[]
   User              User[]
   Webhook           Webhook[]
@@ -210,17 +206,8 @@ model Organization {
   @@index([activa])
   @@index([slug])
   @@index([signatureID])
-  @@index([sectorId])
 }
 
-model Sector {
-  id            String         @id
-  name          String         @unique
-  slug          String         @unique
-  description   String         @default("")
-  createdAt     DateTime       @default(now())
-  Organization  Organization[]
-}
 
 model SupportMessage {
   id             String       @id
