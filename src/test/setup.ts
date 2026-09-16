@@ -73,9 +73,6 @@ process.env.IBS_TOKEN = 'test-token';
 // Global fetch mock
 global.fetch = vi.fn();
 
-// Mock iCommunity client by default to avoid real prisma and network in route tests
-vi.mock('@/lib/icommunity', () => ({
-}));
 
 // Console error suppression for tests
 const originalError = console.error;

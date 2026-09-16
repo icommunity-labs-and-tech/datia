@@ -154,9 +154,10 @@ export function createICommunityService(): ICommunityService {
     async retrySignature(signatureId: string): Promise<{ url?: string }> {
       return requestWithRetry('retrySignature', async () => {
         try {
-          const result = await request<{ url?: string }>(`/signatures/${signatureId}/retry`, {
-            method: 'POST',
-            body: JSON.stringify({}),
+          // iBS restarts a failed or unfinished KYC flow with PUT /signatures/{id}
+          // and answers with the new wizard URL.
+          const result = await request<{ url?: string }>(`/signatures/${encodeURIComponent(signatureId)}`, {
+            method: 'PUT',
           });
           return result;
         } catch (error) {
