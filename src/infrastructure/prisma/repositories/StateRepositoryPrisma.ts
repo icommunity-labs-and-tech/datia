@@ -33,7 +33,7 @@ export const stateRepository: StateRepository = {
 
   async create(input: CreateStateInput): Promise<StateRecord> {
     try {
-      const id = (input as any).id || crypto.randomUUID();
+      const id = crypto.randomUUID();
       const state = await prisma.state.create({
         data: {
           id,
@@ -44,7 +44,7 @@ export const stateRepository: StateRepository = {
           imageUrls: input.imageUrls ?? [],
           evidenceID: input.evidenceID ?? 'pending',
           createdByUserId: input.createdByUserId,
-          templateConfig: (input.templateConfig ?? null) as any,
+          templateConfig: input.templateConfig ?? undefined,
         },
       });
       return toDomain(state);
@@ -217,7 +217,7 @@ export const stateRepository: StateRepository = {
 
   async getStatesByUserGrouped(organizationId: string, startDate: Date) {
     try {
-      return await prisma.state.groupBy({
+      const rows = await prisma.state.groupBy({
         by: ['createdByUserId'],
         where: { 
           Item: { organizationId },
@@ -225,7 +225,8 @@ export const stateRepository: StateRepository = {
           createdByUserId: { not: null } 
         },
         _count: { id: true }
-      } as any);
+      });
+      return rows;
     } catch (e) {
       throw new DbError(e);
     }
@@ -233,7 +234,7 @@ export const stateRepository: StateRepository = {
 
   async getBackedStatesByUserGrouped(organizationId: string, startDate: Date) {
     try {
-      return await prisma.state.groupBy({
+      const rows = await prisma.state.groupBy({
         by: ['createdByUserId'],
         where: { 
           Item: { organizationId },
@@ -242,7 +243,8 @@ export const stateRepository: StateRepository = {
           backed: true 
         },
         _count: { id: true }
-      } as any);
+      });
+      return rows;
     } catch (e) {
       throw new DbError(e);
     }

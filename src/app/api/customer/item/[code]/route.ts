@@ -92,7 +92,7 @@ export async function GET(
       templateFields: item.templateFields,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
-      evidenceID: (item as any).evidenceID || null,
+      evidenceID: item.evidenceID || null,
       createdBy: item.User || null,
       organization: item.Organization
         ? {
@@ -110,9 +110,9 @@ export async function GET(
         name: 'Sin categoría',
         description: '',
       },
-      energyCertifications: (item as any).EnergySource?.flatMap((src: any) =>
-        src.EnergyConsumption?.flatMap((c: any) =>
-          c.EmissionRecord?.map((e: any) => ({
+      energyCertifications: item.EnergySource.flatMap((src) =>
+        src.EnergyConsumption.flatMap((c) =>
+          c.EmissionRecord.map((e) => ({
             id: e.id,
             co2eKg: e.co2eKg,
             scope: e.scope,
@@ -126,9 +126,9 @@ export async function GET(
             consumptionKwh: c.consumptionKwh,
             energyCarrier: src.energyCarrier,
             createdAt: e.createdAt,
-          })) ?? []
-        ) ?? []
-      ) ?? [],
+          }))
+        )
+      ),
       states: item.State.map((state) => ({
         id: state.id,
         title: state.title,

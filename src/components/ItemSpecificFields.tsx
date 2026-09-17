@@ -86,7 +86,7 @@ export default function ItemSpecificFields({
     const typeToFormat: Record<string, FieldSchema['format']> = {
       text: 'text',
       select: 'text',
-      email: 'email' as any, // se renderiza como texto truncado; podemos ajustar si hay KeyValueList para email
+      email: 'text',
       number: 'number',
       date: 'date',
     };

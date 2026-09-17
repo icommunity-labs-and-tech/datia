@@ -31,7 +31,7 @@ export async function updateOrgLogo(
     }
 
     const storage = getStorage();
-    const saved = await storage.saveImage(file, 'org-logo' as any);
+    const saved = await storage.saveImage(file, 'org-logo');
 
     await prisma.organization.update({
       where: { id: organizationId },

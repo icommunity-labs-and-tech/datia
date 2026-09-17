@@ -137,8 +137,7 @@ function injectItemIdExamples(paths: Record<string, any>, exampleItemId: string)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const op = operation as Record<string, any>;
       if (!Array.isArray(op.parameters)) continue;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      for (const param of op.parameters as any[]) {
+      for (const param of op.parameters) {
         if (param.name === 'id' && param.in === 'path') {
           param.example = exampleItemId;
         }

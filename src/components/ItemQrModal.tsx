@@ -35,7 +35,7 @@ export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrMo
       try {
         const mod = await import('qrcode');
         if (cancelled) return;
-        const QR = (mod as any).default || mod;
+        const QR = mod.default ?? mod;
         const canvas = canvasRef.current;
         if (!canvas) return;
         await QR.toCanvas(canvas, itemUrl, {

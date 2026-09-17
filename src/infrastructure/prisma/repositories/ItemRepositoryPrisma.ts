@@ -1,4 +1,5 @@
 import { ItemRepository, type ItemRecord, type CreateItemInput, DbError } from '@/domain/items/ItemRepository';
+import type { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 
@@ -13,6 +14,11 @@ const toDomain = (i: any): ItemRecord => ({
   createdAt: i.createdAt,
   updatedAt: i.updatedAt,
 });
+
+// Las columnas Json llegan como JsonValue; templateFields es siempre un objeto.
+function asJsonObject(value: Prisma.JsonValue): Prisma.JsonObject | null {
+  return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null;
+}
 
 export const itemRepository: ItemRepository = {
   async findByOrganization(organizationId: string): Promise<ItemRecord[]> {
@@ -80,7 +86,7 @@ export const itemRepository: ItemRepository = {
             description: item.description ?? null,
             imageUrl: item.imageUrl ?? null,
             states: item.State ?? [],
-            _count: { states: (item as any)._count?.State ?? 0 },
+            _count: { states: item._count.State },
           }
         : null;
     } catch (e) {
@@ -162,7 +168,7 @@ export const itemRepository: ItemRepository = {
           description: input.description,
           imageUrl: input.imageUrl ?? null,
           itemTemplate: input.itemTemplate ?? [],
-          templateFields: (input.templateFields as any) ?? undefined,
+          templateFields: input.templateFields ?? undefined,
           createdByUserId: input.createdByUserId,
           updatedAt: now,
         },
@@ -227,8 +233,8 @@ export const itemRepository: ItemRepository = {
         name: i.name,
         description: i.description ?? null,
         imageUrl: i.imageUrl ?? null,
-        itemTemplate: (i as any).itemTemplate ?? [],
-        templateFields: (i as any).templateFields ?? null,
+        itemTemplate: Array.isArray(i.itemTemplate) ? i.itemTemplate : [],
+        templateFields: asJsonObject(i.templateFields),
         createdAt: i.createdAt,
       }));
     } catch (e) {
@@ -259,8 +265,8 @@ export const itemRepository: ItemRepository = {
         name: i.name,
         description: i.description ?? null,
         imageUrl: i.imageUrl ?? null,
-        itemTemplate: (i as any).itemTemplate ?? [],
-        templateFields: (i as any).templateFields ?? null,
+        itemTemplate: Array.isArray(i.itemTemplate) ? i.itemTemplate : [],
+        templateFields: asJsonObject(i.templateFields),
         createdAt: i.createdAt,
       }));
     } catch (e) {

@@ -352,7 +352,7 @@ export default function ItemDetailPage() {
                     </ThemeIcon>
                     <Title order={5}>{t('geotracking')}</Title>
                   </Group>
-                  <ItemStatesMap states={states as any} />
+                  <ItemStatesMap states={states} />
                 </Card>
               )}
             </Stack>

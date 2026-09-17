@@ -73,7 +73,7 @@ export const webhookRepository: WebhookRepository = {
           secret: input.secret ?? null,
           events: input.events ?? [],
           active: input.active ?? true,
-          headers: (input.headers ?? null) as any,
+          headers: input.headers ?? undefined,
         },
       });
       return toDomain(webhook);

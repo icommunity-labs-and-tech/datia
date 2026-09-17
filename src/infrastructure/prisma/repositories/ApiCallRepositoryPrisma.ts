@@ -1,7 +1,8 @@
 import { ApiCallRepository, type ApiCallRecord, type CreateApiCallInput, DbError } from '@/domain/api-calls/ApiCallRepository';
+import type { ApiCall } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 
-const toDomain = (c: any): ApiCallRecord => ({
+const toDomain = (c: ApiCall): ApiCallRecord => ({
   id: c.id,
   apiTokenId: c.apiTokenId,
   organizationId: c.organizationId,
@@ -14,15 +15,9 @@ const toDomain = (c: any): ApiCallRecord => ({
 export const apiCallRepository: ApiCallRepository = {
   async create(input: CreateApiCallInput): Promise<ApiCallRecord> {
     try {
-      const apiCallModel = (prisma as any).apiCall;
-      if (!apiCallModel) {
-        throw new DbError(
-          { error: 'Prisma Client no tiene el modelo apiCall. Reinicia el servidor de desarrollo.' },
-          'Prisma Client no tiene el modelo apiCall. Por favor, reinicia el servidor de desarrollo.'
-        );
-      }
-      const call = await apiCallModel.create({
+      const call = await prisma.apiCall.create({
         data: {
+          id: crypto.randomUUID(),
           apiTokenId: input.apiTokenId,
           organizationId: input.organizationId,
           method: input.method,
@@ -38,14 +33,7 @@ export const apiCallRepository: ApiCallRepository = {
 
   async countByToken(apiTokenId: string, organizationId: string): Promise<number> {
     try {
-      const apiCallModel = (prisma as any).apiCall;
-      if (!apiCallModel) {
-        throw new DbError(
-          { error: 'Prisma Client no tiene el modelo apiCall. Reinicia el servidor de desarrollo.' },
-          'Prisma Client no tiene el modelo apiCall. Por favor, reinicia el servidor de desarrollo.'
-        );
-      }
-      return await apiCallModel.count({
+      return await prisma.apiCall.count({
         where: { apiTokenId, organizationId },
       });
     } catch (e: any) {
@@ -55,14 +43,7 @@ export const apiCallRepository: ApiCallRepository = {
 
   async countByTokenAndPeriod(apiTokenId: string, organizationId: string, startDate: Date, endDate: Date): Promise<number> {
     try {
-      const apiCallModel = (prisma as any).apiCall;
-      if (!apiCallModel) {
-        throw new DbError(
-          { error: 'Prisma Client no tiene el modelo apiCall. Reinicia el servidor de desarrollo.' },
-          'Prisma Client no tiene el modelo apiCall. Por favor, reinicia el servidor de desarrollo.'
-        );
-      }
-      return await apiCallModel.count({
+      return await prisma.apiCall.count({
         where: {
           apiTokenId,
           organizationId,
@@ -79,14 +60,7 @@ export const apiCallRepository: ApiCallRepository = {
 
   async getCallsByTokenAndPeriod(apiTokenId: string, organizationId: string, startDate: Date, endDate: Date): Promise<ApiCallRecord[]> {
     try {
-      const apiCallModel = (prisma as any).apiCall;
-      if (!apiCallModel) {
-        throw new DbError(
-          { error: 'Prisma Client no tiene el modelo apiCall. Reinicia el servidor de desarrollo.' },
-          'Prisma Client no tiene el modelo apiCall. Por favor, reinicia el servidor de desarrollo.'
-        );
-      }
-      const calls = await apiCallModel.findMany({
+      const calls = await prisma.apiCall.findMany({
         where: {
           apiTokenId,
           organizationId,
@@ -96,7 +70,7 @@ export const apiCallRepository: ApiCallRepository = {
           },
         },
         orderBy: { createdAt: 'asc' },
-      }) as any[];
+      });
       return calls.map(toDomain);
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');
