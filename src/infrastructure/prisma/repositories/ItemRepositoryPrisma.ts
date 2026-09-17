@@ -609,19 +609,4 @@ export const itemRepository: ItemRepository = {
     }
   },
 
-  // Para SUPER_ADMIN
-  async findAll(): Promise<ItemRecord[]> {
-    try {
-      const items = await prisma.item.findMany({
-        include: { 
-          Organization: { select: { nombre: true, slug: true } },
-          State: { orderBy: { createdAt: 'desc' }, take: 1, select: { title: true, backed: true } } 
-        },
-        orderBy: { createdAt: 'desc' } 
-      });
-      return items.map(toDomain);
-    } catch (e) {
-      throw new DbError(e);
-    }
-  },
 };

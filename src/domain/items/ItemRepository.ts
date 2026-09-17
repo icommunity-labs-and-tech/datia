@@ -128,5 +128,4 @@ export interface ItemRepository {
     createdAt: Date;
   }>>;
   // Para SUPER_ADMIN
-  findAll(): Promise<ItemRecord[]>;
 }

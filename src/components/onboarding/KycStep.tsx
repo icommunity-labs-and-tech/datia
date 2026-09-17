@@ -59,7 +59,7 @@ export default function KycStep({
   // Función para verificar el estado del KYC (usando useCallback para estabilidad)
   const checkStatus = useCallback(async () => {
     try {
-      const result = await checkKycStatus(organizationId);
+      const result = await checkKycStatus();
       if (result.success && result.verificationStatus) {
         const previousStatus = previousStatusRef.current;
         const newStatus = result.verificationStatus;
@@ -425,7 +425,7 @@ export default function KycStep({
                     variant="primary"
                     onClick={async () => {
                       // Verificar el estado antes de redirigir
-                      const result = await checkKycStatus(organizationId);
+                      const result = await checkKycStatus();
                       // Si está verificado, activar cuenta y redirigir
                       // Si no, redirigir directamente al dashboard (el usuario ya tiene contraseña configurada)
                       if (result.success && result.verificationStatus === 'VERIFIED') {

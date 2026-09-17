@@ -1,6 +1,11 @@
 import type { Storage as GCSStorageType } from '@google-cloud/storage';
 
-export type UploadType = 'product' | 'item' | 'issue' | 'org-logo';
+const UPLOAD_TYPES = ['product', 'item', 'issue', 'org-logo'] as const;
+export type UploadType = (typeof UPLOAD_TYPES)[number];
+
+export function isUploadType(value: unknown): value is UploadType {
+  return UPLOAD_TYPES.some((type) => type === value);
+}
 
 export interface StorageProvider {
   saveImage(file: File, type: UploadType): Promise<{ url: string; bytes: number; contentType: string }>;
