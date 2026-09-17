@@ -34,7 +34,6 @@ export interface LoginPageLayoutProps {
   brandColorSecondary?: string;
   poweredByText?: string;
   /** Right panel */
-  role?: 'admin';
   subtitle: string;
   emailPlaceholder: string;
   passwordPlaceholder: string;
@@ -59,7 +58,6 @@ export default function LoginPageLayout({
   brandColor = '#1752CC',
   brandColorSecondary,
   poweredByText,
-  role,
   subtitle,
   emailPlaceholder,
   passwordPlaceholder,
@@ -185,7 +183,7 @@ export default function LoginPageLayout({
           </div>
 
           <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#0f172a', marginBottom: '0.4rem', lineHeight: 1.2 }}>
-            Bienvenido
+            {t('welcome')}
           </h1>
           {orgName && (
             <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '2.25rem' }}>

@@ -56,7 +56,6 @@ export async function middleware(request: NextRequest) {
   const publicRoutes = [
     '/auth/admin/login',
     '/auth/activate',
-    '/auth/error',
     '/api/auth/admin',
     '/favicon.ico',
     '/_next',

@@ -307,21 +307,20 @@
           "invalidCredentials": "Invalid credentials",
           "loginError": "Error logging in"
         },
-        "togglePassword": "Show or hide the password"
+        "togglePassword": "Show or hide the password",
+        "welcome": "Welcome"
       },
       "superadmin": {
-        "title": "Datia",
         "subtitle": "Super Administrator Panel",
-        "emailLabel": "Email",
         "emailPlaceholder": "superadmin@example.com",
-        "passwordLabel": "Password",
         "passwordPlaceholder": "••••••••",
         "accessing": "Accessing...",
         "access": "Access",
-        "exclusiveAccess": "Exclusive access for Super Administrators",
         "errors": {
           "loginError": "Error logging in",
-          "connectionError": "Connection error"
+          "connectionError": "Connection error",
+          "invalidCredentials": "Invalid credentials",
+          "tooManyAttempts": "Too many attempts. Please try again later."
         }
       },
       "loading": "Loading...",
@@ -393,51 +392,6 @@
         "title": "All set!",
         "redirecting": "Redirecting to dashboard..."
       }
-    },
-    "error": {
-      "accessDenied": {
-        "title": "Access Denied",
-        "message": "You do not have permission to access this page.",
-        "description": "Your account does not have the necessary privileges to access the requested area.",
-        "action": "Back to Dashboard"
-      },
-      "unauthorized": {
-        "title": "Unauthorized",
-        "message": "You must log in to continue.",
-        "description": "Your session has expired or you have not logged in.",
-        "action": "Log In"
-      },
-      "configuration": {
-        "title": "Configuration Error",
-        "message": "There is a problem with the server configuration.",
-        "description": "Contact the system administrator.",
-        "action": "Back to Home"
-      },
-      "default": {
-        "title": "Authentication Error",
-        "message": "An unexpected error occurred.",
-        "description": "Try again or contact the administrator.",
-        "action": "Log In"
-      },
-      "goBack": "Go Back",
-      "loading": "Loading..."
-    },
-    "verification": {
-      "title": "Verification Error",
-      "subtitle": "Could not complete your identity verification",
-      "whatHappened": "What happened?",
-      "description": "There was a problem during the identity verification process. This may be due to:",
-      "reasons": {
-        "documents": "Unreadable or blurry documents",
-        "incorrectInfo": "Incorrect information provided",
-        "technicalIssues": "Temporary technical issues",
-        "invalidDocuments": "Invalid or expired documents"
-      },
-      "importantNote": "Important Note",
-      "organizationLevel": "Identity verification is now performed at the organization level. Contact your organization administrator to complete the KYC process.",
-      "contactSupport": "Contact Support",
-      "backToLogin": "Back to Login",
-      "continueProblems": "If you continue to have problems, please contact our technical support team."
     }
   },
   "customer": {

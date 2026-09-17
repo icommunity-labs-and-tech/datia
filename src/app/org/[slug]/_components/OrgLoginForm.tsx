@@ -73,7 +73,6 @@ function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSeconda
       brandColor={brandColor}
       brandColorSecondary={brandColorSecondary}
       poweredByText={t('poweredBy')}
-      role="admin"
       subtitle={t('subtitle')}
       emailPlaceholder={t('emailPlaceholder')}
       passwordPlaceholder={t('passwordPlaceholder')}
