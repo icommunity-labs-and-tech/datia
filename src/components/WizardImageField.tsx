@@ -9,7 +9,7 @@ interface WizardImageFieldProps {
   label: string;
   value?: string;
   onChange: (value: string) => void;
-  uploadType: 'product' | 'item' | 'issue';
+  uploadType: 'product' | 'item';
   required?: boolean;
   compact?: boolean; // Nueva prop para layout compacto
 }

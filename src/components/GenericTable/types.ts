@@ -64,9 +64,8 @@ export type GenericTableProps<TFormData = Record<string, unknown>> = {
   attachmentId?: string;
   actions?: TableAction[];
   customColumns?: CustomColumn[];
-  uploadType?: 'product' | 'item' | 'issue';
+  uploadType?: 'product' | 'item';
   customFormContent?: ReactNode | ((ctx: { formState: Record<string, any>; setFormState: (s: Record<string, any>) => void }) => ReactNode);
-  isIssueTemplate?: boolean;
   // Nuevas props para configuración de columnas
   columnConfig?: ColumnConfig[];
   columnConfigOptions?: ColumnConfigOptions;

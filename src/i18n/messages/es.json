@@ -269,14 +269,9 @@
       "fieldRequired": "El campo \"{label}\" es obligatorio",
       "loadCategoryError": "Error cargando activos de la categoría",
       "loadItemError": "No se pudo cargar el activo seleccionado",
-      "newState": "Nuevo Estado",
       "loadingProducts": "Cargando activos…",
       "dontCopy": "No copiar",
-      "copyHelp": "Se copiarán nombre, descripción, imagen y campos de template. Tu ID se mantiene.",
-      "evidenceSizeExceeded": "El tamaño estimado de la evidencia supera el máximo de",
-      "totalEstimated": "Total estimado:",
-      "aboveLimit": "por encima",
-      "imageDetails": "Detalle de imágenes:"
+      "copyHelp": "Se copiarán nombre, descripción, imagen y campos de template. Tu ID se mantiene."
     }
   },
   "dates": {
