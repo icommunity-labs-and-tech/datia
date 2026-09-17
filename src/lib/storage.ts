@@ -1,6 +1,6 @@
 import type { Storage as GCSStorageType } from '@google-cloud/storage';
 
-const UPLOAD_TYPES = ['product', 'item', 'issue', 'org-logo'] as const;
+const UPLOAD_TYPES = ['product', 'item', 'org-logo'] as const;
 export type UploadType = (typeof UPLOAD_TYPES)[number];
 
 export function isUploadType(value: unknown): value is UploadType {
@@ -33,7 +33,7 @@ export class GCSStorageProvider implements StorageProvider {
   }
 
   async saveImage(file: File, type: UploadType) {
-    if (!['product', 'item', 'issue', 'org-logo'].includes(type)) throw new Error('Invalid upload type');
+    if (!isUploadType(type)) throw new Error('Invalid upload type');
     if (!file.type.startsWith('image/')) throw new Error('El archivo debe ser una imagen');
 
     const bytes = await file.arrayBuffer();

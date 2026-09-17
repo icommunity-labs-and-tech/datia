@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import type { FormTemplate } from './GenericTable';
 import WizardImageField from './WizardImageField';
-import ImageConfigSection from './ImageConfigSection';
 import CategoryTagsInput from './CategoryTagsInput';
 
 type ItemCreationWizardProps = {
@@ -21,8 +20,7 @@ type ItemCreationWizardProps = {
   allowTemplateEditing?: boolean;
   attachmentId?: string;
   customFormContent?: React.ReactNode;
-  isIssueTemplate?: boolean;
-  uploadType?: 'product' | 'item' | 'issue';
+  uploadType?: 'product' | 'item';
   onCategoryChange?: (categoryId: string | null) => void;
 };
 
@@ -38,7 +36,6 @@ export default function ItemCreationWizard({
   allowTemplateEditing = true,
   attachmentId,
   customFormContent,
-  isIssueTemplate = false,
   uploadType = 'item',
   onCategoryChange
 }: ItemCreationWizardProps) {
@@ -48,11 +45,6 @@ export default function ItemCreationWizard({
   const [categoryItems, setCategoryItems] = useState<Array<{ id: string; name: string }>>([]);
   const [isLoadingCategoryItems, setIsLoadingCategoryItems] = useState(false);
   const [selectedCopyItemId, setSelectedCopyItemId] = useState<string>('');
-  const [imageConfig, setImageConfig] = useState({
-    allowMultipleImages: false,
-    maxImages: 1,
-  });
-  const [preflight, setPreflight] = useState<{ overLimit: boolean; totalBytes: number; limitBytes: number } | null>(null);
 
   // Reset wizard state when modal opens/closes
   useEffect(() => {
@@ -62,30 +54,6 @@ export default function ItemCreationWizard({
       setSelectedCopyItemId('');
     }
   }, [show]);
-
-  // Preflight check for issues
-  useEffect(() => {
-    if (!isIssueTemplate) return;
-    const imageUrls: string[] = formState?.imageUrls || [];
-    const description = String(formState?.description || '');
-    
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch('/api/issues/preflight', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrls, description }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setPreflight({ overLimit: data.overLimit, totalBytes: data.totalBytes, limitBytes: data.limitBytes });
-        } else setPreflight(null);
-      } catch {
-        setPreflight(null);
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [isIssueTemplate, formState?.imageUrls, formState?.description]);
 
   // Load category items when categories are selected
   useEffect(() => {
@@ -221,10 +189,6 @@ export default function ItemCreationWizard({
         ...restFormState,
         categoryIds: formState?.categoryIds || (categoryId ? [categoryId] : []),
         ...(attachmentId ? { attachmentId: attachmentId } : {}),
-        ...(isIssueTemplate ? {
-          allowMultipleImages: imageConfig.allowMultipleImages,
-          maxImages: imageConfig.maxImages,
-        } : {}),
       };
       await onSubmit(finalData);
     } catch (err: any) {
@@ -233,7 +197,6 @@ export default function ItemCreationWizard({
   };
 
   const getModalIcon = () => {
-    if (isIssueTemplate) return 'bi bi-journal-plus';
     const isUserForm = formTemplate.some(field =>
       field.name === 'email' || field.name === 'role'
     );
@@ -241,16 +204,11 @@ export default function ItemCreationWizard({
     switch (uploadType) {
       case 'item': return 'bi bi-box-seam';
       case 'product': return 'bi bi-folder-plus';
-      case 'issue': return 'bi bi-journal-plus';
       default: return 'bi bi-plus-circle';
     }
   };
 
   const getModalTitle = () => {
-    if (isIssueTemplate) {
-      return 'Nuevo Estado';
-    }
-
     const isUserForm = formTemplate.some(field =>
       field.name === 'email' || field.name === 'role'
     );
@@ -264,8 +222,6 @@ export default function ItemCreationWizard({
         return 'Crear Nuevo Item';
       case 'product':
         return 'Añadir Categoría';
-      case 'issue':
-        return 'Nuevo Estado';
       default:
         return 'Añadir Elemento';
     }
@@ -561,32 +517,6 @@ export default function ItemCreationWizard({
           </>
         )}
 
-        {isIssueTemplate && (
-          <>
-            <hr className="my-3" />
-            <ImageConfigSection
-              allowMultipleImages={imageConfig.allowMultipleImages}
-              maxImages={imageConfig.maxImages}
-              onConfigChange={setImageConfig}
-            />
-          </>
-        )}
-
-        {preflight?.overLimit && (
-          <Alert variant="warning" className="mt-3">
-            <div className="mb-2">
-              El tamaño estimado de la evidencia supera el máximo de
-              {' '}
-              <strong>{(preflight.limitBytes / (1024 * 1024)).toFixed(0)} MB</strong>.
-            </div>
-            <div className="mb-2">
-              Total estimado: <strong>{(preflight.totalBytes / (1024 * 1024)).toFixed(2)} MB</strong>
-            </div>
-            <div className="mb-0">
-              Sugerencia: reduce la calidad o resolución de las fotos antes de adjuntarlas.
-            </div>
-          </Alert>
-        )}
       </div>
     );
   };

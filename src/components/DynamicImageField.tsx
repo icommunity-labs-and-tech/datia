@@ -9,7 +9,7 @@ interface DynamicImageFieldProps {
   label: string;
   value?: string;
   onChange: (value: string) => void;
-  uploadType: 'product' | 'item' | 'issue';
+  uploadType: 'product' | 'item';
   className?: string;
   required?: boolean;
 }

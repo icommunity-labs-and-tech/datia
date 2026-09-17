@@ -6,10 +6,8 @@ import { Form } from '@/components/legacy/bootstrap-compat';
 import { Stack } from '@/components/legacy/bootstrap-compat';
 import { useEffect, useState } from 'react';
 import type { FormTemplate } from './GenericTable';
-import ImageConfigSection from './ImageConfigSection';
 import DynamicImageField from './DynamicImageField';
 import { Alert } from '@/components/legacy/bootstrap-compat';
-import { ListGroup } from '@/components/legacy/bootstrap-compat';
 import ItemCreationWizard from './ItemCreationWizard';
 import { checkEmailExists } from '@/actions/users';
 import { useTranslations } from 'next-intl';
@@ -24,8 +22,7 @@ type AddItemModalProps = {
   allowTemplateEditing?: boolean;
   attachmentId?: string;
   customFormContent?: React.ReactNode;
-  isIssueTemplate?: boolean;
-  uploadType?: 'product' | 'item' | 'issue';
+  uploadType?: 'product' | 'item';
   onCategoryChange?: (categoryId: string | null) => void;
   useWizard?: boolean; // Nueva prop para activar el wizard
   modalTitle?: string; // Título personalizado para el modal
@@ -41,17 +38,11 @@ export default function AddItemModal({
   allowTemplateEditing = true,
   attachmentId,
   customFormContent,
-  isIssueTemplate = false,
   uploadType = 'product',
   onCategoryChange,
   useWizard = false,
   modalTitle
 }: AddItemModalProps) {
-  const [imageConfig, setImageConfig] = useState({
-    allowMultipleImages: false,
-    maxImages: 1,
-  });
-  const [preflight, setPreflight] = useState<{ overLimit: boolean; totalBytes: number; limitBytes: number } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [categoryItems, setCategoryItems] = useState<Array<{ id: string; name: string }>>([]);
   const [isLoadingCategoryItems, setIsLoadingCategoryItems] = useState(false);
@@ -62,30 +53,6 @@ export default function AddItemModal({
   const tValidation = useTranslations('common.validation');
   const tCommon = useTranslations('common.actions');
   const tForms = useTranslations('forms');
-
-  useEffect(() => {
-    // Only for issue creation, estimate payload size and warn
-    if (!isIssueTemplate) return;
-    const imageUrls: string[] = formState?.imageUrls || [];
-    const description = String(formState?.description || '');
-    // quick debounce-like
-    const t = setTimeout(async () => {
-      try {
-        const res = await fetch('/api/issues/preflight', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageUrls, description }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setPreflight({ overLimit: data.overLimit, totalBytes: data.totalBytes, limitBytes: data.limitBytes });
-        } else setPreflight(null);
-      } catch {
-        setPreflight(null);
-      }
-    }, 300);
-    return () => clearTimeout(t);
-  }, [isIssueTemplate, formState?.imageUrls, formState?.description]);
 
   // Validación en tiempo real del email para formularios de usuario
   useEffect(() => {
@@ -153,7 +120,6 @@ export default function AddItemModal({
 
   // Función para obtener el icono del modal basado en el contexto
   const getModalIcon = () => {
-    if (isIssueTemplate) return 'bi bi-journal-plus';
     const isUserForm = formTemplate.some(field =>
       field.name === 'email' || field.name === 'role'
     );
@@ -161,7 +127,6 @@ export default function AddItemModal({
     switch (uploadType) {
       case 'item': return 'bi bi-box-seam';
       case 'product': return 'bi bi-folder-plus';
-      case 'issue': return 'bi bi-journal-plus';
       default: return 'bi bi-plus-circle';
     }
   };
@@ -171,10 +136,6 @@ export default function AddItemModal({
     // Si se proporciona un título personalizado, usarlo
     if (modalTitle) {
       return modalTitle;
-    }
-
-    if (isIssueTemplate) {
-      return t('newState');
     }
 
     // Detectar si es un formulario de usuario por los campos específicos
@@ -191,8 +152,6 @@ export default function AddItemModal({
         return t('addProduct');
       case 'product':
         return t('addCategory');
-      case 'issue':
-        return tForms('addState');
       default:
         return t('addElement');
     }
@@ -236,10 +195,6 @@ export default function AddItemModal({
       const finalData = {
         ...(formState || {}),
         ...(attachmentId ? { attachmentId: attachmentId } : {}),
-        ...(isIssueTemplate ? {
-          allowMultipleImages: imageConfig.allowMultipleImages,
-          maxImages: imageConfig.maxImages,
-        } : {}),
       };
       await onSubmit(finalData);
     } catch (err: any) {
@@ -490,7 +445,6 @@ export default function AddItemModal({
         allowTemplateEditing={allowTemplateEditing}
         attachmentId={attachmentId}
         customFormContent={customFormContent}
-        isIssueTemplate={isIssueTemplate}
         uploadType={uploadType}
         onCategoryChange={onCategoryChange}
       />
@@ -511,58 +465,12 @@ export default function AddItemModal({
             </Alert>
           )}
 
-          {preflight?.overLimit && (
-            <Alert variant="warning">
-              <div className="mb-2">
-                {t('evidenceSizeExceeded')}
-                {' '}
-                <strong>{(preflight.limitBytes / (1024 * 1024)).toFixed(0)} MB</strong>.
-              </div>
-              <div className="mb-2">
-                {t('totalEstimated')} <strong>{(preflight.totalBytes / (1024 * 1024)).toFixed(2)} MB</strong>
-                {' '}(
-                +{((preflight.totalBytes - preflight.limitBytes) / (1024 * 1024)).toFixed(2)} MB {t('aboveLimit')})
-              </div>
-              {Array.isArray(formState?.imageUrls) && formState?.imageUrls.length > 0 && (
-                <>
-                  <div className="mb-1">{t('imageDetails')}</div>
-                  <ListGroup className="mb-2">
-                    {formState?.imageUrls?.map((u: string, idx: number) => {
-                      const bytes = (preflight as any)?.items?.find((it: any) => it.url === u)?.bytes ?? 0;
-                      const sizeMB = (bytes / (1024 * 1024)).toFixed(2);
-                      return (
-                        <ListGroup.Item key={idx} className="d-flex justify-content-between align-items-center">
-                          <span className="text-truncate" style={{ maxWidth: 360 }} title={u}>{u}</span>
-                          <span className="ms-2">{sizeMB} MB</span>
-                        </ListGroup.Item>
-                      );
-                    })}
-                  </ListGroup>
-                </>
-              )}
-              <div className="mb-0">
-                Sugerencia: reduce la calidad o resolución de las fotos antes de adjuntarlas
-                para cumplir el límite. El número de fotos lo define el template del issue.
-              </div>
-            </Alert>
-          )}
           
           {formTemplate.filter(field => field && field.name).map((field) => renderField(field))}
 
           {customFormContent && (
             <>
               {customFormContent}
-            </>
-          )}
-
-          {isIssueTemplate && (
-            <>
-              <hr className="my-3" />
-              <ImageConfigSection
-                allowMultipleImages={imageConfig.allowMultipleImages}
-                maxImages={imageConfig.maxImages}
-                onConfigChange={setImageConfig}
-              />
             </>
           )}
         </Form>

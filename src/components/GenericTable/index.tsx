@@ -28,7 +28,6 @@ export default function GenericTable<TFormData = Record<string, unknown>>({
   customColumns = [],
   uploadType = 'product',
   customFormContent,
-  isIssueTemplate = false,
   filterPlaceholder,
   addButtonLabel,
   modalTitle,
@@ -187,7 +186,6 @@ export default function GenericTable<TFormData = Record<string, unknown>>({
               ? customFormContent({ formState, setFormState })
               : customFormContent
           }
-          isIssueTemplate={isIssueTemplate}
           uploadType={uploadType}
           modalTitle={modalTitle}
         />

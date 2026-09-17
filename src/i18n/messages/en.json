@@ -269,14 +269,9 @@
       "fieldRequired": "The field \"{label}\" is required",
       "loadCategoryError": "Error loading assets from category",
       "loadItemError": "Could not load selected asset",
-      "newState": "New State",
       "loadingProducts": "Loading assets…",
       "dontCopy": "Don't copy",
-      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved.",
-      "evidenceSizeExceeded": "The estimated evidence size exceeds the maximum of",
-      "totalEstimated": "Estimated total:",
-      "aboveLimit": "above",
-      "imageDetails": "Image details:"
+      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved."
     }
   },
   "dates": {
