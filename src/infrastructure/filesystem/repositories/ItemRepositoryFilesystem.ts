@@ -225,10 +225,6 @@ export const itemRepositoryFilesystem: ItemRepository = {
     return [];
   },
 
-  async findAll(): Promise<ItemRecord[]> {
-    return readRaw().map(toRecord);
-  },
-
   async listPaginated(organizationId, params) {
     const items = readRaw()
       .filter((r) => r.organizationId === organizationId)

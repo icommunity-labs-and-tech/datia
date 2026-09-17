@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { requireOrganizationId } from "@/lib/auth/tenant";
 
 export interface KycStatusResult {
   success: boolean;
@@ -10,43 +11,13 @@ export interface KycStatusResult {
 }
 
 /**
- * Verifica el estado actual del KYC de una organización
- * Puede recibir organizationId o activationToken
+ * Estado del KYC de la organización de la sesión. Se llama durante el
+ * onboarding, cuando la activación ya ha abierto sesión; antes aceptaba
+ * cualquier organizationId sin sesión y devolvía su kycURL.
  */
-export async function checkKycStatus(
-  organizationId?: string,
-  activationToken?: string
-): Promise<KycStatusResult> {
+export async function checkKycStatus(): Promise<KycStatusResult> {
   try {
-    let organizationIdToCheck: string | null = null;
-
-    // Si se proporciona organizationId, usarlo directamente
-    if (organizationId) {
-      organizationIdToCheck = organizationId;
-    }
-    // Si se proporciona activationToken, obtener organizationId del usuario
-    else if (activationToken) {
-      const user = await prisma.user.findFirst({
-        where: { activationToken },
-        select: {
-          organizationId: true,
-        },
-      });
-
-      if (!user || !user.organizationId) {
-        return {
-          success: false,
-          error: "Token de activación inválido o usuario sin organización",
-        };
-      }
-
-      organizationIdToCheck = user.organizationId;
-    } else {
-      return {
-        success: false,
-        error: "Se requiere organizationId o activationToken",
-      };
-    }
+    const organizationIdToCheck = await requireOrganizationId();
 
     // Obtener estado de la organización
     const organization = await prisma.organization.findUnique({
