@@ -14,19 +14,14 @@ const toDomain = (t: any): ApiTokenRecord => ({
 export const apiTokenRepository: ApiTokenRepository = {
   async create(input: CreateApiTokenInput): Promise<ApiTokenRecord> {
     try {
-      if (!prisma.apiToken) {
-        throw new DbError(
-          { error: 'Prisma Client no tiene el modelo apiToken. Reinicia el servidor de desarrollo.' },
-          'Prisma Client no tiene el modelo apiToken. Por favor, reinicia el servidor de desarrollo.'
-        );
-      }
       const token = await prisma.apiToken.create({
         data: {
+          id: crypto.randomUUID(),
           name: input.name,
           tokenHash: input.tokenHash,
           organizationId: input.organizationId,
           expiresAt: input.expiresAt ?? null,
-        } as any,
+        },
       });
       return toDomain(token);
     } catch (e: any) {

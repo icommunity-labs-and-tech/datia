@@ -4,7 +4,7 @@ import { getSwaggerSpec } from '@/lib/swagger/config';
 export async function GET() {
   try {
     // Try to generate spec from JSDoc comments
-    const openApiSpec = getSwaggerSpec() as any;
+    const openApiSpec = getSwaggerSpec() as { paths?: Record<string, unknown> };
     // Log paths found for debugging
     if (process.env.NODE_ENV === 'development') {
       console.log('Swagger spec paths found:', Object.keys(openApiSpec.paths || {}));

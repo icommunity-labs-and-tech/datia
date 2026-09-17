@@ -5,7 +5,6 @@ export * from './delete';
 export * from './get';
 export * from './list';
 export * from './update';
-export * from './updateSigningPreference';
 
 // Backward-compat exports expected in tests
 export { getUserById as getUser } from './get';

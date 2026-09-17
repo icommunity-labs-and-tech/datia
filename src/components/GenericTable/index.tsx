@@ -150,7 +150,7 @@ export default function GenericTable<TFormData = Record<string, unknown>>({
             table={{
               getHeaderGroups: table.getHeaderGroups,
               getRowModel: () => ({ rows: paginatedRows }),
-            } as any}
+            }}
             selectedRow={selectedRow}
             setSelectedRow={setSelectedRow}
             lastAddedId={lastAddedId}
@@ -184,7 +184,7 @@ export default function GenericTable<TFormData = Record<string, unknown>>({
           attachmentId={attachmentId}
           customFormContent={
             typeof customFormContent === 'function'
-              ? (customFormContent as any)({ formState, setFormState })
+              ? customFormContent({ formState, setFormState })
               : customFormContent
           }
           isIssueTemplate={isIssueTemplate}

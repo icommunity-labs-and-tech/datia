@@ -98,18 +98,27 @@ function paginateStates<T extends { id: string; createdAt: Date }>(
 
 // ── Repository implementation ──────────────────────────────────────────────
 
-export const stateRepositoryFilesystem: StateRepository = {
-  async create(input: CreateStateInput): Promise<StateRecord> {
+// El sandbox guarda desnormalizados la organización y el tipo de estado.
+export type SandboxCreateStateInput = CreateStateInput & {
+  organizationId?: string;
+  statusTypeName?: string;
+  statusTypeDescription?: string | null;
+};
+
+export const stateRepositoryFilesystem: StateRepository & {
+  create(input: SandboxCreateStateInput): Promise<StateRecord>;
+} = {
+  async create(input: SandboxCreateStateInput): Promise<StateRecord> {
     const all = readRaw();
     const now = new Date();
     const record: PersistedState = {
       id: randomUUID(),
-      organizationId: (input as any).organizationId ?? 'sandbox',
+      organizationId: input.organizationId ?? 'sandbox',
       title: input.title,
       description: input.description,
       statusTypeId: input.statusTypeId,
-      statusTypeName: (input as any).statusTypeName ?? '',
-      statusTypeDescription: (input as any).statusTypeDescription ?? null,
+      statusTypeName: input.statusTypeName ?? '',
+      statusTypeDescription: input.statusTypeDescription ?? null,
       itemId: input.itemId,
       imageUrls: input.imageUrls ?? null,
       evidenceID: null,

@@ -99,8 +99,7 @@ export async function createItemWithEvidence(
       itemTemplate: input.itemTemplate ?? [],
       templateFields: input.templateFields ?? null,
       createdByUserId: userId,
-      categoryIds: input.categoryIds, // Pass categoryIds for legacy categoryId field
-    } as any);
+    });
   } catch (e) {
     throw new ItemCreationRollbackError(
       input.id,

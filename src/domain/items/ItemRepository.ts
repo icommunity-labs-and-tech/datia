@@ -8,7 +8,7 @@ export interface CreateItemInput {
   imageUrl?: string | null;
   itemTemplate?: any[];
   templateFields?: Record<string, any> | null;
-  createdByUserId: string;
+  createdByUserId: string | null;
 }
 
 export interface ItemRecord {

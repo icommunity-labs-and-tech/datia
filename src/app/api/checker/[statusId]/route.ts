@@ -12,11 +12,9 @@ function getClientIp(req: NextRequest): string {
   if (xff) return xff.split(',')[0].trim();
   const realIp = req.headers.get('x-real-ip');
   if (realIp) return realIp.trim();
-  try {
-    return (req as any).ip || 'unknown';
-  } catch {
-    return 'unknown';
-  }
+  // NextRequest ya no expone `ip` (Next 15); detrás de Cloud Run siempre
+  // llega x-forwarded-for.
+  return 'unknown';
 }
 
 function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {

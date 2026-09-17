@@ -11,7 +11,7 @@ import { IconCalendar, IconListNumbers, IconMap, IconMapPin, IconTag } from '@ta
 // Fix para los iconos de Leaflet en Next.js - solo ejecutar en cliente
 if (typeof window !== 'undefined') {
   try {
-    delete (L.Icon.Default.prototype as any)._getIconUrl;
+    delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
     L.Icon.Default.mergeOptions({
       iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
       iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
@@ -22,18 +22,18 @@ if (typeof window !== 'undefined') {
   }
 }
 
-interface StateWithLocation {
+export interface StateWithLocation {
   id: string;
-  title: string;
-  description?: string;
+  title?: string | null;
+  description?: string | null;
   createdAt?: Date | string;
-  templateConfig?: any;
+  templateConfig?: unknown;
   statusType?: {
-    name: string;
-  };
+    name?: string;
+  } | null;
 }
 
-interface ItemStatesMapProps {
+export interface ItemStatesMapProps {
   states: StateWithLocation[];
 }
 
@@ -225,16 +225,17 @@ export default function ItemStatesMap({ states }: ItemStatesMapProps) {
         scrollWheelZoom={true}
         bounds={bounds?.bounds}
         boundsOptions={{ padding: [80, 80], maxZoom: 18 }}
-        whenReady={((map: any) => {
+        // react-leaflet declara whenReady sin argumentos, pero lo pasa a
+        // map.whenReady de Leaflet, que lo llama con { target: map }.
+        whenReady={((event: { target: L.Map }) => {
           // Ajustar automáticamente el zoom cuando el mapa esté listo
           if (bounds && statesWithLocations.length > 1) {
-            const leafletMap = map.target;
-            leafletMap.fitBounds(bounds.bounds, {
+            event.target.fitBounds(bounds.bounds, {
               padding: [80, 80],
               maxZoom: 18,
             });
           }
-        }) as any}
+        }) as () => void}
       >
         <TileLayer
           attribution={LeafletMapConfig.tileLayerAttribution}

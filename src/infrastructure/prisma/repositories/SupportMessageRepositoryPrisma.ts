@@ -40,7 +40,7 @@ export const supportMessageRepository: SupportMessageRepository = {
     });
     return rows.map((row) => ({
       ...toDomain(row),
-      organizationName: (row as any).Organization?.nombre ?? null,
+      organizationName: row.Organization?.nombre ?? null,
     }));
   },
 

@@ -2,21 +2,7 @@
 
 import dynamic from 'next/dynamic';
 import { Center, Loader, Stack, Text } from '@mantine/core';
-
-interface StateWithLocation {
-  id: string;
-  title: string;
-  description?: string;
-  createdAt?: Date | string;
-  templateConfig?: any;
-  statusType?: {
-    name: string;
-  };
-}
-
-interface ItemStatesMapProps {
-  states: StateWithLocation[];
-}
+import type { ItemStatesMapProps } from './ItemStatesMap';
 
 // Cargar el componente del mapa solo en el cliente
 const ItemStatesMapInternal = dynamic(

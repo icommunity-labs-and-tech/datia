@@ -88,8 +88,9 @@ export async function POST(
         itemId,
         templateConfig: templateConfig ?? null,
         createdByUserId: 'sandbox',
-        // Extra fields consumed by the filesystem repo for denormalized storage
-        ...({ organizationId, statusTypeName: statusType.name, statusTypeDescription: statusType.description } as any),
+        organizationId,
+        statusTypeName: statusType.name,
+        statusTypeDescription: statusType.description,
       });
 
       return NextResponse.json(

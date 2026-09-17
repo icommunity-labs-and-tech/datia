@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
-import { routing } from './i18n/routing';
+import { isLocale, routing } from './i18n/routing';
 import { getAdminJwtSecret } from './lib/auth/admin/config';
 
 function getLocale(request: NextRequest): string {
   const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
-  if (cookieLocale && routing.locales.includes(cookieLocale as any)) {
+  if (isLocale(cookieLocale)) {
     return cookieLocale;
   }
 
@@ -20,7 +20,7 @@ function getLocale(request: NextRequest): string {
       .sort((a, b) => b.quality - a.quality);
 
     for (const { locale } of languages) {
-      if (routing.locales.includes(locale as any)) {
+      if (isLocale(locale)) {
         return locale;
       }
     }

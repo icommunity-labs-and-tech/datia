@@ -64,8 +64,8 @@ export function withApiTracking<T extends Record<string, any>>(
       return response;
     } catch (error) {
       const statusCode =
-        error instanceof Error && 'status' in error
-          ? (error as any).status
+        error instanceof Error && 'status' in error && typeof error.status === 'number'
+          ? error.status
           : 500;
 
       trackApiCall({

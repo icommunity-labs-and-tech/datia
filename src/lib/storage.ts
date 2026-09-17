@@ -52,7 +52,7 @@ export class GCSStorageProvider implements StorageProvider {
       contentType: file.type,
       resumable: false,
       validation: 'crc32c',
-    } as any);
+    });
 
     // Public URL (bucket should allow public read on objects)
     const url = `https://storage.googleapis.com/${this.bucketName}/${objectPath}`;
