@@ -26,31 +26,38 @@ evidencia y la verificación sigue siendo válido.
 Cliente            Datia                                  iBS
   │─POST /api/v1/emissions─▶│                               │
   │                         │ guarda EmissionRecord          │
-  │                         │ crea State (evidenceID 'pending', backed=false)
   │                         │─POST /v2/evidences────────────▶│
   │                         │◀─201 {evidenceID}─────────────│
-  │                         │ State.evidenceID = evidenceID  │
+  │                         │ crea Certification ISSUED y la │
+  │                         │ enlaza a la emisión            │
   │◀─201 certification:     │                               │
   │   pending_anchor        │                               │
   │                         │        (unos 10–15 s después)  │
   │                         │◀─webhook evidence.certified───│
   │                         │─GET /v2/evidences/{id}────────▶│
   │                         │◀─status certified, hash, red──│
-  │                         │ State backed=true + hash, red, │
-  │                         │ enlaces al checker y explorador│
-  │                         │ EmissionRecord VERIFIED        │
+  │                         │ Certification CERTIFIED + hash,│
+  │                         │ red, enlaces checker/explorador│
+  │                         │ emisiones cubiertas VERIFIED   │
   │                         │ EventLog co2_certification_event
 ```
 
 El registro solo pasa a `VERIFIED` cuando la transacción está en cadena, no al
 recibir el 201.
 
+La prueba vive en la entidad `Certification` (#37, septiembre de 2026). Antes se
+guardaba como un `State` con el tipo de estado «Certificación Energética» y la
+prueba dentro de `templateConfig`; la migración `20260918100000_certification_entity`
+copió esas pruebas. Una certificación puede cubrir varias emisiones: las
+mensuales del simulador BMS cubren todas las lecturas del mes
+(`EmissionRecord.certificationId`).
+
 La respuesta de `POST /api/v1/emissions` lleva el estado de la certificación:
 
 | `certification` | Significa |
 |---|---|
 | `{ status: 'pending_anchor', evidenceId }` | Evidencia emitida; falta la confirmación de iBS |
-| `{ status: 'pending', reason: '<error>' }` | iBS falló; el `State` provisional se borra y el registro queda pendiente |
+| `{ status: 'pending', reason: '<error>' }` | iBS rechazó la evidencia; no se escribe nada y el registro queda sin prueba |
 | `{ status: 'pending', reason: 'not_anchored_yet' }` | La organización no puede firmar: sin `signatureID` o sin `verificationStatus = VERIFIED` |
 
 ## Webhooks registrados en iBS
@@ -84,25 +91,23 @@ en la documentación pública de iBS.
 
 No hay barridos ni tareas programadas: se decidió así en septiembre de 2026
 (#34). La certificación se apoya en los webhooks de iBS. Si un registro queda
-pendiente porque iBS falló al ingerirlo, o si un webhook no llega, la
+sin prueba porque iBS falló al ingerirlo, `POST /api/v1/emissions/{id}/certify`
+lo ancla de nuevo con el mismo código que la ingesta. Si un webhook no llega, la
 discrepancia se corrige a mano.
-
-`src/lib/energy/anchor-service.ts` conserva `anchorPendingEmissions` y
-`confirmAnchoredEvidences`, envueltos en `src/actions/energy/anchor-pending.ts`,
-pero nada los llama. Se revisarán en la limpieza de #24.
 
 ## El simulador BMS es otra cosa
 
 El simulador del Energy Hub es solo para demostraciones. Genera lecturas
 diarias y emite **una evidencia mensual agregada** (`emissionRecordIds` en el
-`templateConfig`) para que un año quepa en unos 30 segundos. No refleja cómo
+`payload` de la certificación) para que un año quepa en unos 30 segundos. No refleja cómo
 certifica la plataforma en producción, y el aviso del propio modal lo dice.
 
 ## Ficheros
 
 | Fichero | Qué hace |
 |---|---|
-| `src/lib/energy/anchor-service.ts` | Anclaje por registro, barridos y `applyCertification` |
+| `src/lib/certification/index.ts` | Emite la certificación (`issueCertification`) y la confirma (`applyCertification`) |
+| `src/lib/energy/anchor-service.ts` | Anclaje por registro de emisiones |
 | `src/app/api/v1/emissions/route.ts` | Ingesta; ancla tras guardar |
 | `src/app/api/hooks/evidence/route.ts` | Recibe `evidence.certified` |
 | `src/app/api/v1/emissions/__tests__/create.test.ts` | Ingesta y anclaje |

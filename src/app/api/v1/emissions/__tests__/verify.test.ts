@@ -4,7 +4,7 @@ import { NextRequest } from 'next/server';
 const ORG_ID = 'org-test-1';
 const EMISSION_ID = 'emission-test-1';
 const ITEM_ID = 'item-test-1';
-const STATE_ID = 'state-test-1';
+const CERT_ID = 'cert-test-1';
 const EVIDENCE_ID = 'ev-blockchain-1';
 
 const certifiedAt = '2026-07-15T10:00:00.000Z';
@@ -28,7 +28,7 @@ const storedEvidenceJson = JSON.stringify(
   {
     description: 'Emisión certificada por AENOR según ISO 14064-3',
     imageUrls: [],
-    id: STATE_ID,
+    id: CERT_ID,
     itemId: ITEM_ID,
     title: 'Certificación Energética — 42.5 kg CO₂e',
     createdAt: certifiedAt,
@@ -42,7 +42,6 @@ const { mockValidateApiToken, mockPrisma, mockGetEvidence } = vi.hoisted(() => (
   mockValidateApiToken: vi.fn(),
   mockPrisma: {
     emissionRecord: { findFirst: vi.fn() },
-    eventLog: { findFirst: vi.fn() },
   },
   mockGetEvidence: vi.fn(),
 }));
@@ -78,15 +77,13 @@ const baseEmission = {
       Item: { id: ITEM_ID, organizationId: ORG_ID },
     },
   },
-};
-
-const baseCertEvent = {
-  id: 'evt-1',
-  organizationId: ORG_ID,
-  eventType: 'co2_certification_event',
-  entityId: EMISSION_ID,
-  data: { stateId: STATE_ID, evidenceID: EVIDENCE_ID, emissionRecordId: EMISSION_ID, co2eKg: 42.5, verifierBody: 'AENOR' },
-  createdAt: new Date(certifiedAt),
+  Certification: {
+    id: CERT_ID,
+    evidenceId: EVIDENCE_ID,
+    status: 'CERTIFIED',
+    certifiedAt: new Date(certifiedAt),
+    createdAt: new Date(certifiedAt),
+  },
 };
 
 const baseEvidencePayload = {
@@ -107,7 +104,6 @@ describe('GET /api/v1/emissions/[id]/verify', () => {
     vi.clearAllMocks();
     mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID });
     mockPrisma.emissionRecord.findFirst.mockResolvedValue(baseEmission);
-    mockPrisma.eventLog.findFirst.mockResolvedValue(baseCertEvent);
     mockGetEvidence.mockResolvedValue(baseEvidencePayload);
   });
 
@@ -123,18 +119,23 @@ describe('GET /api/v1/emissions/[id]/verify', () => {
     expect(res.status).toBe(404);
   });
 
-  it('returns 422 when emission is not VERIFIED', async () => {
-    mockPrisma.emissionRecord.findFirst.mockResolvedValue({ ...baseEmission, verificationStatus: 'PENDING' });
+  it('returns 422 when the emission has no certified proof yet', async () => {
+    mockPrisma.emissionRecord.findFirst.mockResolvedValue({ ...baseEmission, verificationStatus: 'PENDING', Certification: null });
     const res = await route.GET(makeRequest(), { params: Promise.resolve({ id: EMISSION_ID }) });
     expect(res.status).toBe(422);
     const json = await res.json();
     expect(json.verificationStatus).toBe('PENDING');
   });
 
-  it('returns 404 when certification event is not found', async () => {
-    mockPrisma.eventLog.findFirst.mockResolvedValue(null);
+  it('returns 422 while the proof is issued but not yet on chain', async () => {
+    mockPrisma.emissionRecord.findFirst.mockResolvedValue({
+      ...baseEmission,
+      verificationStatus: 'PENDING',
+      Certification: { ...baseEmission.Certification, status: 'ISSUED', certifiedAt: null },
+    });
     const res = await route.GET(makeRequest(), { params: Promise.resolve({ id: EMISSION_ID }) });
-    expect(res.status).toBe(404);
+    expect(res.status).toBe(422);
+    expect((await res.json()).certification).toBe('issued');
   });
 
   it('returns 502 when iCommunity is unavailable', async () => {
@@ -150,7 +151,7 @@ describe('GET /api/v1/emissions/[id]/verify', () => {
     expect(json.data.verified).toBe(true);
     expect(json.data.discrepancies).toHaveLength(0);
     expect(json.data.emissionRecordId).toBe(EMISSION_ID);
-    expect(json.data.stateId).toBe(STATE_ID);
+    expect(json.data.certificationId).toBe(CERT_ID);
   });
 
   it('returns evidence audit record with blockchain fields', async () => {
