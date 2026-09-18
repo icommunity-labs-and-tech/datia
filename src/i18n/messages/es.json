@@ -307,21 +307,20 @@
           "invalidCredentials": "Credenciales inválidas",
           "loginError": "Error al iniciar sesión"
         },
-        "togglePassword": "Mostrar u ocultar la contraseña"
+        "togglePassword": "Mostrar u ocultar la contraseña",
+        "welcome": "Bienvenido"
       },
       "superadmin": {
-        "title": "Datia",
         "subtitle": "Panel de Super Administrador",
-        "emailLabel": "Email",
         "emailPlaceholder": "superadmin@ejemplo.com",
-        "passwordLabel": "Contraseña",
         "passwordPlaceholder": "••••••••",
         "accessing": "Accediendo...",
         "access": "Acceder",
-        "exclusiveAccess": "Acceso exclusivo para Super Administradores",
         "errors": {
           "loginError": "Error al iniciar sesión",
-          "connectionError": "Error de conexión"
+          "connectionError": "Error de conexión",
+          "invalidCredentials": "Credenciales inválidas",
+          "tooManyAttempts": "Demasiados intentos. Inténtalo de nuevo más tarde."
         }
       },
       "loading": "Cargando...",
@@ -393,51 +392,6 @@
         "title": "¡Todo listo!",
         "redirecting": "Redirigiendo al dashboard..."
       }
-    },
-    "error": {
-      "accessDenied": {
-        "title": "Acceso Denegado",
-        "message": "No tienes permisos para acceder a esta página.",
-        "description": "Tu cuenta no tiene los privilegios necesarios para acceder al área solicitada.",
-        "action": "Volver al Dashboard"
-      },
-      "unauthorized": {
-        "title": "No Autorizado",
-        "message": "Debes iniciar sesión para continuar.",
-        "description": "Tu sesión ha expirado o no has iniciado sesión.",
-        "action": "Iniciar Sesión"
-      },
-      "configuration": {
-        "title": "Error de Configuración",
-        "message": "Hay un problema con la configuración del servidor.",
-        "description": "Contacta al administrador del sistema.",
-        "action": "Volver al Inicio"
-      },
-      "default": {
-        "title": "Error de Autenticación",
-        "message": "Ocurrió un error inesperado.",
-        "description": "Intenta nuevamente o contacta al administrador.",
-        "action": "Iniciar Sesión"
-      },
-      "goBack": "Volver Atrás",
-      "loading": "Cargando..."
-    },
-    "verification": {
-      "title": "Error en Verificación",
-      "subtitle": "No se pudo completar la verificación de tu identidad",
-      "whatHappened": "¿Qué pasó?",
-      "description": "Hubo un problema durante el proceso de verificación de identidad. Esto puede deberse a:",
-      "reasons": {
-        "documents": "Documentos no legibles o borrosos",
-        "incorrectInfo": "Información incorrecta proporcionada",
-        "technicalIssues": "Problemas técnicos temporales",
-        "invalidDocuments": "Documentos no válidos o expirados"
-      },
-      "importantNote": "Nota Importante",
-      "organizationLevel": "La verificación de identidad ahora se realiza a nivel de organización. Contacta con el administrador de tu organización para completar el proceso KYC.",
-      "contactSupport": "Contactar Soporte",
-      "backToLogin": "Volver al Login",
-      "continueProblems": "Si continúas teniendo problemas, por favor contacta a nuestro equipo de soporte técnico."
     }
   },
   "customer": {

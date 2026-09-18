@@ -15,7 +15,9 @@ export async function authenticateAdmin(email: string, password: string): Promis
 
   // Validar que sea admin
   if (!validateUserRole({ ...user, context: 'admin' }, 'admin')) {
-    return createAuthError('Acceso denegado. Solo administradores pueden acceder al dashboard.');
+    // Mismo mensaje que con credenciales incorrectas: uno distinto confirmaría
+    // que la contraseña de un usuario sin este rol es buena.
+    return createAuthError('Credenciales inválidas');
   }
 
   const payload: JWTPayload = {

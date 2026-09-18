@@ -56,7 +56,6 @@ function AdminLoginContent() {
 
   return (
     <LoginPageLayout
-      role="admin"
       subtitle={t('subtitle')}
       emailPlaceholder={t('emailPlaceholder')}
       passwordPlaceholder={t('passwordPlaceholder')}

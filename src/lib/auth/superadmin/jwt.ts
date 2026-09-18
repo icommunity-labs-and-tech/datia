@@ -13,9 +13,10 @@ export async function authenticateSuperAdmin(email: string, password: string): P
     return createAuthError('Credenciales inválidas');
   }
 
-  // Validar que sea SUPER_ADMIN
+  // Mismo mensaje que con credenciales incorrectas: uno distinto confirmaría
+  // que la contraseña de un usuario sin este rol es buena.
   if (user.role !== 'SUPER_ADMIN') {
-    return createAuthError('Acceso denegado. Solo Super Administradores pueden acceder.');
+    return createAuthError('Credenciales inválidas');
   }
 
   const payload: JWTPayload = {
