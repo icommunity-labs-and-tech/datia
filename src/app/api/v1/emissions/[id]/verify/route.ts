@@ -28,6 +28,7 @@ export async function GET(
       EnergyConsumption: {
         include: { EnergySource: { include: { Item: true } } },
       },
+      Certification: true,
     },
   });
 
@@ -38,40 +39,21 @@ export async function GET(
     );
   }
 
-  if (emission.verificationStatus !== 'VERIFIED') {
+  // ── 2. The proof that covers it, confirmed on chain ──
+  const certification = emission.Certification;
+  if (!certification || certification.status !== 'CERTIFIED') {
     return NextResponse.json(
-      { error: 'Emission record has not been certified yet', verificationStatus: emission.verificationStatus },
+      {
+        error: 'Emission record has not been certified yet',
+        verificationStatus: emission.verificationStatus,
+        certification: certification ? 'issued' : null,
+      },
       { status: 422 }
     );
   }
 
-  // ── 2. Find the certification event to get stateId and evidenceID ──
-  const certEvent = await prisma.eventLog.findFirst({
-    where: {
-      organizationId: auth.organizationId,
-      eventType: 'co2_certification_event',
-      entityId: id,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
-
-  if (!certEvent) {
-    return NextResponse.json(
-      { error: 'Certification event not found for this emission record' },
-      { status: 404 }
-    );
-  }
-
-  const eventData = certEvent.data as Record<string, unknown>;
-  const stateId = eventData.stateId as string;
-  const evidenceID = eventData.evidenceID as string;
-
-  if (!stateId || !evidenceID) {
-    return NextResponse.json(
-      { error: 'Incomplete certification event data' },
-      { status: 500 }
-    );
-  }
+  const evidenceID = certification.evidenceId;
+  const certifiedAt = (certification.certifiedAt ?? certification.createdAt).toISOString();
 
   // ── 3. Fetch blockchain evidence from iCommunity ──
   let evidenceData: Awaited<ReturnType<typeof icommunityService.getEvidence>>;
@@ -130,7 +112,7 @@ export async function GET(
 
   const evidenceAudit: EvidenceAuditRecord = {
     blockchain_tx: evidenceID,
-    timestamp: evidenceData.timestamp ?? certEvent.createdAt.toISOString(),
+    timestamp: evidenceData.timestamp ?? certifiedAt,
     source: String(stored.emissionFactorSource ?? emission.emissionFactorSource ?? ''),
     event_type: 'co2_certification_event',
     hash,
@@ -138,7 +120,7 @@ export async function GET(
 
   const report: EmissionVerificationReport = {
     emissionRecordId: id,
-    stateId,
+    certificationId: certification.id,
     verified: discrepancies.length === 0,
     evidence: evidenceAudit,
     originalData: {
@@ -147,7 +129,7 @@ export async function GET(
       systemBoundary: emission.systemBoundary as EmissionVerificationReport['originalData']['systemBoundary'],
       verifierBody: emission.verifierBody ?? '',
       verificationStandard: emission.verificationStandard ?? '',
-      certifiedAt: String(stored.certifiedAt ?? certEvent.createdAt.toISOString()),
+      certifiedAt: String(stored.certifiedAt ?? certifiedAt),
     },
     discrepancies,
   };

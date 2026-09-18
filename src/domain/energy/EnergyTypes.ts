@@ -116,7 +116,7 @@ export interface EvidenceAuditRecord {
 
 export interface EmissionVerificationReport {
   emissionRecordId: string;
-  stateId: string;
+  certificationId: string;
   verified: boolean;
   evidence: EvidenceAuditRecord;
   originalData: {

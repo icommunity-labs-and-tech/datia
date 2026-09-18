@@ -1,23 +1,22 @@
 'use server';
 
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { recordEvent } from '@/lib/services/events';
-import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
+import { applyCertification } from '@/lib/certification';
 import { prisma } from '@/lib/prisma';
 
 /**
  * Follows evidence from issued to anchored.
  *
  * iBS returns an evidence id straight away and writes the transaction a few
- * seconds later, so a freshly certified state is not yet proof of anything. The
- * simulation leaves it `backed: false` and calls this until the chain confirms
+ * seconds later, so a freshly issued certification is not yet proof of anything. The
+ * simulation leaves it issued and calls this until the chain confirms
  * it — which is what lets the interface show pending and confirmed side by side
  * while it happens, instead of claiming certification the moment the request
  * returns.
  *
- * iBS offers no push channel for evidences, only `GET /evidences/{id}`, so the
- * progress signal has to be polled. It is a real signal all the same: `status`
- * and the transaction hash come from iBS, not from a timer.
+ * iBS also calls back on `evidence.certified`, and whichever comes first confirms
+ * it. Either way the status and the transaction hash come from iBS, not from a
+ * timer.
  */
 
 export interface BmsEvidenceStatus {
@@ -34,117 +33,39 @@ export interface BmsEvidenceStatus {
   /** Further chains the same evidence was mirrored onto. */
   mirrors?: Array<{ network?: string; hash?: string }>;
   certifiedAt?: string;
-  /** True when this call is what flipped the state to backed. */
+  /** True when this call is what confirmed the certification. */
   justConfirmed: boolean;
 }
 
 async function readOne(evidenceID: string, organizationId: string): Promise<BmsEvidenceStatus> {
-  const state = await prisma.state.findFirst({
-    where: { evidenceID, Item: { organizationId } },
-    select: { id: true, backed: true, templateConfig: true },
+  const certification = await prisma.certification.findFirst({
+    where: { evidenceId: evidenceID, organizationId },
   });
-  if (!state) {
+  if (!certification) {
     return { evidenceID, status: 'unknown', confirmed: false, justConfirmed: false };
   }
 
-  // Already anchored: report what was stored instead of asking iBS again.
-  if (state.backed) {
-    const cfg = (state.templateConfig ?? {}) as Record<string, unknown>;
-    return {
-      evidenceID,
-      status: 'certified',
-      confirmed: true,
-      justConfirmed: false,
-      hash: typeof cfg.certificationHash === 'string' ? cfg.certificationHash : undefined,
-      network: typeof cfg.certificationNetwork === 'string' ? cfg.certificationNetwork : undefined,
-      checkerUrl: typeof cfg.checkerUrl === 'string' ? cfg.checkerUrl : undefined,
-    };
-  }
-
-  let evidence;
-  try {
-    evidence = await icommunityService.getEvidence(evidenceID);
-  } catch {
-    // A read that fails is not a failed anchoring: keep it pending and retry.
+  const wasCertified = certification.status === 'CERTIFIED';
+  // Same path the `evidence.certified` webhook takes: whichever arrives first
+  // confirms it, and the other finds it already done.
+  const applied = await applyCertification(evidenceID);
+  if (!applied) {
+    // Not on chain yet, or iBS could not be read: keep it pending and retry.
     return { evidenceID, status: 'pending', confirmed: false, justConfirmed: false };
   }
 
-  const status = evidence.status ?? 'created';
-  const cert = evidence.certification;
-  const confirmed = status === 'certified' && Boolean(cert?.hash);
-
-  if (!confirmed) {
-    return { evidenceID, status, confirmed: false, justConfirmed: false };
-  }
-
-  const certifiedAt = cert?.timestamp ?? new Date().toISOString();
-  // What certification wrote when the evidence was issued: it carries the
-  // emission this proof belongs to and who verified it.
-  const issued = (state.templateConfig ?? {}) as Record<string, unknown>;
-  const asText = (value: unknown) => (typeof value === 'string' ? value : undefined);
-
-  await prisma.state.update({
-    where: { id: state.id },
-    data: {
-      backed: true,
-      backedAt: new Date(certifiedAt),
-      templateConfig: {
-        ...issued,
-        certificationHash: cert?.hash,
-        certificationNetwork: cert?.network,
-        checkerUrl: cert?.links?.checker,
-        blockExplorerUrl: cert?.links?.block_explorer,
-        certifiedAt,
-      },
-    },
-  });
-
-  // Verification follows the anchoring, not the issuing: the emission counts as
-  // verified once its proof is on chain. It is also what stops a re-run from
-  // certifying the same emission again and paying for a second transaction.
-  // A monthly evidence covers every reading of its period, so confirming it
-  // verifies them all at once; a single-emission one carries just its own.
-  const covered = Array.isArray(issued.emissionRecordIds)
-    ? (issued.emissionRecordIds as unknown[]).filter((id): id is string => typeof id === 'string')
-    : [asText(issued.emissionRecordId)].filter((id): id is string => Boolean(id));
-
-  if (covered.length) {
-    await prisma.emissionRecord
-      .updateMany({
-        where: { id: { in: covered } },
-        data: {
-          verificationStatus: 'VERIFIED',
-          verifierBody: asText(issued.verifierBody),
-          verificationStandard: asText(issued.verificationStandard),
-        },
-      })
-      .catch(() => null);
-  }
-
-  await recordEvent(organizationId, {
-    eventType: 'co2_certification_event',
-    entityType: 'State',
-    entityId: state.id,
-    data: {
-      stateId: state.id,
-      evidenceID,
-      hash: cert?.hash,
-      network: cert?.network,
-      anchoredAt: certifiedAt,
-    },
-  });
-
+  const confirmed = applied.certification;
   return {
     evidenceID,
-    status,
+    status: 'certified',
     confirmed: true,
-    justConfirmed: true,
-    hash: cert?.hash,
-    network: cert?.network,
-    checkerUrl: cert?.links?.checker,
-    blockExplorerUrl: cert?.links?.block_explorer,
-    mirrors: cert?.mirrors?.map((m) => ({ network: m.network, hash: m.hash })),
-    certifiedAt,
+    justConfirmed: !wasCertified,
+    hash: confirmed.hash ?? undefined,
+    network: confirmed.network ?? undefined,
+    checkerUrl: confirmed.checkerUrl ?? undefined,
+    blockExplorerUrl: confirmed.blockExplorerUrl ?? undefined,
+    mirrors: applied.evidence?.certification?.mirrors?.map((m) => ({ network: m.network, hash: m.hash })),
+    certifiedAt: confirmed.certifiedAt?.toISOString(),
   };
 }
 

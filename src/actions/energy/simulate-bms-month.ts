@@ -11,9 +11,7 @@ import {
   type BmsProfileId,
 } from '@/lib/energy/bmsProfiles';
 import { prisma } from '@/lib/prisma';
-import { randomUUID } from 'crypto';
-import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
-import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
+import { issueCertification } from '@/lib/certification';
 
 /**
  * A month of daily BMS readings.
@@ -177,13 +175,11 @@ const round = (value: number, decimals = 2) => parseFloat(value.toFixed(decimals
 // asset, which source, which period, how many readings, how much energy and by
 // what factor it became CO₂e.
 
-const CERTIFICATION_STATUS_TYPE_NAME = 'Certificación Energética';
-
 export type BmsMonthCertification =
   | {
       ok: true;
       evidenceID: string;
-      stateId: string;
+      certificationId: string;
       monthIndex: number;
       period: string;
       totalKwh: number;
@@ -227,21 +223,29 @@ export async function certifyBmsMonth(
   const verifierBody = 'AENOR';
   const verificationStandard = 'ISO 14064-3';
 
-  // Already anchored for this period: keep the existing proof rather than mint
-  // a competing one for the same figure.
-  const already = await prisma.state.findFirst({
-    where: {
-      itemId: source.Item.id,
-      backed: true,
-      templateConfig: { path: ['period'], equals: period },
-    },
-    select: { id: true, evidenceID: true },
+  // The ids come from the client: only this source's records count, so a proof
+  // can never cover — and later verify — another organisation's emissions.
+  const ownIds = (
+    await prisma.emissionRecord.findMany({
+      where: { id: { in: emissionIds }, EnergyConsumption: { energySourceId: source.id } },
+      select: { id: true },
+    })
+  ).map((e) => e.id);
+  if (!ownIds.length) {
+    return { ok: false, monthIndex, reason: 'ERROR', message: 'No hay lecturas de esta fuente que certificar.' };
+  }
+
+  // Already covered: keep the existing proof rather than mint a competing one
+  // for the same figure.
+  const already = await prisma.emissionRecord.findFirst({
+    where: { id: { in: ownIds }, certificationId: { not: null } },
+    select: { Certification: { select: { id: true, evidenceId: true } } },
   });
-  if (already) {
+  if (already?.Certification) {
     return {
       ok: true,
-      evidenceID: already.evidenceID,
-      stateId: already.id,
+      evidenceID: already.Certification.evidenceId,
+      certificationId: already.Certification.id,
       monthIndex,
       period,
       totalKwh: 0,
@@ -252,12 +256,12 @@ export async function certifyBmsMonth(
   }
 
   const totals = await prisma.emissionRecord.aggregate({
-    where: { id: { in: emissionIds } },
+    where: { id: { in: ownIds } },
     _sum: { co2eKg: true },
     _count: { _all: true },
   });
   const consumption = await prisma.energyConsumption.aggregate({
-    where: { EmissionRecord: { some: { id: { in: emissionIds } } } },
+    where: { EmissionRecord: { some: { id: { in: ownIds } } } },
     _sum: { consumptionKwh: true },
   });
 
@@ -265,31 +269,8 @@ export async function certifyBmsMonth(
   const totalKwh = parseFloat((consumption._sum.consumptionKwh ?? 0).toFixed(2));
   const readings = totals._count._all;
 
-  let statusType = await prisma.statusType.findFirst({
-    where: { organizationId, name: CERTIFICATION_STATUS_TYPE_NAME },
-    select: { id: true },
-  });
-  if (!statusType) {
-    statusType = await prisma.statusType.create({
-      data: {
-        id: randomUUID(),
-        name: CERTIFICATION_STATUS_TYPE_NAME,
-        description: 'Certificación de emisiones de CO₂ según estándares DPP/ESPR',
-        template: [
-          { label: 'Periodo', name: 'period', type: 'text' },
-          { label: 'Energía (kWh)', name: 'totalKwh', type: 'number' },
-          { label: 'CO₂e (kg)', name: 'totalCo2eKg', type: 'number' },
-          { label: 'Organismo verificador', name: 'verifierBody', type: 'text' },
-        ],
-        organizationId,
-        updatedAt: new Date(),
-      },
-      select: { id: true },
-    });
-  }
-
   const issued = {
-    emissionRecordIds: emissionIds,
+    emissionRecordIds: ownIds,
     assetName: source.Item.name,
     sourceName: source.name,
     period,
@@ -303,42 +284,23 @@ export async function certifyBmsMonth(
     verificationStandard,
   };
 
-  const state = await prisma.state.create({
-    data: {
-      id: randomUUID(),
+  try {
+    const certification = await issueCertification({
+      organizationId,
+      signatureID: org.signatureID,
       itemId: source.Item.id,
-      statusTypeId: statusType.id,
       title: `Emisión certificada — ${period} · ${totalCo2eKg} kg CO₂e`,
       description:
         `${source.Item.name} · ${source.name} · ${totalKwh} kWh en ${period}, ` +
         `agregados de ${readings} lecturas diarias. Verificada por ${verifierBody} según ${verificationStandard}.`,
-      evidenceID: 'pending',
-      backed: false,
-      templateConfig: issued,
-    },
-  });
-
-  try {
-    const evidenceService = createEvidenceServiceImpl({ icommunityService });
-    const evidenceID = await evidenceService.createStateEvidence({
-      signatureID: org.signatureID,
-      title: state.title,
-      description: state.description ?? '',
-      imageUrls: [],
-      metadata: {
-        id: state.id,
-        itemId: source.Item.id,
-        createdAt: new Date().toISOString(),
-        templateConfig: issued,
-      },
+      payload: issued,
+      emissionRecordIds: ownIds,
     });
-
-    await prisma.state.update({ where: { id: state.id }, data: { evidenceID, backed: false } });
 
     return {
       ok: true,
-      evidenceID,
-      stateId: state.id,
+      evidenceID: certification.evidenceId,
+      certificationId: certification.id,
       monthIndex,
       period,
       totalKwh,
@@ -347,7 +309,6 @@ export async function certifyBmsMonth(
       verifierBody,
     };
   } catch (err) {
-    await prisma.state.delete({ where: { id: state.id } }).catch(() => null);
     return {
       ok: false,
       monthIndex,

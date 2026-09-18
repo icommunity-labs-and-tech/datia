@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { applyCertification } from '@/lib/energy/anchor-service';
+import { applyCertification } from '@/lib/certification';
 
 /**
  * iBS calls here when an evidence lands on chain (`evidence.certified`).
  *
- * This is the normal path by which a state becomes proof: anchoring returns an
- * id in milliseconds and the transaction follows seconds later, so the platform
- * does not poll — iBS says when.
- *
- * The handler used to only flip `backed`, which left the emission the evidence
- * covers still pending and dropped the transaction hash. It now applies the same
- * certification the repair sweep does, so both paths leave identical state.
+ * This is the normal path by which a certification becomes proof: anchoring
+ * returns an id in milliseconds and the transaction follows seconds later, so
+ * the platform does not poll — iBS says when. Confirming it also verifies every
+ * record the proof covers.
  */
 export async function POST(req: NextRequest) {
   try {
@@ -21,7 +18,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'evidence_id missing' }, { status: 400 });
     }
 
-    const applied = await applyCertification(evidenceID);
+    const applied = Boolean(await applyCertification(evidenceID));
 
     // Acknowledge either way: an evidence this instance does not know about is
     // not a delivery failure, and a retry would not change the outcome.

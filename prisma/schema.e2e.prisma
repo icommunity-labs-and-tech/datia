@@ -194,6 +194,7 @@ model Organization {
   ApiCall           ApiCall[]
   ApiToken          ApiToken[]
   Category          Category[]
+  Certification     Certification[]
   EventLog          EventLog[]
   Invitation        Invitation[]
   Issue             Issue[]
@@ -484,11 +485,38 @@ model EmissionRecord {
   verificationStatus         EmissionVerificationStatus @default(PENDING)
   verifierBody               String?
   verificationStandard       String?                    // ISO 14064-3, etc.
+  // The proof that covers this record. A monthly BMS proof covers many.
+  certificationId            String?
   createdAt                  DateTime                   @default(now())
 
   EnergyConsumption EnergyConsumption @relation(fields: [energyConsumptionId], references: [id], onDelete: Cascade)
+  Certification     Certification?    @relation(fields: [certificationId], references: [id], onDelete: SetNull)
 
   @@index([energyConsumptionId])
+  @@index([certificationId])
+}
+
+/// A proof anchored in iBS. Issued when the evidence is created; certified when
+/// iBS confirms the transaction on chain (`evidence.certified`).
+model Certification {
+  id               String              @id @default(uuid())
+  organizationId   String
+  evidenceId       String              @unique
+  status           CertificationStatus @default(ISSUED)
+  /// What the evidence certifies, exactly as it was sent to iBS.
+  payload          Json
+  network          String?
+  hash             String?
+  checkerUrl       String?
+  blockExplorerUrl String?
+  certifiedAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+
+  Organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  EmissionRecord EmissionRecord[]
+
+  @@index([organizationId, status])
 }
 
 enum EmissionScope {
@@ -502,6 +530,11 @@ enum SystemBoundary {
   CRADLE_TO_GRAVE
   GATE_TO_GATE
   CRADLE_TO_CRADLE
+}
+
+enum CertificationStatus {
+  ISSUED
+  CERTIFIED
 }
 
 enum EmissionVerificationStatus {
