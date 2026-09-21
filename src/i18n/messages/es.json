@@ -164,7 +164,7 @@
     "usersDescription": "La gestión de usuarios te permite administrar los usuarios del sistema, crear nuevos usuarios, asignar roles (Operador o Administrador) y gestionar sus permisos. Los usuarios pueden ser verificados mediante KYC y pueden tener diferentes niveles de acceso según su rol en la organización.",
     "whatIsUserManagement": "¿Qué es la gestión de usuarios?",
     "whatIsInventory": "¿Qué es el catálogo de activos?",
-    "inventoryDescription": "El catálogo de activos es el catálogo central de productos o elementos que gestiona tu organización. Cada producto puede tener múltiples categorías, una imagen, campos personalizados según su tipo, y un historial de estados que registra su evolución a lo largo del tiempo.",
+    "inventoryDescription": "El catálogo de activos es el registro central de productos o elementos que gestiona tu organización. Cada activo puede tener varias categorías, una imagen, campos personalizados según su tipo y las certificaciones en blockchain de su energía.",
     "columns": {
       "productName": "Nombre del activo",
       "categories": "Categorías",
@@ -415,7 +415,6 @@
     "productInfo": "Información del activo",
     "createdAt": "Creado:",
     "tabInfo": "Información",
-    "tabHistory": "Historial",
     "verifiedProduct": "Activo verificado en blockchain",
     "stateVerified": "Estado verificado en blockchain",
     "productDetails": "Detalles del activo",
@@ -587,7 +586,6 @@
     "metrics": "Métricas",
     "monthlyActivityTitle": "Actividad Mensual de Estados",
     "categoryDistributionTitle": "Distribución por Categorías",
-    "backupStatusByUserTitle": "Estados creados por usuario",
     "loadingData": "Cargando datos...",
     "charts": {
       "monthlyActivity": {
@@ -600,26 +598,12 @@
         "percentage": "Porcentaje:",
         "emptyMessage": "No hay datos de categorías disponibles",
         "others": "Otros"
-      },
-      "backupStatusByUser": {
-        "totalStates": "Total Estados",
-        "backedStates": "Respaldados",
-        "pendingStates": "Pendientes",
-        "emptyMessage": "No hay datos de estados por usuario disponibles"
       }
     },
     "kpis": {
       "totalItems": {
         "title": "Total Activos",
         "subtitle": "Activos registrados"
-      },
-      "backupRate": {
-        "title": "Estados certificados",
-        "subtitle": "{backed} de {total}"
-      },
-      "statesThisMonth": {
-        "title": "Estados este mes",
-        "subtitle": "Mes en curso"
       }
     },
     "energyMap": "Mapa de Fuentes de Energía",
@@ -648,7 +632,7 @@
       "coverage": "Cobertura de certificación",
       "carbon": "Huella del último mes",
       "coverageHint": "{certified} de {total} registros con prueba en cadena",
-      "trackedHint": "{certified} estados certificados · {pending} pendientes",
+      "trackedHint": "{certified} certificaciones en cadena · {pending} pendientes",
       "inProgress": "Mes en curso: {kwh} kWh"
     },
     "scope": {
@@ -667,15 +651,9 @@
     "delete": "Eliminar",
     "imageAlt": "Imagen de {name}",
     "noDescription": "Sin descripción",
-    "productStates": "Estados del activo",
-    "addState": "Añadir estado",
-    "noStates": "No hay estados registrados para este activo.",
     "certified": "Certificado",
     "pendingBackup": "Pendiente",
-    "geotracking": "Seguimiento con geolocalización",
     "summary": "Resumen",
-    "totalStates": "Estados totales",
-    "certifiedStates": "Certificados en blockchain",
     "deleteEntityName": "Activo",
     "deleteError": "Error al eliminar el activo",
     "deleteTitle": "Eliminar activo",
@@ -685,7 +663,14 @@
       "titleNamed": "QR de {name}",
       "copyLink": "Copiar enlace",
       "downloadPng": "Descargar PNG"
-    }
+    },
+    "certifications": "Certificaciones",
+    "noCertifications": "Este activo todavía no tiene certificaciones.",
+    "certificationWithoutPeriod": "Certificación",
+    "readingsCovered": "{count} lecturas cubiertas",
+    "viewProof": "Ver la prueba",
+    "totalCertifications": "Certificaciones",
+    "certifiedCertifications": "En cadena"
   },
   "userDetail": {
     "title": "Usuario: {name}",
@@ -1041,7 +1026,7 @@
     "certified": "Certificado",
     "pending": "Pendiente",
     "title": "Activos",
-    "description": "Cada activo reúne su historial de estados y su certificación en blockchain.",
+    "description": "Cada activo reúne sus certificaciones en blockchain.",
     "count": "{count, plural, =0 {Sin activos} one {1 activo} other {# activos}}",
     "noResults": "Ningún activo coincide con la búsqueda",
     "clearFilters": "Limpiar filtros",

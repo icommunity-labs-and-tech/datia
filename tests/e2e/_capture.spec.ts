@@ -19,7 +19,7 @@ const EMAIL = 'demo@datia.icommunitylabs.com';
 const PASSWORD = process.env.DEMO_ADMIN_PASSWORD ?? '';
 test.skip(!PASSWORD, 'DEMO_ADMIN_PASSWORD no está definida');
 
-/** Asset with the fullest history, used for the detail figure. */
+/** Asset with the most certifications, used for the detail figure. */
 const FEATURED = '0739710e-f95d-55c3-8364-97e59c204517';
 
 async function shot(page: Page, name: string) {
@@ -57,7 +57,7 @@ test('recorrido completo', async ({ page }) => {
   await shot(page, '03-inventario');
 
   await page.goto(`/dashboard/items/${FEATURED}`, { waitUntil: 'networkidle' });
-  await expect(page.getByText(/estados del activo|resumen/i).first()).toBeVisible();
+  await expect(page.getByText(/certificaciones|certifications|resumen|summary/i).first()).toBeVisible();
   await shot(page, '04-detalle-activo');
 
   for (const [view, name] of [

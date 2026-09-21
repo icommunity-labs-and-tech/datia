@@ -59,20 +59,6 @@ export async function GET(
             },
           },
         },
-        State: {
-          include: {
-            StatusType: true,
-            User: {
-              select: {
-                name: true,
-                email: true,
-              }
-            },
-          },
-          orderBy: {
-            createdAt: 'desc',
-          },
-        },
       },
     });
 
@@ -129,23 +115,6 @@ export async function GET(
           }))
         )
       ),
-      states: item.State.map((state) => ({
-        id: state.id,
-        title: state.title,
-        description: state.description,
-        evidenceID: state.evidenceID,
-        backed: state.backed,
-        backedAt: state.backedAt,
-        imageUrls: state.imageUrls,
-        templateConfig: state.templateConfig,
-        createdAt: state.createdAt,
-        createdBy: state.User || null,
-        statusType: {
-          id: state.StatusType.id,
-          name: state.StatusType.name,
-          description: state.StatusType.description,
-        },
-      })),
     };
 
     return NextResponse.json(transformedItem);

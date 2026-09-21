@@ -4,6 +4,5 @@ export * from './get';
 export * from './listByItem';
 export * from './update';
 export * from './list';
-export * from './backupStatusByUser';
 
 

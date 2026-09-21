@@ -9,8 +9,6 @@ import * as itemActions from '@/actions/items';
 import * as userActions from '@/actions/users';
 import * as kpis from '../dashboard/kpis/route';
 import * as activity from '../dashboard/activity/route';
-import * as backupStatus from '../dashboard/backup-status/route';
-import * as backupByUser from '../dashboard/backup-status-by-user/route';
 import * as distribution from '../dashboard/categories/route';
 import * as category from '../categories/[id]/route';
 import * as item from '../items/[id]/route';
@@ -48,8 +46,6 @@ const withId = (id: string) => ({ params: Promise.resolve({ id }) });
 const ROUTES = [
   { name: 'dashboard/kpis', call: () => (kpis as any).GET(), action: dashboardActions.getDashboardKPIs },
   { name: 'dashboard/activity', call: () => (activity as any).GET(req('/api/dashboard/activity?months=3')), action: dashboardActions.getMonthlyActivity },
-  { name: 'dashboard/backup-status', call: () => (backupStatus as any).GET(), action: dashboardActions.getBackupStatus },
-  { name: 'dashboard/backup-status-by-user', call: () => (backupByUser as any).GET(req('/api/dashboard/backup-status-by-user')), action: stateActions.getBackupStatusByUser },
   { name: 'dashboard/categories', call: () => (distribution as any).GET(), action: dashboardActions.getCategoryDistribution },
   { name: 'categories/[id]', call: () => (category as any).GET(req('/api/categories/c-1'), withId('c-1')), action: categoryActions.getCategory },
   { name: 'items/[id]', call: () => (item as any).GET(req('/api/items/i-1'), withId('i-1')), action: itemActions.getItem },

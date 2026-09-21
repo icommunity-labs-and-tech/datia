@@ -164,7 +164,7 @@
     "usersDescription": "User management allows you to manage system users, create new users, assign roles (Operator or Administrator) and manage their permissions. Users can be verified through KYC and can have different access levels according to their role in the organization.",
     "whatIsUserManagement": "What is user management?",
     "whatIsInventory": "What is asset catalog?",
-    "inventoryDescription": "The asset catalog is the central registry of equipment and items your organization manages. Each asset can have multiple categories, an image, custom fields by type, and a state history that records its evolution over time.",
+    "inventoryDescription": "The asset catalog is the central registry of equipment and items your organization manages. Each asset can have multiple categories, an image, custom fields by type, and the blockchain certifications of its energy.",
     "columns": {
       "productName": "Asset name",
       "categories": "Categories",
@@ -415,7 +415,6 @@
     "productInfo": "Asset Information",
     "createdAt": "Created:",
     "tabInfo": "Information",
-    "tabHistory": "History",
     "verifiedProduct": "Asset verified on blockchain",
     "stateVerified": "State verified in blockchain",
     "productDetails": "Asset Details",
@@ -587,7 +586,6 @@
     "metrics": "Metrics",
     "monthlyActivityTitle": "Monthly State Activity",
     "categoryDistributionTitle": "Distribution by Categories",
-    "backupStatusByUserTitle": "States Created by User",
     "loadingData": "Loading data...",
     "charts": {
       "monthlyActivity": {
@@ -600,26 +598,12 @@
         "percentage": "Percentage:",
         "emptyMessage": "No category data available",
         "others": "Others"
-      },
-      "backupStatusByUser": {
-        "totalStates": "Total States",
-        "backedStates": "Backed",
-        "pendingStates": "Pending",
-        "emptyMessage": "No state data by user available"
       }
     },
     "kpis": {
       "totalItems": {
         "title": "Total Assets",
         "subtitle": "Registered assets"
-      },
-      "backupRate": {
-        "title": "Certified States",
-        "subtitle": "{backed} of {total}"
-      },
-      "statesThisMonth": {
-        "title": "States this month",
-        "subtitle": "Current month"
       }
     },
     "energyMap": "Energy Sources Map",
@@ -648,7 +632,7 @@
       "coverage": "Certification coverage",
       "carbon": "Last month footprint",
       "coverageHint": "{certified} of {total} records proven on chain",
-      "trackedHint": "{certified} certified states · {pending} pending",
+      "trackedHint": "{certified} certifications on chain · {pending} pending",
       "inProgress": "Month in progress: {kwh} kWh"
     },
     "scope": {
@@ -667,15 +651,9 @@
     "delete": "Delete",
     "imageAlt": "Image of {name}",
     "noDescription": "No description",
-    "productStates": "Asset states",
-    "addState": "Add state",
-    "noStates": "No states recorded for this asset.",
     "certified": "Certified",
     "pendingBackup": "Pending",
-    "geotracking": "Geolocation tracking",
     "summary": "Summary",
-    "totalStates": "Total states",
-    "certifiedStates": "Blockchain certified",
     "deleteEntityName": "Asset",
     "deleteError": "Error deleting asset",
     "deleteTitle": "Delete asset",
@@ -685,7 +663,14 @@
       "titleNamed": "{name} QR",
       "copyLink": "Copy link",
       "downloadPng": "Download PNG"
-    }
+    },
+    "certifications": "Certifications",
+    "noCertifications": "This asset has no certifications yet.",
+    "certificationWithoutPeriod": "Certification",
+    "readingsCovered": "{count} readings covered",
+    "viewProof": "View the proof",
+    "totalCertifications": "Certifications",
+    "certifiedCertifications": "On chain"
   },
   "userDetail": {
     "title": "User: {name}",
@@ -1041,7 +1026,7 @@
     "certified": "Certified",
     "pending": "Pending",
     "title": "Assets",
-    "description": "Every asset gathers its state history and its blockchain certification.",
+    "description": "Every asset gathers its blockchain certifications.",
     "count": "{count, plural, =0 {No assets} one {1 asset} other {# assets}}",
     "noResults": "No asset matches your search",
     "clearFilters": "Clear filters",
