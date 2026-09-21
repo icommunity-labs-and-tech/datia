@@ -38,7 +38,7 @@ export default async function DashboardIndexPage() {
     id: item.id,
     name: item.name,
     categoryName: item.categories?.[0]?.name ?? null,
-    certified: item.states?.[0]?.backed ?? false,
+    certified: item.certified,
   }));
 
   return (

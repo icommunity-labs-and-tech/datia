@@ -23,7 +23,7 @@ import {
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ItemData } from '../types';
-import { ItemInfoSection, ItemHistorySection, EnergyReportSection } from './sections';
+import { ItemInfoSection, EnergyReportSection } from './sections';
 import { VerifiedBadge } from './ui';
 import { formatDate } from '../utils/dateFormatters';
 
@@ -123,22 +123,11 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
         <Tabs defaultValue="info" keepMounted={false}>
           <Tabs.List mb="md">
             <Tabs.Tab value="info">{tCustomer('tabInfo')}</Tabs.Tab>
-            <Tabs.Tab value="history">
-              {tCustomer('tabHistory')}
-              {item.states?.length > 0 && (
-                <Badge size="xs" variant="light" color="gray" ml={6}>
-                  {item.states.length}
-                </Badge>
-              )}
-            </Tabs.Tab>
             {showEnergy && <Tabs.Tab value="energy">{tCustomer('tabEnergy')}</Tabs.Tab>}
           </Tabs.List>
 
           <Tabs.Panel value="info">
             <ItemInfoSection item={item} />
-          </Tabs.Panel>
-          <Tabs.Panel value="history">
-            <ItemHistorySection states={item.states} />
           </Tabs.Panel>
           {showEnergy && (
             <Tabs.Panel value="energy">

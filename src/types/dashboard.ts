@@ -1,11 +1,12 @@
 export interface DashboardKPIs {
-  totalPassports: number;
-  backedPassports: number;
-  pendingPassports: number;
-  activePassports: number;
-  statesThisMonth: number;
-  evidencesGenerated: number;
-  backupRate: number;
+  totalItems: number;
+  /** Assets with activity in the last 90 days. */
+  activeItems: number;
+  /** Proofs anchored in iBS, whether or not they are on chain yet. */
+  certifications: number;
+  certifiedCertifications: number;
+  issuedCertifications: number;
+  certificationsThisMonth: number;
   activeUsers: number;
   verifiedUsers: number;
 }

@@ -1,65 +1,49 @@
 import { DashboardService } from './DashboardService';
-import type { DashboardKPIs, MonthlyActivity, CategoryDistribution, BackupStatus } from '@/types/dashboard';
+import type { DashboardKPIs, MonthlyActivity, CategoryDistribution } from '@/types/dashboard';
 import type { UserRepository } from '@/domain/users/UserRepository';
 import type { ItemRepository } from '@/domain/items/ItemRepository';
-import type { StateRepository } from '@/domain/states/StateRepository';
 import type { CategoryRepository } from '@/domain/categories/CategoryRepository';
 import { requireOrganizationId } from '@/lib/auth/tenant';
+import { certificationCounts } from '@/lib/certification/queries';
 
 export function createDashboardServiceImpl(deps: {
   userRepository: UserRepository;
   itemRepository: ItemRepository;
-  stateRepository: StateRepository;
   categoryRepository: CategoryRepository;
 }): DashboardService {
-  const { userRepository: userRepo, itemRepository: itemRepo, stateRepository: stateRepo, categoryRepository: categoryRepo } = deps;
+  const { userRepository: userRepo, itemRepository: itemRepo, categoryRepository: categoryRepo } = deps;
 
   return {
     async getKPIs(): Promise<DashboardKPIs> {
       try {
         const organizationId = await requireOrganizationId();
-        
-        const [
-          totalItems,
-          backedStates,
-          totalStates,
-          statesThisMonth,
-          totalUsers,
-          verifiedUsers,
-          activePassports
-        ] = await Promise.all([
+
+        const [totalItems, activeItems, certifications, totalUsers, verifiedUsers] = await Promise.all([
           itemRepo.countTotalItems(organizationId),
-          stateRepo.countBackedStates(organizationId),
-          stateRepo.countTotalStates(organizationId),
-          stateRepo.countStatesThisMonth(organizationId, new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
+          itemRepo.countActiveItems(organizationId, 90),
+          certificationCounts(organizationId),
           userRepo.countActiveUsers(organizationId, 30),
           userRepo.countVerifiedUsers(organizationId),
-          itemRepo.countActiveItems(organizationId, 90)
         ]);
 
-        const pendingStates = totalStates - backedStates;
-        const backupRate = totalStates > 0 ? (backedStates / totalStates) * 100 : 0;
-
         return {
-          totalPassports: totalItems,
-          backedPassports: backedStates,
-          pendingPassports: pendingStates,
-          activePassports,
-          statesThisMonth,
-          evidencesGenerated: totalStates,
-          backupRate: Math.round(backupRate * 100) / 100,
+          totalItems,
+          activeItems,
+          certifications: certifications.total,
+          certifiedCertifications: certifications.certified,
+          issuedCertifications: certifications.issued,
+          certificationsThisMonth: certifications.thisMonth,
           activeUsers: totalUsers,
           verifiedUsers,
         };
       } catch {
         return {
-          totalPassports: 0,
-          backedPassports: 0,
-          pendingPassports: 0,
-          activePassports: 0,
-          statesThisMonth: 0,
-          evidencesGenerated: 0,
-          backupRate: 0,
+          totalItems: 0,
+          activeItems: 0,
+          certifications: 0,
+          certifiedCertifications: 0,
+          issuedCertifications: 0,
+          certificationsThisMonth: 0,
           activeUsers: 0,
           verifiedUsers: 0,
         };
@@ -115,57 +99,5 @@ export function createDashboardServiceImpl(deps: {
       }
     },
 
-    async getBackupStatus(): Promise<BackupStatus[]> {
-      try {
-        const organizationId = await requireOrganizationId();
-        
-        const currentMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-        const itemsWithStates = await itemRepo.getItemsWithStatesForBackup(organizationId, currentMonth);
-        
-        return itemsWithStates
-          .map((item) => {
-            const statesCreated = item.states.length;
-            const backedStates = item.states.filter((state) => state.backed).length;
-            const pendingStates = statesCreated - backedStates;
-            return {
-              user: item.name,
-              statesCreated,
-              backedStates,
-              pendingStates,
-              total: statesCreated,
-            };
-          })
-          .slice(0, 10) as BackupStatus[];
-      } catch {
-        return [];
-      }
-    },
-
-    async getBackupStatusByUser(months: number = 1): Promise<BackupStatus[]> {
-      try {
-        const organizationId = await requireOrganizationId();
-        
-        const startDate = new Date();
-        startDate.setMonth(startDate.getMonth() - months);
-
-        const [users, statesByUser, backedStatesByUser] = await Promise.all([
-          userRepo.listUsersForDashboard(organizationId),
-          stateRepo.getStatesByUserGrouped(organizationId, startDate),
-          stateRepo.getBackedStatesByUserGrouped(organizationId, startDate)
-        ]);
-
-        const totalStatesMap = new Map(statesByUser.map(s => [s.createdByUserId!, s._count.id]));
-        const backedStatesMap = new Map(backedStatesByUser.map(s => [s.createdByUserId!, s._count.id]));
-        
-        return users.map(user => {
-          const totalStates = totalStatesMap.get(user.id) || 0;
-          const backedStates = backedStatesMap.get(user.id) || 0;
-          const pendingStates = totalStates - backedStates;
-          return { user: user.name, statesCreated: totalStates, backedStates, pendingStates, total: totalStates };
-        }).filter(user => user.statesCreated > 0) as BackupStatus[];
-      } catch {
-        return [];
-      }
-    },
   };
 }

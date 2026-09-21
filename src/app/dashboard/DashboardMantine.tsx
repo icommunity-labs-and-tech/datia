@@ -76,10 +76,10 @@ export default function DashboardMantine({
       <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing="md" mb="lg">
         <TrendStat
           label={t('stat.tracked')}
-          value={kpis.totalPassports.toLocaleString()}
+          value={kpis.totalItems.toLocaleString()}
           hint={t('stat.trackedHint', {
-            certified: kpis.backedPassports,
-            pending: kpis.pendingPassports,
+            certified: kpis.certifiedCertifications,
+            pending: kpis.issuedCertifications,
           })}
         />
         {trend && (

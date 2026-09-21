@@ -189,8 +189,10 @@ test.describe('UX journey — public passport', () => {
     await expectNoHorizontalScroll(page);
 
     // Tabs replace the old JS-driven mobile/desktop split, so they exist on both.
-    await page.getByRole('tab', { name: /historial|history/i }).click();
-    await shot(page, 'desktop', '10-passport-history');
+    // The state history is gone (#63): what the passport proves is its energy.
+    await expect(page.getByRole('tab', { name: /historial|history/i })).toHaveCount(0);
+    await page.getByRole('tab', { name: /certificación energética|energy certification/i }).click();
+    await shot(page, 'desktop', '10-passport-energy');
 
     await page.setViewportSize(MOBILE);
     await page.goto(`/customer/item/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });

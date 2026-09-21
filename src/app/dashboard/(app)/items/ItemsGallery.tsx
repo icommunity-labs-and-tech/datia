@@ -36,7 +36,7 @@ interface Item {
   description?: string;
   imageUrl?: string;
   categories: Array<{ id: string; name: string }>;
-  states: Array<{ title: string; backed: boolean }>;
+  certified: boolean;
   location?: { lat: number; lng: number } | null;
   siteName?: string | null;
 }
@@ -44,7 +44,6 @@ interface Item {
 function ItemCard({ item }: { item: Item }) {
   const t = useTranslations('itemsPage');
   const firstLetter = item.name.charAt(0).toUpperCase();
-  const lastState = item.states[0];
   const category = item.categories[0];
 
   return (
@@ -68,14 +67,9 @@ function ItemCard({ item }: { item: Item }) {
       <Stack gap={8} p="md">
         <Group justify="space-between" wrap="nowrap" gap="xs">
           <Text fw={600} size="sm" lineClamp={1}>{item.name}</Text>
-          {lastState && (
-            <Badge
-              size="xs"
-              variant="light"
-              color={lastState.backed ? 'green' : 'yellow'}
-              style={{ flexShrink: 0 }}
-            >
-              {lastState.backed ? t('certified') : t('pending')}
+          {item.certified && (
+            <Badge size="xs" variant="light" color="green" style={{ flexShrink: 0 }}>
+              {t('certified')}
             </Badge>
           )}
         </Group>
@@ -379,7 +373,7 @@ export default function ItemsGallery({
               key={g.id}
               label={g.label ?? t('unnamedInstallation')}
               count={g.members.length}
-              certified={g.members.filter((m) => m.item.states[0]?.backed).length}
+              certified={g.members.filter((m) => m.item.certified).length}
               categories={[...new Set(g.members.flatMap((m) => m.item.categories.map((c) => c.name)))]}
               energy={withEnergy ? energyOf(g.id) : undefined}
               onOpen={() => setInstallationId(g.id)}
@@ -389,7 +383,7 @@ export default function ItemsGallery({
             <InstallationCard
               label={t('unlocatedInstallation')}
               count={unlocated.length}
-              certified={unlocated.filter((i) => i.states[0]?.backed).length}
+              certified={unlocated.filter((i) => i.certified).length}
               categories={[...new Set(unlocated.flatMap((i) => i.categories.map((c) => c.name)))]}
               onOpen={() => setInstallationId('__unlocated__')}
             />

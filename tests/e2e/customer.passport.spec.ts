@@ -24,7 +24,8 @@ test.describe('Customer - Item Passport', () => {
 
     // Tabs render on every viewport — no JS-driven mobile/desktop split.
     await expect(page.getByRole('tab', { name: /informaci[óo]n|information/i })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /historial|history/i })).toBeVisible();
+    // The state history is gone (#63); what a passport proves now is its energy.
+    await expect(page.getByRole('tab', { name: /historial|history/i })).toHaveCount(0);
   });
 
   test('shows a recoverable error for an unknown code', async ({ page }) => {

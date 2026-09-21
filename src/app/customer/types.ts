@@ -15,24 +15,6 @@ export interface ItemCategory {
   description?: string;
 }
 
-export type StateData = {
-  id: string;
-  title: string;
-  description: string;
-  evidenceID: string;
-  backed: boolean;
-  backedAt: string | null;
-  imageUrls: string[];
-  templateConfig: any;
-  createdAt: string;
-  createdBy?: { name: string; email: string } | null;
-  statusType: {
-    id: string;
-    name: string;
-    description: string;
-  };
-};
-
 export type ItemData = {
   id: string;
   name: string;
@@ -53,7 +35,6 @@ export type ItemData = {
     name: string;
     description: string;
   };
-  states: StateData[];
   energyCertifications?: EnergyCertification[];
 };
 

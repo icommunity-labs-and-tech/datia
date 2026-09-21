@@ -23,59 +23,26 @@ import {
   IconQrcode,
   IconExternalLink,
   IconTrash,
-  IconPlus,
-  IconFlag,
-  IconMapPin,
+  IconCertificate,
+  IconExternalLink as IconLink,
   IconInfoCircle,
   IconShieldCheck,
   IconClock,
   IconArrowLeft,
 } from '@tabler/icons-react';
 import { getItem, deleteItem, getItemDetails } from '@/actions/items';
-import { getStatesByItem } from '@/actions/states';
+import { getItemCertifications } from '@/actions/certifications/listByItem';
+import type { ItemCertification } from '@/lib/certification/queries';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { getCascadeInfo } from '@/config/entityConfig';
 import ItemQrModal from '@/components/ItemQrModal';
 import ImageDisplay from '@/components/ImageDisplay';
 import ItemSpecificFields from '@/components/ItemSpecificFields';
-import ItemStatesMap from '@/components/ItemStatesMapClient';
 import CategoryInputField from '@/components/CategoryInputField';
-import AddStateForm from '@/components/AddStateForm';
 import PageHeader from '@/components/layout/PageHeader';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-
-interface StateRow {
-  id: string;
-  title?: string | null;
-  description?: string | null;
-  createdAt: string | Date;
-  backed?: boolean | null;
-  templateConfig?: unknown;
-  statusType?: { id?: string; name?: string; description?: string | null } | null;
-}
-
-function stateHasGeolocation(state: StateRow): boolean {
-  let config = state.templateConfig;
-  if (!config) return false;
-  if (typeof config === 'string') {
-    try {
-      config = JSON.parse(config);
-    } catch {
-      return false;
-    }
-  }
-  return Object.values(config as Record<string, unknown>).some(
-    (value) =>
-      value != null &&
-      typeof value === 'object' &&
-      'lat' in value &&
-      'lng' in value &&
-      typeof (value as { lat: unknown }).lat === 'number' &&
-      typeof (value as { lng: unknown }).lng === 'number'
-  );
-}
 
 export default function ItemDetailPage() {
   const t = useTranslations('itemDetail');
@@ -84,10 +51,9 @@ export default function ItemDetailPage() {
   const router = useRouter();
   const itemId = id as string;
   const [item, setItem] = useState<any>(null);
-  const [states, setStates] = useState<StateRow[]>([]);
+  const [certifications, setCertifications] = useState<ItemCertification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
-  const [showAddStateModal, setShowAddStateModal] = useState(false);
 
   const {
     showDeleteModal,
@@ -115,28 +81,18 @@ export default function ItemDetailPage() {
       }
       setIsLoading(true);
       try {
-        const [itemData, statesData] = await Promise.all([
+        const [itemData, certificationData] = await Promise.all([
           getItem(itemId).catch(() => null),
-          getStatesByItem(itemId).catch(() => []),
+          getItemCertifications(itemId).catch(() => []),
         ]);
         if (itemData) setItem(itemData);
-        if (statesData) setStates(statesData as StateRow[]);
+        setCertifications(certificationData);
       } finally {
         setIsLoading(false);
       }
     };
     load();
   }, [itemId]);
-
-  const reloadStates = async () => {
-    setShowAddStateModal(false);
-    try {
-      const statesData = await getStatesByItem(itemId);
-      setStates(statesData as StateRow[]);
-    } catch {
-      /* keep previous states on reload failure */
-    }
-  };
 
   const openDeleteModalWithDetails = async () => {
     try {
@@ -174,8 +130,7 @@ export default function ItemDetailPage() {
   }
 
   const cascadeInfo = entityToDelete ? getCascadeInfo(entityToDelete, 'items') : undefined;
-  const hasGeolocation = states.some(stateHasGeolocation);
-  const backedCount = states.filter((s) => s.backed).length;
+  const certifiedCount = certifications.filter((c) => c.status === 'CERTIFIED').length;
 
   return (
     <>
@@ -247,7 +202,7 @@ export default function ItemDetailPage() {
         </PageHeader>
 
         <Grid gutter="md">
-          {/* ── Left column: info + states ── */}
+          {/* ── Left column: info + certifications ── */}
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="md">
               <Card>
@@ -270,91 +225,64 @@ export default function ItemDetailPage() {
                 />
               </Card>
 
-              {/* ── States timeline ── */}
+              {/* ── Certifications ── */}
               <Card>
-                <Group justify="space-between" mb="md">
-                  <Group gap="xs">
-                    <ThemeIcon color="datiaBlue" variant="light" size={28} radius="sm">
-                      <IconFlag size={16} />
-                    </ThemeIcon>
-                    <Title order={5}>{t('productStates')}</Title>
-                  </Group>
-                  <Button
-                    size="xs"
-                    leftSection={<IconPlus size={15} />}
-                    onClick={() => setShowAddStateModal(true)}
-                  >
-                    {t('addState')}
-                  </Button>
+                <Group gap="xs" mb="md">
+                  <ThemeIcon color="datiaBlue" variant="light" size={28} radius="sm">
+                    <IconCertificate size={16} />
+                  </ThemeIcon>
+                  <Title order={5}>{t('certifications')}</Title>
                 </Group>
 
-                {states.length === 0 ? (
-                  <Text size="sm" c="dimmed" ta="center" py="lg">{t('noStates')}</Text>
+                {certifications.length === 0 ? (
+                  <Text size="sm" c="dimmed" ta="center" py="lg">{t('noCertifications')}</Text>
                 ) : (
-                  <Timeline
-                    active={states.length}
-                    bulletSize={26}
-                    lineWidth={2}
-                    color="datiaBlue"
-                  >
-                    {states.map((state) => (
-                      <Timeline.Item
-                        key={state.id}
-                        bullet={
-                          state.backed
-                            ? <IconShieldCheck size={14} />
-                            : <IconClock size={14} />
-                        }
-                        color={state.backed ? 'green' : 'datiaBlue'}
-                        title={
-                          <Group gap={6} wrap="wrap">
-                            <Text
-                              fw={600}
-                              size="sm"
-                              style={{ cursor: 'pointer' }}
-                              onClick={() => router.push(`/dashboard/states/${state.id}`)}
-                            >
-                              {state.title || state.statusType?.name || '—'}
-                            </Text>
-                            {state.statusType?.name && (
-                              <Badge size="xs" color="datiaBlue" variant="light">
-                                {state.statusType.name}
+                  <Timeline active={certifications.length} bulletSize={26} lineWidth={2} color="datiaBlue">
+                    {certifications.map((certification) => {
+                      const certified = certification.status === 'CERTIFIED';
+                      return (
+                        <Timeline.Item
+                          key={certification.id}
+                          bullet={certified ? <IconShieldCheck size={14} /> : <IconClock size={14} />}
+                          color={certified ? 'green' : 'datiaBlue'}
+                          title={
+                            <Group gap={6} wrap="wrap">
+                              <Text fw={600} size="sm">
+                                {certification.period ?? t('certificationWithoutPeriod')}
+                              </Text>
+                              {certification.co2eKg != null && (
+                                <Badge size="xs" color="datiaBlue" variant="light">
+                                  {certification.co2eKg} kg CO₂e
+                                </Badge>
+                              )}
+                              <Badge size="xs" color={certified ? 'green' : 'yellow'} variant="dot">
+                                {certified ? t('certified') : t('pendingBackup')}
                               </Badge>
+                            </Group>
+                          }
+                        >
+                          {certification.readings != null && (
+                            <Text size="sm" c="dimmed">{t('readingsCovered', { count: certification.readings })}</Text>
+                          )}
+                          <Group gap={8} mt={4}>
+                            <Text size="xs" c="dimmed">
+                              {new Date(certification.certifiedAt ?? certification.createdAt).toLocaleString()}
+                            </Text>
+                            {certification.checkerUrl && (
+                              <Anchor href={certification.checkerUrl} target="_blank" rel="noreferrer" size="xs">
+                                <Group gap={4}>
+                                  {t('viewProof')}
+                                  <IconLink size={12} />
+                                </Group>
+                              </Anchor>
                             )}
-                            <Badge
-                              size="xs"
-                              color={state.backed ? 'green' : 'yellow'}
-                              variant="dot"
-                            >
-                              {state.backed ? t('certified') : t('pendingBackup')}
-                            </Badge>
                           </Group>
-                        }
-                      >
-                        {state.description && (
-                          <Text size="sm" c="dimmed" lineClamp={2}>{state.description}</Text>
-                        )}
-                        <Text size="xs" c="dimmed" mt={4}>
-                          {new Date(state.createdAt).toLocaleString()}
-                        </Text>
-                      </Timeline.Item>
-                    ))}
+                        </Timeline.Item>
+                      );
+                    })}
                   </Timeline>
                 )}
               </Card>
-
-              {/* ── Geotracking map ── */}
-              {hasGeolocation && (
-                <Card>
-                  <Group gap="xs" mb="md">
-                    <ThemeIcon color="datiaBlue" variant="light" size={28} radius="sm">
-                      <IconMapPin size={16} />
-                    </ThemeIcon>
-                    <Title order={5}>{t('geotracking')}</Title>
-                  </Group>
-                  <ItemStatesMap states={states} />
-                </Card>
-              )}
             </Stack>
           </Grid.Col>
 
@@ -379,13 +307,13 @@ export default function ItemDetailPage() {
                 <Title order={6} mb="sm">{t('summary')}</Title>
                 <Stack gap={8}>
                   <Group justify="space-between">
-                    <Text size="sm" c="dimmed">{t('totalStates')}</Text>
-                    <Text size="sm" fw={600}>{states.length}</Text>
+                    <Text size="sm" c="dimmed">{t('totalCertifications')}</Text>
+                    <Text size="sm" fw={600}>{certifications.length}</Text>
                   </Group>
                   <Group justify="space-between">
-                    <Text size="sm" c="dimmed">{t('certifiedStates')}</Text>
-                    <Text size="sm" fw={600} c={backedCount > 0 ? 'green' : undefined}>
-                      {backedCount}
+                    <Text size="sm" c="dimmed">{t('certifiedCertifications')}</Text>
+                    <Text size="sm" fw={600} c={certifiedCount > 0 ? 'green' : undefined}>
+                      {certifiedCount}
                     </Text>
                   </Group>
                 </Stack>
@@ -412,16 +340,6 @@ export default function ItemDetailPage() {
         itemName={item?.name}
       />
 
-      {item && (
-        <AddStateForm
-          item={item}
-          itemId={itemId}
-          show={showAddStateModal}
-          onHide={() => setShowAddStateModal(false)}
-          onSuccess={reloadStates}
-          onStateCreated={reloadStates}
-        />
-      )}
     </>
   );
 }
