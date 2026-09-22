@@ -34,7 +34,20 @@ export interface ItemRepository {
   // Métodos con filtro por organización
   findByOrganization(organizationId: string): Promise<ItemRecord[]>;
   getById(id: string, organizationId: string): Promise<ItemRecord | null>;
-  listForExport(organizationId: string, options: { fullPassport: boolean }): Promise<Array<{ id: string; name: string; description: string | null; createdAt: Date; categoryName: string | null }>>;
+  listForExport(organizationId: string, options: { fullPassport: boolean }): Promise<Array<{
+    id: string;
+    name: string;
+    description: string | null;
+    createdAt: Date;
+    categoryId: string | null;
+    categoryName: string | null;
+    categories: Array<{ id: string; name: string }>;
+    siteName: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    templateFields: Record<string, any> | null;
+    imageUrl: string | null;
+  }>>;
   create(input: CreateItemInput): Promise<ItemRecord>;
   updateEvidenceId(id: string, organizationId: string, evidenceID: string): Promise<void>;
   delete(id: string, organizationId: string): Promise<void>;

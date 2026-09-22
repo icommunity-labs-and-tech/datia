@@ -2,7 +2,6 @@
 
 import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { geolocationOf } from '@/lib/map/installations';
 import { certifiedItemIds } from '@/lib/certification/queries';
 
 export async function getItems() {
@@ -22,9 +21,8 @@ export async function getItems() {
       categories: r.categories ?? [], // Array de categorías con id y name
       // What can be proven about an asset is what has been anchored for it.
       certified: certified.has(r.id),
-      // Position comes from the category's template, so only the coordinate is
-      // sent — the rest of the template fields are none of the map's business.
-      location: geolocationOf(r.templateFields),
+      // Position has its own columns now (#37); the map needs nothing else.
+      location: r.latitude != null && r.longitude != null ? { lat: r.latitude, lng: r.longitude } : null,
       siteName: r.siteName ?? null,
     }));
   } catch (error) {

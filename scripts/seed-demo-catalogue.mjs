@@ -218,6 +218,7 @@ async function main() {
     const id = stableId(a.serial);
     idBySerial[a.serial] = id;
 
+    const posicion = scatter(site, index + 1);
     const anchor = a.installed ? at(a.installed) : at('2025-09-12');
     const created = new Date(anchor.getTime() - 25 * 864e5);
 
@@ -235,7 +236,11 @@ async function main() {
         itemTemplate: [],
         // Position lives in the category's template, which is where the map
         // reads it from to group assets into installations.
-        templateFields: { ubicacion: scatter(site, index + 1) },
+        templateFields: { ubicacion: posicion },
+        // La posición tiene columnas propias desde #37; la plantilla se
+        // mantiene mientras siga existiendo.
+        latitude: posicion.lat,
+        longitude: posicion.lng,
       },
     });
     await prisma.itemCategory.create({ data: { itemId: id, categoryId: catId[a.cat] } });
