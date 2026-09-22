@@ -24,9 +24,24 @@ export interface EvidenceCertification {
   };
 }
 
+/**
+ * What iBS publishes about each file of an evidence. It never returns the file
+ * itself: only its checksum, as `base64(SHA-512(bytes))`.
+ */
+export interface EvidenceIntegrity {
+  name?: string;
+  type?: string;
+  algorithm?: string;
+  checksum?: string;
+  /** How the checksum is encoded; iBS sends `base64.standard`. */
+  sanitizer?: string;
+}
+
 export interface EvidenceData {
   id: string;
-  payload: { files: EvidenceFile[]; title?: string };
+  title?: string;
+  created_at?: string;
+  payload?: { integrity?: EvidenceIntegrity[] };
   data?: any;
   timestamp?: string;
   status?: EvidenceStatus;

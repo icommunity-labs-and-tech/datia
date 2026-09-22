@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockPrisma, mockCreateStateEvidence, mockGetEvidence, mockRecordEvent } = vi.hoisted(() => ({
+const { mockPrisma, mockCreateCertificationEvidence, mockGetEvidence, mockRecordEvent } = vi.hoisted(() => ({
   mockPrisma: {
     certification: { create: vi.fn(), update: vi.fn(), findUnique: vi.fn() },
     emissionRecord: { updateMany: vi.fn() },
     $transaction: vi.fn(async (ops: unknown[]) => Promise.all(ops)),
   },
-  mockCreateStateEvidence: vi.fn(),
+  mockCreateCertificationEvidence: vi.fn(),
   mockGetEvidence: vi.fn(),
   mockRecordEvent: vi.fn(),
 }));
@@ -14,7 +14,7 @@ const { mockPrisma, mockCreateStateEvidence, mockGetEvidence, mockRecordEvent } 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/services/events', () => ({ recordEvent: mockRecordEvent }));
 vi.mock('@/domain/evidence/EvidenceServiceImpl', () => ({
-  createEvidenceServiceImpl: () => ({ createCertificationEvidence: mockCreateStateEvidence }),
+  createEvidenceServiceImpl: () => ({ createCertificationEvidence: mockCreateCertificationEvidence }),
 }));
 vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
   icommunityService: { getEvidence: mockGetEvidence },
@@ -50,7 +50,7 @@ const input = {
 describe('issueCertification', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockCreateStateEvidence.mockResolvedValue('ev-1');
+    mockCreateCertificationEvidence.mockResolvedValue({ evidenceId: 'ev-1', payloadChecksum: 'huella-1' });
     mockPrisma.certification.create.mockImplementation(async ({ data }) => ({ ...issuedRow, ...data }));
   });
 
@@ -58,16 +58,19 @@ describe('issueCertification', () => {
     const cert = await issueCertification(input);
 
     expect(cert).toMatchObject({ evidenceId: 'ev-1', organizationId: 'org-1' });
+    // The checksum iBS will publish is recorded now: later it is the only way
+    // to prove the stored payload is what was certified.
+    expect(mockPrisma.certification.create.mock.calls[0][0].data.payloadChecksum).toBe('huella-1');
     expect(mockPrisma.emissionRecord.updateMany).toHaveBeenCalledWith({
       where: { id: { in: ['em-1', 'em-2'] } },
       data: { certificationId: cert.id },
     });
     // The evidence carries the same id the row gets, so iBS and datia agree.
-    expect(mockCreateStateEvidence.mock.calls[0][0].metadata).toMatchObject({ id: cert.id, templateConfig: { co2eKg: 1 } });
+    expect(mockCreateCertificationEvidence.mock.calls[0][0].metadata).toMatchObject({ id: cert.id, templateConfig: { co2eKg: 1 } });
   });
 
   it('writes nothing when iBS rejects the evidence', async () => {
-    mockCreateStateEvidence.mockRejectedValue(new Error('iBS down'));
+    mockCreateCertificationEvidence.mockRejectedValue(new Error('iBS down'));
     await expect(issueCertification(input)).rejects.toThrow('iBS down');
     expect(mockPrisma.certification.create).not.toHaveBeenCalled();
     expect(mockPrisma.emissionRecord.updateMany).not.toHaveBeenCalled();

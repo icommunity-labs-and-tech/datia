@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHash } from 'crypto';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { prisma } from '@/lib/prisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
-import type { EmissionVerificationReport, EvidenceAuditRecord } from '@/domain/energy/EnergyTypes';
+import type { EmissionVerificationReport } from '@/domain/energy/EnergyTypes';
 
-function sha256(data: string): string {
-  return createHash('sha256').update(data, 'utf8').digest('hex');
-}
-
+/**
+ * Verifies an emission against its proof on chain.
+ *
+ * iBS never returns the certified file, only the checksum it published for it
+ * (`payload.integrity`), so verification compares checksums, not contents: the
+ * one iBS publishes against the one recorded when the proof was issued. If they
+ * match, the proof is intact; then the certified payload is compared field by
+ * field with the record as it stands today, which is what surfaces a figure
+ * that changed after being certified.
+ */
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -18,18 +23,12 @@ export async function GET(
 
   const { id } = await params;
 
-  // ── 1. Load the full chain: EmissionRecord → Consumption → Source → Item ──
   const emission = await prisma.emissionRecord.findFirst({
     where: {
       id,
       EnergyConsumption: { EnergySource: { Item: { organizationId: auth.organizationId } } },
     },
-    include: {
-      EnergyConsumption: {
-        include: { EnergySource: { include: { Item: true } } },
-      },
-      Certification: true,
-    },
+    include: { Certification: true },
   });
 
   if (!emission) {
@@ -39,7 +38,6 @@ export async function GET(
     );
   }
 
-  // ── 2. The proof that covers it, confirmed on chain ──
   const certification = emission.Certification;
   if (!certification || certification.status !== 'CERTIFIED') {
     return NextResponse.json(
@@ -52,13 +50,22 @@ export async function GET(
     );
   }
 
-  const evidenceID = certification.evidenceId;
-  const certifiedAt = (certification.certifiedAt ?? certification.createdAt).toISOString();
+  if (!certification.payloadChecksum) {
+    // Proofs issued before checksums were recorded: the evidence is on chain,
+    // but there is nothing to compare it against here.
+    return NextResponse.json(
+      {
+        error: 'This proof predates checksum recording and cannot be verified automatically',
+        certificationId: certification.id,
+        evidenceId: certification.evidenceId,
+      },
+      { status: 409 }
+    );
+  }
 
-  // ── 3. Fetch blockchain evidence from iCommunity ──
-  let evidenceData: Awaited<ReturnType<typeof icommunityService.getEvidence>>;
+  let evidence: Awaited<ReturnType<typeof icommunityService.getEvidence>>;
   try {
-    evidenceData = await icommunityService.getEvidence(evidenceID);
+    evidence = await icommunityService.getEvidence(certification.evidenceId);
   } catch {
     return NextResponse.json(
       { error: 'Could not retrieve blockchain evidence. The iCommunity service may be unavailable.' },
@@ -66,70 +73,61 @@ export async function GET(
     );
   }
 
-  // ── 4. Parse the stored evidence JSON ──
-  const jsonFile = evidenceData.payload?.files?.find(
-    (f) => f.name === 'issue_data.json'
-  );
-
-  if (!jsonFile) {
+  const published = evidence.payload?.integrity?.find((entry) => entry.name?.endsWith('.json'));
+  if (!published?.checksum) {
     return NextResponse.json(
-      { error: 'Evidence JSON file not found in blockchain record' },
-      { status: 500 }
+      { error: 'The evidence publishes no checksum for its certified data' },
+      { status: 502 }
     );
   }
 
-  const rawJson = Buffer.from(jsonFile.file, 'base64').toString('utf8');
-  const storedEvidence = JSON.parse(rawJson) as {
-    templateConfig?: Record<string, unknown>;
-    [key: string]: unknown;
-  };
+  const intact = published.checksum === certification.payloadChecksum;
 
-  const stored = (storedEvidence.templateConfig ?? {}) as Record<string, unknown>;
-
-  // ── 5. Compute SHA-256 of the canonical evidence payload ──
-  const hash = sha256(rawJson);
-
-  // ── 6. Compare stored fields vs current DB emission record ──
+  // What the proof says, against what the record says now.
+  const certified = (certification.payload ?? {}) as Record<string, unknown>;
   const discrepancies: string[] = [];
-
-  const numDiff = (field: string, stored: unknown, current: unknown) => {
-    if (stored !== undefined && Number(stored) !== Number(current)) {
-      discrepancies.push(`${field}: stored=${stored}, current=${current}`);
-    }
-  };
-  const strDiff = (field: string, stored: unknown, current: unknown) => {
-    if (stored !== undefined && String(stored) !== String(current ?? '')) {
-      discrepancies.push(`${field}: stored=${stored}, current=${current}`);
+  const compare = (field: string, certifiedValue: unknown, current: unknown) => {
+    if (certifiedValue === undefined || certifiedValue === null) return;
+    if (String(certifiedValue) !== String(current ?? '')) {
+      discrepancies.push(`${field}: certificado=${certifiedValue}, actual=${current}`);
     }
   };
 
-  numDiff('co2eKg', stored.co2eKg, emission.co2eKg);
-  strDiff('scope', stored.scope, emission.scope);
-  strDiff('systemBoundary', stored.systemBoundary, emission.systemBoundary);
-  strDiff('emissionFactorSource', stored.emissionFactorSource, emission.emissionFactorSource ?? '');
-  strDiff('verifierBody', stored.verifierBody, emission.verifierBody ?? '');
-  strDiff('verificationStandard', stored.verificationStandard, emission.verificationStandard ?? '');
+  compare('co2eKg', certified.co2eKg, emission.co2eKg);
+  compare('scope', certified.scope, emission.scope);
+  compare('systemBoundary', certified.systemBoundary, emission.systemBoundary);
+  compare('emissionFactor', certified.emissionFactor, emission.emissionFactor);
+  compare('emissionFactorSource', certified.emissionFactorSource, emission.emissionFactorSource ?? '');
+  compare('verifierBody', certified.verifierBody, emission.verifierBody ?? '');
+  compare('verificationStandard', certified.verificationStandard, emission.verificationStandard ?? '');
 
-  const evidenceAudit: EvidenceAuditRecord = {
-    blockchain_tx: evidenceID,
-    timestamp: evidenceData.timestamp ?? certifiedAt,
-    source: String(stored.emissionFactorSource ?? emission.emissionFactorSource ?? ''),
-    event_type: 'co2_certification_event',
-    hash,
-  };
+  const asText = (value: unknown) => (typeof value === 'string' ? value : null);
+  const asNumber = (value: unknown) => (typeof value === 'number' ? value : null);
+  const certifiedAt = (certification.certifiedAt ?? certification.createdAt).toISOString();
 
   const report: EmissionVerificationReport = {
     emissionRecordId: id,
     certificationId: certification.id,
-    verified: discrepancies.length === 0,
-    evidence: evidenceAudit,
-    originalData: {
-      co2eKg: emission.co2eKg,
-      scope: emission.scope as EmissionVerificationReport['originalData']['scope'],
-      systemBoundary: emission.systemBoundary as EmissionVerificationReport['originalData']['systemBoundary'],
-      verifierBody: emission.verifierBody ?? '',
-      verificationStandard: emission.verificationStandard ?? '',
-      certifiedAt: String(stored.certifiedAt ?? certifiedAt),
+    verified: intact && discrepancies.length === 0,
+    evidence: {
+      blockchain_tx: certification.hash ?? certification.evidenceId,
+      timestamp: evidence.certification?.timestamp ?? certifiedAt,
+      source: asText(certified.emissionFactorSource) ?? emission.emissionFactorSource ?? '',
+      event_type: 'co2_certification_event',
+      hash: certification.hash ?? '',
+    },
+    proof: {
+      publishedChecksum: published.checksum,
+      storedChecksum: certification.payloadChecksum,
+      intact,
+    },
+    certifiedData: {
+      co2eKg: asNumber(certified.co2eKg),
+      scope: asText(certified.scope),
+      systemBoundary: asText(certified.systemBoundary),
+      verifierBody: asText(certified.verifierBody),
+      verificationStandard: asText(certified.verificationStandard),
+      certifiedAt,
     },
     discrepancies,
   };
