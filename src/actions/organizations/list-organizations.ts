@@ -11,7 +11,7 @@ export interface OrganizationListItem {
   createdAt: Date;
   userCount: number;
   itemCount: number;
-  stateCount: number;
+  certificationCount: number;
   adminActivated: boolean;
   activeUsersCount: number;
   pendingUsersCount: number;
@@ -48,15 +48,7 @@ export async function listOrganizations(): Promise<ListOrganizationsResult> {
           select: {
             User: true,
             Item: true,
-          },
-        },
-        Item: {
-          select: {
-            _count: {
-              select: {
-                State: true,
-              },
-            },
+            Certification: true,
           },
         },
         User: {
@@ -110,7 +102,6 @@ export async function listOrganizations(): Promise<ListOrganizationsResult> {
     
     const result: OrganizationListItem[] = organizations.map((org) => {
       // Contar estados sumando los estados de todos los items
-      const stateCount = org.Item.reduce((sum, item) => sum + item._count.State, 0);
       
       // Verificar si el primer admin ha activado su cuenta
       const firstAdmin = org.User[0];
@@ -127,7 +118,7 @@ export async function listOrganizations(): Promise<ListOrganizationsResult> {
         createdAt: org.createdAt,
         userCount: org._count.User,
         itemCount: org._count.Item,
-        stateCount,
+        certificationCount: org._count.Certification,
         adminActivated,
         activeUsersCount: counts.active,
         pendingUsersCount: counts.pending,

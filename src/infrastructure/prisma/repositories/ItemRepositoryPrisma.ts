@@ -25,7 +25,6 @@ export const itemRepository: ItemRepository = {
     try {
       const items = await prisma.item.findMany({ 
         where: { organizationId },
-        include: { State: { orderBy: { createdAt: 'desc' }, take: 1, select: { title: true, backed: true } } },
         orderBy: { createdAt: 'desc' } 
       });
       return items.map(toDomain);
@@ -75,8 +74,6 @@ export const itemRepository: ItemRepository = {
           name: true,
           description: true,
           imageUrl: true,
-          State: { select: { title: true }, take: 5 },
-          _count: { select: { State: true } },
         },
       });
       return item
@@ -85,8 +82,6 @@ export const itemRepository: ItemRepository = {
             name: item.name,
             description: item.description ?? null,
             imageUrl: item.imageUrl ?? null,
-            states: item.State ?? [],
-            _count: { states: item._count.State },
           }
         : null;
     } catch (e) {
@@ -96,17 +91,6 @@ export const itemRepository: ItemRepository = {
 
   async listForExport(organizationId: string, options: { fullPassport: boolean }) {
     try {
-      const statesConfig = options.fullPassport
-        ? {
-            orderBy: { createdAt: 'desc' as const },
-            select: { id: true, title: true, backed: true, createdAt: true },
-          }
-        : {
-            orderBy: { createdAt: 'desc' as const },
-            take: 1,
-            select: { id: true, title: true, backed: true, createdAt: true },
-          };
-
       const rows = await prisma.item.findMany({
         where: { organizationId },
         include: {
@@ -120,7 +104,6 @@ export const itemRepository: ItemRepository = {
               },
             },
           },
-          State: statesConfig,
           // The only place name Datia holds today: assets carry coordinates but
           // no site name, and the source attached to one declares it.
           EnergySource: { select: { location: true }, take: 1 },
@@ -147,7 +130,6 @@ export const itemRepository: ItemRepository = {
           // the item's template fields rather than as a column of its own.
           templateFields: r.templateFields ?? null,
           imageUrl: r.imageUrl ?? null,
-          states: r.State ?? [],
         };
       });
     } catch (e) {
@@ -371,17 +353,27 @@ export const itemRepository: ItemRepository = {
 
   async countActiveItems(organizationId: string, days: number): Promise<number> {
     try {
+      // Activity is what has been anchored for the asset: its state history is
+      // gone (#63), and a proof is the only dated thing an asset gathers now.
       return await prisma.item.count({
         where: {
           organizationId,
-          State: {
+          EnergySource: {
             some: {
-              createdAt: {
-                gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
-              }
-            }
-          }
-        }
+              EnergyConsumption: {
+                some: {
+                  EmissionRecord: {
+                    some: {
+                      Certification: {
+                        createdAt: { gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000) },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       });
     } catch (e) {
       throw new DbError(e);
@@ -401,35 +393,6 @@ export const itemRepository: ItemRepository = {
     }
   },
 
-  async getItemsWithStatesForBackup(organizationId: string, startDate: Date) {
-    try {
-      const items = await prisma.item.findMany({
-        where: { 
-          organizationId,
-          State: { some: { createdAt: { gte: startDate } } } 
-        },
-        select: {
-          id: true,
-          name: true,
-          State: {
-            where: { createdAt: { gte: startDate } },
-            select: { id: true, backed: true, createdAt: true }
-          }
-        }
-      });
-      return items.map(item => ({
-        id: item.id,
-        name: item.name,
-        states: item.State.map(state => ({
-          id: state.id,
-          backed: state.backed,
-          createdAt: state.createdAt,
-        })),
-      }));
-    } catch (e) {
-      throw new DbError(e);
-    }
-  },
 
   async importMany(organizationId: string, rows: Array<{ id: string; name: string; description: string; imageUrl?: string | null }>): Promise<void> {
     try {

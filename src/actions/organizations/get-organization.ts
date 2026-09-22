@@ -19,7 +19,7 @@ export interface OrganizationDetail {
   updatedAt: Date;
   userCount: number;
   itemCount: number;
-  stateCount: number;
+  certificationCount: number;
   categoryCount: number;
   activeUsersCount: number;
   pendingUsersCount: number;
@@ -64,15 +64,7 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
             User: true,
             Item: true,
             Category: true,
-          },
-        },
-        Item: {
-          select: {
-            _count: {
-              select: {
-                State: true,
-              },
-            },
+            Certification: true,
           },
         },
         User: {
@@ -100,7 +92,6 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
     }
     
     // Contar estados
-    const stateCount = organization.Item.reduce((sum, item) => sum + item._count.State, 0);
     
     // Obtener conteos de usuarios por estado
     const userCounts = await prisma.user.groupBy({
@@ -129,7 +120,7 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
       userCount: organization._count.User,
       itemCount: organization._count.Item,
       categoryCount: organization._count.Category,
-      stateCount,
+      certificationCount: organization._count.Certification,
       activeUsersCount: activeCount,
       pendingUsersCount: pendingCount,
       adminActivated: firstAdmin ? firstAdmin.status === 'ACTIVE' : false,

@@ -155,8 +155,8 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
           <Card className="border-warning h-100">
             <Card.Body className="text-center">
               <i className="bi bi-list-check text-warning" style={{ fontSize: '2rem' }}></i>
-              <h3 className="mt-2 mb-0">{organization.stateCount}</h3>
-              <p className="text-muted mb-0">Estados</p>
+              <h3 className="mt-2 mb-0">{organization.certificationCount}</h3>
+              <p className="text-muted mb-0">Certificaciones</p>
             </Card.Body>
           </Card>
         </Col>

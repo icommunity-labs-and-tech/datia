@@ -30,7 +30,6 @@
     "test:e2e:debug": "playwright test --debug",
     "test:e2e:json": "playwright test --reporter=json > playwright-report.json",
     "test:e2e:isolated": "node tests/e2e/run-isolated.mjs",
-    "test:e2e:certification": "playwright test tests/e2e/complete-state-certification.spec.ts --project=certification-flow",
     "gen:e2e:schema": "node scripts/gen-e2e-schema.mjs"
   },
   "dependencies": {

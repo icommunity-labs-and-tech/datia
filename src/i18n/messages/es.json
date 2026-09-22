@@ -95,10 +95,7 @@
     "editItem": "Editar activo",
     "addUser": "Añadir usuario",
     "editUser": "Editar usuario",
-    "addState": "Añadir estado",
-    "editState": "Editar estado",
     "selectOption": "Seleccionar...",
-    "selectStatusType": "Selecciona un tipo de estado",
     "description": "Descripción",
     "descriptionPlaceholder": "Describe el estado actual del activo...",
     "customId": "ID personalizado",
@@ -106,7 +103,6 @@
     "generatedTitle": "Título generado",
     "addField": "Agregar campo",
     "categoryFields": "Campos específicos de la categoría",
-    "statusTypeFields": "Campos específicos del tipo de estado",
     "validationErrors": "Errores de validación",
     "fieldMustHaveName": "El campo {index} debe tener un nombre",
     "fieldMustHaveNameWithNumber": "El campo {number} debe tener un nombre",
@@ -123,8 +119,6 @@
       "productName": "Nombre del activo",
       "productDescription": "Descripción del activo",
       "imageUrl": "URL de la imagen",
-      "statusTypeName": "Nombre del tipo de estado",
-      "statusTypeDescription": "Descripción del tipo de estado",
       "userName": "Nombre completo del usuario",
       "userEmail": "correo@ejemplo.com",
       "selectRole": "Seleccionar rol",
@@ -133,7 +127,6 @@
     "roles": {
       "administrator": "Administrador"
     },
-    "loadingStatusTypes": "Cargando tipos de estado disponibles...",
     "newTag": "Nueva etiqueta"
   },
   "tables": {
@@ -160,7 +153,6 @@
     "addCategory": "Añadir categoría",
     "users": "Usuarios del Sistema",
     "items": "Catálogo de activos",
-    "statusTypes": "Tipos de estado",
     "usersDescription": "La gestión de usuarios te permite administrar los usuarios del sistema, crear nuevos usuarios, asignar roles (Operador o Administrador) y gestionar sus permisos. Los usuarios pueden ser verificados mediante KYC y pueden tener diferentes niveles de acceso según su rol en la organización.",
     "whatIsUserManagement": "¿Qué es la gestión de usuarios?",
     "whatIsInventory": "¿Qué es el catálogo de activos?",
@@ -186,14 +178,6 @@
     "confirmDeleteProduct": "¿Estás seguro de que quieres eliminar el activo \"{name}\"?",
     "deleteUserError": "Error al eliminar el usuario",
     "deleteProductError": "Error al eliminar el activo",
-    "deleteStatusType": "Eliminar Tipo de Estado",
-    "confirmDeleteStatusType": "¿Estás seguro de que quieres eliminar el tipo de estado \"{name}\"?",
-    "editStatusType": "Editar Tipo de Estado",
-    "statusTypesDescription": "Los tipos de estados son categorizaciones predefinidas de los activos/elementos para tener un control más dinámico de las operaciones que se hacen sobre ellos. Por ejemplo, si ha pasado el activo a reparación, se se ha enviado logísticamente a otro lugar, etc. Desde aquí podrás crear nuevos estados o modificarlos para luego poder asignarlos desde el activo en concreto.",
-    "whatIsStatusTypes": "¿Qué son los tipos de estado?",
-    "deleteStatusTypeError": "Error al eliminar el tipo de estado",
-    "loadStatusTypeError": "Error al cargar el tipo de estado",
-    "updateStatusTypeError": "Error al actualizar el tipo de estado",
     "columnLabels": {
       "itemName": "Nombre del Item",
       "status": "Estado",
@@ -208,23 +192,7 @@
       "name": "Nombre",
       "role": "Rol",
       "created": "Creado",
-      "stateTitle": "Título del Estado",
       "creationDate": "Fecha de Creación"
-    },
-    "statusTypeDetail": {
-      "notFound": "No se encontró información del tipo de estado.",
-      "pageTitle": "Tipo de Estado: {name}",
-      "fields": "Campos",
-      "field": "Campo",
-      "statesUsingType": "Estados que usan este tipo ({count})",
-      "deleteTitle": "Eliminar Tipo de Estado",
-      "deleteMessage": "¿Estás seguro de que quieres eliminar el tipo de estado \"{name}\"?",
-      "deleteError": "Error al eliminar el tipo de estado",
-      "columns": {
-        "title": "Título",
-        "product": "Activo",
-        "created": "Creado"
-      }
     }
   },
   "modals": {
@@ -261,7 +229,6 @@
       "addUser": "Añadir Usuario",
       "addProduct": "Añadir activo",
       "addCategory": "Añadir Categoría",
-      "addStatusType": "Añadir Tipo de estado",
       "addElement": "Añadir Elemento",
       "createError": "Error al crear el elemento",
       "emailExists": "Ya existe un usuario con este email",
@@ -416,7 +383,6 @@
     "createdAt": "Creado:",
     "tabInfo": "Información",
     "verifiedProduct": "Activo verificado en blockchain",
-    "stateVerified": "Estado verificado en blockchain",
     "productDetails": "Detalles del activo",
     "category": "Categoría:",
     "specifications": "Especificaciones",
@@ -434,7 +400,6 @@
     "loadingCertification": "Cargando certificación...",
     "blockchainCertification": "Certificación blockchain",
     "signer": "Firmante",
-    "noHistory": "No hay historial disponible para este activo",
     "error": {
       "title": "Error",
       "unknownError": "Error desconocido",
@@ -452,7 +417,6 @@
       "notCertified": "Pendiente de certificar",
       "certifiedDescription": "La identidad y el historial de este activo están registrados en blockchain y son verificables públicamente.",
       "notCertifiedDescription": "Este activo aún no tiene un registro certificado en blockchain.",
-      "states": "Estados registrados",
       "energy": {
         "co2Certified": "kg CO₂e certificados",
         "kwhConsumed": "kWh consumidos",
@@ -503,25 +467,6 @@
       "footer": "Datos certificados según ESPR / ISO 14067"
     }
   },
-  "states": {
-    "title": "Estado",
-    "notFound": "No se encontró información del estado.",
-    "type": "Tipo",
-    "date": "Fecha",
-    "backed": "Respaldado",
-    "yes": "Sí",
-    "no": "No",
-    "evidenceId": "Evidence ID",
-    "description": "Descripción",
-    "fields": "Campos",
-    "field": "Campo",
-    "photos": "Fotografías",
-    "whatAreStates": "¿Qué son los estados?",
-    "statesDescription": "Los estados representan eventos o cambios importantes en el ciclo de vida de un item, como inspecciones, reparaciones, mantenimientos o verificaciones. Cada estado puede incluir imágenes, descripciones detalladas y datos personalizados según el tipo de estado, y puede ser respaldado como evidencia verificable.",
-    "filterPlaceholder": "Filtrar por estado...",
-    "addButton": "Añadir estado",
-    "viewDetail": "Ver detalle"
-  },
   "categories": {
     "title": "Categorías",
     "deleteCategory": "Eliminar Categoría",
@@ -559,8 +504,6 @@
       "categoryName": "Categoría (primera)",
       "allCategories": "Todas las categorías",
       "createdAt": "Fecha de creación",
-      "lastStateTitle": "Pasaporte: Último estado",
-      "lastStateDate": "Pasaporte: Fecha del último estado",
       "customerUrl": "URL pública"
     }
   },
@@ -576,15 +519,11 @@
   },
   "deleteConfirmation": {
     "itemsMore": "y {count} item{plural} más",
-    "itemsCount": "{count} item{plural}",
-    "statesMore": "y {count} estado{plural} más",
-    "statesCount": "{count} estado{plural}",
-    "statusTypesMore": "y {count} tipo{plural} de estado más",
-    "statusTypesCount": "{count} tipo{plural} de estado"
+    "itemsCount": "{count} item{plural}"
   },
   "dashboard": {
     "metrics": "Métricas",
-    "monthlyActivityTitle": "Actividad Mensual de Estados",
+    "monthlyActivityTitle": "Actividad mensual",
     "categoryDistributionTitle": "Distribución por Categorías",
     "loadingData": "Cargando datos...",
     "charts": {
@@ -750,8 +689,8 @@
       "retry": "Reintentar KYC",
       "retrying": "Creando nueva firma...",
       "noUrlError": "No se pudo obtener una URL de verificación. Por favor, intenta más tarde.",
-      "verifiedMessage": "Tu organización está verificada. Ya puedes crear items y estados certificados.",
-      "needKycNote": "Necesitarás completar el KYC para crear items y estados certificados en blockchain."
+      "verifiedMessage": "Tu organización está verificada. Ya puedes certificar en blockchain.",
+      "needKycNote": "Necesitarás completar el KYC para poder certificar en blockchain."
     },
     "password": {
       "current": "Contraseña actual",
@@ -900,7 +839,7 @@
       "filter": {
         "all": "Todos",
         "itemCreated": "Item Creado",
-        "stateCreated": "Estado Creado"
+        "certification": "Certificaciones"
       },
       "noEvents": "No hay eventos registrados aún",
       "table": {
@@ -1021,7 +960,6 @@
     "searchPlaceholder": "Buscar activos...",
     "noItems": "No hay activos registrados",
     "allCategories": "Todas las categorías",
-    "lastState": "Último estado",
     "noCategory": "Sin categoría",
     "certified": "Certificado",
     "pending": "Pendiente",

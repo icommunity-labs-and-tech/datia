@@ -3,7 +3,6 @@ import { NextRequest } from 'next/server';
 import { requireOrganizationId, TenantContextNotFoundError } from '@/lib/auth/tenant';
 import { requireSessionOrganization } from '@/lib/api/require-session';
 import * as dashboardActions from '@/actions/dashboard';
-import * as stateActions from '@/actions/states';
 import * as categoryActions from '@/actions/categories';
 import * as itemActions from '@/actions/items';
 import * as userActions from '@/actions/users';
@@ -14,7 +13,6 @@ import * as category from '../categories/[id]/route';
 import * as item from '../items/[id]/route';
 import * as itemsByCategory from '../items/by-category/route';
 import * as itemSearch from '../items/search/route';
-import * as state from '../states/[id]/route';
 import * as user from '../users/[id]/route';
 
 vi.mock('@/lib/auth/tenant', async () => {
@@ -25,12 +23,7 @@ vi.mock('@/lib/auth/tenant', async () => {
 vi.mock('@/actions/dashboard', () => ({
   getDashboardKPIs: vi.fn(async () => ({})),
   getMonthlyActivity: vi.fn(async () => []),
-  getBackupStatus: vi.fn(async () => []),
   getCategoryDistribution: vi.fn(async () => []),
-}));
-vi.mock('@/actions/states', () => ({
-  getBackupStatusByUser: vi.fn(async () => []),
-  getState: vi.fn(async () => ({ id: 's-1' })),
 }));
 vi.mock('@/actions/categories', () => ({ getCategory: vi.fn(async () => ({ id: 'c-1' })) }));
 vi.mock('@/actions/items', () => ({
@@ -51,7 +44,6 @@ const ROUTES = [
   { name: 'items/[id]', call: () => (item as any).GET(req('/api/items/i-1'), withId('i-1')), action: itemActions.getItem },
   { name: 'items/by-category', call: () => (itemsByCategory as any).GET(req('/api/items/by-category?categoryId=c-1')), action: itemActions.getItemsByCategory },
   { name: 'items/search', call: () => (itemSearch as any).GET(req('/api/items/search?q=panel')), action: itemActions.searchItems },
-  { name: 'states/[id]', call: () => (state as any).GET(req('/api/states/s-1'), withId('s-1')), action: stateActions.getState },
   { name: 'users/[id]', call: () => (user as any).GET(req('/api/users/u-1'), withId('u-1')), action: userActions.getUserById },
 ];
 

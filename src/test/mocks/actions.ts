@@ -1,14 +1,6 @@
 import { vi } from 'vitest';
 
 // Mock actions/API calls
-vi.mock('@/actions/statusTypes', () => ({
-  listStatusTypes: vi.fn()
-}));
-
-vi.mock('@/actions/states', () => ({
-  createState: vi.fn()
-}));
-
 vi.mock('@/actions/items', () => ({
   getItem: vi.fn()
 }));

@@ -47,10 +47,6 @@ const manualOpenApiSpec = {
       description: 'Operations related to products management',
     },
     {
-      name: 'States',
-      description: 'Operations related to product states',
-    },
-    {
       name: 'Categories',
       description: 'Operations related to categories management',
     },
@@ -65,10 +61,6 @@ const manualOpenApiSpec = {
     {
       name: 'Emissions',
       description: 'CO₂ emission records and DPP certification (ISO 14067 / GHG Protocol)',
-    },
-    {
-      name: 'Maintenance',
-      description: 'Maintenance events on hardware assets',
     },
   ],
   paths: {
@@ -345,10 +337,6 @@ const manualOpenApiSpec = {
                     description: { type: 'string' },
                     imageUrl: { type: 'string', nullable: true },
                     createdAt: { type: 'string', format: 'date-time' },
-                    states: {
-                      type: 'array',
-                      items: { type: 'object' },
-                    },
                   },
                 },
               },
@@ -370,205 +358,6 @@ const manualOpenApiSpec = {
           },
           '404': {
             description: 'Product not found',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/products/{id}/states': {
-      post: {
-        summary: 'Add a state to a product',
-        description: 'Adds a new state to a product. Select a status type from the options — each one defines the exact fields required in `templateConfig`.',
-        operationId: 'createProductState',
-        tags: ['Products'],
-        security: [{ BearerAuth: [] }],
-        parameters: [
-          {
-            name: 'id',
-            in: 'path',
-            required: true,
-            description: 'Product ID',
-            schema: { type: 'string' },
-            example: 'PROD-001',
-          },
-        ],
-        responses: {
-          '501': {
-            description: 'Not Implemented',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                    message: { type: 'string' },
-                    details: { type: 'object' },
-                  },
-                },
-                example: {
-                  error: 'Not Implemented',
-                  code: 'NOT_IMPLEMENTED',
-                  message: 'State creation API is not yet implemented. This requires dynamic template validation based on StatusType configuration.',
-                  details: {
-                    itemId: 'PROD-001',
-                    note: 'The templateConfig structure is dynamic and depends on the StatusType.template field.',
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/states': {
-      get: {
-        summary: 'List all states',
-        description: 'Retrieves a list of all states in the system. Requires a valid API token.',
-        operationId: 'listStates',
-        tags: ['States'],
-        security: [{ BearerAuth: [] }],
-            parameters: [
-              {
-                name: 'itemId',
-                in: 'query',
-                schema: { type: 'string' },
-                description: 'Filter states by product ID (optional)',
-                example: 'PROD-001',
-              },
-              {
-                name: 'cursor',
-                in: 'query',
-                schema: { type: 'string' },
-                description: 'Cursor for pagination (ID of the last state from previous page)',
-                example: 'state-001',
-              },
-              {
-                name: 'limit',
-                in: 'query',
-                schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-                description: 'Maximum number of states to return',
-                example: 20,
-              },
-            ],
-            responses: {
-              '200': {
-                description: 'List of states retrieved successfully (paginated)',
-                content: {
-                  'application/json': {
-                    schema: {
-                      type: 'object',
-                      properties: {
-                        data: {
-                          type: 'array',
-                          items: {
-                            type: 'object',
-                            properties: {
-                              id: { type: 'string' },
-                              title: { type: 'string' },
-                              description: { type: 'string' },
-                              statusTypeId: { type: 'string' },
-                              itemId: { type: 'string' },
-                              createdAt: { type: 'string', format: 'date-time' },
-                              evidenceID: { type: 'string', nullable: true },
-                              backed: { type: 'boolean', nullable: true },
-                            },
-                          },
-                        },
-                        nextCursor: {
-                          type: 'string',
-                          nullable: true,
-                          description: 'ID of the last state in this page, use this as cursor for next page',
-                          example: 'state-020',
-                        },
-                        hasNextPage: {
-                          type: 'boolean',
-                          description: 'Whether there are more states available',
-                          example: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-          '401': {
-            description: 'Unauthorized - invalid or missing API token',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/states/{id}': {
-      get: {
-        summary: 'Get a state by ID',
-        description: 'Retrieves detailed information about a specific state. Requires a valid API token.',
-        operationId: 'getStateById',
-        tags: ['States'],
-        security: [{ BearerAuth: [] }],
-        parameters: [
-          {
-            name: 'id',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: 'State ID',
-            example: 'state-001',
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'State retrieved successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    title: { type: 'string' },
-                    description: { type: 'string' },
-                    statusTypeId: { type: 'string' },
-                    itemId: { type: 'string' },
-                    createdAt: { type: 'string', format: 'date-time' },
-                  },
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized - invalid or missing API token',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'State not found',
             content: {
               'application/json': {
                 schema: {
@@ -1253,46 +1042,12 @@ const manualOpenApiSpec = {
           },
         },
         responses: {
-          '200': { description: 'Emission certified. Returns evidenceID and stateId anchored to blockchain.' },
+          '201': { description: 'Proof issued. Returns the certification, certified once iBS confirms it on chain.' },
           '401': { description: 'Unauthorized' },
           '404': { description: 'Emission record not found' },
           '409': { description: 'Already certified' },
           '422': { description: 'Organization KYC incomplete' },
           '502': { description: 'Blockchain evidence creation failed. Emission remains PENDING.' },
-        },
-      },
-    },
-
-    // ── Maintenance ───────────────────────────────────────────────────────────
-    '/maintenance/event': {
-      post: {
-        summary: 'Register a maintenance event',
-        description: 'Creates a lifecycle State on a hardware Item to record a maintenance action (preventive, corrective, etc.).',
-        tags: ['Maintenance'],
-        security: [{ BearerAuth: [] }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['itemId', 'statusTypeId', 'title'],
-                properties: {
-                  itemId: { type: 'string', description: 'ID of the hardware Item' },
-                  statusTypeId: { type: 'string', description: 'ID of the maintenance StatusType' },
-                  title: { type: 'string', example: 'Revisión anual preventiva' },
-                  description: { type: 'string', example: 'Limpieza de módulos y revisión de conexiones' },
-                  metadata: { type: 'object', additionalProperties: true },
-                },
-              },
-            },
-          },
-        },
-        responses: {
-          '201': { description: 'Maintenance state created' },
-          '400': { description: 'Invalid input' },
-          '401': { description: 'Unauthorized' },
-          '404': { description: 'Item or StatusType not found' },
         },
       },
     },

@@ -65,45 +65,6 @@ const RENAMES = new Map([
 ]);
 
 /** Lifecycle a serviced asset walks through, newest last. */
-const LIFECYCLE = [
-  {
-    type: 'Recibida',
-    title: 'Recepción en almacén',
-    description: 'Unidad recibida del proveedor, verificada contra albarán y registrada en el catálogo.',
-    config: (i) => ({ vendor: 'Distribuidora Solar Ibérica', batchOrSerial: `LOT-2025-${1200 + i}` }),
-    daysAgo: 240,
-  },
-  {
-    type: 'Inspeccionada',
-    title: 'Inspección de entrada',
-    description: 'Inspección visual y eléctrica sin incidencias. Apta para instalación.',
-    config: () => ({ restVoltage: 51.2, inspector: 'Laura Méndez' }),
-    daysAgo: 232,
-  },
-  {
-    type: 'Instalación',
-    title: 'Instalación en planta',
-    description: 'Instalada y conectada al sistema de monitorización de la planta.',
-    config: () => ({ installedBy: 'Equipo de campo · Zona Centro' }),
-    daysAgo: 210,
-    geo: { lat: 40.4168, lng: -3.7038 },
-  },
-  {
-    type: 'En servicio',
-    title: 'Puesta en servicio',
-    description: 'Unidad operativa. Telemetría reportando con normalidad al BMS.',
-    config: () => ({ soh: 100, soc: 96 }),
-    daysAgo: 205,
-  },
-  {
-    type: 'Mantenimiento',
-    title: 'Mantenimiento preventivo anual',
-    description: 'Revisión de conexiones, limpieza y actualización de firmware. Sin desviaciones.',
-    config: () => ({ performedBy: 'Servicio Técnico Autorizado', firmware: '4.2.1' }),
-    daysAgo: 45,
-  },
-];
-
 /** Coordinates spread over Spanish plants, so the map is not a single pin. */
 const PLANTS = [
   { name: 'Planta Madrid', lat: 40.4168, lng: -3.7038 },
@@ -198,78 +159,7 @@ async function main() {
   }
   console.log(`✅ ${items.length} activos revisados (${renamed} renombrados con identidad de catálogo)`);
 
-  // ── 3. Lifecycle history, certified on chain ──────────────────────────────
-  const statusTypes = await prisma.statusType.findMany({
-    where: { organizationId: org.id },
-    select: { id: true, name: true },
-  });
-  // Prefer the canonical type over its hash-suffixed duplicates.
-  const typeByName = new Map();
-  for (const st of statusTypes) {
-    const base = st.name.replace(/\s*\([0-9a-f]{8}\)$/, '');
-    if (!typeByName.has(base) || !/\([0-9a-f]{8}\)$/.test(st.name)) typeByName.set(base, st);
-  }
-
-  const author = await prisma.user.findFirst({
-    where: { organizationId: org.id, role: 'ADMIN' },
-    select: { id: true },
-  });
-
-  const withHistory = await prisma.item.findMany({
-    where: { organizationId: org.id },
-    select: { id: true, name: true, evidenceID: true, _count: { select: { State: true } } },
-    orderBy: { createdAt: 'asc' },
-    take: 24,
-  });
-
-  let created = 0;
-  for (const [index, item] of withHistory.entries()) {
-    if (item._count.State > 0) continue;
-
-    if (!item.evidenceID) {
-      await prisma.item.update({
-        where: { id: item.id },
-        data: { evidenceID: evidenceId(), updatedAt: new Date() },
-      });
-    }
-
-    // The newest step stays pending, so both certified and in-flight states show.
-    for (const [step, phase] of LIFECYCLE.entries()) {
-      const statusType = typeByName.get(phase.type);
-      if (!statusType) continue;
-
-      const isLatest = step === LIFECYCLE.length - 1;
-      const createdAt = daysAgo(phase.daysAgo);
-      const config = { ...phase.config(index) };
-      if (phase.geo) {
-        const plant = PLANTS[index % PLANTS.length];
-        config.ubicacion = { lat: plant.lat, lng: plant.lng };
-      }
-
-      await prisma.state.create({
-        data: {
-          id: randomUUID(),
-          title: phase.title,
-          description: phase.description,
-          templateConfig: config,
-          imageUrls: [],
-          createdAt,
-          // Evidence is always issued; `backed` is what says the chain
-          // confirmed it, so the newest step reads as certification in flight.
-          evidenceID: evidenceId(),
-          backed: !isLatest,
-          backedAt: isLatest ? null : new Date(createdAt.getTime() + 7 * 60 * 1000),
-          Item: { connect: { id: item.id } },
-          StatusType: { connect: { id: statusType.id } },
-          ...(author ? { User: { connect: { id: author.id } } } : {}),
-        },
-      });
-      created++;
-    }
-  }
-  console.log(`✅ ${created} estados de ciclo de vida creados y certificados`);
-
-  // ── 4. Energy sources: place them on the map ──────────────────────────────
+  // ── 3. Energy sources: place them on the map ──────────────────────────────
   const sources = await prisma.energySource.findMany({
     select: { id: true, name: true, latitude: true, location: true },
   });

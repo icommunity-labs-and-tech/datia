@@ -95,10 +95,7 @@
     "editItem": "Edit asset",
     "addUser": "Add user",
     "editUser": "Edit user",
-    "addState": "Add state",
-    "editState": "Edit state",
     "selectOption": "Select...",
-    "selectStatusType": "Select a status type",
     "description": "Description",
     "descriptionPlaceholder": "Describe the current state of the asset...",
     "customId": "Custom ID",
@@ -106,7 +103,6 @@
     "generatedTitle": "Generated title",
     "addField": "Add field",
     "categoryFields": "Category-specific fields",
-    "statusTypeFields": "Status type-specific fields",
     "validationErrors": "Validation errors",
     "fieldMustHaveName": "Field {index} must have a name",
     "fieldMustHaveNameWithNumber": "Field {number} must have a name",
@@ -123,8 +119,6 @@
       "productName": "Asset name",
       "productDescription": "Asset description",
       "imageUrl": "Image URL",
-      "statusTypeName": "Status type name",
-      "statusTypeDescription": "Status type description",
       "userName": "Full user name",
       "userEmail": "email@example.com",
       "selectRole": "Select role",
@@ -133,7 +127,6 @@
     "roles": {
       "administrator": "Administrator"
     },
-    "loadingStatusTypes": "Loading available status types...",
     "newTag": "New tag"
   },
   "tables": {
@@ -160,7 +153,6 @@
     "addCategory": "Add category",
     "users": "System Users",
     "items": "Asset Catalog",
-    "statusTypes": "Status Types",
     "usersDescription": "User management allows you to manage system users, create new users, assign roles (Operator or Administrator) and manage their permissions. Users can be verified through KYC and can have different access levels according to their role in the organization.",
     "whatIsUserManagement": "What is user management?",
     "whatIsInventory": "What is asset catalog?",
@@ -186,14 +178,6 @@
     "confirmDeleteProduct": "Are you sure you want to delete the asset \"{name}\"?",
     "deleteUserError": "Error deleting user",
     "deleteProductError": "Error deleting asset",
-    "deleteStatusType": "Delete Status Type",
-    "confirmDeleteStatusType": "Are you sure you want to delete the status type \"{name}\"?",
-    "editStatusType": "Edit Status Type",
-    "statusTypesDescription": "Status types define templates and data structures for the different states that items can have. Each status type can have custom fields that allow capturing specific information, such as inspections, repairs or verifications, and are used to create consistent and structured states in the system.",
-    "whatIsStatusTypes": "What are status types?",
-    "deleteStatusTypeError": "Error deleting status type",
-    "loadStatusTypeError": "Error loading status type",
-    "updateStatusTypeError": "Error updating status type",
     "columnLabels": {
       "itemName": "Item Name",
       "status": "Status",
@@ -208,23 +192,7 @@
       "name": "Name",
       "role": "Role",
       "created": "Created",
-      "stateTitle": "State Title",
       "creationDate": "Creation Date"
-    },
-    "statusTypeDetail": {
-      "notFound": "Status type information not found.",
-      "pageTitle": "Status Type: {name}",
-      "fields": "Fields",
-      "field": "Field",
-      "statesUsingType": "States using this type ({count})",
-      "deleteTitle": "Delete Status Type",
-      "deleteMessage": "Are you sure you want to delete the status type \"{name}\"?",
-      "deleteError": "Error deleting the status type",
-      "columns": {
-        "title": "Title",
-        "product": "Asset",
-        "created": "Created"
-      }
     }
   },
   "modals": {
@@ -261,7 +229,6 @@
       "addUser": "Add User",
       "addProduct": "Add asset",
       "addCategory": "Add Category",
-      "addStatusType": "Add Status Type",
       "addElement": "Add Element",
       "createError": "Error creating element",
       "emailExists": "A user with this email already exists",
@@ -416,7 +383,6 @@
     "createdAt": "Created:",
     "tabInfo": "Information",
     "verifiedProduct": "Asset verified on blockchain",
-    "stateVerified": "State verified in blockchain",
     "productDetails": "Asset Details",
     "category": "Category:",
     "specifications": "Specifications",
@@ -434,7 +400,6 @@
     "loadingCertification": "Loading certification...",
     "blockchainCertification": "Blockchain certification",
     "signer": "Signer",
-    "noHistory": "No history available for this asset",
     "error": {
       "title": "Error",
       "unknownError": "Unknown error",
@@ -452,7 +417,6 @@
       "notCertified": "Pending certification",
       "certifiedDescription": "This asset’s identity and history are recorded on blockchain and publicly verifiable.",
       "notCertifiedDescription": "This asset does not have a certified blockchain record yet.",
-      "states": "Recorded states",
       "energy": {
         "co2Certified": "kg CO₂e certified",
         "kwhConsumed": "kWh consumed",
@@ -503,25 +467,6 @@
       "footer": "Data certified under ESPR / ISO 14067"
     }
   },
-  "states": {
-    "title": "State",
-    "notFound": "State information not found.",
-    "type": "Type",
-    "date": "Date",
-    "backed": "Backed",
-    "yes": "Yes",
-    "no": "No",
-    "evidenceId": "Evidence ID",
-    "description": "Description",
-    "fields": "Fields",
-    "field": "Field",
-    "photos": "Photos",
-    "whatAreStates": "What are states?",
-    "statesDescription": "States represent events or important changes in an item's lifecycle, such as inspections, repairs, maintenance or verifications. Each state can include images, detailed descriptions and custom data according to the state type, and can be backed as verifiable evidence.",
-    "filterPlaceholder": "Filter by state...",
-    "addButton": "Add state",
-    "viewDetail": "View detail"
-  },
   "categories": {
     "title": "Categories",
     "deleteCategory": "Delete Category",
@@ -559,8 +504,6 @@
       "categoryName": "Category (first)",
       "allCategories": "All categories",
       "createdAt": "Creation date",
-      "lastStateTitle": "Passport: Last state",
-      "lastStateDate": "Passport: Last state date",
       "customerUrl": "Public URL"
     }
   },
@@ -576,15 +519,11 @@
   },
   "deleteConfirmation": {
     "itemsMore": "and {count} item{plural} more",
-    "itemsCount": "{count} item{plural}",
-    "statesMore": "and {count} state{plural} more",
-    "statesCount": "{count} state{plural}",
-    "statusTypesMore": "and {count} status type{plural} more",
-    "statusTypesCount": "{count} status type{plural}"
+    "itemsCount": "{count} item{plural}"
   },
   "dashboard": {
     "metrics": "Metrics",
-    "monthlyActivityTitle": "Monthly State Activity",
+    "monthlyActivityTitle": "Monthly activity",
     "categoryDistributionTitle": "Distribution by Categories",
     "loadingData": "Loading data...",
     "charts": {
@@ -750,8 +689,8 @@
       "retry": "Retry KYC",
       "retrying": "Creating new signature...",
       "noUrlError": "Could not obtain a verification URL. Please try again later.",
-      "verifiedMessage": "Your organization is verified. You can now create items and certified states.",
-      "needKycNote": "You will need to complete KYC to create certified items and states on blockchain."
+      "verifiedMessage": "Your organisation is verified. You can now certify on blockchain.",
+      "needKycNote": "You will need to complete KYC before you can certify on blockchain."
     },
     "password": {
       "current": "Current password",
@@ -900,7 +839,7 @@
       "filter": {
         "all": "All",
         "itemCreated": "Item Created",
-        "stateCreated": "State Created"
+        "certification": "Certifications"
       },
       "noEvents": "No events registered yet",
       "table": {
@@ -1021,7 +960,6 @@
     "searchPlaceholder": "Search assets...",
     "noItems": "No assets registered",
     "allCategories": "All categories",
-    "lastState": "Last state",
     "noCategory": "No category",
     "certified": "Certified",
     "pending": "Pending",

@@ -86,7 +86,6 @@ export function ItemInfoSection({ item }: ItemInfoSectionProps) {
         <Section title={t('productCertification')}>
           <EvidenceVerification
             evidenceId={item.evidenceID}
-            type="item"
             entityId={item.id}
             createdAt={item.createdAt}
             createdBy={item.createdBy}

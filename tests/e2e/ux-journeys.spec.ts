@@ -20,6 +20,9 @@ const PASSPORT_ITEM_ID = 'e2e-item-0';
 /** Entities deliberately hidden from the UI for now. */
 const HIDDEN_ROUTES = ['/dashboard/users', '/dashboard/status-types', '/dashboard/states'];
 
+/** Gone with the state history (#63): these routes no longer exist. */
+const GONE_ROUTES = ['/dashboard/status-types', '/dashboard/states'];
+
 async function shot(page: Page, device: string, step: string) {
   await page.waitForTimeout(400); // let Mantine transitions and maps settle
   await page.screenshot({
@@ -148,10 +151,14 @@ test.describe('Hidden entities', () => {
   test.use({ viewport: DESKTOP, storageState: ADMIN_STORAGE_STATE });
 
   test('users and status types are not reachable from the UI', async ({ page }) => {
-    // Direct navigation bounces back to the dashboard instead of exposing them.
-    for (const route of ['/dashboard/users', '/dashboard/status-types']) {
-      await page.goto(route);
-      await expect(page, `${route} should redirect away`).toHaveURL(/\/dashboard\/?$/);
+    // Users are hidden: direct navigation bounces back to the dashboard.
+    await page.goto('/dashboard/users');
+    await expect(page).toHaveURL(/\/dashboard\/?$/);
+
+    // States and status types no longer exist at all.
+    for (const route of GONE_ROUTES) {
+      const res = await page.goto(route);
+      expect(res?.status(), `${route} should be gone`).toBe(404);
     }
 
     // And no link anywhere in the shell points at them.

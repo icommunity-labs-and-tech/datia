@@ -9,13 +9,12 @@ import { retryFetch } from '../utils/apiRetry';
 
 interface EvidenceVerificationProps {
   evidenceId: string;
-  type: 'item' | 'state';
   entityId: string;
   createdAt?: string;
   createdBy?: { name: string; email: string } | null;
 }
 
-export function EvidenceVerification({ evidenceId, type, entityId, createdAt: _createdAt, createdBy }: EvidenceVerificationProps) {
+export function EvidenceVerification({ evidenceId, entityId, createdAt: _createdAt, createdBy }: EvidenceVerificationProps) {
   const t = useTranslations('customer');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,9 +23,7 @@ export function EvidenceVerification({ evidenceId, type, entityId, createdAt: _c
   useEffect(() => {
     if (!evidenceId) return;
 
-    const endpoint = type === 'item'
-      ? `/api/checker/item/${encodeURIComponent(entityId)}`
-      : `/api/checker/${encodeURIComponent(entityId)}`;
+    const endpoint = `/api/checker/item/${encodeURIComponent(entityId)}`;
 
     let cancelled = false;
 
@@ -72,7 +69,7 @@ export function EvidenceVerification({ evidenceId, type, entityId, createdAt: _c
     return () => {
       cancelled = true;
     };
-  }, [evidenceId, type, entityId]);
+  }, [evidenceId, entityId]);
 
   if (loading) {
     return (

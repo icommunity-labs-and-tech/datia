@@ -19,7 +19,7 @@ export interface EvidenceService {
   createItemEvidence(
     input: EvidencePayloadInput
   ): Promise<string>;
-  createStateEvidence(
+  createCertificationEvidence(
     input: EvidencePayloadInput
   ): Promise<string>;
 }

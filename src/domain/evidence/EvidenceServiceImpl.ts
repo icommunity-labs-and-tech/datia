@@ -207,7 +207,7 @@ export function createEvidenceServiceImpl(deps: {
       }
     },
 
-    async createStateEvidence(input: EvidencePayloadInput): Promise<string> {
+    async createCertificationEvidence(input: EvidencePayloadInput): Promise<string> {
       try {
         const baseUrl = await getBaseUrl();
         const files = await buildFiles(input, baseUrl);

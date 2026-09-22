@@ -32,8 +32,7 @@ export default defineConfig({
     },
     {
       name: 'chromium',
-      // Needs the real iBS API; it has its own project below.
-      testIgnore: ['**/_capture.spec.ts', '**/complete-state-certification.spec.ts'],
+      testIgnore: ['**/_capture.spec.ts'],
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['setup'],
     },
@@ -46,19 +45,6 @@ export default defineConfig({
       name: 'webkit',
       use: { ...devices['Desktop Safari'] },
       dependencies: ['setup'],
-    },
-    {
-      name: 'certification-flow',
-      testMatch: '**/complete-state-certification.spec.ts',
-      timeout: 120000, // 2 minutos para tests de certificación
-      retries: 1, // Retry una vez para manejar fallos de red
-      use: { 
-        ...devices['Desktop Chrome'],
-        // Configuración específica para tests de certificación
-        trace: 'retain-on-failure',
-        screenshot: 'only-on-failure',
-        video: 'retain-on-failure',
-      },
     },
   ],
   webServer: {

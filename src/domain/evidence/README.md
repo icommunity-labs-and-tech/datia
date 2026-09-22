@@ -1,6 +1,6 @@
 # Evidence Domain Service
 
-Handles evidence creation and management for items and states using Effect.ts.
+Handles evidence creation for assets and certifications.
 
 ## Purpose
 
@@ -19,7 +19,7 @@ export class EvidenceService extends Context.Tag('EvidenceService')<
   EvidenceService,
   {
     readonly createItemEvidence: (input: EvidencePayloadInput) => Effect<string, EvidenceError>;
-    readonly createStateEvidence: (input: EvidencePayloadInput) => Effect<string, EvidenceError>;
+    readonly createCertificationEvidence: (input: EvidencePayloadInput) => Effect<string, EvidenceError>;
   }
 >() {}
 ```
@@ -33,9 +33,9 @@ Creates evidence for item creation operations:
 - Calls iCommunity API to create evidence
 - Returns evidence ID
 
-### `createStateEvidence(input)`
-Creates evidence for state creation operations:
-- Processes state images and metadata  
+### `createCertificationEvidence(input)`
+Creates the evidence a certification anchors:
+- Processes the certified payload and its metadata  
 - Generates `issue_data.json` file
 - Calls iCommunity API to create evidence
 - Returns evidence ID
