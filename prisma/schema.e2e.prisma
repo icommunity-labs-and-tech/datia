@@ -127,6 +127,10 @@ model Item {
   description         String?
   imageUrl            String?
   templateFields      Json?
+  /// Where the asset is. It used to live inside the category's template, which
+  /// meant the map depended on how a template had been named (#37).
+  latitude            Float?
+  longitude           Float?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime
   itemTemplate        Json           @default("[]")

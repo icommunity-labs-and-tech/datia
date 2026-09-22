@@ -1,5 +1,6 @@
 import { ItemRepository, type ItemRecord, type CreateItemInput, DbError } from '@/domain/items/ItemRepository';
 import type { Prisma } from '@/generated/prisma';
+import { geolocationOf } from '@/lib/map/installations';
 import { prisma } from '@/lib/prisma';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 
@@ -18,6 +19,12 @@ const toDomain = (i: any): ItemRecord => ({
 // Las columnas Json llegan como JsonValue; templateFields es siempre un objeto.
 function asJsonObject(value: Prisma.JsonValue): Prisma.JsonObject | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null;
+}
+
+/** The position columns for an asset whose template still carries it. */
+function geolocationColumns(templateFields: unknown): { latitude?: number; longitude?: number } {
+  const position = geolocationOf(templateFields);
+  return position ? { latitude: position.lat, longitude: position.lng } : {};
 }
 
 export const itemRepository: ItemRepository = {
@@ -126,8 +133,8 @@ export const itemRepository: ItemRepository = {
           categoryName: categoryName,
           categories: categories, // Array con múltiples categorías
           siteName: r.EnergySource?.find((e: any) => e.location)?.location ?? null,
-          // Position lives inside the category's template, so it travels with
-          // the item's template fields rather than as a column of its own.
+          latitude: r.latitude ?? null,
+          longitude: r.longitude ?? null,
           templateFields: r.templateFields ?? null,
           imageUrl: r.imageUrl ?? null,
         };
@@ -151,6 +158,9 @@ export const itemRepository: ItemRepository = {
           imageUrl: input.imageUrl ?? null,
           itemTemplate: input.itemTemplate ?? [],
           templateFields: input.templateFields ?? undefined,
+          // Position has its own columns now; while templates still exist it is
+          // taken from whichever field holds it (#37).
+          ...geolocationColumns(input.templateFields),
           createdByUserId: input.createdByUserId,
           updatedAt: now,
         },
