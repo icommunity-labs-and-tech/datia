@@ -19,7 +19,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     detailPath: (id: string) => `/dashboard/categories/${id}`,
     editPath: (id: string) => `/dashboard/categories/${id}/edit`,
     hasCascade: true,
-    cascadeFields: ['items', 'statusTypes'],
+    cascadeFields: ['items'],
     getDetailsFunction: 'getCategoryDetails',
   },
   items: {
@@ -28,8 +28,9 @@ export const entityConfigs: Record<string, EntityConfig> = {
     icon: 'bi-list-columns',
     listPath: '/dashboard/items',
     detailPath: (id: string) => `/dashboard/items/${id}`,
-    hasCascade: true,
-    cascadeFields: ['states'],
+    // Nothing of the asset is shown as cascade any more: its state history is
+    // gone (#63) and its proofs survive it, linked to the emissions.
+    hasCascade: false,
     getDetailsFunction: 'getItemDetails',
   },
   users: {

@@ -22,67 +22,7 @@ async function main() {
 
   console.log('✅ Categorías creadas');
 
-  // Crear tipos de estado para cada categoría
-  const networkingStatus = {
-    created: await prisma.statusType.create({
-      data: {
-        name: 'Creado',
-        description: 'Creación inicial del activo',
-        template: [
-          { label: 'Creado por', name: 'createdBy', type: 'text' },
-          { label: 'Fecha creación', name: 'createdAt', type: 'date' },
-          { label: 'Notas', name: 'notes', type: 'text' },
-        ],
-        categoryId: networking.id,
-      },
-    }),
-    installed: await prisma.statusType.create({
-      data: {
-        name: 'Instalado',
-        description: 'Equipo instalado y configurado',
-        template: [
-          { label: 'Instalado por', name: 'installedBy', type: 'text' },
-          { label: 'Fecha instalación', name: 'installDate', type: 'date' },
-          { label: 'Configuración', name: 'config', type: 'text' },
-          { label: 'Notas', name: 'notes', type: 'text' },
-        ],
-        categoryId: networking.id,
-      },
-    }),
-  };
-
-  const infrastructureStatus = {
-    created: await prisma.statusType.create({
-      data: {
-        name: 'Creado',
-        description: 'Creación inicial del activo',
-        template: [
-          { label: 'Creado por', name: 'createdBy', type: 'text' },
-          { label: 'Fecha creación', name: 'createdAt', type: 'date' },
-          { label: 'Notas', name: 'notes', type: 'text' },
-        ],
-        categoryId: infrastructure.id,
-      },
-    }),
-    installed: await prisma.statusType.create({
-      data: {
-        name: 'Instalado',
-        description: 'Equipo instalado y operativo',
-        template: [
-          { label: 'Instalado por', name: 'installedBy', type: 'text' },
-          { label: 'Fecha instalación', name: 'installDate', type: 'date' },
-          { label: 'Ubicación', name: 'location', type: 'text' },
-          { label: 'Notas', name: 'notes', type: 'text' },
-        ],
-        categoryId: infrastructure.id,
-      },
-    }),
-  };
-
-  console.log('✅ Tipos de estado creados');
-
-  // Helper para crear items con estado inicial
-  const createItemWithInitialState = async ({ categoryId, name, description, imageUrl, itemTemplate, templateFields, statusTypes }) => {
+  const createItem = async ({ categoryId, name, description, imageUrl, itemTemplate, templateFields }) => {
     const item = await prisma.item.create({
       data: {
         name,
@@ -94,29 +34,11 @@ async function main() {
       },
     });
 
-    // Crear estado "Creado" automáticamente
-    await prisma.state.create({
-      data: {
-        itemId: item.id,
-        statusTypeId: statusTypes.created.id,
-        title: 'Creado',
-        description: 'Creación inicial del activo',
-        evidenceID: 'EVID-' + Math.random().toString(36).substring(2, 8).toUpperCase(),
-        backed: false,
-        imageUrls: [],
-        templateConfig: {
-          createdBy: 'Sistema',
-          createdAt: new Date().toISOString().slice(0, 10),
-          notes: 'Item creado automáticamente',
-        },
-      },
-    });
-
     return item;
   };
 
   // Crear items de ejemplo
-  await createItemWithInitialState({
+  await createItem({
     categoryId: networking.id,
     name: 'Router Core 01',
     description: 'Router de núcleo principal',
@@ -139,10 +61,9 @@ async function main() {
       throughputGbps: 20,
       warrantyEnd: '2026-05-10',
     },
-    statusTypes: networkingStatus,
   });
 
-  await createItemWithInitialState({
+  await createItem({
     categoryId: networking.id,
     name: 'Switch Acceso 24P-01',
     description: 'Switch de acceso 24 puertos',
@@ -163,10 +84,9 @@ async function main() {
       rackUnit: 18,
       managementIP: '10.0.0.2',
     },
-    statusTypes: networkingStatus,
   });
 
-  await createItemWithInitialState({
+  await createItem({
     categoryId: infrastructure.id,
     name: 'Rack A-01',
     description: 'Rack 42U en fila A',
@@ -183,10 +103,9 @@ async function main() {
       heightU: 42,
       location: 'CPD 1 - Pasillo frío',
     },
-    statusTypes: infrastructureStatus,
   });
 
-  await createItemWithInitialState({
+  await createItem({
     categoryId: infrastructure.id,
     name: 'Srv-DB-01',
     description: 'Servidor base de datos',
@@ -213,10 +132,9 @@ async function main() {
       rackUnit: 15,
       managementIP: '10.0.20.21',
     },
-    statusTypes: infrastructureStatus,
   });
 
-  await createItemWithInitialState({
+  await createItem({
     categoryId: infrastructure.id,
     name: 'UPS-01',
     description: 'UPS 40kVA',
@@ -233,7 +151,6 @@ async function main() {
       serialNumber: 'UPS123456789',
       installDate: '2023-01-15',
     },
-    statusTypes: infrastructureStatus,
   });
 
   console.log('✅ Items de ejemplo creados');

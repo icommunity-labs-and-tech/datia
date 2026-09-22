@@ -23,7 +23,6 @@ const ORG_SLUG = 'datia';
 
 /** Evidence identifiers mimic the ones iBS returns, so the UI renders as in production. */
 const itemEvidence = () => `evd_${randomBytes(16).toString('base64url').slice(0, 22)}`;
-const stateEvidence = () => `evd_${randomBytes(12).toString('hex')}`;
 
 const at = (iso) => new Date(iso);
 
@@ -132,25 +131,7 @@ const ASSETS = [
  * Lifecycle templates. Each entry produces one state; `offset` is days from the
  * installation date, so every history stays ordered and plausible.
  */
-const LIFECYCLES = {
-  full:          ['recibida', 'inspeccionada', 'instalacion', 'servicio', 'mantenimiento', 'mantenimiento2'],
-  servicio:      ['recibida', 'inspeccionada', 'instalacion', 'servicio'],
-  mantenimiento: ['recibida', 'inspeccionada', 'instalacion', 'servicio', 'mantenimiento'],
-  incidencia:    ['recibida', 'inspeccionada', 'instalacion', 'servicio', 'incidencia', 'retirada'],
-  reciente:      ['recibida', 'inspeccionada', 'instalacion'],
-  almacen:       ['recibida', 'inspeccionada'],
-};
 
-const STEP = {
-  recibida:      { type: 'Recibida',          title: 'Recepción en almacén',        offset: -22 },
-  inspeccionada: { type: 'Inspeccionada',     title: 'Inspección de entrada',       offset: -15 },
-  instalacion:   { type: 'Instalación',       title: 'Instalación en planta',       offset: 0 },
-  servicio:      { type: 'En servicio',       title: 'Puesta en servicio',          offset: 4 },
-  mantenimiento: { type: 'Mantenimiento',     title: 'Mantenimiento preventivo',    offset: 120 },
-  mantenimiento2:{ type: 'Mantenimiento',     title: 'Revisión semestral',          offset: 240 },
-  incidencia:    { type: 'Incidencia/Fallo',  title: 'Incidencia detectada',        offset: 180 },
-  retirada:      { type: 'Retirada temporal', title: 'Retirada temporal a taller',  offset: 195 },
-};
 
 const VENDOR_DOC = (serial) => `ALB-${serial.split('-').slice(-2).join('')}`;
 
@@ -221,16 +202,9 @@ async function main() {
   const cats = await prisma.category.findMany({ where: { organizationId: org.id } });
   const catId = Object.fromEntries(cats.map((c) => [c.name, c.id]));
 
-  const types = await prisma.statusType.findMany({ where: { organizationId: org.id } });
-  const typeId = Object.fromEntries(types.map((t) => [t.name, t.id]));
-
   for (const a of ASSETS) {
     if (!catId[a.cat]) throw new Error(`Falta la categoría "${a.cat}"`);
   }
-  for (const s of Object.values(STEP)) {
-    if (!typeId[s.type]) throw new Error(`Falta el tipo de estado "${s.type}"`);
-  }
-
   // ── Wipe ───────────────────────────────────────────────────────────────────
   const before = await prisma.item.count({ where: { organizationId: org.id } });
   const { count: removed } = await prisma.item.deleteMany({ where: { organizationId: org.id } });
@@ -238,7 +212,6 @@ async function main() {
 
   // ── Assets ─────────────────────────────────────────────────────────────────
   const idBySerial = {};
-  let stateCount = 0;
 
   for (const [index, a] of ASSETS.entries()) {
     const site = SITES[a.site];
@@ -267,35 +240,8 @@ async function main() {
     });
     await prisma.itemCategory.create({ data: { itemId: id, categoryId: catId[a.cat] } });
 
-    const steps = LIFECYCLES[a.life];
-    for (const [i, step] of steps.entries()) {
-      const cfg = STEP[step];
-      const when = new Date(anchor.getTime() + cfg.offset * 864e5);
-      // The most recent state of an in-service asset is still settling on chain:
-      // the interface must be able to show confirmed and pending side by side.
-      const pending = i === steps.length - 1 && ['full', 'mantenimiento'].includes(a.life);
-      await prisma.state.create({
-        data: {
-          id: stableId(`${a.serial}:${step}`),
-          itemId: id,
-          statusTypeId: typeId[cfg.type],
-          title: cfg.title,
-          description: `${cfg.title} — ${a.name}`,
-          // A pending state has no evidence yet: the real flow writes
-          // 'pending' until iBS answers. Inventing an `evd_` id here made the
-          // confirmation sweep retry a reference iBS rejects with 400, forever.
-          evidenceID: pending ? 'pending' : stateEvidence(),
-          backed: !pending,
-          backedAt: pending ? null : new Date(when.getTime() + 42 * 60000),
-          templateConfig: templateFor(step, a, site, when),
-          createdAt: when,
-          createdByUserId: admin?.id ?? null,
-        },
-      });
-      stateCount++;
-    }
   }
-  console.log(`  creados ${ASSETS.length} activos · ${stateCount} estados`);
+  console.log(`  creados ${ASSETS.length} activos`);
 
   // ── Energy chain ───────────────────────────────────────────────────────────
   let consCount = 0;

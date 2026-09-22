@@ -34,7 +34,7 @@ export interface ItemRepository {
   // Métodos con filtro por organización
   findByOrganization(organizationId: string): Promise<ItemRecord[]>;
   getById(id: string, organizationId: string): Promise<ItemRecord | null>;
-  listForExport(organizationId: string, options: { fullPassport: boolean }): Promise<Array<{ id: string; name: string; description: string | null; createdAt: Date; categoryName: string | null; states: Array<{ id: string; title: string; backed: boolean | null; createdAt: Date }> }>>;
+  listForExport(organizationId: string, options: { fullPassport: boolean }): Promise<Array<{ id: string; name: string; description: string | null; createdAt: Date; categoryName: string | null }>>;
   create(input: CreateItemInput): Promise<ItemRecord>;
   updateEvidenceId(id: string, organizationId: string, evidenceID: string): Promise<void>;
   delete(id: string, organizationId: string): Promise<void>;
@@ -44,8 +44,6 @@ export interface ItemRepository {
         name: string;
         description: string | null;
         imageUrl: string | null;
-        states: Array<{ title: string }>;
-        _count: { states: number };
       })
     | null
   >;
@@ -80,11 +78,6 @@ export interface ItemRepository {
   countTotalItems(organizationId: string): Promise<number>;
   countActiveItems(organizationId: string, days: number): Promise<number>;
   countItemsByMonth(organizationId: string, startDate: Date, endDate: Date): Promise<number>;
-  getItemsWithStatesForBackup(organizationId: string, startDate: Date): Promise<Array<{
-    id: string;
-    name: string;
-    states: Array<{ id: string; backed: boolean | null; createdAt: Date }>;
-  }>>;
   importMany(
     organizationId: string,
     rows: Array<{

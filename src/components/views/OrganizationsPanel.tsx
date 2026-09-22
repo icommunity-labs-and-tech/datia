@@ -167,7 +167,7 @@ export default function OrganizationsPanel({
                   <th>Slug</th>
                   <th className="text-center">Usuarios</th>
                   <th className="text-center">Items</th>
-                  <th className="text-center">Estados</th>
+                  <th className="text-center">Certificaciones</th>
                   <th className="text-center">Admin Activado</th>
                   <th className="text-center">Usuarios Activos</th>
                   <th>Fecha Creación</th>
@@ -199,7 +199,7 @@ export default function OrganizationsPanel({
                       <Badge bg="primary">{org.itemCount}</Badge>
                     </td>
                     <td className="text-center">
-                      <Badge bg="warning" text="dark">{org.stateCount}</Badge>
+                      <Badge bg="warning" text="dark">{org.certificationCount}</Badge>
                     </td>
                     <td className="text-center">
                       {org.adminActivated ? (

@@ -213,9 +213,6 @@ export const itemRepositoryFilesystem: ItemRepository = {
     return 0;
   },
 
-  async getItemsWithStatesForBackup(_organizationId, _startDate) {
-    return [];
-  },
 
   async importMany(_organizationId, _rows): Promise<void> {
     // No-op

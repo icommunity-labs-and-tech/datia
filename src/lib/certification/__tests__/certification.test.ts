@@ -14,7 +14,7 @@ const { mockPrisma, mockCreateStateEvidence, mockGetEvidence, mockRecordEvent } 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/services/events', () => ({ recordEvent: mockRecordEvent }));
 vi.mock('@/domain/evidence/EvidenceServiceImpl', () => ({
-  createEvidenceServiceImpl: () => ({ createStateEvidence: mockCreateStateEvidence }),
+  createEvidenceServiceImpl: () => ({ createCertificationEvidence: mockCreateStateEvidence }),
 }));
 vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
   icommunityService: { getEvidence: mockGetEvidence },

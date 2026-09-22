@@ -63,7 +63,6 @@ jobs:
 
       - run: npx playwright install --with-deps chromium
 
-      # certification-flow needs the real iBS API and stays out of CI.
       - run: npx playwright test --project=chromium --reporter=list
 
       - if: failure()

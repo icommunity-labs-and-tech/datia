@@ -137,7 +137,6 @@ model Item {
   User                User?          @relation(fields: [createdByUserId], references: [id])
   Organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   ItemCategory        ItemCategory[]
-  State               State[]
   EnergySource        EnergySource[]
 
   @@index([createdByUserId])
@@ -200,7 +199,6 @@ model Organization {
   Issue             Issue[]
   Item              Item[]
   Notification      Notification[]
-  StatusType        StatusType[]
   User              User[]
   Webhook           Webhook[]
   ImportJob         ImportJob[]
@@ -210,7 +208,6 @@ model Organization {
   @@index([slug])
   @@index([signatureID])
 }
-
 
 model SupportMessage {
   id             String       @id
@@ -241,45 +238,6 @@ model PasswordResetToken {
   @@index([userId])
 }
 
-model State {
-  id              String     @id
-  itemId          String
-  statusTypeId    String
-  title           String
-  description     String
-  evidenceID      String
-  backed          Boolean    @default(false)
-  backedAt        DateTime?
-  imageUrls       Json?
-  templateConfig  Json?
-  createdAt       DateTime   @default(now())
-  createdByUserId String?
-  issueDataJson   String?
-  User            User?      @relation(fields: [createdByUserId], references: [id])
-  Item            Item       @relation(fields: [itemId], references: [id], onDelete: Cascade)
-  StatusType      StatusType @relation(fields: [statusTypeId], references: [id], onDelete: Cascade)
-
-  @@index([createdAt])
-  @@index([createdByUserId])
-  @@index([itemId])
-  @@index([statusTypeId])
-}
-
-model StatusType {
-  id             String       @id
-  name           String
-  description    String       @default("")
-  template       Json
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime
-  organizationId String
-  State          State[]
-  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([organizationId, name])
-  @@index([organizationId])
-}
-
 model User {
   id                   String               @id
   email                String               @unique
@@ -301,7 +259,6 @@ model User {
   Item                 Item[]
   Notification         Notification[]
   PasswordResetToken   PasswordResetToken[]
-  State                State[]
   Organization         Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   ImportJobUploadedBy  ImportJob[]          @relation("ImportJobUploadedBy")
   ImportJobExecutedBy  ImportJob[]          @relation("ImportJobExecutedBy")

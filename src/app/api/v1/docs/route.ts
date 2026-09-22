@@ -1,5 +1,4 @@
 import { ApiReference } from '@scalar/nextjs-api-reference';
-import { listStatusTypes } from '@/actions/statusTypes/list';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 import { listApiTokens } from '@/actions/api-tokens/list';
 import { createApiTokenServiceImpl } from '@/domain/api-tokens/ApiTokenServiceImpl';
@@ -148,9 +147,8 @@ function injectItemIdExamples(paths: Record<string, any>, exampleItemId: string)
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function buildPersonalizedSpec(baseUrl: string, organizationId: string, docsToken: string | null): Promise<Record<string, any>> {
-  const [baseSpecRes, statusTypes, recentItemsRaw, tokenResult] = await Promise.all([
+  const [baseSpecRes, recentItemsRaw, tokenResult] = await Promise.all([
     fetch(`${baseUrl}/api/openapi.json`),
-    listStatusTypes(),
     prisma.item.findMany({
       where: { organizationId },
       orderBy: { createdAt: 'desc' },
@@ -191,129 +189,6 @@ async function buildPersonalizedSpec(baseUrl: string, organizationId: string, do
   if (spec.paths) {
     injectItemIdExamples(spec.paths, exampleItemId);
   }
-
-  // ── Status type schemas ───────────────────────────────────────────────────
-  const statusTypeSchemas = statusTypes.map((st) => {
-    const fields: TemplateField[] = Array.isArray(st.template) ? st.template : [];
-    const templateProperties: Record<string, unknown> = {};
-    const requiredFields: string[] = [];
-    const templateExample: Record<string, unknown> = {};
-
-    for (const field of fields) {
-      templateProperties[field.name] = fieldToJsonSchema(field);
-      templateExample[field.name] = fieldExampleValue(field);
-      if (field.required) requiredFields.push(field.name);
-    }
-
-    return {
-      title: st.name,
-      ...(st.description ? { description: st.description } : {}),
-      type: 'object',
-      required: ['statusTypeId', 'templateConfig'],
-      properties: {
-        statusTypeId: {
-          type: 'string',
-          enum: [st.id],
-          description: `Status type: "${st.name}"`,
-          example: st.id,
-        },
-        templateConfig: {
-          type: 'object',
-          ...(requiredFields.length > 0 ? { required: requiredFields } : {}),
-          properties: templateProperties,
-          ...(Object.keys(templateProperties).length === 0 ? { additionalProperties: true } : {}),
-        },
-      },
-      example: {
-        statusTypeId: st.id,
-        templateConfig: templateExample,
-      },
-    };
-  });
-
-  if (!spec.paths) spec.paths = {};
-
-  spec.paths['/products/{id}/states'] = {
-    post: {
-      tags: ['Products'],
-      summary: 'Create a state for a product',
-      description:
-        'Creates a new state for the specified product. Select a status type from the options below — each one defines the exact fields required in `templateConfig`.',
-      operationId: 'createState',
-      security: [{ BearerAuth: [] }],
-      parameters: [
-        {
-          name: 'id',
-          in: 'path',
-          required: true,
-          schema: { type: 'string' },
-          description: 'Product ID',
-          example: exampleItemId,
-        },
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          'application/json': {
-            schema:
-              statusTypeSchemas.length > 0
-                ? { oneOf: statusTypeSchemas }
-                : {
-                    type: 'object',
-                    description:
-                      'No status types configured for this organization. Create status types from the dashboard first.',
-                    required: ['statusTypeId', 'templateConfig'],
-                    properties: {
-                      statusTypeId: { type: 'string' },
-                      templateConfig: { type: 'object', additionalProperties: true },
-                    },
-                  },
-            ...(statusTypeSchemas.length > 0 && {
-              examples: Object.fromEntries(
-                statusTypes.map((st) => {
-                  const fields: TemplateField[] = Array.isArray(st.template) ? st.template : [];
-                  const templateExample: Record<string, unknown> = {};
-                  for (const field of fields) {
-                    templateExample[field.name] = fieldExampleValue(field);
-                  }
-                  return [
-                    st.name,
-                    {
-                      summary: st.name,
-                      ...(st.description ? { description: st.description } : {}),
-                      value: { statusTypeId: st.id, templateConfig: templateExample },
-                    },
-                  ];
-                })
-              ),
-            }),
-          },
-        },
-      },
-      responses: {
-        '201': {
-          description: 'State created successfully',
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                properties: {
-                  id: { type: 'string' },
-                  title: { type: 'string' },
-                  statusTypeId: { type: 'string' },
-                  itemId: { type: 'string' },
-                  createdAt: { type: 'string', format: 'date-time' },
-                },
-              },
-            },
-          },
-        },
-        '401': { description: 'Unauthorized — missing or invalid Bearer token' },
-        '404': { description: 'Product or status type not found' },
-        '422': { description: 'Validation error — missing required templateConfig fields' },
-      },
-    },
-  };
 
   return spec;
 }

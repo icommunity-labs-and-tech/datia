@@ -38,7 +38,7 @@ export async function issueCertification(input: IssueCertificationInput): Promis
   const id = randomUUID();
 
   const evidenceService = createEvidenceServiceImpl({ icommunityService });
-  const evidenceId = await evidenceService.createStateEvidence({
+  const evidenceId = await evidenceService.createCertificationEvidence({
     signatureID: input.signatureID,
     title: input.title,
     description: input.description,

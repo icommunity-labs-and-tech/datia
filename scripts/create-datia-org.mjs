@@ -71,46 +71,6 @@ async function main() {
     console.log(`   Domain: ${org.dominio}`);
     console.log(`   Colors: ${DATIA_CONFIG.brandColorPrimary} / ${DATIA_CONFIG.brandColorSecondary}\n`);
 
-    // Add maintenance status types for energy lifecycle
-    await prisma.statusType.createMany({
-      data: [
-        {
-          id: crypto.randomUUID(),
-          name: 'En operación',
-          description: 'Equipo en operación normal',
-          template: [
-            { label: 'Operador', name: 'operator', type: 'text' },
-            { label: 'Fecha inicio', name: 'startDate', type: 'date' },
-          ],
-          organizationId: org.id,
-          updatedAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Mantenimiento preventivo',
-          description: 'Mantenimiento programado',
-          template: [
-            { label: 'Técnico', name: 'technician', type: 'text' },
-            { label: 'Tarea', name: 'task', type: 'text' },
-            { label: 'Próximo mantenimiento', name: 'nextDate', type: 'date' },
-          ],
-          organizationId: org.id,
-          updatedAt: new Date(),
-        },
-        {
-          id: crypto.randomUUID(),
-          name: 'Mantenimiento correctivo',
-          description: 'Reparación de avería',
-          template: [
-            { label: 'Causa', name: 'cause', type: 'text' },
-            { label: 'Resolución', name: 'resolution', type: 'text' },
-            { label: 'Tiempo fuera de servicio (h)', name: 'downtimeHours', type: 'number' },
-          ],
-          organizationId: org.id,
-          updatedAt: new Date(),
-        },
-      ],
-    });
     console.log('✅ Tipos de estado de mantenimiento creados\n');
   }
 
