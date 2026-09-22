@@ -2,6 +2,7 @@ import { EvidenceService, type EvidencePayloadInput, type EvidenceFile } from '.
 import { EvidenceInputError, ImageFetchError, ImageSizeExceededError, EvidenceBuildError } from './errors';
 import { ICommunityConfigError, ICommunityHTTPError } from '../../infrastructure/icommunity/errors';
 import type { ICommunityService } from '../../infrastructure/icommunity/ICommunityService';
+import { createHash } from 'node:crypto';
 import { MAX_EVIDENCE_BYTES, buildIssueDataObject, buildItemDataObject, detectImageExt } from '@/lib/evidenceUtils';
 import { getBaseUrl, toAbsoluteUrl } from '@/lib/http';
 
@@ -157,6 +158,17 @@ async function buildFiles(
   return files;
 }
 
+/**
+ * The checksum iBS will publish for the certified JSON, computed the same way:
+ * base64 of the SHA-512 of the file bytes (`api/src/integrity.go` in
+ * ibs-backend decodes the base64 before hashing).
+ */
+export function jsonFileChecksum(files: EvidenceFile[]): string {
+  const json = files.find((f) => f.name.endsWith('.json'));
+  if (!json) throw new EvidenceBuildError('fileAssembly', 'Evidence has no JSON file to checksum');
+  return createHash('sha512').update(Buffer.from(json.file, 'base64')).digest('base64');
+}
+
 async function createEvidenceWithRetry(
   icommunity: ICommunityService,
   signatureID: string,
@@ -207,11 +219,13 @@ export function createEvidenceServiceImpl(deps: {
       }
     },
 
-    async createCertificationEvidence(input: EvidencePayloadInput): Promise<string> {
+    async createCertificationEvidence(input: EvidencePayloadInput) {
       try {
         const baseUrl = await getBaseUrl();
         const files = await buildFiles(input, baseUrl);
-        return await createEvidenceWithRetry(icommunity, input.signatureID, input.title, files);
+        const payloadChecksum = jsonFileChecksum(files);
+        const evidenceId = await createEvidenceWithRetry(icommunity, input.signatureID, input.title, files);
+        return { evidenceId, payloadChecksum };
       } catch (error) {
         if (error instanceof EvidenceInputError || error instanceof ImageFetchError || 
             error instanceof ImageSizeExceededError || error instanceof EvidenceBuildError ||

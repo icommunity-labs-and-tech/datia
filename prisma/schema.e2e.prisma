@@ -462,6 +462,8 @@ model Certification {
   status           CertificationStatus @default(ISSUED)
   /// What the evidence certifies, exactly as it was sent to iBS.
   payload          Json
+  /// base64(SHA-512) of the certified JSON, to compare with what iBS publishes.
+  payloadChecksum  String?
   network          String?
   hash             String?
   checkerUrl       String?

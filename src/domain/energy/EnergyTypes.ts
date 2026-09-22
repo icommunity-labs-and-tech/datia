@@ -117,16 +117,26 @@ export interface EvidenceAuditRecord {
 export interface EmissionVerificationReport {
   emissionRecordId: string;
   certificationId: string;
+  /** True when the proof is intact and the record still says what was certified. */
   verified: boolean;
   evidence: EvidenceAuditRecord;
-  originalData: {
-    co2eKg: number;
-    scope: EmissionScope;
-    systemBoundary: SystemBoundary;
-    verifierBody: string;
-    verificationStandard: string;
+  /** The proof itself: does what iBS published still match what was sent? */
+  proof: {
+    /** base64(SHA-512) of the certified JSON, as iBS publishes it. */
+    publishedChecksum: string;
+    storedChecksum: string;
+    intact: boolean;
+  };
+  /** The figures as they were certified. */
+  certifiedData: {
+    co2eKg: number | null;
+    scope: string | null;
+    systemBoundary: string | null;
+    verifierBody: string | null;
+    verificationStandard: string | null;
     certifiedAt: string;
   };
+  /** Where the record today no longer matches what was certified. */
   discrepancies: string[];
 }
 

@@ -87,6 +87,20 @@ en la documentación pública de iBS.
   `signature_id`, piden la firma a iBS (`GET /v2/signatures/{id}`) y solo
   aplican `success` o `failed` si la id que devuelve iBS coincide (#33).
 
+## Verificar una emisión
+
+`GET /api/v1/emissions/{id}/verify` compara **huellas, no contenidos**: iBS no
+devuelve el fichero certificado, solo el checksum que publicó para él
+(`payload.integrity`, `base64(SHA-512(bytes))`).
+
+- Al emitir, `issueCertification` guarda ese mismo checksum en
+  `Certification.payloadChecksum`.
+- Al verificar, se compara con el que publica iBS: si coinciden, la prueba está
+  intacta. Después se compara el payload certificado con el registro actual,
+  que es lo que destapa una cifra cambiada después de certificar.
+- Las pruebas anteriores a esta columna (las 129 de agosto y septiembre de 2026)
+  no se pueden verificar así: responden 409.
+
 ## Si algo se queda atrás
 
 No hay barridos ni tareas programadas: se decidió así en septiembre de 2026
