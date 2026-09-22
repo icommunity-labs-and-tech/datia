@@ -119,13 +119,10 @@ async function buildFiles(
   if (type === 'item_creation') {
     json = buildItemDataObject({
       itemId: input.metadata.itemId as string,
-      categoryId: input.metadata.categoryId as string,
       name: input.metadata.name as string,
       description: input.description,
       createdAt: input.metadata.createdAt as string,
       imageUrls: input.imageUrls,
-      templateFields: input.metadata.templateFields,
-      itemTemplate: input.metadata.itemTemplate,
     });
     fileName = 'item_data.json';
   } else {

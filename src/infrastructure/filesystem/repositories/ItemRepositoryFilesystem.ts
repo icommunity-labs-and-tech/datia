@@ -35,9 +35,9 @@ function readAll(): ItemRecord[] {
       name: r.name as string,
       description: r.description as string,
       imageUrl: (r.imageUrl as string | null) ?? null,
-      itemTemplate: Array.isArray(r.itemTemplate) ? r.itemTemplate : [],
-      templateFields: (r.templateFields as Record<string, any> | null) ?? null,
       evidenceID: (r.evidenceID as string | null) ?? null,
+      latitude: null,
+      longitude: null,
       createdAt: new Date(r.createdAt as string),
       updatedAt: new Date(r.updatedAt as string),
     }));
@@ -66,9 +66,9 @@ function readRaw(): PersistedItem[] {
       name: r.name as string,
       description: r.description as string,
       imageUrl: (r.imageUrl as string | null) ?? null,
-      itemTemplate: Array.isArray(r.itemTemplate) ? r.itemTemplate : [],
-      templateFields: (r.templateFields as Record<string, any> | null) ?? null,
       evidenceID: (r.evidenceID as string | null) ?? null,
+      latitude: null,
+      longitude: null,
       createdAt: new Date(r.createdAt as string),
       updatedAt: new Date(r.updatedAt as string),
     }));
@@ -121,9 +121,9 @@ export const itemRepositoryFilesystem: ItemRepository = {
       name: input.name,
       description: input.description,
       imageUrl: input.imageUrl ?? null,
-      itemTemplate: input.itemTemplate ?? [],
-      templateFields: input.templateFields ?? null,
       evidenceID: null,
+      latitude: null,
+      longitude: null,
       createdAt: now,
       updatedAt: now,
     };
@@ -164,25 +164,10 @@ export const itemRepositoryFilesystem: ItemRepository = {
     };
   },
 
-  async listByCategory(_categoryId, _organizationId) {
-    return [];
-  },
 
-  async listByCategories(_categoryIds, _organizationId) {
-    return [];
-  },
 
-  async addCategoriesToItem(_itemId, _categoryIds, _organizationId): Promise<void> {
-    // No-op: sandbox has no category associations
-  },
 
-  async removeCategoriesFromItem(_itemId, _categoryIds, _organizationId): Promise<void> {
-    // No-op
-  },
 
-  async getItemCategories(_itemId, _organizationId) {
-    return [];
-  },
 
   async search(query: string, organizationId: string) {
     const q = query.toLowerCase();
@@ -235,9 +220,6 @@ export const itemRepositoryFilesystem: ItemRepository = {
     return paginateItems(items, params);
   },
 
-  async listByCategoryPaginated(_categoryId, _organizationId, params) {
-    return { data: [], nextCursor: null, hasNextPage: false };
-  },
 
   async searchPaginated(query, organizationId, params) {
     const q = query.toLowerCase();

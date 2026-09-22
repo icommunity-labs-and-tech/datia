@@ -16,7 +16,6 @@ export interface ValidationError {
 export interface ValidationResult {
   valid: boolean;
   errors?: ValidationError[];
-  categoriesToCreate?: string[]; // Categorías que se crearán automáticamente
   summary?: {
     totalRows: number;
     validRows: number;
@@ -89,7 +88,7 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
     const headers = parsedRows.length > 0 ? Object.keys(parsedRows[0].values) : [];
     
     // Validar columnas requeridas
-    const requiredColumns = ['id', 'name', 'categoryName'];
+    const requiredColumns = ['id', 'name'];
     const missingColumns = requiredColumns.filter(col => !headers.includes(col));
     
     const errors: ValidationError[] = [];
@@ -112,7 +111,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
         'id': 'ID',
         'name': 'Nombre',
         'description': 'Descripción',
-        'categoryName': 'Categoría',
       };
       
       // Filtrar y renombrar headers para el preview
@@ -125,7 +123,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
         'ID': 'id',
         'Nombre': 'name',
         'Descripción': 'description',
-        'Categoría': 'categoryName',
       };
       
       return {
@@ -161,7 +158,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
       id: row.values['id']?.trim() ?? '',
       name: row.values['name']?.trim() ?? '',
       description: row.values['description']?.trim() || null,
-      categoryName: row.values['categoryName']?.trim() ?? '',
     }));
 
     // Validar IDs únicos dentro del CSV
@@ -200,54 +196,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
           message: 'El campo name es requerido y no puede estar vacío',
           value: row.name || '',
         });
-      }
-      if (!row.categoryName?.trim()) {
-        errors.push({
-          line: row.line,
-          column: 'categoryName',
-          type: 'empty_required',
-          message: 'El campo categoryName es requerido y no puede estar vacío',
-          value: row.categoryName || '',
-        });
-      }
-    }
-
-    // Detectar categorías existentes y las que se crearán automáticamente
-    const validRowsForCategoryCheck = itemRows.filter(row => 
-      row.categoryName?.trim() && 
-      !errors.some(e => e.line === row.line && e.column === 'categoryName')
-    );
-    
-    const categoryMap = new Map<string, string>();
-    const categoryNames = new Set(validRowsForCategoryCheck.map(r => r.categoryName.trim()));
-    const categoriesToCreate: string[] = [];
-    
-    for (const catName of categoryNames) {
-      try {
-        const cat = await prisma.category.findFirst({
-          where: { name: catName, organizationId },
-        });
-        if (!cat) {
-          // Categoría no existe, se creará automáticamente
-          if (!categoriesToCreate.includes(catName)) {
-            categoriesToCreate.push(catName);
-          }
-        } else {
-          categoryMap.set(catName, cat.id);
-        }
-      } catch {
-        // Error al buscar categoría - marcar como error
-        validRowsForCategoryCheck
-          .filter(r => r.categoryName.trim() === catName)
-          .forEach(row => {
-            errors.push({
-              line: row.line,
-              column: 'categoryName',
-              type: 'category_not_found',
-              message: `Error al verificar la categoría "${catName}"`,
-              value: catName,
-            });
-          });
       }
     }
 
@@ -302,7 +250,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
       'id': 'ID',
       'name': 'Nombre',
       'description': 'Descripción',
-      'categoryName': 'Categoría',
     };
     
     // Mapeo inverso para obtener el header original desde el español
@@ -310,7 +257,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
       'ID': 'id',
       'Nombre': 'name',
       'Descripción': 'description',
-      'Categoría': 'categoryName',
     };
 
     // Filtrar y renombrar headers para el preview
@@ -323,7 +269,6 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
       result: {
         valid: isValid,
         errors: errors.length > 0 ? errors : undefined,
-        categoriesToCreate: categoriesToCreate.length > 0 ? categoriesToCreate : undefined,
         summary: {
           totalRows: itemRows.length,
           validRows: Math.max(0, validRows),

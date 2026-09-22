@@ -38,11 +38,10 @@ export function createItemServiceImpl(deps: {
             id: data.customId,
             name: data.name,
             description: data.description,
-            categoryIds: data.categoryIds,
             imageUrl: data.imageUrl ?? null,
-            templateFields: data.templateFields ?? null,
-            itemTemplate: data.itemTemplate ?? [],
             createdByUserId: data.createdByUserId,
+            latitude: data.latitude ?? null,
+            longitude: data.longitude ?? null,
           }
         );
 
@@ -54,7 +53,6 @@ export function createItemServiceImpl(deps: {
           name: result.name,
           description: result.description,
           imageUrl: result.imageUrl || undefined,
-          itemTemplate: data.itemTemplate ?? [],
         } satisfies ItemResponse;
       } catch (error) {
         if (error instanceof ItemInputError || 

@@ -102,7 +102,6 @@
     "customIdHelp": "The ID is required, must be unique and will be used to generate the QR code.",
     "generatedTitle": "Generated title",
     "addField": "Add field",
-    "categoryFields": "Category-specific fields",
     "validationErrors": "Validation errors",
     "fieldMustHaveName": "Field {index} must have a name",
     "fieldMustHaveNameWithNumber": "Field {number} must have a name",
@@ -146,20 +145,17 @@
     "filterUserPlaceholder": "Filter by user...",
     "searchByName": "Search by name",
     "searchById": "Search by ID",
-    "searchByCategory": "Search by category",
     "addUser": "Add user",
     "addProduct": "Add asset",
     "addItem": "Add item",
-    "addCategory": "Add category",
     "users": "System Users",
     "items": "Asset Catalog",
     "usersDescription": "User management allows you to manage system users, create new users, assign roles (Operator or Administrator) and manage their permissions. Users can be verified through KYC and can have different access levels according to their role in the organization.",
     "whatIsUserManagement": "What is user management?",
     "whatIsInventory": "What is asset catalog?",
-    "inventoryDescription": "The asset catalog is the central registry of equipment and items your organization manages. Each asset can have multiple categories, an image, custom fields by type, and the blockchain certifications of its energy.",
+    "inventoryDescription": "The asset catalog is the central registry of equipment and items your organization manages. Each asset has its position and the blockchain certifications of its energy.",
     "columns": {
       "productName": "Asset name",
-      "categories": "Categories",
       "creationDate": "Creation Date",
       "image": "Image",
       "actions": "Actions",
@@ -169,8 +165,7 @@
     },
     "filterType": {
       "name": "Name",
-      "id": "ID",
-      "category": "Category"
+      "id": "ID"
     },
     "searchTable": "Search in table",
     "exportCsv": "Export CSV",
@@ -181,10 +176,8 @@
     "columnLabels": {
       "itemName": "Item Name",
       "status": "Status",
-      "category": "Category",
       "image": "Image",
       "passport": "Passport",
-      "categoryName": "Category Name",
       "items": "Items",
       "actions": "Actions",
       "item": "Item",
@@ -220,25 +213,6 @@
     "error": {
       "title": "Error creating state",
       "generic": "An error occurred"
-    },
-    "addItem": {
-      "customIdHelp": "The ID is required, must be unique and will be used to generate the QR code.",
-      "emailFormatInvalid": "Email format is invalid",
-      "checkingEmail": "Checking email...",
-      "fixErrors": "Fix errors",
-      "addUser": "Add User",
-      "addProduct": "Add asset",
-      "addCategory": "Add Category",
-      "addElement": "Add Element",
-      "createError": "Error creating element",
-      "emailExists": "A user with this email already exists",
-      "emailCheckError": "Error verifying email",
-      "fieldRequired": "The field \"{label}\" is required",
-      "loadCategoryError": "Error loading assets from category",
-      "loadItemError": "Could not load selected asset",
-      "loadingProducts": "Loading assets…",
-      "dontCopy": "Don't copy",
-      "copyHelp": "Name, description, image and template fields will be copied. Your ID will be preserved."
     }
   },
   "dates": {
@@ -384,7 +358,6 @@
     "tabInfo": "Information",
     "verifiedProduct": "Asset verified on blockchain",
     "productDetails": "Asset Details",
-    "category": "Category:",
     "specifications": "Specifications",
     "productCertification": "Asset Certification",
     "loadingInfo": "Loading information...",
@@ -465,20 +438,8 @@
         "verificationStandard": "Verification standard"
       },
       "footer": "Data certified under ESPR / ISO 14067"
-    }
-  },
-  "categories": {
-    "title": "Categories",
-    "deleteCategory": "Delete Category",
-    "confirmDeleteCategory": "Are you sure you want to delete the category \"{name}\"?",
-    "deleteCategoryError": "Error deleting category",
-    "nameRequired": "Category name is required",
-    "descriptionRequired": "Category description is required",
-    "filterPlaceholder": "Filter by category...",
-    "addButton": "Add category",
-    "viewDetail": "View detail",
-    "edit": "Edit",
-    "delete": "Delete"
+    },
+    "position": "Position"
   },
   "exports": {
     "title": "Export/Import assets",
@@ -487,9 +448,6 @@
     "exportCsv": "Export CSV",
     "selectProductsAndFields": "Select assets and fields to export CSV",
     "selectFields": "Select the fields you want to include in the CSV.",
-    "categoriesToCreate": "Categories to create automatically",
-    "categoriesToCreateDescription": "The following categories do not exist in the system and will be created automatically during import:",
-    "categoriesToCreateCount": "Categories to create: {count}",
     "importFromCsv": "Import assets from CSV",
     "importDescription": "The {button} button allows you to upload a CSV file to import assets. The file will first be validated and then you can execute the import if everything is correct. The CSV must contain at least the columns: {fields}.",
     "importButton": "Import items from CSV",
@@ -501,8 +459,6 @@
       "id": "ID",
       "name": "Name",
       "description": "Description",
-      "categoryName": "Category (first)",
-      "allCategories": "All categories",
       "createdAt": "Creation date",
       "customerUrl": "Public URL"
     }
@@ -524,19 +480,12 @@
   "dashboard": {
     "metrics": "Metrics",
     "monthlyActivityTitle": "Monthly activity",
-    "categoryDistributionTitle": "Distribution by Categories",
     "loadingData": "Loading data...",
     "charts": {
       "monthlyActivity": {
         "usersRegistered": "Registered Users",
         "itemsCreated": "Items Created",
         "emptyMessage": "No activity data available"
-      },
-      "categoryDistribution": {
-        "items": "Items:",
-        "percentage": "Percentage:",
-        "emptyMessage": "No category data available",
-        "others": "Others"
       }
     },
     "kpis": {
@@ -944,23 +893,8 @@
     }
   },
   "itemsPage": {
-    "charts": {
-      "loading": "Loading data...",
-      "statsTitle": "Statistics",
-      "total": "Total",
-      "withCategory": "With category",
-      "uncategorized": "Uncategorized",
-      "withImage": "With image",
-      "categoryDistribution": "By category",
-      "allCategories": "All categories",
-      "monthlyCreations": "Monthly creations",
-      "products": "Assets",
-      "others": "Others"
-    },
     "searchPlaceholder": "Search assets...",
     "noItems": "No assets registered",
-    "allCategories": "All categories",
-    "noCategory": "No category",
     "certified": "Certified",
     "pending": "Pending",
     "title": "Assets",

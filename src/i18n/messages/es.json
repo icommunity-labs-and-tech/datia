@@ -102,7 +102,6 @@
     "customIdHelp": "El ID es obligatorio, debe ser único y se usará para generar el código QR.",
     "generatedTitle": "Título generado",
     "addField": "Agregar campo",
-    "categoryFields": "Campos específicos de la categoría",
     "validationErrors": "Errores de validación",
     "fieldMustHaveName": "El campo {index} debe tener un nombre",
     "fieldMustHaveNameWithNumber": "El campo {number} debe tener un nombre",
@@ -146,20 +145,17 @@
     "filterUserPlaceholder": "Filtrar por usuario...",
     "searchByName": "Buscar por nombre",
     "searchById": "Buscar por ID",
-    "searchByCategory": "Buscar por categoría",
     "addUser": "Añadir usuario",
     "addProduct": "Añadir activo",
     "addItem": "Añadir elemento",
-    "addCategory": "Añadir categoría",
     "users": "Usuarios del Sistema",
     "items": "Catálogo de activos",
     "usersDescription": "La gestión de usuarios te permite administrar los usuarios del sistema, crear nuevos usuarios, asignar roles (Operador o Administrador) y gestionar sus permisos. Los usuarios pueden ser verificados mediante KYC y pueden tener diferentes niveles de acceso según su rol en la organización.",
     "whatIsUserManagement": "¿Qué es la gestión de usuarios?",
     "whatIsInventory": "¿Qué es el catálogo de activos?",
-    "inventoryDescription": "El catálogo de activos es el registro central de productos o elementos que gestiona tu organización. Cada activo puede tener varias categorías, una imagen, campos personalizados según su tipo y las certificaciones en blockchain de su energía.",
+    "inventoryDescription": "El catálogo de activos es el registro central de productos o elementos que gestiona tu organización. Cada activo tiene su posición y las certificaciones en blockchain de su energía.",
     "columns": {
       "productName": "Nombre del activo",
-      "categories": "Categorías",
       "creationDate": "Fecha de alta",
       "image": "Imagen",
       "actions": "Acciones",
@@ -169,8 +165,7 @@
     },
     "filterType": {
       "name": "Nombre",
-      "id": "ID",
-      "category": "Categoría"
+      "id": "ID"
     },
     "searchTable": "Buscar en la tabla",
     "exportCsv": "Exportar CSV",
@@ -181,10 +176,8 @@
     "columnLabels": {
       "itemName": "Nombre del Item",
       "status": "Estado",
-      "category": "Categoría",
       "image": "Imagen",
       "passport": "Pasaporte",
-      "categoryName": "Nombre de la Categoría",
       "items": "Items",
       "actions": "Acciones",
       "item": "Item",
@@ -220,25 +213,6 @@
     "error": {
       "title": "Error al crear estado",
       "generic": "Ha ocurrido un error"
-    },
-    "addItem": {
-      "customIdHelp": "El ID es obligatorio, debe ser único y se usará para generar el código QR.",
-      "emailFormatInvalid": "El formato del email no es válido",
-      "checkingEmail": "Verificando email...",
-      "fixErrors": "Corrija los errores",
-      "addUser": "Añadir Usuario",
-      "addProduct": "Añadir activo",
-      "addCategory": "Añadir Categoría",
-      "addElement": "Añadir Elemento",
-      "createError": "Error al crear el elemento",
-      "emailExists": "Ya existe un usuario con este email",
-      "emailCheckError": "Error al verificar el email",
-      "fieldRequired": "El campo \"{label}\" es obligatorio",
-      "loadCategoryError": "Error cargando activos de la categoría",
-      "loadItemError": "No se pudo cargar el activo seleccionado",
-      "loadingProducts": "Cargando activos…",
-      "dontCopy": "No copiar",
-      "copyHelp": "Se copiarán nombre, descripción, imagen y campos de template. Tu ID se mantiene."
     }
   },
   "dates": {
@@ -384,7 +358,6 @@
     "tabInfo": "Información",
     "verifiedProduct": "Activo verificado en blockchain",
     "productDetails": "Detalles del activo",
-    "category": "Categoría:",
     "specifications": "Especificaciones",
     "productCertification": "Certificación del activo",
     "loadingInfo": "Cargando información...",
@@ -465,20 +438,8 @@
         "verificationStandard": "Estándar de verificación"
       },
       "footer": "Datos certificados según ESPR / ISO 14067"
-    }
-  },
-  "categories": {
-    "title": "Categorías",
-    "deleteCategory": "Eliminar Categoría",
-    "confirmDeleteCategory": "¿Estás seguro de que quieres eliminar la categoría \"{name}\"?",
-    "deleteCategoryError": "Error al eliminar la categoría",
-    "nameRequired": "El nombre de la categoría es obligatorio",
-    "descriptionRequired": "La descripción de la categoría es obligatoria",
-    "filterPlaceholder": "Filtrar por categoría...",
-    "addButton": "Añadir categoría",
-    "viewDetail": "Ver detalle",
-    "edit": "Editar",
-    "delete": "Eliminar"
+    },
+    "position": "Posición"
   },
   "exports": {
     "title": "Exportar/Importar activos",
@@ -487,9 +448,6 @@
     "exportCsv": "Exportar CSV",
     "selectProductsAndFields": "Seleccionar activos y campos para exportar CSV",
     "selectFields": "Selecciona los campos que quieres incluir en el CSV.",
-    "categoriesToCreate": "Categorías a crear automáticamente",
-    "categoriesToCreateDescription": "Las siguientes categorías no existen en el sistema y se crearán automáticamente durante la importación:",
-    "categoriesToCreateCount": "Categorías a crear: {count}",
     "importFromCsv": "Importar activos desde CSV",
     "importDescription": "El botón {button} permite subir un archivo CSV para importar activos. Primero se validará el archivo y luego podrás ejecutar la importación si todo está correcto. El CSV debe contener al menos las columnas: {fields}.",
     "importButton": "Importar items desde CSV",
@@ -501,8 +459,6 @@
       "id": "ID",
       "name": "Nombre",
       "description": "Descripción",
-      "categoryName": "Categoría (primera)",
-      "allCategories": "Todas las categorías",
       "createdAt": "Fecha de creación",
       "customerUrl": "URL pública"
     }
@@ -524,19 +480,12 @@
   "dashboard": {
     "metrics": "Métricas",
     "monthlyActivityTitle": "Actividad mensual",
-    "categoryDistributionTitle": "Distribución por Categorías",
     "loadingData": "Cargando datos...",
     "charts": {
       "monthlyActivity": {
         "usersRegistered": "Usuarios Registrados",
         "itemsCreated": "Items Creados",
         "emptyMessage": "No hay datos de actividad disponibles"
-      },
-      "categoryDistribution": {
-        "items": "Items:",
-        "percentage": "Porcentaje:",
-        "emptyMessage": "No hay datos de categorías disponibles",
-        "others": "Otros"
       }
     },
     "kpis": {
@@ -944,23 +893,8 @@
     }
   },
   "itemsPage": {
-    "charts": {
-      "loading": "Cargando datos...",
-      "statsTitle": "Estadísticas",
-      "total": "Total",
-      "withCategory": "Con categoría",
-      "uncategorized": "Sin categoría",
-      "withImage": "Con imagen",
-      "categoryDistribution": "Por categoría",
-      "allCategories": "Todas las categorías",
-      "monthlyCreations": "Altas por mes",
-      "products": "Activos",
-      "others": "Otros"
-    },
     "searchPlaceholder": "Buscar activos...",
     "noItems": "No hay activos registrados",
-    "allCategories": "Todas las categorías",
-    "noCategory": "Sin categoría",
     "certified": "Certificado",
     "pending": "Pendiente",
     "title": "Activos",

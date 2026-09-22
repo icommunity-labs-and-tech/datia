@@ -1,17 +1,15 @@
 import { DashboardService } from './DashboardService';
-import type { DashboardKPIs, MonthlyActivity, CategoryDistribution } from '@/types/dashboard';
+import type { DashboardKPIs, MonthlyActivity } from '@/types/dashboard';
 import type { UserRepository } from '@/domain/users/UserRepository';
 import type { ItemRepository } from '@/domain/items/ItemRepository';
-import type { CategoryRepository } from '@/domain/categories/CategoryRepository';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 import { certificationCounts } from '@/lib/certification/queries';
 
 export function createDashboardServiceImpl(deps: {
   userRepository: UserRepository;
   itemRepository: ItemRepository;
-  categoryRepository: CategoryRepository;
 }): DashboardService {
-  const { userRepository: userRepo, itemRepository: itemRepo, categoryRepository: categoryRepo } = deps;
+  const { userRepository: userRepo, itemRepository: itemRepo } = deps;
 
   return {
     async getKPIs(): Promise<DashboardKPIs> {
@@ -76,28 +74,6 @@ export function createDashboardServiceImpl(deps: {
       }
     },
 
-    async getCategoryDistribution(): Promise<CategoryDistribution[]> {
-      try {
-        const organizationId = await requireOrganizationId();
-        
-        const categories = await categoryRepo.getCategoriesWithItemCounts(organizationId);
-        
-        const totalItems = categories.reduce((sum, cat) => sum + cat._count.items, 0);
-        
-        return categories
-          .map((category) => {
-            const itemCount = category._count.items;
-            return {
-              category: category.name,
-              itemCount,
-              percentage: totalItems > 0 ? (itemCount / totalItems) * 100 : 0,
-            };
-          })
-          .filter((cat) => cat.itemCount > 0) as CategoryDistribution[];
-      } catch {
-        return [];
-      }
-    },
 
   };
 }

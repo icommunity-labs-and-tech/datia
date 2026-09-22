@@ -6,9 +6,10 @@ export interface CreateItemInput {
   name: string;
   description: string;
   imageUrl?: string | null;
-  itemTemplate?: any[];
-  templateFields?: Record<string, any> | null;
   createdByUserId: string | null;
+  /** Where the asset is, in its own columns since #37. */
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ItemRecord {
@@ -16,11 +17,11 @@ export interface ItemRecord {
   name: string;
   description: string;
   imageUrl: string | null;
-  itemTemplate: any[];
-  templateFields: Record<string, any> | null;
   evidenceID?: string | null;
   createdAt: Date;
   updatedAt: Date;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 export class DbError extends Error {
@@ -39,13 +40,9 @@ export interface ItemRepository {
     name: string;
     description: string | null;
     createdAt: Date;
-    categoryId: string | null;
-    categoryName: string | null;
-    categories: Array<{ id: string; name: string }>;
     siteName: string | null;
     latitude: number | null;
     longitude: number | null;
-    templateFields: Record<string, any> | null;
     imageUrl: string | null;
   }>>;
   create(input: CreateItemInput): Promise<ItemRecord>;
@@ -60,27 +57,6 @@ export interface ItemRepository {
       })
     | null
   >;
-  listByCategory(categoryId: string, organizationId: string): Promise<Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    imageUrl: string | null;
-    itemTemplate: any[];
-    templateFields: Record<string, any> | null;
-    createdAt: Date;
-  }>>;
-  listByCategories(categoryIds: string[], organizationId: string): Promise<Array<{
-    id: string;
-    name: string;
-    description: string | null;
-    imageUrl: string | null;
-    itemTemplate: any[];
-    templateFields: Record<string, any> | null;
-    createdAt: Date;
-  }>>;
-  addCategoriesToItem(itemId: string, categoryIds: string[], organizationId: string): Promise<void>;
-  removeCategoriesFromItem(itemId: string, categoryIds: string[], organizationId: string): Promise<void>;
-  getItemCategories(itemId: string, organizationId: string): Promise<Array<{ id: string; name: string }>>;
   search(query: string, organizationId: string): Promise<Array<{
     id: string;
     name: string;
@@ -102,17 +78,6 @@ export interface ItemRepository {
   ): Promise<void>;
   // Cursor-based pagination
   listPaginated(
-    organizationId: string,
-    params: CursorPaginationParams
-  ): Promise<CursorPaginationResult<{
-    id: string;
-    name: string;
-    description: string | null;
-    imageUrl: string | null;
-    createdAt: Date;
-  }>>;
-  listByCategoryPaginated(
-    categoryId: string,
     organizationId: string,
     params: CursorPaginationParams
   ): Promise<CursorPaginationResult<{

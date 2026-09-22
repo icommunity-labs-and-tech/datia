@@ -161,15 +161,6 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
           </Card>
         </Col>
 
-        <Col md={6} lg={3}>
-          <Card className="border-info h-100">
-            <Card.Body className="text-center">
-              <i className="bi bi-tags text-info" style={{ fontSize: '2rem' }}></i>
-              <h3 className="mt-2 mb-0">{organization.categoryCount}</h3>
-              <p className="text-muted mb-0">Categorías</p>
-            </Card.Body>
-          </Card>
-        </Col>
       </Row>
 
       <Row className="g-4">

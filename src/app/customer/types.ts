@@ -20,7 +20,8 @@ export type ItemData = {
   name: string;
   description: string | null;
   imageUrl: string | null;
-  templateFields: Record<string, any> | null;
+  latitude: number | null;
+  longitude: number | null;
   createdAt: string;
   updatedAt: string;
   evidenceID?: string | null;
@@ -30,11 +31,6 @@ export type ItemData = {
     logoUrl: string | null;
     brandColorPrimary: string | null;
   } | null;
-  category: {
-    id: string;
-    name: string;
-    description: string;
-  };
   energyCertifications?: EnergyCertification[];
 };
 

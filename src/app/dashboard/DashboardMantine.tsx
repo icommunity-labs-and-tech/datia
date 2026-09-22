@@ -37,7 +37,6 @@ interface DashboardMantineProps {
 interface RecentItem {
   id: string;
   name: string;
-  categoryName: string | null;
   certified: boolean;
 }
 
@@ -143,9 +142,6 @@ export default function DashboardMantine({
                   <Group justify="space-between" wrap="nowrap" gap="sm">
                     <Stack gap={0} style={{ minWidth: 0 }}>
                       <Text size="sm" fw={550} truncate>{item.name}</Text>
-                      {item.categoryName && (
-                        <Text size="xs" c="dimmed" truncate>{item.categoryName}</Text>
-                      )}
                     </Stack>
                     <Badge
                       size="xs"

@@ -56,31 +56,17 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 export function ItemInfoSection({ item }: ItemInfoSectionProps) {
   const t = useTranslations('customer');
-  const specs = item.templateFields ? Object.entries(item.templateFields) : [];
 
   return (
     <Stack gap="xl">
       <Section title={t('productDetails')}>
-        <Field label={t('category').replace(':', '')}>
-          {item.category?.name || '—'}
+        <Field label={t('position')}>
+          {item.latitude != null && item.longitude != null
+            ? `${item.latitude}, ${item.longitude}`
+            : '—'}
         </Field>
       </Section>
 
-      {specs.length > 0 && (
-        <Section title={t('specifications')}>
-          {specs.map(([key, value]) => (
-            <Field key={key} label={key}>
-              {isGeolocation(value) ? (
-                <Box w={{ base: '100%', xs: 320 }} mt={6}>
-                  <GeolocationMap value={value} readOnly />
-                </Box>
-              ) : (
-                String(value)
-              )}
-            </Field>
-          ))}
-        </Section>
-      )}
 
       {item.evidenceID && (
         <Section title={t('productCertification')}>

@@ -81,12 +81,6 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
               {isCertified && <VerifiedBadge title={tCustomer('verifiedProduct')} />}
             </Group>
 
-            {item.category?.name && (
-              <Badge size="sm" variant="light" color="gray" style={{ alignSelf: 'flex-start' }}>
-                {item.category.name}
-              </Badge>
-            )}
-
             <Text size="sm" c="dimmed">
               {item.description || t('noDescription')}
             </Text>

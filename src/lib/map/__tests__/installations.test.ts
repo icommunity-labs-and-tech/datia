@@ -3,7 +3,6 @@ import {
   DEFAULT_RADIUS_METERS,
   clusterInstallations,
   distanceMeters,
-  geolocationOf,
   isLocated,
   type Located,
 } from '../installations';
@@ -46,23 +45,6 @@ describe('isLocated', () => {
   });
 });
 
-describe('geolocationOf', () => {
-  it('finds the coordinate whatever the template called it', () => {
-    expect(geolocationOf({ ubicacion: { lat: 1, lng: 2 } })).toEqual({ lat: 1, lng: 2 });
-    expect(geolocationOf({ 'Dónde está': { lat: 3, lng: 4 } })).toEqual({ lat: 3, lng: 4 });
-  });
-
-  it('ignores the other fields around it', () => {
-    const fields = { serie: 'ABC-1', potencia: 605, ubicacion: { lat: 5, lng: 6 } };
-    expect(geolocationOf(fields)).toEqual({ lat: 5, lng: 6 });
-  });
-
-  it('returns null when there is nothing to find', () => {
-    expect(geolocationOf(null)).toBeNull();
-    expect(geolocationOf({})).toBeNull();
-    expect(geolocationOf({ ubicacion: 'Alcalá' })).toBeNull();
-  });
-});
 
 describe('clusterInstallations', () => {
   it('returns nothing for no assets', () => {

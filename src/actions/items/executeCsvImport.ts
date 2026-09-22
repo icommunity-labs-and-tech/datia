@@ -70,7 +70,6 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
       id: row.values['id']?.trim() ?? '',
       name: row.values['name']?.trim() ?? '',
       description: row.values['description']?.trim() || null,
-      categoryName: row.values['categoryName']?.trim() ?? '',
     }));
 
     // Re-validar antes de ejecutar (por seguridad)
@@ -78,7 +77,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
     
     // Validar columnas requeridas
     const headers = parsedRows.length > 0 ? Object.keys(parsedRows[0].values) : [];
-    const requiredColumns = ['id', 'name', 'categoryName'];
+    const requiredColumns = ['id', 'name'];
     const missingColumns = requiredColumns.filter(col => !headers.includes(col));
     
     if (missingColumns.length > 0) {
@@ -104,9 +103,6 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
       if (!row.name?.trim()) {
         validationErrors.push(`Línea ${row.line}: name vacío`);
       }
-      if (!row.categoryName?.trim()) {
-        validationErrors.push(`Línea ${row.line}: categoryName vacío`);
-      }
     }
 
     if (validationErrors.length > 0) {
@@ -116,35 +112,8 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
       );
     }
 
-    // Verificar productos existentes y preparar categorías
     const existingConflicts: string[] = [];
-    const categoryMap = new Map<string, string>();
-    const categoryNames = new Set(itemRows.map(r => r.categoryName.trim()));
-    
-    // Obtener o crear categorías primero (fuera de la creación de items)
-    const now = new Date();
-    for (const catName of categoryNames) {
-      let cat = await prisma.category.findFirst({
-        where: { name: catName, organizationId },
-      });
-      
-      // Si la categoría no existe, crearla automáticamente
-      if (!cat) {
-        cat = await prisma.category.create({
-          data: {
-            id: crypto.randomUUID(),
-            organizationId,
-            name: catName.trim(),
-            description: '', // Descripción vacía por defecto
-            itemTemplate: [],
-            updatedAt: now,
-          },
-        });
-      }
-      
-      categoryMap.set(catName, cat.id);
-    }
-    
+
     // Verificar productos existentes
     for (const row of itemRows) {
       const existing = await prisma.item.findFirst({
@@ -171,12 +140,6 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
     
     for (const row of itemRows) {
       try {
-        const categoryId = categoryMap.get(row.categoryName.trim());
-        if (!categoryId) {
-          errors.push(`Línea ${row.line}: No se pudo encontrar la categoría "${row.categoryName}"`);
-          continue;
-        }
-        
         await createItemWithEvidence(
           { itemRepository, userRepository, evidenceService },
           {
@@ -184,10 +147,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
             id: row.id.trim(),
             name: row.name.trim(),
             description: row.description || '',
-            categoryIds: [categoryId],
             imageUrl: null, // No se importa imageUrl desde CSV
-            templateFields: null,
-            itemTemplate: [],
           }
         );
         
