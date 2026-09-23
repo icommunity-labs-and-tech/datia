@@ -43,7 +43,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import { getItems } from '@/actions/items';
+import { getAssets } from '@/actions/assets';
 import {
   createBmsSource,
 
@@ -144,7 +144,7 @@ export default function BmsSimulatorButton() {
     if (items.length === 0) {
       setLoadingItems(true);
       try {
-        const data = await getItems();
+        const data = await getAssets();
         setItems(data.map((i: any) => ({ id: i.id, name: i.name })));
       } catch {
         setError(t('loadItemsError'));

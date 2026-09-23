@@ -7,12 +7,12 @@ import { IconAlertCircle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { ItemPassport } from '../../components/ItemPassport';
 import PassportShell from '../../components/PassportShell';
-import { ItemData } from '../../types';
+import { AssetData } from '../../types';
 
 export default function ItemPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations('customer');
   const router = useRouter();
-  const [itemData, setItemData] = useState<ItemData | null>(null);
+  const [itemData, setItemData] = useState<AssetData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [assetId, setItemId] = useState<string>('');

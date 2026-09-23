@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import DashboardMantine from '../DashboardMantine';
 import { getDashboardKPIs, getEnergySummary, getCertificationTrend } from '@/actions/dashboard';
-import { getItems } from '@/actions/items';
+import { getAssets } from '@/actions/assets';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { prisma } from '@/lib/prisma';
@@ -28,7 +28,7 @@ export default async function DashboardIndexPage() {
     getDashboardKPIs(),
     getEnergySummary(),
     isEnergyEnabled(),
-    getItems().catch(() => []),
+    getAssets().catch(() => []),
     // The series the page is built around; an organisation without the module
     // simply has none, and the layout falls back to the catalogue.
     getCertificationTrend().catch(() => undefined),

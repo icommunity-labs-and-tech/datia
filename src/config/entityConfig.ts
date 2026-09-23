@@ -31,7 +31,7 @@ export const entityConfigs: Record<string, EntityConfig> = {
     // Nothing of the asset is shown as cascade any more: its state history is
     // gone (#63) and its proofs survive it, linked to the emissions.
     hasCascade: false,
-    getDetailsFunction: 'getItemDetails',
+    getDetailsFunction: 'getAssetDetails',
   },
   users: {
     name: 'users',

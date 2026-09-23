@@ -41,11 +41,11 @@ Each domain service follows this pattern:
 ## Usage Example
 
 ```typescript
-import { ItemService } from '@/domain/items/ItemService';
-import { ItemServiceLive } from '@/domain/items/ItemServiceLive';
+import { AssetService } from '@/domain/assets/AssetService';
+import { ItemServiceLive } from '@/domain/assets/ItemServiceLive';
 
 const program = Effect.gen(function* (_) {
-  const itemService = yield* _(ItemService);
+  const itemService = yield* _(AssetService);
   return yield* _(itemService.createItem(request));
 }).pipe(
   Effect.provide(ItemServiceLive)

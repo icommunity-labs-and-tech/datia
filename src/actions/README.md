@@ -15,7 +15,7 @@ The actions layer provides:
 
 ```
 actions/
-├── items/              # Item-related operations
+├── assets/             # Asset-related operations
 ├── states/             # State-related operations
 ├── upload/             # File upload operations
 └── shared/             # Shared action utilities (future)
@@ -45,13 +45,13 @@ Each action follows this pattern:
 'use server';
 
 import { Effect } from 'effect';
-import { ItemService } from '@/domain/items/ItemService';
-import { ItemServiceLive } from '@/domain/items/ItemServiceLive';
+import { AssetService } from '@/domain/assets/AssetService';
+import { ItemServiceLive } from '@/domain/assets/ItemServiceLive';
 
 export async function addItem(formData: Record<string, any>) {
   try {
     const program = Effect.gen(function* (_) {
-      const itemService = yield* _(ItemService);
+      const itemService = yield* _(AssetService);
       return yield* _(itemService.createItem(parseInput(formData)));
     }).pipe(Effect.provide(ItemServiceLive));
 
@@ -67,10 +67,10 @@ export async function addItem(formData: Record<string, any>) {
 
 Actions map domain errors to user-friendly messages:
 
-- **`ItemInputError`** → "El nombre es obligatorio"
-- **`ItemAlreadyExistsError`** → "El ID ya existe. Elige otro."
-- **`UserNotVerifiedError`** → "Completa el KYC antes de crear items"
-- **`ItemCreationRollbackError`** → "Error al crear evidencia"
+- **`AssetInputError`** → "El nombre es obligatorio"
+- **`AssetAlreadyExistsError`** → "El ID ya existe. Elige otro."
+- **`UserNotVerifiedError`** → "Completa el KYC antes de crear activos"
+- **`AssetCreationRollbackError`** → "Error al crear evidencia"
 
 ## Dependencies
 

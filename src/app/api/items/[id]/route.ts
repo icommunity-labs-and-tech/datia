@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSessionOrganization } from '@/lib/api/require-session';
-import { getItem } from '@/actions/items';
+import { getAsset } from '@/actions/assets';
 import { decodeUrlParam } from '@/lib/api/decode-param';
 
 export async function GET(
@@ -13,7 +13,7 @@ export async function GET(
   try {
     const { id: rawId } = await params;
     const id = decodeUrlParam(rawId);
-    const item = await getItem(id);
+    const item = await getAsset(id);
     
     return NextResponse.json(item);
   } catch (error) {

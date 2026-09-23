@@ -2,12 +2,12 @@
 
 import { Box, Group, Stack, Text, Title } from '@mantine/core';
 import { useTranslations } from 'next-intl';
-import { ItemData } from '../../types';
+import { AssetData } from '../../types';
 import { EvidenceVerification } from '../EvidenceVerification';
 import GeolocationMap from '@/components/GeolocationMapClient';
 
 interface ItemInfoSectionProps {
-  item: ItemData;
+  item: AssetData;
 }
 
 function isGeolocation(value: unknown): value is { lat: number; lng: number } {

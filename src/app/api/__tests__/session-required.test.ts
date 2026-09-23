@@ -3,12 +3,12 @@ import { NextRequest } from 'next/server';
 import { requireOrganizationId, TenantContextNotFoundError } from '@/lib/auth/tenant';
 import { requireSessionOrganization } from '@/lib/api/require-session';
 import * as dashboardActions from '@/actions/dashboard';
-import * as itemActions from '@/actions/items';
+import * as assetActions from '@/actions/assets';
 import * as userActions from '@/actions/users';
 import * as kpis from '../dashboard/kpis/route';
 import * as activity from '../dashboard/activity/route';
-import * as item from '../items/[id]/route';
-import * as itemSearch from '../items/search/route';
+import * as asset from '../items/[id]/route';
+import * as assetSearch from '../items/search/route';
 import * as user from '../users/[id]/route';
 
 vi.mock('@/lib/auth/tenant', async () => {
@@ -20,9 +20,9 @@ vi.mock('@/actions/dashboard', () => ({
   getDashboardKPIs: vi.fn(async () => ({})),
   getMonthlyActivity: vi.fn(async () => []),
 }));
-vi.mock('@/actions/items', () => ({
-  getItem: vi.fn(async () => ({ id: 'i-1' })),
-  searchItems: vi.fn(async () => [{ id: 'i-1' }]),
+vi.mock('@/actions/assets', () => ({
+  getAsset: vi.fn(async () => ({ id: 'i-1' })),
+  searchAssets: vi.fn(async () => [{ id: 'i-1' }]),
 }));
 vi.mock('@/actions/users', () => ({ getUserById: vi.fn(async () => ({ success: true, user: { id: 'u-1' } })) }));
 
@@ -32,8 +32,8 @@ const withId = (id: string) => ({ params: Promise.resolve({ id }) });
 const ROUTES = [
   { name: 'dashboard/kpis', call: () => (kpis as any).GET(), action: dashboardActions.getDashboardKPIs },
   { name: 'dashboard/activity', call: () => (activity as any).GET(req('/api/dashboard/activity?months=3')), action: dashboardActions.getMonthlyActivity },
-  { name: 'items/[id]', call: () => (item as any).GET(req('/api/items/i-1'), withId('i-1')), action: itemActions.getItem },
-  { name: 'items/search', call: () => (itemSearch as any).GET(req('/api/items/search?q=panel')), action: itemActions.searchItems },
+  { name: 'items/[id]', call: () => (asset as any).GET(req('/api/items/i-1'), withId('i-1')), action: assetActions.getAsset },
+  { name: 'items/search', call: () => (assetSearch as any).GET(req('/api/items/search?q=panel')), action: assetActions.searchAssets },
   { name: 'users/[id]', call: () => (user as any).GET(req('/api/users/u-1'), withId('u-1')), action: userActions.getUserById },
 ];
 

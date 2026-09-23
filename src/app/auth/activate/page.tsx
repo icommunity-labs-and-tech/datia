@@ -123,7 +123,7 @@ function ActivateAccountForm() {
     if (!storageKey) return null;
     
     try {
-      const saved = localStorage.getItem(storageKey);
+      const saved = localStorage.getAsset(storageKey);
       if (saved) {
         const parsed = JSON.parse(saved);
         // Verificar que no sea muy antiguo (más de 7 días)

@@ -1,10 +1,10 @@
 'use server';
 
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { createItemImportServiceImpl } from '@/domain/items/ItemImportServiceImpl';
-import { ItemImportValidationError, type ParsedItemRow } from '@/domain/items/ItemImportService';
+import { createAssetImportServiceImpl } from '@/domain/assets/AssetImportServiceImpl';
+import { AssetImportValidationError, type ParsedAssetRow } from '@/domain/assets/AssetImportService';
 import { parseCsv } from '@/lib/csv';
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 
 export interface ImportItemsFromCsvResult {
   success: boolean;
@@ -12,7 +12,7 @@ export interface ImportItemsFromCsvResult {
   errors?: string[];
 }
 
-export async function importItemsFromCsv(formData: FormData): Promise<ImportItemsFromCsvResult> {
+export async function importAssetsFromCsv(formData: FormData): Promise<ImportItemsFromCsvResult> {
   const file = formData.get('file') as File | null;
   if (!file) {
     return { success: false, errors: ['No se ha enviado ningún archivo'] };
@@ -24,7 +24,7 @@ export async function importItemsFromCsv(formData: FormData): Promise<ImportItem
   }
 
   const parsed = parseCsv(text);
-  const rows: ParsedItemRow[] = parsed.map((row) => ({
+  const rows: ParsedAssetRow[] = parsed.map((row) => ({
     line: row.line,
     id: row.values['id']?.trim() ?? '',
     name: row.values['name']?.trim() ?? '',
@@ -33,26 +33,26 @@ export async function importItemsFromCsv(formData: FormData): Promise<ImportItem
   }));
 
   try {
-    const itemImportService = createItemImportServiceImpl({
-      itemRepository,
+    const itemImportService = createAssetImportServiceImpl({
+      assetRepository,
     });
-    const result = await itemImportService.importItemsFromParsedRows(await requireOrganizationId(), rows);
+    const result = await itemImportService.importAssetsFromParsedRows(await requireOrganizationId(), rows);
     return {
       success: true,
       createdCount: result.createdCount,
     };
   } catch (err: any) {
-    if (err instanceof ItemImportValidationError) {
+    if (err instanceof AssetImportValidationError) {
       return {
         success: false,
         errors: err.details.length ? err.details : [err.message],
       };
     }
 
-    console.error('Error en importItemsFromCsv:', err);
+    console.error('Error en importAssetsFromCsv:', err);
     return {
       success: false,
-      errors: ['Error interno al importar items desde CSV'],
+      errors: ['Error interno al importar activos desde CSV'],
     };
   }
 }

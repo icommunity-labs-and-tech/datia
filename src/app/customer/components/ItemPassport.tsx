@@ -22,13 +22,13 @@ import {
 } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { ItemData } from '../types';
+import { AssetData } from '../types';
 import { ItemInfoSection, EnergyReportSection } from './sections';
 import { VerifiedBadge } from './ui';
 import { formatDate } from '../utils/dateFormatters';
 
 interface ItemPassportProps {
-  item: ItemData;
+  item: AssetData;
   onBack?: () => void;
 }
 

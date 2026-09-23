@@ -152,7 +152,7 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
 
     const organizationId = await requireOrganizationId();
     
-    // Convertir a formato de filas de items
+    // Convertir a formato de filas de activos
     const itemRows = parsedRows.map((row) => ({
       line: row.line,
       id: row.values['id']?.trim() ?? '',
@@ -227,7 +227,7 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
             });
         }
       } catch {
-        // Error al buscar item
+        // Error al buscar asset
         validRowsForIdCheck
           .filter(r => r.id.trim() === id)
           .forEach(row => {

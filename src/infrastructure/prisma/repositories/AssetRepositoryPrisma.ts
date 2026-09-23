@@ -1,9 +1,9 @@
-import { ItemRepository, type ItemRecord, type CreateItemInput, DbError } from '@/domain/items/ItemRepository';
+import { AssetRepository, type AssetRecord, type CreateAssetInput, DbError } from '@/domain/assets/AssetRepository';
 import type { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 
-const toDomain = (i: any): ItemRecord => ({
+const toDomain = (i: any): AssetRecord => ({
   id: i.id,
   name: i.name,
   description: i.description,
@@ -19,22 +19,22 @@ function asJsonObject(value: Prisma.JsonValue): Prisma.JsonObject | null {
   return value !== null && typeof value === 'object' && !Array.isArray(value) ? value : null;
 }
 
-export const itemRepository: ItemRepository = {
-  async findByOrganization(organizationId: string): Promise<ItemRecord[]> {
+export const assetRepository: AssetRepository = {
+  async findByOrganization(organizationId: string): Promise<AssetRecord[]> {
     try {
-      const items = await prisma.asset.findMany({ 
+      const activos = await prisma.asset.findMany({ 
         where: { organizationId },
         orderBy: { createdAt: 'desc' } 
       });
-      return items.map(toDomain);
+      return activos.map(toDomain);
     } catch (e) {
       throw new DbError(e);
     }
   },
 
-  async getById(id: string, organizationId: string): Promise<ItemRecord | null> {
+  async getById(id: string, organizationId: string): Promise<AssetRecord | null> {
     try {
-      const item = await prisma.asset.findFirst({ 
+      const asset = await prisma.asset.findFirst({ 
         where: { id, organizationId },
         select: {
           id: true,
@@ -46,7 +46,7 @@ export const itemRepository: ItemRepository = {
           updatedAt: true,
         },
       });
-      return item ? toDomain(item) : null;
+      return asset ? toDomain(asset) : null;
     } catch (e) {
       throw new DbError(e);
     }
@@ -54,7 +54,7 @@ export const itemRepository: ItemRepository = {
 
   async getDetails(id: string, organizationId: string) {
     try {
-      const item = await prisma.asset.findFirst({
+      const asset = await prisma.asset.findFirst({
         where: { id, organizationId },
         select: {
           id: true,
@@ -63,12 +63,12 @@ export const itemRepository: ItemRepository = {
           imageUrl: true,
         },
       });
-      return item
+      return asset
         ? {
-            id: item.id,
-            name: item.name,
-            description: item.description ?? null,
-            imageUrl: item.imageUrl ?? null,
+            id: asset.id,
+            name: asset.name,
+            description: asset.description ?? null,
+            imageUrl: asset.imageUrl ?? null,
           }
         : null;
     } catch (e) {
@@ -101,15 +101,15 @@ export const itemRepository: ItemRepository = {
       });
     } catch (e) {
       const message = e instanceof Error ? e.message : String(e);
-      throw new DbError(e, `Error al listar items para exportación: ${message}`);
+      throw new DbError(e, `Error al listar activos para exportación: ${message}`);
     }
   },
 
-  async create(input: CreateItemInput): Promise<ItemRecord> {
+  async create(input: CreateAssetInput): Promise<AssetRecord> {
     try {
       const now = new Date();
       
-      const item = await prisma.asset.create({
+      const asset = await prisma.asset.create({
         data: {
           id: input.id,
           organizationId: input.organizationId,
@@ -124,7 +124,7 @@ export const itemRepository: ItemRepository = {
           updatedAt: now,
         },
       });
-      return toDomain(item);
+      return toDomain(asset);
     } catch (e) {
       if (e instanceof DbError) throw e;
       throw new DbError(e);
@@ -133,10 +133,10 @@ export const itemRepository: ItemRepository = {
 
   async updateEvidenceId(id: string, organizationId: string, evidenceId: string): Promise<void> {
     try {
-      // Verificar que el item pertenece a la organización
+      // Verificar que el activo pertenece a la organización
       const existing = await prisma.asset.findFirst({ where: { id, organizationId } });
       if (!existing) {
-        throw new DbError({ message: 'Item no encontrado' }, 'Item no encontrado');
+        throw new DbError({ message: 'Activo no encontrado' }, 'Activo no encontrado');
       }
       
       await prisma.asset.update({ where: { id }, data: { evidenceId } });
@@ -148,10 +148,10 @@ export const itemRepository: ItemRepository = {
 
   async delete(id: string, organizationId: string): Promise<void> {
     try {
-      // Verificar que el item pertenece a la organización
+      // Verificar que el activo pertenece a la organización
       const existing = await prisma.asset.findFirst({ where: { id, organizationId } });
       if (!existing) {
-        throw new DbError({ message: 'Item no encontrado' }, 'Item no encontrado');
+        throw new DbError({ message: 'Activo no encontrado' }, 'Activo no encontrado');
       }
       
       await prisma.asset.delete({ where: { id } });
@@ -170,7 +170,7 @@ export const itemRepository: ItemRepository = {
     try {
       const q = query.trim();
       if (!q) return [];
-      const items = await prisma.asset.findMany({
+      const activos = await prisma.asset.findMany({
         where: { 
           organizationId,
           OR: [{ name: { contains: q } }, { id: q }] 
@@ -179,7 +179,7 @@ export const itemRepository: ItemRepository = {
         take: 10,
         orderBy: { createdAt: 'desc' },
       });
-      return items.map((i) => ({
+      return activos.map((i) => ({
         id: i.id,
         name: i.name,
         description: i.description ?? null,
@@ -272,13 +272,13 @@ export const itemRepository: ItemRepository = {
 
       const whereClause: any = { organizationId };
       if (params.cursor) {
-        // Get the cursor item to find its createdAt
+        // Get the cursor asset to find its createdAt
         const cursorItem = await prisma.asset.findFirst({
           where: { id: params.cursor, organizationId },
           select: { createdAt: true, id: true },
         });
         if (cursorItem) {
-          // Items created before the cursor item, or same createdAt but id < cursor
+          // Items created before the cursor asset, or same createdAt but id < cursor
           whereClause.AND = [
             {
               OR: [
@@ -290,7 +290,7 @@ export const itemRepository: ItemRepository = {
         }
       }
 
-      const items = await prisma.asset.findMany({
+      const activos = await prisma.asset.findMany({
         where: whereClause,
         select: {
           id: true,
@@ -303,7 +303,7 @@ export const itemRepository: ItemRepository = {
         take,
       });
 
-      return createPaginationResponse(items, limit);
+      return createPaginationResponse(activos, limit);
     } catch (e) {
       throw new DbError(e);
     }
@@ -352,7 +352,7 @@ export const itemRepository: ItemRepository = {
         }
       }
 
-      const items = await prisma.asset.findMany({
+      const activos = await prisma.asset.findMany({
         where: whereClause,
         select: {
           id: true,
@@ -365,7 +365,7 @@ export const itemRepository: ItemRepository = {
         take,
       });
 
-      return createPaginationResponse(items, limit);
+      return createPaginationResponse(activos, limit);
     } catch (e) {
       throw new DbError(e);
     }

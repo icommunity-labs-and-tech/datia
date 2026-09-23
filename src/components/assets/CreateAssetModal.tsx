@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { Alert, Button, Group, Modal, NumberInput, Stack, TextInput, Textarea } from '@mantine/core';
 import { IconAlertTriangleFilled } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { createAsset } from '@/actions/items/createAsset';
+import { createAsset } from '@/actions/assets/createAsset';
 
 interface CreateAssetModalProps {
   opened: boolean;
