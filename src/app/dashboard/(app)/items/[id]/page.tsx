@@ -47,7 +47,7 @@ export default function ItemDetailPage() {
   const tSidebar = useTranslations('sidebar');
   const { id } = useParams();
   const router = useRouter();
-  const itemId = id as string;
+  const assetId = id as string;
   const [item, setItem] = useState<any>(null);
   const [certifications, setCertifications] = useState<ItemCertification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -73,15 +73,15 @@ export default function ItemDetailPage() {
 
   useEffect(() => {
     const load = async () => {
-      if (!itemId) {
+      if (!assetId) {
         setIsLoading(false);
         return;
       }
       setIsLoading(true);
       try {
         const [itemData, certificationData] = await Promise.all([
-          getItem(itemId).catch(() => null),
-          getItemCertifications(itemId).catch(() => []),
+          getItem(assetId).catch(() => null),
+          getItemCertifications(assetId).catch(() => []),
         ]);
         if (itemData) setItem(itemData);
         setCertifications(certificationData);
@@ -90,11 +90,11 @@ export default function ItemDetailPage() {
       }
     };
     load();
-  }, [itemId]);
+  }, [assetId]);
 
   const openDeleteModalWithDetails = async () => {
     try {
-      const detailedItem = await getItemDetails(itemId);
+      const detailedItem = await getItemDetails(assetId);
       setItem(detailedItem);
       openDeleteModal(detailedItem);
     } catch {
@@ -163,7 +163,7 @@ export default function ItemDetailPage() {
                 size="xs"
                 leftSection={<IconExternalLink size={15} />}
                 component="a"
-                href={`/customer/item/${encodeURIComponent(itemId)}`}
+                href={`/customer/item/${encodeURIComponent(assetId)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -184,12 +184,12 @@ export default function ItemDetailPage() {
           <Group gap="xs" mt="xs">
             <Badge
               variant="light"
-              color={item.evidenceID ? 'green' : 'yellow'}
+              color={item.evidenceId ? 'green' : 'yellow'}
               leftSection={
-                item.evidenceID ? <IconShieldCheck size={12} /> : <IconClock size={12} />
+                item.evidenceId ? <IconShieldCheck size={12} /> : <IconClock size={12} />
               }
             >
-              {item.evidenceID ? t('certified') : t('pendingBackup')}
+              {item.evidenceId ? t('certified') : t('pendingBackup')}
             </Badge>
           </Group>
         </PageHeader>
@@ -309,7 +309,7 @@ export default function ItemDetailPage() {
       <ItemQrModal
         show={showQr}
         onHide={() => setShowQr(false)}
-        itemId={itemId}
+        assetId={assetId}
         itemName={item?.name}
       />
 

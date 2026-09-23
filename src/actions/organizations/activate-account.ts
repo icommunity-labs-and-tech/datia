@@ -35,8 +35,8 @@ export async function activateAccount(
         Organization: {
           select: {
             id: true,
-            nombre: true,
-            activa: true,
+            name: true,
+            active: true,
             verificationStatus: true,
             User: {
               where: {
@@ -78,7 +78,7 @@ export async function activateAccount(
     }
     
     // Verificar que la organización esté activa
-    if (user.Organization && !user.Organization.activa) {
+    if (user.Organization && !user.Organization.active) {
       return {
         success: false,
         error: "La organización está desactivada",

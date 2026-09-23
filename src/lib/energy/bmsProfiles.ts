@@ -109,9 +109,9 @@ export function bmsSourceName(profile: BmsProfile, year: number): string {
  * random, so re-running the simulation does not invent a second certificate for
  * energy that was already accounted for.
  */
-export function bmsGuaranteeOfOrigin(profile: BmsProfile, itemId: string, year: number): string | undefined {
+export function bmsGuaranteeOfOrigin(profile: BmsProfile, assetId: string, year: number): string | undefined {
   if (!profile.hasGuaranteeOfOrigin) return undefined;
-  const suffix = itemId.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
+  const suffix = assetId.replace(/[^a-zA-Z0-9]/g, '').slice(-6).toUpperCase();
   return `GO-ES-${year}-${suffix}`;
 }
 

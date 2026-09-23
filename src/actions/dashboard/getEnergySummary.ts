@@ -19,19 +19,19 @@ export async function getEnergySummary(): Promise<EnergySummary> {
 
   const [sources, consumptionAgg, emissionsAgg] = await Promise.all([
     prisma.energySource.findMany({
-      where: { Item: { organizationId } },
+      where: { Asset: { organizationId } },
       select: { id: true, renewableShare: true, latitude: true, longitude: true },
     }),
     prisma.energyConsumption.aggregate({
       where: {
-        EnergySource: { Item: { organizationId } },
+        EnergySource: { Asset: { organizationId } },
         periodStart: { gte: monthStart },
       },
       _sum: { consumptionKwh: true },
     }),
     prisma.emissionRecord.aggregate({
       where: {
-        EnergyConsumption: { EnergySource: { Item: { organizationId } } },
+        EnergyConsumption: { EnergySource: { Asset: { organizationId } } },
         createdAt: { gte: monthStart },
       },
       _sum: { co2eKg: true },

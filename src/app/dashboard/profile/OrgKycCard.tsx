@@ -8,7 +8,7 @@ import { retryOrganizationKyc } from '@/actions/organizations/retry-organization
 
 interface Props {
   organization: {
-    nombre: string;
+    name: string;
     verificationStatus: string;
     kycURL?: string | null;
   };
@@ -58,7 +58,7 @@ export default function OrgKycCard({ organization }: Props) {
       <Stack gap="sm">
         <Group justify="space-between" wrap="nowrap">
           <Text size="sm" c="dimmed">{t('kyc.organization').replace(':', '')}</Text>
-          <Text size="sm" fw={550}>{organization.nombre}</Text>
+          <Text size="sm" fw={550}>{organization.name}</Text>
         </Group>
         <Group justify="space-between" wrap="nowrap">
           <Text size="sm" c="dimmed">{t('kyc.status').replace(':', '')}</Text>

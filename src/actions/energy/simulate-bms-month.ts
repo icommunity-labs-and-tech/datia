@@ -60,7 +60,7 @@ export async function createBmsMonthReadings(
     where: {
       energySourceId: sourceId,
       periodStart: { gte: monthStart, lte: monthEnd },
-      EnergySource: { Item: { organizationId } },
+      EnergySource: { Asset: { organizationId } },
     },
     select: { id: true, consumptionKwh: true, EmissionRecord: { select: { id: true, co2eKg: true } } },
   });
@@ -178,7 +178,7 @@ const round = (value: number, decimals = 2) => parseFloat(value.toFixed(decimals
 export type BmsMonthCertification =
   | {
       ok: true;
-      evidenceID: string;
+      evidenceId: string;
       certificationId: string;
       monthIndex: number;
       period: string;
@@ -212,8 +212,8 @@ export async function certifyBmsMonth(
   }
 
   const source = await prisma.energySource.findFirst({
-    where: { id: sourceId, Item: { organizationId } },
-    select: { id: true, name: true, Item: { select: { id: true, name: true } } },
+    where: { id: sourceId, Asset: { organizationId } },
+    select: { id: true, name: true, Asset: { select: { id: true, name: true } } },
   });
   if (!source) {
     return { ok: false, monthIndex, reason: 'ERROR', message: 'Fuente de energía no encontrada.' };
@@ -244,7 +244,7 @@ export async function certifyBmsMonth(
   if (already?.Certification) {
     return {
       ok: true,
-      evidenceID: already.Certification.evidenceId,
+      evidenceId: already.Certification.evidenceId,
       certificationId: already.Certification.id,
       monthIndex,
       period,
@@ -271,7 +271,7 @@ export async function certifyBmsMonth(
 
   const issued = {
     emissionRecordIds: ownIds,
-    assetName: source.Item.name,
+    assetName: source.Asset.name,
     sourceName: source.name,
     period,
     periodStart: new Date(Date.UTC(year, monthIndex, 1)).toISOString(),
@@ -288,10 +288,10 @@ export async function certifyBmsMonth(
     const certification = await issueCertification({
       organizationId,
       signatureID: org.signatureID,
-      itemId: source.Item.id,
+      assetId: source.Asset.id,
       title: `Emisión certificada — ${period} · ${totalCo2eKg} kg CO₂e`,
       description:
-        `${source.Item.name} · ${source.name} · ${totalKwh} kWh en ${period}, ` +
+        `${source.Asset.name} · ${source.name} · ${totalKwh} kWh en ${period}, ` +
         `agregados de ${readings} lecturas diarias. Verificada por ${verifierBody} según ${verificationStandard}.`,
       payload: issued,
       emissionRecordIds: ownIds,
@@ -299,7 +299,7 @@ export async function certifyBmsMonth(
 
     return {
       ok: true,
-      evidenceID: certification.evidenceId,
+      evidenceId: certification.evidenceId,
       certificationId: certification.id,
       monthIndex,
       period,

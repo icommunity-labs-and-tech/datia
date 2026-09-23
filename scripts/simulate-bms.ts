@@ -109,7 +109,7 @@ async function findExistingSource(name: string): Promise<{ id: string } | null> 
     const qs = cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';
     const body = await get(`/api/v1/energy/source${qs}`);
     const rows: any[] = body.data ?? [];
-    const hit = rows.find((r) => r.name === name && r.itemId === ITEM_ID);
+    const hit = rows.find((r) => r.name === name && r.assetId === ITEM_ID);
     if (hit) return hit;
     cursor = body.pagination?.nextCursor ?? body.nextCursor;
     if (!cursor || rows.length === 0) return null;
@@ -184,7 +184,7 @@ async function main() {
       renewableShare: PROFILE.renewableShare,
       guaranteeOfOriginId: bmsGuaranteeOfOrigin(PROFILE, ITEM_ID, YEAR),
       gridEmissionFactor: EMISSION_FACTOR,
-      itemId: ITEM_ID,
+      assetId: ITEM_ID,
     });
     console.log(`  ✅ EnergySource: ${source.id}\n`);
   }

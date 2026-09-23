@@ -66,7 +66,7 @@ const program = Effect.gen(function* (_) {
     title: 'Item Creation',
     description: 'Creating new item',
     imageUrls: ['https://example.com/image.jpg'],
-    metadata: { type: 'item_creation', itemId: 'item-123' }
+    metadata: { type: 'item_creation', assetId: 'item-123' }
   }));
 }).pipe(Effect.provide(EvidenceServiceLive));
 ```

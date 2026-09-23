@@ -11,7 +11,7 @@ import type {
 } from './EnergyTypes';
 
 export interface EnergyRepository {
-  // Energy Sources — filtered by org via itemId → Item.organizationId
+  // Energy Sources — filtered by org via assetId → Item.organizationId
   createSource(organizationId: string, input: CreateEnergySourceInput): Promise<EnergySourceRecord>;
   findSourcesByOrganization(organizationId: string, limit?: number, pagination?: CursorPaginationParams): Promise<CursorPaginationResult<EnergySourceRecord>>;
   findSourceById(organizationId: string, id: string): Promise<EnergySourceRecord | null>;

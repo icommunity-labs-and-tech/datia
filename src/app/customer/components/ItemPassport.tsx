@@ -39,7 +39,7 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
   const router = useRouter();
 
   const showEnergy = (item.energyCertifications?.length ?? 0) > 0;
-  const isCertified = Boolean(item.evidenceID);
+  const isCertified = Boolean(item.evidenceId);
 
   const handleBack = () => (onBack ? onBack() : router.push('/customer'));
 
@@ -125,7 +125,7 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
           </Tabs.Panel>
           {showEnergy && (
             <Tabs.Panel value="energy">
-              <EnergyReportSection itemId={item.id} />
+              <EnergyReportSection assetId={item.id} />
             </Tabs.Panel>
           )}
         </Tabs>

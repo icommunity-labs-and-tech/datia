@@ -5,7 +5,7 @@ export interface ItemState {
   createdAt: string;
   backed?: boolean;
   backedAt?: string;
-  evidenceID?: string;
+  evidenceId?: string;
   imageUrls?: string[];
 }
 
@@ -24,7 +24,7 @@ export type ItemData = {
   longitude: number | null;
   createdAt: string;
   updatedAt: string;
-  evidenceID?: string | null;
+  evidenceId?: string | null;
   createdBy?: { name: string; email: string } | null;
   organization?: {
     name: string;

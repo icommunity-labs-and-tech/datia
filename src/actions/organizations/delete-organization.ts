@@ -26,7 +26,7 @@ export async function deleteOrganization(id: string): Promise<DeleteOrganization
       where: { id },
       select: {
         id: true,
-        nombre: true,
+        name: true,
       },
     });
     

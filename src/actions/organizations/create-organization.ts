@@ -8,7 +8,7 @@ import crypto from "crypto";
 
 export interface CreateOrganizationInput {
   // Datos de la organización
-  nombre: string;
+  name: string;
 
   // Datos del primer administrador
   adminName: string;
@@ -67,7 +67,7 @@ export interface CreateOrganizationResult {
   success: boolean;
   organization?: {
     id: string;
-    nombre: string;
+    name: string;
     slug: string;
   };
   admin?: {
@@ -95,7 +95,7 @@ export async function createOrganizationWithAdmin(
     }
 
     // Generar slug único automáticamente
-    const slug = await generateUniqueSlug(input.nombre);
+    const slug = await generateUniqueSlug(input.name);
 
     // Validar que el email no exista
     const existingUser = await prisma.user.findUnique({
@@ -125,7 +125,7 @@ export async function createOrganizationWithAdmin(
       const okUrl = `${baseUrl}/api/hooks/signature/ok`;
       const koUrl = `${baseUrl}/api/hooks/signature/ko`;
       
-      const signatureResult = await icommunityService.createSignature(input.nombre, okUrl, koUrl);
+      const signatureResult = await icommunityService.createSignature(input.name, okUrl, koUrl);
       signatureID = signatureResult.signature_id;
       kycURL = signatureResult.url || null;
     } catch (error) {
@@ -141,9 +141,9 @@ export async function createOrganizationWithAdmin(
       const organization = await tx.organization.create({
         data: {
           id: crypto.randomUUID(),
-          nombre: input.nombre,
+          name: input.name,
           slug: slug,
-          activa: true,
+          active: true,
           signatureID: signatureID,
           kycURL: kycURL,
           verificationStatus: signatureID ? 'WAITING' : 'NOT_VERIFIED',
@@ -177,7 +177,7 @@ export async function createOrganizationWithAdmin(
       await sendInvitationEmail({
         recipientEmail: result.admin.email,
         recipientName: input.adminName,
-        organizationName: result.organization.nombre,
+        organizationName: result.organization.name,
         activationToken,
         language: input.language,
       });
@@ -198,7 +198,7 @@ export async function createOrganizationWithAdmin(
       success: true,
       organization: {
         id: result.organization.id,
-        nombre: result.organization.nombre,
+        name: result.organization.name,
         slug: result.organization.slug,
       },
       admin: {

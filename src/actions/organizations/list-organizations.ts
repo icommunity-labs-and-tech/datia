@@ -5,9 +5,9 @@ import { isSuperAdmin } from "@/lib/auth/tenant";
 
 export interface OrganizationListItem {
   id: string;
-  nombre: string;
+  name: string;
   slug: string;
-  activa: boolean;
+  active: boolean;
   createdAt: Date;
   userCount: number;
   itemCount: number;
@@ -40,14 +40,14 @@ export async function listOrganizations(): Promise<ListOrganizationsResult> {
     const organizations = await prisma.organization.findMany({
       select: {
         id: true,
-        nombre: true,
+        name: true,
         slug: true,
-        activa: true,
+        active: true,
         createdAt: true,
         _count: {
           select: {
             User: true,
-            Item: true,
+            Asset: true,
             Certification: true,
           },
         },
@@ -112,12 +112,12 @@ export async function listOrganizations(): Promise<ListOrganizationsResult> {
       
       return {
         id: org.id,
-        nombre: org.nombre,
+        name: org.name,
         slug: org.slug,
-        activa: org.activa,
+        active: org.active,
         createdAt: org.createdAt,
         userCount: org._count.User,
-        itemCount: org._count.Item,
+        itemCount: org._count.Asset,
         certificationCount: org._count.Certification,
         adminActivated,
         activeUsersCount: counts.active,

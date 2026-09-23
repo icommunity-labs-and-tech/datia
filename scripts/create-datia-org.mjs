@@ -15,12 +15,12 @@ const prisma = new PrismaClient();
 // Datia brand: teal/green palette
 const DATIA_CONFIG = {
   slug: 'datia',
-  nombre: 'Datia',
-  dominio: 'datia.icommunitylabs.com',
+  name: 'Datia',
+  domain: 'datia.icommunitylabs.com',
   brandColorPrimary: '#0d9488',   // teal-600
   brandColorSecondary: '#065f46', // emerald-800
   logoUrl: null,                  // placeholder — replace with real logo URL
-  configuracion: {
+  settings: {
     modules: {
       passport: false,
       energy: true,
@@ -46,8 +46,8 @@ async function main() {
       data: {
         brandColorPrimary: DATIA_CONFIG.brandColorPrimary,
         brandColorSecondary: DATIA_CONFIG.brandColorSecondary,
-        configuracion: DATIA_CONFIG.configuracion,
-        dominio: DATIA_CONFIG.dominio,
+        settings: DATIA_CONFIG.settings,
+        domain: DATIA_CONFIG.domain,
       },
     });
     console.log('   ✅ Organización actualizada\n');
@@ -55,20 +55,20 @@ async function main() {
     org = await prisma.organization.create({
       data: {
         id: crypto.randomUUID(),
-        nombre: DATIA_CONFIG.nombre,
+        name: DATIA_CONFIG.name,
         slug: DATIA_CONFIG.slug,
-        dominio: DATIA_CONFIG.dominio,
-        activa: true,
+        domain: DATIA_CONFIG.domain,
+        active: true,
         brandColorPrimary: DATIA_CONFIG.brandColorPrimary,
         brandColorSecondary: DATIA_CONFIG.brandColorSecondary,
         logoUrl: DATIA_CONFIG.logoUrl,
-        configuracion: DATIA_CONFIG.configuracion,
+        settings: DATIA_CONFIG.settings,
         updatedAt: new Date(),
       },
     });
-    console.log(`✅ Organización creada: ${org.nombre} (${org.id})`);
+    console.log(`✅ Organización creada: ${org.name} (${org.id})`);
     console.log(`   Slug:   ${org.slug}`);
-    console.log(`   Domain: ${org.dominio}`);
+    console.log(`   Domain: ${org.domain}`);
     console.log(`   Colors: ${DATIA_CONFIG.brandColorPrimary} / ${DATIA_CONFIG.brandColorSecondary}\n`);
 
     console.log('✅ Tipos de estado de mantenimiento creados\n');

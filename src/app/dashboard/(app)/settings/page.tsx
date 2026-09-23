@@ -22,7 +22,7 @@ export default async function SettingsPage() {
           createdAt: true, updatedAt: true, organizationId: true,
           Organization: {
             select: {
-              id: true, nombre: true, slug: true, signatureID: true,
+              id: true, name: true, slug: true, signatureID: true,
               kycURL: true, verificationStatus: true,
               logoUrl: true, brandColorPrimary: true, brandColorSecondary: true,
             },

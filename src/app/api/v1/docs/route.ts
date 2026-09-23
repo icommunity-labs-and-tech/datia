@@ -149,7 +149,7 @@ function injectItemIdExamples(paths: Record<string, any>, exampleItemId: string)
 async function buildPersonalizedSpec(baseUrl: string, organizationId: string, docsToken: string | null): Promise<Record<string, any>> {
   const [baseSpecRes, recentItemsRaw, tokenResult] = await Promise.all([
     fetch(`${baseUrl}/api/openapi.json`),
-    prisma.item.findMany({
+    prisma.asset.findMany({
       where: { organizationId },
       orderBy: { createdAt: 'desc' },
       take: 3,

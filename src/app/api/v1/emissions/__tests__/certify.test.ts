@@ -50,7 +50,7 @@ describe('POST /api/v1/emissions/[id]/certify', () => {
     mockPrisma.emissionRecord.findFirst.mockResolvedValue({ id: EMISSION_ID, Certification: null });
     mockPrisma.organization.findUnique.mockResolvedValue({ signatureID: 'sig', verificationStatus: 'VERIFIED' });
     mockPrisma.certification.findUnique.mockResolvedValue(issued);
-    mockAnchor.mockResolvedValue({ emissionId: EMISSION_ID, certificationId: CERT_ID, evidenceID: EVIDENCE_ID });
+    mockAnchor.mockResolvedValue({ emissionId: EMISSION_ID, certificationId: CERT_ID, evidenceId: EVIDENCE_ID });
   });
 
   it('returns 401 when the token is invalid', async () => {

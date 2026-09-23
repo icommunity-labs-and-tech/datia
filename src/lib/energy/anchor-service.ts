@@ -29,7 +29,7 @@ export interface AnchorDetail {
   period: string;
   co2eKg: number;
   certificationId?: string;
-  evidenceID?: string;
+  evidenceId?: string;
   error?: string;
 }
 
@@ -56,7 +56,7 @@ const EMISSION_SELECT = {
       consumptionKwh: true,
       measurementStandard: true,
       EnergySource: {
-        select: { id: true, name: true, Item: { select: { id: true, name: true } } },
+        select: { id: true, name: true, Asset: { select: { id: true, name: true } } },
       },
     },
   },
@@ -77,7 +77,7 @@ type EmissionRow = {
     periodEnd: Date;
     consumptionKwh: number;
     measurementStandard: string | null;
-    EnergySource: { id: string; name: string; Item: { id: string; name: string } };
+    EnergySource: { id: string; name: string; Asset: { id: string; name: string } };
   };
 };
 
@@ -109,7 +109,7 @@ async function anchorOne(
 ): Promise<AnchorDetail> {
   const consumption = emission.EnergyConsumption;
   const source = consumption.EnergySource;
-  const item = source.Item;
+  const item = source.Asset;
   const period = periodLabel(consumption.periodStart, consumption.periodEnd);
 
   // Everything the figure rests on travels with the proof: what was measured,
@@ -140,7 +140,7 @@ async function anchorOne(
     const certification = await issueCertification({
       organizationId,
       signatureID: ctx.signatureID,
-      itemId: item.id,
+      assetId: item.id,
       title: `Emisión certificada — ${period} · ${emission.co2eKg} kg CO₂e`,
       description:
         `${item.name} · ${source.name} · ${consumption.consumptionKwh} kWh en ${period}. ` +
@@ -154,7 +154,7 @@ async function anchorOne(
       period,
       co2eKg: emission.co2eKg,
       certificationId: certification.id,
-      evidenceID: certification.evidenceId,
+      evidenceId: certification.evidenceId,
     };
   } catch (err) {
     // Nothing is written when iBS rejects the evidence: the record stays
@@ -188,7 +188,7 @@ export async function anchorEmissionById(
         // An issued proof is waiting for the chain; a second one would pay for
         // another transaction for the same figure.
         certificationId: null,
-        EnergyConsumption: { EnergySource: { Item: { organizationId } } },
+        EnergyConsumption: { EnergySource: { Asset: { organizationId } } },
       },
       select: EMISSION_SELECT,
     })) as EmissionRow | null;

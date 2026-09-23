@@ -10,11 +10,11 @@ export interface OrgModuleConfig {
 
 export interface OrganizationDetail {
   id: string;
-  nombre: string;
+  name: string;
   slug: string;
-  activa: boolean;
-  dominio: string | null;
-  configuracion: { modules?: OrgModuleConfig } | null;
+  active: boolean;
+  domain: string | null;
+  settings: { modules?: OrgModuleConfig } | null;
   createdAt: Date;
   updatedAt: Date;
   userCount: number;
@@ -51,17 +51,17 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
       where: { id },
       select: {
         id: true,
-        nombre: true,
+        name: true,
         slug: true,
-        activa: true,
-        dominio: true,
-        configuracion: true,
+        active: true,
+        domain: true,
+        settings: true,
         createdAt: true,
         updatedAt: true,
         _count: {
           select: {
             User: true,
-            Item: true,
+            Asset: true,
             Certification: true,
           },
         },
@@ -109,22 +109,22 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
     
     const result: OrganizationDetail = {
       id: organization.id,
-      nombre: organization.nombre,
+      name: organization.name,
       slug: organization.slug,
-      activa: organization.activa,
-      dominio: organization.dominio,
+      active: organization.active,
+      domain: organization.domain,
       createdAt: organization.createdAt,
       updatedAt: organization.updatedAt,
       userCount: organization._count.User,
-      itemCount: organization._count.Item,
+      itemCount: organization._count.Asset,
       certificationCount: organization._count.Certification,
       activeUsersCount: activeCount,
       pendingUsersCount: pendingCount,
       adminActivated: firstAdmin ? firstAdmin.status === 'ACTIVE' : false,
       adminEmail: firstAdmin?.email || null,
       adminName: firstAdmin?.name || null,
-      configuracion: (organization.configuracion && typeof organization.configuracion === 'object')
-        ? organization.configuracion as { modules?: OrgModuleConfig }
+      settings: (organization.settings && typeof organization.settings === 'object')
+        ? organization.settings as { modules?: OrgModuleConfig }
         : null,
     };
     

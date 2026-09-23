@@ -21,7 +21,7 @@ const schema = z.object({
   guaranteeOfOriginId: z.string().optional(),
   countryOfOrigin: z.string().length(2).optional(),
   gridEmissionFactor: z.number().nonnegative().optional(),
-  itemId: z.string(),
+  assetId: z.string(),
 });
 
 export async function POST(request: NextRequest) {
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const item = await validateItemOwnership(parsed.data.itemId, auth.organizationId);
+    const item = await validateItemOwnership(parsed.data.assetId, auth.organizationId);
     if (!item) return NextResponse.json({ error: 'Item not found or does not belong to your organization' }, { status: 404 });
 
     const service = createEnergyServiceImpl({ energyRepository });
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
       eventType: 'energy_source_event',
       entityType: 'EnergySource',
       entityId: source.id,
-      data: { sourceId: source.id, name: source.name, energyCarrier: source.energyCarrier, itemId: source.itemId },
+      data: { sourceId: source.id, name: source.name, energyCarrier: source.energyCarrier, assetId: source.assetId },
     });
 
     return NextResponse.json({ data: source }, { status: 201 });

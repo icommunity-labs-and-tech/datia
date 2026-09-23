@@ -7,7 +7,7 @@ export async function GET(
 ) {
   const { itemId } = await params;
 
-  const item = await prisma.item.findUnique({
+  const item = await prisma.asset.findUnique({
     where: { id: itemId },
     select: {
       id: true,
@@ -17,7 +17,7 @@ export async function GET(
       latitude: true,
       longitude: true,
       createdAt: true,
-      Organization: { select: { nombre: true, logoUrl: true, brandColorPrimary: true } },
+      Organization: { select: { name: true, logoUrl: true, brandColorPrimary: true } },
       EnergySource: {
         include: {
           EnergyConsumption: {

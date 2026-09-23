@@ -88,7 +88,7 @@ async function main() {
     data: {
       verificationStatus: 'VERIFIED',
       signatureID: org.signatureID ?? `sig_${randomUUID().replace(/-/g, '').slice(0, 20)}`,
-      configuracion: { modules: { energy: true, passport: true } },
+      settings: { modules: { energy: true, passport: true } },
       updatedAt: new Date(),
     },
   });
@@ -119,7 +119,7 @@ async function main() {
   console.log(`✅ Cuenta de demostración: ${DEMO_ADMIN.email}`);
 
   // ── 2. Assets: catalogue identities and imagery ───────────────────────────
-  const items = await prisma.item.findMany({
+  const items = await prisma.asset.findMany({
     where: { organizationId: org.id },
     select: { id: true, name: true, imageUrl: true, description: true },
     orderBy: { createdAt: 'asc' },
@@ -153,7 +153,7 @@ async function main() {
 
     if (Object.keys(data).length > 0) {
       data.updatedAt = new Date();
-      await prisma.item.update({ where: { id: item.id }, data });
+      await prisma.asset.update({ where: { id: item.id }, data });
       if (data.name) renamed++;
     }
   }

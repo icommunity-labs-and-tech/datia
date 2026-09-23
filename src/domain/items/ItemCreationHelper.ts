@@ -23,7 +23,7 @@ export interface CreateItemWithEvidenceResult {
   name: string;
   description: string;
   imageUrl: string | null;
-  evidenceID: string;
+  evidenceId: string;
 }
 
 /**
@@ -120,24 +120,24 @@ export async function createItemWithEvidence(
 
 
     // Create evidence
-    let evidenceID: string;
+    let evidenceId: string;
     try {
-      evidenceID = await evidence.createItemEvidence({
+      evidenceId = await evidence.createItemEvidence({
         signatureID,
         title: 'Creación de Item',
         description: created.description || '',
         imageUrls: created.imageUrl ? [created.imageUrl] : [],
         metadata: {
           type: 'item_creation',
-          itemId: created.id,
+          assetId: created.id,
           name: created.name,
           createdAt: created.createdAt.toISOString(),
         },
       });
 
-      // Update item with evidenceID
+      // Update item with evidenceId
       try {
-        await itemRepo.updateEvidenceId(created.id, organizationId, evidenceID);
+        await itemRepo.updateEvidenceId(created.id, organizationId, evidenceId);
       } catch (error) {
         await rollback();
         throw new ItemCreationRollbackError(
@@ -161,7 +161,7 @@ export async function createItemWithEvidence(
       name: created.name,
       description: created.description || '',
       imageUrl: created.imageUrl,
-      evidenceID,
+      evidenceId,
     };
   } catch (e) {
     // If we get here, rollback was already called or item creation failed

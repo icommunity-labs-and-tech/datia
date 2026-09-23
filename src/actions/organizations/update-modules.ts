@@ -14,13 +14,13 @@ export async function updateOrgModules(
 
   const org = await prisma.organization.findUnique({
     where: { id: organizationId },
-    select: { configuracion: true },
+    select: { settings: true },
   });
 
   if (!org) return { success: false, error: 'Organization not found' };
 
-  const current = (org.configuracion && typeof org.configuracion === 'object')
-    ? org.configuracion as Record<string, unknown>
+  const current = (org.settings && typeof org.settings === 'object')
+    ? org.settings as Record<string, unknown>
     : {};
 
   const currentModules = (current.modules && typeof current.modules === 'object')
@@ -30,7 +30,7 @@ export async function updateOrgModules(
   await prisma.organization.update({
     where: { id: organizationId },
     data: {
-      configuracion: {
+      settings: {
         ...current,
         modules: { ...currentModules, ...modules },
       },

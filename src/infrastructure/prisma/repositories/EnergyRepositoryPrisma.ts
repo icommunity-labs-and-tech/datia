@@ -24,7 +24,7 @@ const toSource = (r: any): EnergySourceRecord => ({
   guaranteeOfOriginId: r.guaranteeOfOriginId ?? null,
   countryOfOrigin: r.countryOfOrigin ?? null,
   gridEmissionFactor: r.gridEmissionFactor ?? null,
-  itemId: r.itemId,
+  assetId: r.assetId,
   createdAt: r.createdAt,
   updatedAt: r.updatedAt,
 });
@@ -62,7 +62,7 @@ const toEmission = (r: any): EmissionRecord => ({
 });
 
 // Org filter travels through the relation chain — no organizationId on energy models
-const orgViaItem = (organizationId: string) => ({ Item: { organizationId } });
+const orgViaItem = (organizationId: string) => ({ Asset: { organizationId } });
 const orgViaSource = (organizationId: string) => ({ EnergySource: orgViaItem(organizationId) });
 const orgViaConsumption = (organizationId: string) => ({ EnergyConsumption: orgViaSource(organizationId) });
 
@@ -102,7 +102,7 @@ export const energyRepository: EnergyRepository = {
         guaranteeOfOriginId: input.guaranteeOfOriginId ?? null,
         countryOfOrigin: input.countryOfOrigin ?? null,
         gridEmissionFactor: input.gridEmissionFactor ?? null,
-        itemId: input.itemId,
+        assetId: input.assetId,
       },
     });
     return toSource(r);

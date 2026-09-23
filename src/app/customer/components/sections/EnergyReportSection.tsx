@@ -82,7 +82,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function EnergyReportSection({ itemId }: { itemId: string }) {
+export function EnergyReportSection({ assetId }: { assetId: string }) {
   const t = useTranslations('customer.energyReport');
   const [report, setReport] = useState<EnergyReport | null>(null);
   const [loading, setLoading] = useState(true);
@@ -92,14 +92,14 @@ export function EnergyReportSection({ itemId }: { itemId: string }) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`/api/energy/item/${encodeURIComponent(itemId)}`)
+    fetch(`/api/energy/item/${encodeURIComponent(assetId)}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((data: EnergyReport) => { if (!cancelled) setReport(data); })
       .catch(() => { if (!cancelled) setError(t('loadError')); })
       .finally(() => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [itemId, t]);
+  }, [assetId, t]);
 
   const derived = useMemo(() => {
     if (!report) return null;

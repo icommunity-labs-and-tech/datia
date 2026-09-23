@@ -34,14 +34,14 @@ export interface BmsSourceResult {
 }
 
 export async function createBmsSource(
-  itemId: string,
+  assetId: string,
   year: number,
   profileId?: BmsProfileId
 ): Promise<BmsSourceResult> {
-  if (!itemId) throw new Error('Activo requerido');
+  if (!assetId) throw new Error('Activo requerido');
 
   const organizationId = await requireOrganizationId();
-  const item = await itemRepository.getById(itemId, organizationId);
+  const item = await itemRepository.getById(assetId, organizationId);
   if (!item) throw new Error('Activo no encontrado');
 
   const profile = resolveBmsProfile(profileId);
@@ -50,7 +50,7 @@ export async function createBmsSource(
   // The asset, year and profile identify the source: a second run must land on
   // the same one rather than add a twin.
   const existing = await prisma.energySource.findFirst({
-    where: { itemId, name, Item: { organizationId } },
+    where: { assetId, name, Asset: { organizationId } },
     select: { id: true, name: true },
   });
   if (existing) {
@@ -66,9 +66,9 @@ export async function createBmsSource(
     capacityKw: profile.capacityKw ?? undefined,
     countryOfOrigin: 'ES',
     renewableShare: profile.renewableShare,
-    guaranteeOfOriginId: bmsGuaranteeOfOrigin(profile, itemId, year),
+    guaranteeOfOriginId: bmsGuaranteeOfOrigin(profile, assetId, year),
     gridEmissionFactor: profile.emissionFactor,
-    itemId,
+    assetId,
   });
 
   await recordEvent(organizationId, {
@@ -81,7 +81,7 @@ export async function createBmsSource(
       energyCarrier: source.energyCarrier,
       profile: profile.id,
       renewableShare: profile.renewableShare,
-      itemId,
+      assetId,
     },
   });
 

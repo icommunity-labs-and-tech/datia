@@ -42,8 +42,8 @@ export async function getOnboardingInfo(
         Organization: {
           select: {
             id: true,
-            nombre: true,
-            activa: true,
+            name: true,
+            active: true,
             signatureID: true,
             kycURL: true,
             verificationStatus: true,
@@ -101,7 +101,7 @@ export async function getOnboardingInfo(
       info: {
         isFirstAdmin,
         userName: user.name,
-        organizationName: user.Organization.nombre,
+        organizationName: user.Organization.name,
         organizationId: user.Organization.id,
         kycURL: user.Organization.kycURL,
         verificationStatus: user.Organization.verificationStatus,

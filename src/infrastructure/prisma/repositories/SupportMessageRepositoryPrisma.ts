@@ -36,11 +36,11 @@ export const supportMessageRepository: SupportMessageRepository = {
   async findAll(): Promise<SupportMessageListItem[]> {
     const rows = await prisma.supportMessage.findMany({
       orderBy: { createdAt: 'desc' },
-      include: { Organization: { select: { nombre: true } } },
+      include: { Organization: { select: { name: true } } },
     });
     return rows.map((row) => ({
       ...toDomain(row),
-      organizationName: row.Organization?.nombre ?? null,
+      organizationName: row.Organization?.name ?? null,
     }));
   },
 

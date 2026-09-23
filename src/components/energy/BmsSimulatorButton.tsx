@@ -104,7 +104,7 @@ interface MonthRow {
   /** Daily readings aggregated into this month. */
   readings?: number;
   /** Evidence id once iBS issues it, before the chain anchors it. */
-  evidenceID?: string;
+  evidenceId?: string;
   /** iBS status: `waiting` until the transaction lands, then `certified`. */
   anchorStatus?: string;
   checkerUrl?: string;
@@ -121,7 +121,7 @@ export default function BmsSimulatorButton() {
 
   const [items, setItems] = useState<Array<{ id: string; name: string }>>([]);
   const [loadingItems, setLoadingItems] = useState(false);
-  const [itemId, setItemId] = useState<string | null>(null);
+  const [assetId, setItemId] = useState<string | null>(null);
   const [year, setYear] = useState<string | null>(String(currentYear - 1));
   const [profile, setProfile] = useState<BmsProfileId>(DEFAULT_BMS_PROFILE);
   // Set when a run lands on data an earlier run had already produced.
@@ -173,7 +173,7 @@ export default function BmsSimulatorButton() {
   };
 
   const handleRun = async () => {
-    if (!itemId || !year) return;
+    if (!assetId || !year) return;
     const targetYear = parseInt(year, 10);
     setError(null);
     setPhase('running');
@@ -183,7 +183,7 @@ export default function BmsSimulatorButton() {
     try {
       // ── Step 1: energy source ──
       setActiveStep(0);
-      const source = await createBmsSource(itemId, targetYear, profile);
+      const source = await createBmsSource(assetId, targetYear, profile);
       setSourceName(source.sourceName);
       let anyReused = source.reused;
       await sleep(PACE.betweenPhases);
@@ -221,13 +221,13 @@ export default function BmsSimulatorButton() {
             setCertification((prev) => prev ?? cert);
             return;
           }
-          pending.add(cert.evidenceID);
+          pending.add(cert.evidenceId);
           setCertifications((prev) => [...prev, cert]);
           setSelectedMonth((prev) => (prev === null ? cert.monthIndex : prev));
           setMonths((prev) =>
             prev.map((row) =>
               row.monthIndex === m
-                ? { ...row, evidenceID: cert.evidenceID, anchorStatus: 'waiting' }
+                ? { ...row, evidenceId: cert.evidenceId, anchorStatus: 'waiting' }
                 : row
             )
           );
@@ -249,7 +249,7 @@ export default function BmsSimulatorButton() {
           const statuses = await confirmBmsEvidences(outstanding);
           setMonths((prev) =>
             prev.map((row) => {
-              const hit = statuses.find((st) => st.evidenceID === row.evidenceID);
+              const hit = statuses.find((st) => st.evidenceId === row.evidenceId);
               return hit
                 ? {
                     ...row,
@@ -261,7 +261,7 @@ export default function BmsSimulatorButton() {
                 : row;
             })
           );
-          for (const st of statuses) if (st.confirmed) pending.delete(st.evidenceID);
+          for (const st of statuses) if (st.confirmed) pending.delete(st.evidenceId);
           if (!pending.size) break;
         }
         await sleep(ANCHOR_POLL.everyMs);
@@ -314,7 +314,7 @@ export default function BmsSimulatorButton() {
                   label={t('itemLabel')}
                   placeholder={loadingItems ? t('loadingItems') : t('itemPlaceholder')}
                   data={items.map((i) => ({ value: i.id, label: i.name }))}
-                  value={itemId}
+                  value={assetId}
                   onChange={setItemId}
                   disabled={loadingItems}
                   searchable
@@ -345,7 +345,7 @@ export default function BmsSimulatorButton() {
 
                 <Group justify="flex-end">
                   <Button variant="default" onClick={handleClose}>{t('cancel')}</Button>
-                  <Button onClick={handleRun} disabled={!itemId || !year} leftSection={<IconCpu size={16} />}>
+                  <Button onClick={handleRun} disabled={!assetId || !year} leftSection={<IconCpu size={16} />}>
                     {t('run')}
                   </Button>
                 </Group>
@@ -432,14 +432,14 @@ export default function BmsSimulatorButton() {
                         <Text size="xs" c="dimmed">
                           {t('anchors.progress', {
                             done: months.filter((m) => m.anchorStatus === 'certified').length,
-                            total: months.filter((m) => m.evidenceID).length || 12,
+                            total: months.filter((m) => m.evidenceId).length || 12,
                           })}
                         </Text>
                       </Group>
                       <SimpleGrid cols={4} spacing={6}>
                         {months.map((m) => {
                           const certified = m.anchorStatus === 'certified';
-                          const issued = Boolean(m.evidenceID);
+                          const issued = Boolean(m.evidenceId);
                           const chip = (
                             <Badge
                               key={m.monthIndex}
@@ -547,7 +547,7 @@ export default function BmsSimulatorButton() {
                           )}
 
                           <Badge size="xs" variant="light" color="datiaBlue" style={{ alignSelf: 'flex-start' }}>
-                            {shown.evidenceID}
+                            {shown.evidenceId}
                           </Badge>
                         </Stack>
                       )}

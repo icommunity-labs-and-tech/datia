@@ -73,7 +73,7 @@ describe('POST /api/v1/emissions', () => {
       emissionId: EMISSION_ID,
       period: '2026-03-14',
       co2eKg: 16.91,
-      evidenceID: EVIDENCE_ID,
+      evidenceId: EVIDENCE_ID,
     });
     mockEventCreate.mockResolvedValue({});
   });
@@ -124,7 +124,7 @@ describe('POST /api/v1/emissions', () => {
       });
       mockAnchorEmissionById.mockImplementation(async () => {
         order.push('anchor');
-        return { emissionId: EMISSION_ID, period: '2026-03-14', co2eKg: 16.91, evidenceID: EVIDENCE_ID };
+        return { emissionId: EMISSION_ID, period: '2026-03-14', co2eKg: 16.91, evidenceId: EVIDENCE_ID };
       });
 
       await post();

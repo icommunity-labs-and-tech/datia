@@ -68,10 +68,10 @@ export function ItemInfoSection({ item }: ItemInfoSectionProps) {
       </Section>
 
 
-      {item.evidenceID && (
+      {item.evidenceId && (
         <Section title={t('productCertification')}>
           <EvidenceVerification
-            evidenceId={item.evidenceID}
+            evidenceId={item.evidenceId}
             entityId={item.id}
             createdAt={item.createdAt}
             createdBy={item.createdBy}

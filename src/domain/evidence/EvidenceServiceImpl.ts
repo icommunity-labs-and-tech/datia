@@ -118,7 +118,7 @@ async function buildFiles(
 
   if (type === 'item_creation') {
     json = buildItemDataObject({
-      itemId: input.metadata.itemId as string,
+      assetId: input.metadata.assetId as string,
       name: input.metadata.name as string,
       description: input.description,
       createdAt: input.metadata.createdAt as string,
@@ -130,7 +130,7 @@ async function buildFiles(
       description: input.description,
       imageUrls: input.imageUrls,
       id: input.metadata.id as string,
-      itemId: input.metadata.itemId as string,
+      assetId: input.metadata.assetId as string,
       title: input.title,
       createdAt: input.metadata.createdAt as string,
       templateConfig: input.metadata.templateConfig,

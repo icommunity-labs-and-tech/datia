@@ -8,7 +8,7 @@ export class ItemInputError extends Error {
 
 export class ItemAlreadyExistsError extends Error {
   readonly _tag = 'ItemAlreadyExistsError';
-  constructor(public readonly itemId: string, message: string) {
+  constructor(public readonly assetId: string, message: string) {
     super(message);
     this.name = 'ItemAlreadyExistsError';
   }
@@ -32,7 +32,7 @@ export class OrganizationNotVerifiedError extends Error {
 
 export class ItemCreationRollbackError extends Error {
   readonly _tag = 'ItemCreationRollbackError';
-  constructor(public readonly itemId: string, public readonly reason: 'evidence_failed' | 'db_error', message: string) {
+  constructor(public readonly assetId: string, public readonly reason: 'evidence_failed' | 'db_error', message: string) {
     super(message);
     this.name = 'ItemCreationRollbackError';
   }

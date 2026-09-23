@@ -15,7 +15,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
   const [itemData, setItemData] = useState<ItemData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [itemId, setItemId] = useState<string>('');
+  const [assetId, setItemId] = useState<string>('');
 
   useEffect(() => {
     const getParams = async () => {
@@ -27,13 +27,13 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
 
   useEffect(() => {
     const fetchItemData = async () => {
-      if (!itemId) return;
+      if (!assetId) return;
 
       try {
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/customer/item/${itemId}`);
+        const response = await fetch(`/api/customer/item/${assetId}`);
         if (!response.ok) {
           throw new Error(t('productNotFound'));
         }
@@ -49,7 +49,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
     };
 
     fetchItemData();
-  }, [itemId]);
+  }, [assetId]);
 
   if (loading) {
     return (

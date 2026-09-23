@@ -22,7 +22,7 @@ export interface IssueCertificationInput {
   organizationId: string;
   signatureID: string;
   /** The asset the proof is about, recorded in the evidence metadata. */
-  itemId: string;
+  assetId: string;
   title: string;
   description: string;
   /** What is certified, exactly as it goes to iBS. */
@@ -47,7 +47,7 @@ export async function issueCertification(input: IssueCertificationInput): Promis
     // reads old and new proofs alike.
     metadata: {
       id,
-      itemId: input.itemId,
+      assetId: input.assetId,
       createdAt: new Date().toISOString(),
       templateConfig: input.payload,
     },
@@ -75,7 +75,7 @@ export async function issueCertification(input: IssueCertificationInput): Promis
     entityId: id,
     data: {
       certificationId: id,
-      evidenceID: evidenceId,
+      evidenceId: evidenceId,
       status: 'issued',
       emissionRecordIds: input.emissionRecordIds,
     },
@@ -146,7 +146,7 @@ export async function applyCertification(evidenceId: string): Promise<AppliedCer
     entityId: existing.id,
     data: {
       certificationId: existing.id,
-      evidenceID: evidenceId,
+      evidenceId: evidenceId,
       status: 'certified',
       hash: onChain.hash,
       network: onChain.network,

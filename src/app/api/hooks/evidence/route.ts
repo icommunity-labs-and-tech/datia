@@ -12,13 +12,13 @@ import { applyCertification } from '@/lib/certification';
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const evidenceID: string | undefined = body?.data?.evidence_id ?? body?.evidence_id;
+    const evidenceId: string | undefined = body?.data?.evidence_id ?? body?.evidence_id;
 
-    if (!evidenceID) {
+    if (!evidenceId) {
       return NextResponse.json({ error: 'evidence_id missing' }, { status: 400 });
     }
 
-    const applied = Boolean(await applyCertification(evidenceID));
+    const applied = Boolean(await applyCertification(evidenceId));
 
     // Acknowledge either way: an evidence this instance does not know about is
     // not a delivery failure, and a retry would not change the outcome.

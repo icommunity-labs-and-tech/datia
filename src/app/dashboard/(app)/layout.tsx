@@ -22,13 +22,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     if (payload?.organizationId) {
       const org = await prisma.organization.findUnique({
         where: { id: payload.organizationId },
-        select: { logoUrl: true, brandColorPrimary: true, brandColorSecondary: true, configuracion: true },
+        select: { logoUrl: true, brandColorPrimary: true, brandColorSecondary: true, settings: true },
       });
       logoUrl = org?.logoUrl ?? null;
       brandColorPrimary = org?.brandColorPrimary ?? null;
       brandColorSecondary = org?.brandColorSecondary ?? null;
-      if (org?.configuracion && typeof org.configuracion === 'object') {
-        const cfg = org.configuracion as Record<string, unknown>;
+      if (org?.settings && typeof org.settings === 'object') {
+        const cfg = org.settings as Record<string, unknown>;
         if (cfg.modules && typeof cfg.modules === 'object') {
           modules = { ...modules, ...(cfg.modules as OrgModules) };
         }
