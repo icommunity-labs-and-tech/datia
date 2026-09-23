@@ -38,8 +38,6 @@ import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { getCascadeInfo } from '@/config/entityConfig';
 import ItemQrModal from '@/components/ItemQrModal';
 import ImageDisplay from '@/components/ImageDisplay';
-import ItemSpecificFields from '@/components/ItemSpecificFields';
-import CategoryInputField from '@/components/CategoryInputField';
 import PageHeader from '@/components/layout/PageHeader';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -193,11 +191,6 @@ export default function ItemDetailPage() {
             >
               {item.evidenceID ? t('certified') : t('pendingBackup')}
             </Badge>
-            {item.categories?.map((c: { id: string; name: string }) => (
-              <Badge key={c.id} size="sm" variant="light" color="gray">
-                {c.name}
-              </Badge>
-            ))}
           </Group>
         </PageHeader>
 
@@ -205,26 +198,6 @@ export default function ItemDetailPage() {
           {/* ── Left column: info + certifications ── */}
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="md">
-              <Card>
-                {item.itemTemplate && item.templateFields && (
-                  <>
-                    <ItemSpecificFields
-                      itemTemplate={Array.isArray(item.itemTemplate) ? item.itemTemplate : []}
-                      templateFields={item.templateFields || {}}
-                    />
-                    <Divider my="md" />
-                  </>
-                )}
-
-                <CategoryInputField
-                  itemId={itemId}
-                  categories={item.categories || []}
-                  onUpdate={(updatedCategories) => {
-                    setItem((prev: any) => ({ ...prev, categories: updatedCategories }));
-                  }}
-                />
-              </Card>
-
               {/* ── Certifications ── */}
               <Card>
                 <Group gap="xs" mb="md">

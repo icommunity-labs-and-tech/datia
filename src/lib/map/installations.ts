@@ -65,18 +65,6 @@ export function isLocated(value: unknown): value is { lat: number; lng: number }
   );
 }
 
-/**
- * Pulls the first geolocation value out of a template's stored fields. Position
- * lives in user-defined templates rather than in a column, so which key holds it
- * depends on how the template was named.
- */
-export function geolocationOf(templateFields: unknown): { lat: number; lng: number } | null {
-  if (!templateFields || typeof templateFields !== 'object') return null;
-  for (const value of Object.values(templateFields as Record<string, unknown>)) {
-    if (isLocated(value)) return value;
-  }
-  return null;
-}
 
 function centroid(points: Array<{ lat: number; lng: number }>): { lat: number; lng: number } {
   const sum = points.reduce((acc, p) => ({ lat: acc.lat + p.lat, lng: acc.lng + p.lng }), { lat: 0, lng: 0 });

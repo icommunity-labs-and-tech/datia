@@ -1,12 +1,10 @@
 import { ItemRepository, DbError as ItemDbError } from './ItemRepository';
-import { CategoryRepository, DbError as CategoryDbError } from '../categories/CategoryRepository';
 
 export interface ParsedItemRow {
   line: number;
   id: string;
   name: string;
   description: string | null;
-  categoryName: string;
   imageUrl?: string | null;
 }
 
@@ -14,7 +12,6 @@ export interface ImportItemRow {
   id: string;
   name: string;
   description: string | null;
-  categoryIds: string[]; // Changed to array for many-to-many
   imageUrl?: string | null;
 }
 

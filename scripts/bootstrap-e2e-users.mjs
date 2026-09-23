@@ -58,18 +58,6 @@ async function bootstrapE2EUsers() {
       console.log(`✅ Created ${role}: ${email} / ${password}`);
     }
 
-    const categoryId = 'e2e-category-machinery';
-    if (!(await prisma.category.findUnique({ where: { id: categoryId } }))) {
-      await prisma.category.create({
-        data: {
-          id: categoryId,
-          name: 'Maquinaria',
-          organizationId: org.id,
-          updatedAt: now,
-        },
-      });
-    }
-
     for (const [index, name] of ITEMS.entries()) {
       const id = `e2e-item-${index}`;
       if (await prisma.item.findUnique({ where: { id } })) continue;
@@ -80,7 +68,9 @@ async function bootstrapE2EUsers() {
           description: 'Activo de demostración para pruebas end-to-end.',
           organizationId: org.id,
           updatedAt: now,
-          ItemCategory: { create: { categoryId } },
+          // Posición en columnas propias desde #37; el mapa lee de aquí.
+          latitude: 41.31 + index * 0.004,
+          longitude: -1.55 + index * 0.004,
         },
       });
     }

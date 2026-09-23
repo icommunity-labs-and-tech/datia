@@ -20,7 +20,6 @@ export interface OrganizationDetail {
   userCount: number;
   itemCount: number;
   certificationCount: number;
-  categoryCount: number;
   activeUsersCount: number;
   pendingUsersCount: number;
   adminActivated: boolean;
@@ -63,7 +62,6 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
           select: {
             User: true,
             Item: true,
-            Category: true,
             Certification: true,
           },
         },
@@ -119,7 +117,6 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
       updatedAt: organization.updatedAt,
       userCount: organization._count.User,
       itemCount: organization._count.Item,
-      categoryCount: organization._count.Category,
       certificationCount: organization._count.Certification,
       activeUsersCount: activeCount,
       pendingUsersCount: pendingCount,

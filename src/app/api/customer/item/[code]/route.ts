@@ -33,11 +33,6 @@ export async function GET(
             brandColorPrimary: true,
           },
         },
-        ItemCategory: {
-          include: {
-            Category: true
-          }
-        },
         User: {
           select: {
             name: true,
@@ -75,9 +70,10 @@ export async function GET(
       name: item.name,
       description: item.description,
       imageUrl: item.imageUrl,
-      templateFields: item.templateFields,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
+      latitude: item.latitude,
+      longitude: item.longitude,
       evidenceID: item.evidenceID || null,
       createdBy: item.User || null,
       organization: item.Organization
@@ -87,15 +83,6 @@ export async function GET(
             brandColorPrimary: item.Organization.brandColorPrimary,
           }
         : null,
-      category: item.ItemCategory.length > 0 ? {
-        id: item.ItemCategory[0].Category.id,
-        name: item.ItemCategory[0].Category.name,
-        description: item.ItemCategory[0].Category.description,
-      } : {
-        id: '',
-        name: 'Sin categoría',
-        description: '',
-      },
       energyCertifications: item.EnergySource.flatMap((src) =>
         src.EnergyConsumption.flatMap((c) =>
           c.EmissionRecord.map((e) => ({

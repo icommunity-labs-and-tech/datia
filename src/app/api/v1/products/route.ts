@@ -21,12 +21,6 @@ import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
  *       - BearerAuth: []
  *     parameters:
  *       - in: query
- *         name: categoryId
- *         schema:
- *           type: string
- *         description: Filter products by category ID (optional)
- *         example: cat-001
- *       - in: query
  *         name: q
  *         schema:
  *           type: string
@@ -127,22 +121,14 @@ import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
  *                 type: string
  *                 description: Description of the product
  *                 example: High efficiency solar panel
- *               categoryIds:
- *                 type: array
- *                 items:
- *                   type: string
- *                 description: Array of category IDs
- *                 example: ["cat-001"]
  *               imageUrl:
  *                 type: string
  *                 format: uri
  *                 description: URL of the product image
  *                 example: https://example.com/image.jpg
- *               templateFields:
  *                 type: object
  *                 description: Additional template fields
  *                 additionalProperties: true
- *               itemTemplate:
  *                 type: array
  *                 description: Product template configuration
  *                 items:
@@ -164,7 +150,6 @@ import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
  *                 imageUrl:
  *                   type: string
  *                   nullable: true
- *                 itemTemplate:
  *                   type: array
  *                   nullable: true
  *       '400':
@@ -205,7 +190,6 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const categoryId = searchParams.get('categoryId');
     const q = searchParams.get('q');
     const paginationParams = parseCursorPaginationParams(searchParams);
 
@@ -215,8 +199,6 @@ export async function GET(request: NextRequest) {
       let result;
       if (q) {
         result = await repo.searchPaginated(q, auth.organizationId, paginationParams);
-      } else if (categoryId) {
-        result = await repo.listByCategoryPaginated(categoryId, auth.organizationId, paginationParams);
       } else {
         result = await repo.listPaginated(auth.organizationId, paginationParams);
       }
@@ -228,9 +210,6 @@ export async function GET(request: NextRequest) {
     if (q) {
       const { searchItemsPaginated } = await import('@/actions/items/searchPaginated');
       result = await searchItemsPaginated(q, paginationParams);
-    } else if (categoryId) {
-      const { getItemsByCategoryPaginated } = await import('@/actions/items/getByCategoryPaginated');
-      result = await getItemsByCategoryPaginated(categoryId, paginationParams);
     } else {
       const { getItemsPaginated } = await import('@/actions/items/listPaginated');
       result = await getItemsPaginated(paginationParams);
@@ -295,10 +274,10 @@ export async function POST(request: NextRequest) {
       name: body.name.trim(),
       description: body.description.trim(),
       customId: body.id.trim(),
-      categoryIds: Array.isArray(body.categoryIds) ? body.categoryIds : undefined,
       imageUrl: typeof body.imageUrl === 'string' ? body.imageUrl : undefined,
-      templateFields: body.templateFields || undefined,
-      itemTemplate: body.itemTemplate || undefined,
+      // Position is a field of the asset since #37, not a template entry.
+      latitude: typeof body.latitude === 'number' ? body.latitude : undefined,
+      longitude: typeof body.longitude === 'number' ? body.longitude : undefined,
     };
 
     // ── Sandbox: write to filesystem, skip evidence service ─────────────
@@ -316,12 +295,17 @@ export async function POST(request: NextRequest) {
         name: createRequest.name,
         description: createRequest.description,
         imageUrl: createRequest.imageUrl ?? null,
-        templateFields: createRequest.templateFields ?? null,
-        itemTemplate: createRequest.itemTemplate ?? [],
         createdByUserId: 'sandbox',
       });
       return NextResponse.json(
-        { id: sandboxItem.id, name: sandboxItem.name, description: sandboxItem.description, imageUrl: sandboxItem.imageUrl, itemTemplate: sandboxItem.itemTemplate },
+        {
+          id: sandboxItem.id,
+          name: sandboxItem.name,
+          description: sandboxItem.description,
+          imageUrl: sandboxItem.imageUrl,
+          latitude: sandboxItem.latitude,
+          longitude: sandboxItem.longitude,
+        },
         { status: 201 }
       );
     }

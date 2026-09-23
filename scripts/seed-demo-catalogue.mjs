@@ -5,8 +5,8 @@
  * consumption series and emission records that hang off each asset.
  *
  * It replaces every Item of the organisation — deleting an Item cascades to its
- * states, category links, energy sources, consumptions and emissions — and then
- * seeds the new portfolio. Categories and status types are left untouched: the
+ * energy sources, consumptions and emissions — and then
+ * seeds the new portfolio. The organisation and its users are left untouched: the
  * script reuses the ones already defined.
  *
  * Data is fabricated, but internally consistent: serial numbers, dates, powers,
@@ -198,13 +198,6 @@ async function main() {
     where: { organizationId: org.id, role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
     orderBy: { createdAt: 'asc' },
   });
-
-  const cats = await prisma.category.findMany({ where: { organizationId: org.id } });
-  const catId = Object.fromEntries(cats.map((c) => [c.name, c.id]));
-
-  for (const a of ASSETS) {
-    if (!catId[a.cat]) throw new Error(`Falta la categoría "${a.cat}"`);
-  }
   // ── Wipe ───────────────────────────────────────────────────────────────────
   const before = await prisma.item.count({ where: { organizationId: org.id } });
   const { count: removed } = await prisma.item.deleteMany({ where: { organizationId: org.id } });
@@ -233,17 +226,11 @@ async function main() {
         evidenceID: itemEvidence(),
         createdAt: created,
         updatedAt: created,
-        itemTemplate: [],
-        // Position lives in the category's template, which is where the map
-        // reads it from to group assets into installations.
-        templateFields: { ubicacion: posicion },
-        // La posición tiene columnas propias desde #37; la plantilla se
-        // mantiene mientras siga existiendo.
+        // La posición vive en columnas propias (#37).
         latitude: posicion.lat,
         longitude: posicion.lng,
       },
     });
-    await prisma.itemCategory.create({ data: { itemId: id, categoryId: catId[a.cat] } });
 
   }
   console.log(`  creados ${ASSETS.length} activos`);

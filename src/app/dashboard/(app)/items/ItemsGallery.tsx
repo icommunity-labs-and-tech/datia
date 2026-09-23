@@ -21,7 +21,6 @@ import { IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconX } from '@tabl
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getItems } from '@/actions/items';
-import { getCategoriesWithItemCount } from '@/actions/categories';
 import PageHeader from '@/components/layout/PageHeader';
 import InstallationsMap from '@/components/maps/InstallationsMapLazy';
 import { clusterInstallations, type Located } from '@/lib/map/installations';
@@ -35,7 +34,6 @@ interface Item {
   name: string;
   description?: string;
   imageUrl?: string;
-  categories: Array<{ id: string; name: string }>;
   certified: boolean;
   location?: { lat: number; lng: number } | null;
   siteName?: string | null;
@@ -44,7 +42,6 @@ interface Item {
 function ItemCard({ item }: { item: Item }) {
   const t = useTranslations('itemsPage');
   const firstLetter = item.name.charAt(0).toUpperCase();
-  const category = item.categories[0];
 
   return (
     <Card
@@ -77,10 +74,6 @@ function ItemCard({ item }: { item: Item }) {
         <Text size="xs" c="dimmed" lineClamp={2} style={{ minHeight: '2.4em' }}>
           {item.description || ' '}
         </Text>
-
-        <Text size="xs" c="dimmed" fw={550} tt="uppercase" lts={0.3}>
-          {category?.name ?? t('noCategory')}
-        </Text>
       </Stack>
     </Card>
   );
@@ -112,14 +105,12 @@ function InstallationCard({
   label,
   count,
   certified,
-  categories,
   energy,
   onOpen,
 }: {
   label: string;
   count: number;
   certified: number;
-  categories: string[];
   energy?: { capacityKw: number; renewableShare: number | null; sources: unknown[] };
   onOpen: () => void;
 }) {
@@ -134,14 +125,6 @@ function InstallationCard({
           <Text fw={600} lineClamp={2}>{label}</Text>
         </Group>
         <Text size="sm" c="dimmed">{t('installation', { count })}</Text>
-        <Group gap={6}>
-          {categories.slice(0, 3).map((c) => (
-            <Badge key={c} size="xs" variant="light" color="gray">{c}</Badge>
-          ))}
-          {categories.length > 3 && (
-            <Badge size="xs" variant="light" color="gray">+{categories.length - 3}</Badge>
-          )}
-        </Group>
         <Text size="xs" c="dimmed">{t('certifiedRatio', { certified, total: count })}</Text>
         {energy && energy.sources.length > 0 && (
           <Text size="xs" c="dimmed">
@@ -171,20 +154,14 @@ export default function ItemsGallery({
 } = {}) {
   const t = useTranslations('itemsPage');
   const [items, setItems] = useState<Item[]>([]);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [installationId, setInstallationId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
-      const [data, catResult] = await Promise.all([
-        getItems(),
-        getCategoriesWithItemCount(),
-      ]);
+      const data = await getItems();
       setItems(data ?? []);
-      if (catResult.success) setCategories(catResult.categories ?? []);
     } finally {
       setLoading(false);
     }
@@ -194,13 +171,6 @@ export default function ItemsGallery({
 
   const filtered = useMemo(() => {
     let result = items;
-    if (categoryFilter) {
-      result = result.filter((i) =>
-        categoryFilter === '__none__'
-          ? !i.categories?.length
-          : i.categories?.some((c) => c.id === categoryFilter)
-      );
-    }
     if (search.trim()) {
       const q = search.trim().toLowerCase();
       result = result.filter(
@@ -210,7 +180,7 @@ export default function ItemsGallery({
       );
     }
     return result;
-  }, [items, categoryFilter, search]);
+  }, [items, search]);
 
   // Installations are derived from where the assets are, not declared: the map
   // discovers them, so an asset that moves changes installation on its own.
@@ -271,14 +241,8 @@ export default function ItemsGallery({
     return hit ? hit.members.map((m) => m.item) : filtered;
   }, [searching, installationId, installations, unlocated, filtered]);
 
-  const categoryOptions = [
-    { value: '', label: t('allCategories') },
-    { value: '__none__', label: t('noCategory') },
-    ...categories.map((c) => ({ value: c.id, label: c.name })),
-  ];
-
-  const hasFilters = Boolean(search.trim() || categoryFilter || installationId);
-  const clearFilters = () => { setSearch(''); setCategoryFilter(null); setInstallationId(null); };
+  const hasFilters = Boolean(search.trim() || installationId);
+  const clearFilters = () => { setSearch(''); setInstallationId(null); };
 
   return (
     <>
@@ -293,14 +257,6 @@ export default function ItemsGallery({
               leftSection={<IconSearch size={15} stroke={1.7} />}
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
-            />
-            <Select
-              data={categoryOptions}
-              value={categoryFilter ?? ''}
-              onChange={(v) => setCategoryFilter(v || null)}
-              w={180}
-              clearable={false}
-              aria-label={t('allCategories')}
             />
             {withEnergy && <BmsSimulatorButton />}
           </Group>
@@ -374,7 +330,6 @@ export default function ItemsGallery({
               label={g.label ?? t('unnamedInstallation')}
               count={g.members.length}
               certified={g.members.filter((m) => m.item.certified).length}
-              categories={[...new Set(g.members.flatMap((m) => m.item.categories.map((c) => c.name)))]}
               energy={withEnergy ? energyOf(g.id) : undefined}
               onOpen={() => setInstallationId(g.id)}
             />
@@ -384,7 +339,6 @@ export default function ItemsGallery({
               label={t('unlocatedInstallation')}
               count={unlocated.length}
               certified={unlocated.filter((i) => i.certified).length}
-              categories={[...new Set(unlocated.flatMap((i) => i.categories.map((c) => c.name)))]}
               onOpen={() => setInstallationId('__unlocated__')}
             />
           )}

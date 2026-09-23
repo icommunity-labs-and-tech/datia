@@ -1,12 +1,10 @@
 import { ItemImportService, type ParsedItemRow, type ItemImportResult, ItemImportValidationError, type ImportItemRow } from './ItemImportService';
 import type { ItemRepository } from './ItemRepository';
-import type { CategoryRepository } from '../categories/CategoryRepository';
 
 export function createItemImportServiceImpl(deps: {
   itemRepository: ItemRepository;
-  categoryRepository: CategoryRepository;
 }): ItemImportService {
-  const { itemRepository: itemRepo, categoryRepository: categoryRepo } = deps;
+  const { itemRepository: itemRepo } = deps;
 
   return {
     async importItemsFromParsedRows(organizationId: string, rows: ParsedItemRow[]): Promise<ItemImportResult> {
@@ -35,9 +33,6 @@ export function createItemImportServiceImpl(deps: {
         if (!row.name?.trim()) {
           errors.push(`Línea ${row.line}: name vacío`);
         }
-        if (!row.categoryName?.trim()) {
-          errors.push(`Línea ${row.line}: categoryName vacío`);
-        }
       }
 
       if (errors.length > 0) {
@@ -65,45 +60,15 @@ export function createItemImportServiceImpl(deps: {
         );
       }
 
-      // Resolve categories
-      const categoryMap = new Map<string, string>();
-      for (const row of rows) {
-        const name = row.categoryName?.trim();
-        if (!name) continue;
-        if (categoryMap.has(name)) continue;
-
-        try {
-          const cat = await categoryRepo.getByName(name, organizationId);
-          categoryMap.set(name, cat.id);
-        } catch {
-          throw new ItemImportValidationError(
-            'Categoría no encontrada',
-            [`Línea ${row.line}: categoryName "${name}" no existe`]
-          );
-        }
-      }
-
       // Build import rows
-      const importRows: ImportItemRow[] = rows.map((r) => {
-        const categoryId = categoryMap.get(r.categoryName.trim());
-        return {
-          id: r.id.trim(),
-          name: r.name.trim(),
-          description: r.description ?? null,
-          categoryIds: categoryId ? [categoryId] : [],
-          imageUrl: r.imageUrl ?? null,
-        };
-      });
+      const importRows: ImportItemRow[] = rows.map((r) => ({
+        id: r.id.trim(),
+        name: r.name.trim(),
+        description: r.description ?? null,
+        imageUrl: r.imageUrl ?? null,
+      }));
 
-      // Import items (without categories first)
-      await itemRepo.importMany(organizationId, importRows.map(({ categoryIds, ...rest }) => rest));
-      
-      // Add categories using many-to-many relationship
-      for (const row of importRows) {
-        if (row.categoryIds.length > 0) {
-          await itemRepo.addCategoriesToItem(row.id, row.categoryIds, organizationId);
-        }
-      }
+      await itemRepo.importMany(organizationId, importRows);
 
       return { createdCount: importRows.length };
     },

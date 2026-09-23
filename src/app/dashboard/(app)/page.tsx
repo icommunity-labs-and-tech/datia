@@ -37,7 +37,6 @@ export default async function DashboardIndexPage() {
   const recentItems = items.slice(0, 5).map((item) => ({
     id: item.id,
     name: item.name,
-    categoryName: item.categories?.[0]?.name ?? null,
     certified: item.certified,
   }));
 

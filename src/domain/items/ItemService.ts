@@ -9,15 +9,15 @@ export interface CreateItemRequest {
   name: string;
   description: string;
   customId: string;
-  categoryIds?: string[];
   imageUrl?: string;
-  templateFields?: Record<string, any>;
-  itemTemplate?: any;
   /**
    * Who creates the item. Omitted: the signed-in user. `null`: nobody — an API
    * token belongs to the organization, not to a person.
    */
   createdByUserId?: string | null;
+  /** Where the asset is. Since #37 it is a field of its own, not a template. */
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface ItemResponse {
@@ -25,7 +25,6 @@ export interface ItemResponse {
   name: string;
   description: string;
   imageUrl?: string;
-  itemTemplate?: any;
 }
 
 export interface ItemService {

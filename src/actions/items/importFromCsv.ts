@@ -5,7 +5,6 @@ import { createItemImportServiceImpl } from '@/domain/items/ItemImportServiceImp
 import { ItemImportValidationError, type ParsedItemRow } from '@/domain/items/ItemImportService';
 import { parseCsv } from '@/lib/csv';
 import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
-import { categoryRepository } from '@/infrastructure/prisma/repositories/CategoryRepositoryPrisma';
 
 export interface ImportItemsFromCsvResult {
   success: boolean;
@@ -30,14 +29,12 @@ export async function importItemsFromCsv(formData: FormData): Promise<ImportItem
     id: row.values['id']?.trim() ?? '',
     name: row.values['name']?.trim() ?? '',
     description: row.values['description']?.trim() || null,
-    categoryName: row.values['categoryName']?.trim() ?? '',
     imageUrl: (row.values['imageUrl'] ?? '').trim() || null,
   }));
 
   try {
     const itemImportService = createItemImportServiceImpl({
       itemRepository,
-      categoryRepository,
     });
     const result = await itemImportService.importItemsFromParsedRows(await requireOrganizationId(), rows);
     return {

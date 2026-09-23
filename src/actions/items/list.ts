@@ -17,8 +17,6 @@ export async function getItems() {
       description: r.description,
       imageUrl: r.imageUrl ?? undefined,
       createdAt: r.createdAt,
-      categoryId: r.categoryId,
-      categories: r.categories ?? [], // Array de categorías con id y name
       // What can be proven about an asset is what has been anchored for it.
       certified: certified.has(r.id),
       // Position has its own columns now (#37); the map needs nothing else.

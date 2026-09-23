@@ -44,21 +44,6 @@ model ApiToken {
   @@index([tokenHash])
 }
 
-model Category {
-  id             String         @id
-  name           String
-  description    String         @default("")
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime
-  itemTemplate   Json           @default("[]")
-  organizationId String
-  Organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  ItemCategory   ItemCategory[]
-
-  @@index([organizationId])
-  @@index([organizationId, name])
-}
-
 model EventLog {
   id             String       @id
   organizationId String
@@ -126,36 +111,22 @@ model Item {
   name                String
   description         String?
   imageUrl            String?
-  templateFields      Json?
   /// Where the asset is. It used to live inside the category's template, which
   /// meant the map depended on how a template had been named (#37).
   latitude            Float?
   longitude           Float?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime
-  itemTemplate        Json           @default("[]")
   evidenceID          String?
   evidenceDataJson    String?
   createdByUserId     String?
   organizationId      String
   User                User?          @relation(fields: [createdByUserId], references: [id])
   Organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  ItemCategory        ItemCategory[]
   EnergySource        EnergySource[]
 
   @@index([createdByUserId])
   @@index([organizationId])
-}
-
-model ItemCategory {
-  itemId     String
-  categoryId String
-  Category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Item       Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@id([itemId, categoryId])
-  @@index([categoryId])
-  @@index([itemId])
 }
 
 model Notification {
@@ -196,7 +167,6 @@ model Organization {
   updatedAt          DateTime
   ApiCall           ApiCall[]
   ApiToken          ApiToken[]
-  Category          Category[]
   Certification     Certification[]
   EventLog          EventLog[]
   Invitation        Invitation[]

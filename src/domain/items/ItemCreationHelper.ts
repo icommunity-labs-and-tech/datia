@@ -11,12 +11,11 @@ export interface CreateItemWithEvidenceInput {
   id: string;
   name: string;
   description: string;
-  categoryIds?: string[];
   imageUrl?: string | null;
-  templateFields?: Record<string, any> | null;
-  itemTemplate?: any[];
   /** Omitted: the signed-in user. `null`: no creator (API calls). */
   createdByUserId?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
 }
 
 export interface CreateItemWithEvidenceResult {
@@ -29,7 +28,7 @@ export interface CreateItemWithEvidenceResult {
 
 /**
  * Helper function to create an item with evidence.
- * This encapsulates the logic of creating an item, adding categories, and creating evidence.
+ * This encapsulates creating an asset and creating evidence.
  * Can be used both for single item creation and bulk imports.
  */
 export async function createItemWithEvidence(
@@ -96,8 +95,8 @@ export async function createItemWithEvidence(
       name: input.name,
       description: input.description,
       imageUrl: input.imageUrl ?? null,
-      itemTemplate: input.itemTemplate ?? [],
-      templateFields: input.templateFields ?? null,
+      latitude: input.latitude ?? null,
+      longitude: input.longitude ?? null,
       createdByUserId: userId,
     });
   } catch (e) {
@@ -118,19 +117,7 @@ export async function createItemWithEvidence(
   };
 
   try {
-    // Add categories to item (many-to-many relationship)
-    if (input.categoryIds && input.categoryIds.length > 0) {
-      try {
-        await itemRepo.addCategoriesToItem(created.id, input.categoryIds, organizationId);
-      } catch (e) {
-        await rollback();
-        throw new ItemCreationRollbackError(
-          created.id,
-          'db_error',
-          `Failed to add categories to item: ${e}`
-        );
-      }
-    }
+
 
     // Create evidence
     let evidenceID: string;
@@ -143,11 +130,8 @@ export async function createItemWithEvidence(
         metadata: {
           type: 'item_creation',
           itemId: created.id,
-          categoryIds: input.categoryIds || [],
           name: created.name,
           createdAt: created.createdAt.toISOString(),
-          templateFields: created.templateFields,
-          itemTemplate: created.itemTemplate,
         },
       });
 
