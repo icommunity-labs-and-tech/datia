@@ -20,13 +20,13 @@ export default async function EmissionDetailPage({ params }: { params: Promise<{
   const emission = await prisma.emissionRecord.findFirst({
     where: {
       id,
-      EnergyConsumption: { EnergySource: { Item: { organizationId: payload.organizationId } } },
+      EnergyConsumption: { EnergySource: { Asset: { organizationId: payload.organizationId } } },
     },
     include: {
       EnergyConsumption: {
         include: {
           EnergySource: {
-            include: { Item: { select: { id: true, name: true, imageUrl: true } } },
+            include: { Asset: { select: { id: true, name: true, imageUrl: true } } },
           },
         },
       },

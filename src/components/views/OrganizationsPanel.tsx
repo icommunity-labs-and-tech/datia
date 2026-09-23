@@ -59,14 +59,14 @@ export default function OrganizationsPanel({
 
     try {
       const result = await createOrganizationWithAdmin({
-        nombre: formData.organizationName,
+        name: formData.organizationName,
         adminName: formData.adminName,
         adminEmail: formData.adminEmail,
         language: formData.language,
       });
 
       if (result.success) {
-        const successMessage = `¡Organización "${result.organization?.nombre}" creada exitosamente!\n` +
+        const successMessage = `¡Organización "${result.organization?.name}" creada exitosamente!\n` +
           `Administrador: ${result.admin?.email}\n` +
           `Se ha enviado automáticamente un email de invitación al administrador.`;
         
@@ -182,7 +182,7 @@ export default function OrganizationsPanel({
                     title="Doble clic para ver detalles"
                   >
                     <td>
-                      <strong>{org.nombre}</strong>
+                      <strong>{org.name}</strong>
                     </td>
                     <td>
                       <code className="text-muted">{org.slug}</code>

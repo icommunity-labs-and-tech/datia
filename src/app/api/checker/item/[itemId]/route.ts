@@ -52,17 +52,17 @@ export async function GET(
 
   const itemId = decodeUrlParam(rawItemId);
 
-  // Buscar el item para obtener el evidenceID
-  const item = await prisma.item.findUnique({
+  // Buscar el item para obtener el evidenceId
+  const item = await prisma.asset.findUnique({
     where: { id: itemId },
-    select: { id: true, name: true, evidenceID: true, evidenceDataJson: true, imageUrl: true },
+    select: { id: true, name: true, evidenceId: true, imageUrl: true },
   });
 
   if (!item) {
     return NextResponse.json({ error: 'Item no encontrado' }, { status: 404 });
   }
 
-  const evidenceId = item.evidenceID;
+  const evidenceId = item.evidenceId;
   if (!evidenceId) {
     return NextResponse.json({ error: 'El item no tiene evidencia asociada' }, { status: 422 });
   }
@@ -106,11 +106,6 @@ export async function GET(
     if (item.imageUrl) {
       const name = item.imageUrl.split('/').pop() || 'item_image';
       localAssets.push({ name, url: item.imageUrl });
-    }
-
-    // Añadir evidenceDataJson si existe
-    if (item.evidenceDataJson) {
-      localAssets.push({ name: 'item_data.json', inline: item.evidenceDataJson });
     }
 
     return NextResponse.json({ evidenceId, itemName: item.name, data, localAssets });

@@ -65,12 +65,12 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         data: record,
-        certification: anchor?.evidenceID
+        certification: anchor?.evidenceId
           ? {
               // Issued, not yet on chain: iBS confirms seconds later through the
               // `evidence.certified` webhook.
               status: 'pending_anchor',
-              evidenceId: anchor.evidenceID,
+              evidenceId: anchor.evidenceId,
             }
           : { status: 'pending', reason: anchor?.error ?? 'not_anchored_yet' },
       },

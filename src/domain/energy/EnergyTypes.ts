@@ -26,7 +26,7 @@ export interface EnergySourceRecord {
   guaranteeOfOriginId: string | null;
   countryOfOrigin: string | null;
   gridEmissionFactor: number | null;
-  itemId: string;
+  assetId: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -76,7 +76,7 @@ export interface CreateEnergySourceInput {
   guaranteeOfOriginId?: string;
   countryOfOrigin?: string;
   gridEmissionFactor?: number;
-  itemId: string;
+  assetId: string;
 }
 
 export interface CreateEnergyConsumptionInput {

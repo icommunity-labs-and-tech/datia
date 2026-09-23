@@ -17,7 +17,7 @@ export interface ItemRecord {
   name: string;
   description: string;
   imageUrl: string | null;
-  evidenceID?: string | null;
+  evidenceId?: string | null;
   createdAt: Date;
   updatedAt: Date;
   latitude: number | null;
@@ -46,7 +46,7 @@ export interface ItemRepository {
     imageUrl: string | null;
   }>>;
   create(input: CreateItemInput): Promise<ItemRecord>;
-  updateEvidenceId(id: string, organizationId: string, evidenceID: string): Promise<void>;
+  updateEvidenceId(id: string, organizationId: string, evidenceId: string): Promise<void>;
   delete(id: string, organizationId: string): Promise<void>;
   getDetails(id: string, organizationId: string): Promise<
     | ({

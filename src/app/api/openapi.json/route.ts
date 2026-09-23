@@ -860,7 +860,7 @@ const manualOpenApiSpec = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['name', 'energyCarrier', 'itemId'],
+                required: ['name', 'energyCarrier', 'assetId'],
                 properties: {
                   name: { type: 'string', example: 'Panel solar cubierta norte' },
                   energyCarrier: { type: 'string', enum: ['ELECTRICITY', 'NATURAL_GAS', 'HYDROGEN', 'SOLAR_THERMAL', 'DISTRICT_HEATING', 'DISTRICT_COOLING', 'BIOMASS', 'OIL', 'COAL', 'OTHER'], example: 'ELECTRICITY' },
@@ -872,7 +872,7 @@ const manualOpenApiSpec = {
                   guaranteeOfOriginId: { type: 'string', example: 'GO-ES-2024-001' },
                   countryOfOrigin: { type: 'string', example: 'ES', description: 'ISO 3166-1 alpha-2' },
                   gridEmissionFactor: { type: 'number', example: 207, description: 'gCO2eq/kWh' },
-                  itemId: { type: 'string', description: 'ID of the hardware Item this source belongs to' },
+                  assetId: { type: 'string', description: 'ID of the hardware Item this source belongs to' },
                 },
               },
             },

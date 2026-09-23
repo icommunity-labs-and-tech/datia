@@ -40,7 +40,7 @@ const issuedRow = {
 const input = {
   organizationId: 'org-1',
   signatureID: 'sig-1',
-  itemId: 'item-1',
+  assetId: 'item-1',
   title: 'Emisión certificada',
   description: 'desc',
   payload: { co2eKg: 1 },

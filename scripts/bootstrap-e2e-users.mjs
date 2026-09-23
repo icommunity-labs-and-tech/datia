@@ -29,13 +29,13 @@ async function bootstrapE2EUsers() {
       (await prisma.organization.create({
         data: {
           id: randomUUID(),
-          nombre: 'Datia E2E',
+          name: 'Datia E2E',
           slug: ORG_SLUG,
           verificationStatus: 'VERIFIED',
           updatedAt: now,
         },
       }));
-    console.log(`✅ Organization: ${org.nombre} (${org.slug})`);
+    console.log(`✅ Organization: ${org.name} (${org.slug})`);
 
     for (const { email, password, name, role } of USERS) {
       const existing = await prisma.user.findUnique({ where: { email } });
@@ -60,8 +60,8 @@ async function bootstrapE2EUsers() {
 
     for (const [index, name] of ITEMS.entries()) {
       const id = `e2e-item-${index}`;
-      if (await prisma.item.findUnique({ where: { id } })) continue;
-      await prisma.item.create({
+      if (await prisma.asset.findUnique({ where: { id } })) continue;
+      await prisma.asset.create({
         data: {
           id,
           name,
@@ -83,7 +83,7 @@ async function bootstrapE2EUsers() {
       await prisma.energySource.create({
         data: {
           id: sourceId,
-          itemId: 'e2e-item-0',
+          assetId: 'e2e-item-0',
           name: 'Planta solar Ariza',
           energyCarrier: 'SOLAR_THERMAL',
           generationTechnology: 'photovoltaic',

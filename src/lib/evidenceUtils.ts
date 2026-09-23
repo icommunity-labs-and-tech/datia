@@ -13,7 +13,7 @@ export function detectImageExt(contentType: string): string {
 
 type IssueDataInput = {
   id?: string;
-  itemId?: string;
+  assetId?: string;
   title?: string;
   description: string;
   createdAt?: string | Date;
@@ -28,7 +28,7 @@ type IssueDataInput = {
 export function buildIssueDataObject(input: IssueDataInput) {
   const {
     id,
-    itemId,
+    assetId,
     title,
     description,
     createdAt,
@@ -46,7 +46,7 @@ export function buildIssueDataObject(input: IssueDataInput) {
   };
 
   if (id) result.id = id;
-  if (itemId) result.itemId = itemId;
+  if (assetId) result.assetId = assetId;
   if (title) result.title = title;
   if (createdAt) result.createdAt = createdAt;
   if (templateConfig) result.templateConfig = templateConfig;
@@ -60,7 +60,7 @@ export function buildIssueDataObject(input: IssueDataInput) {
 }
 
 type ItemDataInput = {
-  itemId: string;
+  assetId: string;
   name: string;
   description: string;
   createdAt: string | Date;
@@ -69,7 +69,7 @@ type ItemDataInput = {
 
 export function buildItemDataObject(input: ItemDataInput) {
   const {
-    itemId,
+    assetId,
     name,
     description,
     createdAt,
@@ -79,7 +79,7 @@ export function buildItemDataObject(input: ItemDataInput) {
   // Deterministic order for consistent checksums
   const result: Record<string, any> = {
     type: 'item_creation',
-    itemId,
+    assetId,
     name,
     description,
     createdAt,

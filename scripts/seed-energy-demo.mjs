@@ -127,7 +127,7 @@ async function main() {
 
   // ── Clean previous demo sources ───────────────────────────────────────────
   const existing = await prisma.energySource.findMany({
-    where: { name: { startsWith: '[DEMO]' }, Item: { organizationId: ORG_ID } },
+    where: { name: { startsWith: '[DEMO]' }, Asset: { organizationId: ORG_ID } },
     select: { id: true },
   });
   if (existing.length > 0) {
@@ -148,7 +148,7 @@ async function main() {
   // ── Create each source with consumption + emissions ───────────────────────
   for (let idx = 0; idx < SOURCES.length; idx++) {
     const def = SOURCES[idx];
-    const itemId = ITEM_IDS[idx];
+    const assetId = ITEM_IDS[idx];
 
     const source = await prisma.energySource.create({
       data: {
@@ -163,7 +163,7 @@ async function main() {
         countryOfOrigin: def.countryOfOrigin,
         gridEmissionFactor: def.gridEmissionFactor,
         guaranteeOfOriginId: def.guaranteeOfOriginId,
-        itemId,
+        assetId,
       },
     });
 

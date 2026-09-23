@@ -6,7 +6,7 @@ async function main() {
   console.log('🌱 Iniciando seed de datos...');
 
   const createItem = async ({ name, description, imageUrl, latitude, longitude }) => {
-    const item = await prisma.item.create({
+    const item = await prisma.asset.create({
       data: {
         name,
         description,

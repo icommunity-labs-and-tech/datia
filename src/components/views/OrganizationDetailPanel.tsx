@@ -107,7 +107,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h2 className="mb-0">
           <i className="bi bi-building me-2"></i>
-          {organization.nombre}
+          {organization.name}
         </h2>
         <div className="d-flex gap-2">
           <Button 
@@ -177,7 +177,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
                 <tbody>
                   <tr>
                     <td><strong>Nombre:</strong></td>
-                    <td>{organization.nombre}</td>
+                    <td>{organization.name}</td>
                   </tr>
                   <tr>
                     <td><strong>Slug:</strong></td>
@@ -186,17 +186,17 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
                   <tr>
                     <td><strong>Estado:</strong></td>
                     <td>
-                      {organization.activa ? (
+                      {organization.active ? (
                         <Badge bg="success">Activa</Badge>
                       ) : (
                         <Badge bg="secondary">Inactiva</Badge>
                       )}
                     </td>
                   </tr>
-                  {organization.dominio && (
+                  {organization.domain && (
                     <tr>
                       <td><strong>Dominio:</strong></td>
-                      <td><code>{organization.dominio}</code></td>
+                      <td><code>{organization.domain}</code></td>
                     </tr>
                   )}
                   <tr>
@@ -276,7 +276,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
         </Card.Header>
         <Card.Body>
           {(['passport', 'energy'] as const).map((mod) => {
-            const modules = organization.configuracion?.modules ?? {};
+            const modules = organization.settings?.modules ?? {};
             const defaultOn = mod === 'passport';
             const enabled = modules[mod] !== undefined ? modules[mod] : defaultOn;
             return (
@@ -319,7 +319,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
             </Alert>
           )}
           <p>
-            ¿Estás seguro de que deseas eliminar la organización <strong>&quot;{organization.nombre}&quot;</strong>?
+            ¿Estás seguro de que deseas eliminar la organización <strong>&quot;{organization.name}&quot;</strong>?
           </p>
           <Alert variant="warning" className="mb-0">
             <strong>⚠️ Advertencia:</strong> Esta acción es irreversible y eliminará permanentemente:

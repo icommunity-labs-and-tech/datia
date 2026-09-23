@@ -32,7 +32,7 @@ export async function retryOrganizationKyc(): Promise<RetryOrganizationKycResult
         Organization: {
           select: {
             id: true,
-            nombre: true,
+            name: true,
           },
         },
       },
@@ -57,7 +57,7 @@ export async function retryOrganizationKyc(): Promise<RetryOrganizationKycResult
 
     // Siempre crear una nueva firma, sustituyendo la anterior (si existe)
     const signatureResult = await icommunityService.createSignature(
-      organization.nombre,
+      organization.name,
       okUrl,
       koUrl
     );

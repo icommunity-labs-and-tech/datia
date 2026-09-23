@@ -18,15 +18,15 @@ const uid = () => crypto.randomUUID();
 const d = (s) => new Date(s);
 
 async function upsertItem(data) {
-  const existing = await prisma.item.findUnique({ where: { id: data.id } });
+  const existing = await prisma.asset.findUnique({ where: { id: data.id } });
   if (existing) { process.stdout.write(`  ⚠  Item ya existe: ${data.name}\n`); return existing; }
-  const r = await prisma.item.create({ data: { ...data, updatedAt: new Date() } });
+  const r = await prisma.asset.create({ data: { ...data, updatedAt: new Date() } });
   process.stdout.write(`  ✅ Item: ${r.name}\n`);
   return r;
 }
 
 async function upsertSource(data) {
-  const existing = await prisma.energySource.findFirst({ where: { itemId: data.itemId, name: data.name } });
+  const existing = await prisma.energySource.findFirst({ where: { assetId: data.assetId, name: data.name } });
   if (existing) { process.stdout.write(`  ⚠  Source ya existe: ${data.name}\n`); return existing; }
   const r = await prisma.energySource.create({ data: { ...data, updatedAt: new Date() } });
   process.stdout.write(`  ✅ EnergySource: ${r.name} (${r.energyCarrier})\n`);
@@ -53,7 +53,7 @@ async function main() {
 
   const org = await prisma.organization.findUnique({ where: { slug: 'datia' } });
   if (!org) { console.error('❌ Org "datia" not found. Run create-datia-org.mjs first'); process.exit(1); }
-  console.log(`Org: ${org.nombre}\n`);
+  console.log(`Org: ${org.name}\n`);
 
   // ── API token ─────────────────────────────────────────────────────────────
   const RAW_TOKEN = 'datia-demo-token-2024';
@@ -64,10 +64,10 @@ async function main() {
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────
-  const totalSources = await prisma.energySource.count({ where: { Item: { organizationId: org.id } } });
-  const totalConsumptions = await prisma.energyConsumption.count({ where: { EnergySource: { Item: { organizationId: org.id } } } });
-  const totalEmissions = await prisma.emissionRecord.count({ where: { EnergyConsumption: { EnergySource: { Item: { organizationId: org.id } } } } });
-  const pendingEmissions = await prisma.emissionRecord.count({ where: { verificationStatus: 'PENDING', EnergyConsumption: { EnergySource: { Item: { organizationId: org.id } } } } });
+  const totalSources = await prisma.energySource.count({ where: { Asset: { organizationId: org.id } } });
+  const totalConsumptions = await prisma.energyConsumption.count({ where: { EnergySource: { Asset: { organizationId: org.id } } } });
+  const totalEmissions = await prisma.emissionRecord.count({ where: { EnergyConsumption: { EnergySource: { Asset: { organizationId: org.id } } } } });
+  const pendingEmissions = await prisma.emissionRecord.count({ where: { verificationStatus: 'PENDING', EnergyConsumption: { EnergySource: { Asset: { organizationId: org.id } } } } });
 
   console.log('\n─────────────────────────────────────────────────────────────');
   console.log('📊 DATOS EN BD');

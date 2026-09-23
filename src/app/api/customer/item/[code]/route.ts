@@ -21,14 +21,14 @@ export async function GET(
     console.log('[API] Looking for item with ID:', code);
 
     // Buscar el item por ID (asumiendo que el código es el ID del item)
-    const item = await prisma.item.findUnique({
+    const item = await prisma.asset.findUnique({
       where: {
         id: code,
       },
       include: {
         Organization: {
           select: {
-            nombre: true,
+            name: true,
             logoUrl: true,
             brandColorPrimary: true,
           },
@@ -74,11 +74,11 @@ export async function GET(
       updatedAt: item.updatedAt,
       latitude: item.latitude,
       longitude: item.longitude,
-      evidenceID: item.evidenceID || null,
+      evidenceId: item.evidenceId || null,
       createdBy: item.User || null,
       organization: item.Organization
         ? {
-            name: item.Organization.nombre,
+            name: item.Organization.name,
             logoUrl: item.Organization.logoUrl,
             brandColorPrimary: item.Organization.brandColorPrimary,
           }

@@ -78,7 +78,7 @@ export async function inviteUser(
     // Obtener nombre de la organización
     const organization = await prisma.organization.findUnique({
       where: { id: tenant.organizationId! },
-      select: { nombre: true },
+      select: { name: true },
     });
 
     if (!organization) {
@@ -131,7 +131,7 @@ export async function inviteUser(
       await sendInvitationEmail({
         recipientEmail: result.user.email,
         recipientName: input.name,
-        organizationName: organization.nombre,
+        organizationName: organization.name,
         activationToken,
       });
     } catch (emailError) {

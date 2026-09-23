@@ -61,7 +61,7 @@ async function main() {
 
   // The sources the simulator produced: they are the ones that stop at 2025.
   const sources = await prisma.energySource.findMany({
-    where: { Item: { organizationId: org.id }, name: { contains: 'Simulación BMS' } },
+    where: { Asset: { organizationId: org.id }, name: { contains: 'Simulación BMS' } },
     select: { id: true, name: true, _count: { select: { EnergyConsumption: true } } },
   });
 

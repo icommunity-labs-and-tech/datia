@@ -12,7 +12,7 @@ import type { CertificationStatus } from '@/generated/prisma';
 
 /** Assets with at least one proof already on chain. */
 export async function certifiedItemIds(organizationId: string): Promise<Set<string>> {
-  const rows = await prisma.item.findMany({
+  const rows = await prisma.asset.findMany({
     where: {
       organizationId,
       EnergySource: {
@@ -48,13 +48,13 @@ const asNumber = (value: unknown) => (typeof value === 'number' ? value : null);
 /** The proofs of one asset, newest first. */
 export async function listItemCertifications(
   organizationId: string,
-  itemId: string,
+  assetId: string,
   limit = 50
 ): Promise<ItemCertification[]> {
   const rows = await prisma.certification.findMany({
     where: {
       organizationId,
-      EmissionRecord: { some: { EnergyConsumption: { EnergySource: { itemId } } } },
+      EmissionRecord: { some: { EnergyConsumption: { EnergySource: { assetId } } } },
     },
     orderBy: { createdAt: 'desc' },
     take: limit,

@@ -16,7 +16,7 @@ interface Props {
 export default function EmissionDetailClient({ emission }: Props) {
   const consumption = emission.EnergyConsumption;
   const source = consumption.EnergySource;
-  const item = source.Item;
+  const item = source.Asset;
 
   return (
     <div>

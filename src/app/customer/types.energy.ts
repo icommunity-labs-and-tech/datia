@@ -1,4 +1,4 @@
-/** Payload of GET /api/energy/item/[itemId] — the ESPR certification report. */
+/** Payload of GET /api/energy/item/[assetId] — the ESPR certification report. */
 
 export interface ReportEmission {
   id: string;
@@ -51,7 +51,7 @@ export interface EnergyReport {
     imageUrl: string | null;
     templateFields: unknown;
     createdAt: string;
-    organization: { nombre: string; logoUrl: string | null; brandColorPrimary: string | null };
+    organization: { name: string; logoUrl: string | null; brandColorPrimary: string | null };
   };
   sources: ReportSource[];
   kpis: {

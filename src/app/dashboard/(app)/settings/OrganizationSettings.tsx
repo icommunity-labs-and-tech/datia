@@ -63,7 +63,7 @@ export default function OrganizationSettings({ user }: { user: any }) {
   const [logoUrl, setLogoUrl] = useState<string | null>(org?.logoUrl ?? null);
 
   const isAdmin = user?.role === 'ADMIN';
-  const orgInitial = (org?.nombre ?? 'O').trim().charAt(0).toUpperCase();
+  const orgInitial = (org?.name ?? 'O').trim().charAt(0).toUpperCase();
 
   return (
     <>
@@ -80,7 +80,7 @@ export default function OrganizationSettings({ user }: { user: any }) {
                     <Text fw={700} fz="lg">{orgInitial}</Text>
                   </Avatar>
                   <Stack gap={2} style={{ minWidth: 0 }}>
-                    <Text fw={600} truncate>{org?.nombre ?? '—'}</Text>
+                    <Text fw={600} truncate>{org?.name ?? '—'}</Text>
                     {org?.slug && <Text size="xs" c="dimmed" ff="monospace">/{org.slug}</Text>}
                   </Stack>
                 </Group>
@@ -111,7 +111,7 @@ export default function OrganizationSettings({ user }: { user: any }) {
                   <OrgLogoCard logoUrl={logoUrl} onLogoChange={setLogoUrl} />
                   <OrgColorsCard
                     logoUrl={logoUrl}
-                    orgName={org.nombre}
+                    orgName={org.name}
                     initialColorPrimary={org.brandColorPrimary || '#0f172a'}
                     initialColorSecondary={org.brandColorSecondary || ''}
                   />

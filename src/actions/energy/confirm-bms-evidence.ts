@@ -20,7 +20,7 @@ import { prisma } from '@/lib/prisma';
  */
 
 export interface BmsEvidenceStatus {
-  evidenceID: string;
+  evidenceId: string;
   /** `created` while pending, `certified` once anchored. */
   status: string;
   confirmed: boolean;
@@ -37,26 +37,26 @@ export interface BmsEvidenceStatus {
   justConfirmed: boolean;
 }
 
-async function readOne(evidenceID: string, organizationId: string): Promise<BmsEvidenceStatus> {
+async function readOne(evidenceId: string, organizationId: string): Promise<BmsEvidenceStatus> {
   const certification = await prisma.certification.findFirst({
-    where: { evidenceId: evidenceID, organizationId },
+    where: { evidenceId: evidenceId, organizationId },
   });
   if (!certification) {
-    return { evidenceID, status: 'unknown', confirmed: false, justConfirmed: false };
+    return { evidenceId, status: 'unknown', confirmed: false, justConfirmed: false };
   }
 
   const wasCertified = certification.status === 'CERTIFIED';
   // Same path the `evidence.certified` webhook takes: whichever arrives first
   // confirms it, and the other finds it already done.
-  const applied = await applyCertification(evidenceID);
+  const applied = await applyCertification(evidenceId);
   if (!applied) {
     // Not on chain yet, or iBS could not be read: keep it pending and retry.
-    return { evidenceID, status: 'pending', confirmed: false, justConfirmed: false };
+    return { evidenceId, status: 'pending', confirmed: false, justConfirmed: false };
   }
 
   const confirmed = applied.certification;
   return {
-    evidenceID,
+    evidenceId,
     status: 'certified',
     confirmed: true,
     justConfirmed: !wasCertified,

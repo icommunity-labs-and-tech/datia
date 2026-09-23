@@ -217,7 +217,7 @@ export const userRepository: UserRepository = {
     try {
       const rows = await prisma.user.findMany({
         include: {
-          Organization: { select: { nombre: true, slug: true } }
+          Organization: { select: { name: true, slug: true } }
         },
         orderBy: { createdAt: 'desc' }
       });

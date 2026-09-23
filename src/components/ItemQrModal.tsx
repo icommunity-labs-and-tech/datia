@@ -8,11 +8,11 @@ import { useTranslations } from 'next-intl';
 type ItemQrModalProps = {
   show: boolean;
   onHide: () => void;
-  itemId: string;
+  assetId: string;
   itemName?: string;
 };
 
-export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrModalProps) {
+export default function ItemQrModal({ show, onHide, assetId, itemName }: ItemQrModalProps) {
   const t = useTranslations('itemDetail.qr');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -21,11 +21,11 @@ export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrMo
     if (typeof window === 'undefined') return '';
     try {
       const origin = window.location.origin;
-      return `${origin}/customer/item/${encodeURIComponent(itemId)}`;
+      return `${origin}/customer/item/${encodeURIComponent(assetId)}`;
     } catch {
-      return `/customer/item/${encodeURIComponent(itemId)}`;
+      return `/customer/item/${encodeURIComponent(assetId)}`;
     }
-  }, [itemId]);
+  }, [assetId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -62,7 +62,7 @@ export default function ItemQrModal({ show, onHide, itemId, itemName }: ItemQrMo
     const dataUrl = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = dataUrl;
-    a.download = `qr_item_${itemId}.png`;
+    a.download = `qr_item_${assetId}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();

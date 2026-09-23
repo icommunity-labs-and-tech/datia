@@ -209,7 +209,7 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
     
     for (const id of uniqueIds) {
       try {
-        const existing = await prisma.item.findFirst({
+        const existing = await prisma.asset.findFirst({
           where: { id, organizationId },
         });
         if (existing) {

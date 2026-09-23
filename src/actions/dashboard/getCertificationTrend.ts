@@ -60,7 +60,7 @@ export async function getCertificationTrend(): Promise<CertificationTrend> {
   const organizationId = await requireOrganizationId();
 
   const rows = await prisma.energyConsumption.findMany({
-    where: { EnergySource: { Item: { organizationId } } },
+    where: { EnergySource: { Asset: { organizationId } } },
     select: {
       periodStart: true,
       consumptionKwh: true,

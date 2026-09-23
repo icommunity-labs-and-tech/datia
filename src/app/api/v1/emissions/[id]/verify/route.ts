@@ -26,7 +26,7 @@ export async function GET(
   const emission = await prisma.emissionRecord.findFirst({
     where: {
       id,
-      EnergyConsumption: { EnergySource: { Item: { organizationId: auth.organizationId } } },
+      EnergyConsumption: { EnergySource: { Asset: { organizationId: auth.organizationId } } },
     },
     include: { Certification: true },
   });

@@ -200,9 +200,9 @@ export default function ItemsGallery({
   const sourcesByInstallation = useMemo(() => {
     const byItem = new Map<string, EnergySourceRecord[]>();
     for (const s of sources) {
-      const list = byItem.get(s.itemId) ?? [];
+      const list = byItem.get(s.assetId) ?? [];
       list.push(s);
-      byItem.set(s.itemId, list);
+      byItem.set(s.assetId, list);
     }
     const result = new Map<string, EnergySourceRecord[]>();
     for (const g of installations) {

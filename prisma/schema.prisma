@@ -77,34 +77,8 @@ model Invitation {
   @@index([token])
 }
 
-model Issue {
-  id             String       @id
-  title          String
-  description    String?
-  status         String       @default("open")
-  priority       String       @default("medium")
-  assignedTo     String?
-  createdBy      String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime
-  imageUrl       String?
-  category       String?
-  tags           String[]
-  attachments    Json?
-  comments       Json?
-  dueDate        DateTime?
-  resolvedAt     DateTime?
-  resolution     String?
-  metadata       Json?
-  organizationId String
-  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@index([organizationId, createdBy])
-  @@index([organizationId])
-  @@index([organizationId, status])
-}
-
-model Item {
+model Asset {
   id                  String         @id
   name                String
   description         String?
@@ -115,8 +89,7 @@ model Item {
   longitude           Float?
   createdAt           DateTime       @default(now())
   updatedAt           DateTime
-  evidenceID          String?
-  evidenceDataJson    String?
+  evidenceId          String?
   createdByUserId     String?
   organizationId      String
   User                User?          @relation(fields: [createdByUserId], references: [id])
@@ -150,11 +123,11 @@ model Notification {
 
 model Organization {
   id                String             @id
-  nombre            String
+  name              String
   slug              String             @unique
-  dominio           String?            @unique
-  activa            Boolean            @default(true)
-  configuracion      Json?
+  domain            String?            @unique
+  active            Boolean            @default(true)
+  settings          Json?
   signatureID        String?
   kycURL            String?
   logoUrl           String?
@@ -168,15 +141,14 @@ model Organization {
   Certification     Certification[]
   EventLog          EventLog[]
   Invitation        Invitation[]
-  Issue             Issue[]
-  Item              Item[]
+  Asset              Asset[]
   Notification      Notification[]
   User              User[]
   Webhook           Webhook[]
   ImportJob         ImportJob[]
   SupportMessage    SupportMessage[]
 
-  @@index([activa])
+  @@index([active])
   @@index([slug])
   @@index([signatureID])
 }
@@ -228,7 +200,7 @@ model User {
   status               UserStatus           @default(ACTIVE)
   activationExpiresAt  DateTime?
   Invitation           Invitation[]
-  Item                 Item[]
+  Asset                 Asset[]
   Notification         Notification[]
   PasswordResetToken   PasswordResetToken[]
   Organization         Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -341,15 +313,15 @@ model EnergySource {
   guaranteeOfOriginId String?       // GO / RECs certificate reference
   countryOfOrigin     String?       // ISO 3166-1 alpha-2
   gridEmissionFactor  Float?        // gCO2eq/kWh (IEA, national grid)
-  // Relations — itemId required: every source is a physical asset
-  itemId              String
+  // Relations — assetId required: every source is a physical asset
+  assetId             String
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
 
-  Item              Item               @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  Asset             Asset              @relation(fields: [assetId], references: [id], onDelete: Cascade)
   EnergyConsumption EnergyConsumption[]
 
-  @@index([itemId])
+  @@index([assetId])
 }
 
 enum EnergyCarrier {

@@ -17,9 +17,9 @@ async function isEnergyEnabled(): Promise<boolean> {
 
   const org = await prisma.organization.findUnique({
     where: { id: payload.organizationId },
-    select: { configuracion: true },
+    select: { settings: true },
   });
-  const cfg = org?.configuracion as { modules?: { energy?: boolean } } | null;
+  const cfg = org?.settings as { modules?: { energy?: boolean } } | null;
   return cfg?.modules?.energy === true;
 }
 

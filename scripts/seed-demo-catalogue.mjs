@@ -199,8 +199,8 @@ async function main() {
     orderBy: { createdAt: 'asc' },
   });
   // ── Wipe ───────────────────────────────────────────────────────────────────
-  const before = await prisma.item.count({ where: { organizationId: org.id } });
-  const { count: removed } = await prisma.item.deleteMany({ where: { organizationId: org.id } });
+  const before = await prisma.asset.count({ where: { organizationId: org.id } });
+  const { count: removed } = await prisma.asset.deleteMany({ where: { organizationId: org.id } });
   console.log(`  borrados ${removed}/${before} items (con su cascada)`);
 
   // ── Assets ─────────────────────────────────────────────────────────────────
@@ -215,7 +215,7 @@ async function main() {
     const anchor = a.installed ? at(a.installed) : at('2025-09-12');
     const created = new Date(anchor.getTime() - 25 * 864e5);
 
-    await prisma.item.create({
+    await prisma.asset.create({
       data: {
         id,
         name: `${a.name} · ${a.serial}`,
@@ -223,7 +223,7 @@ async function main() {
         imageUrl: a.img ?? null,
         organizationId: org.id,
         createdByUserId: admin?.id ?? null,
-        evidenceID: itemEvidence(),
+        evidenceId: itemEvidence(),
         createdAt: created,
         updatedAt: created,
         // La posición vive en columnas propias (#37).
@@ -241,8 +241,8 @@ async function main() {
 
   for (const s of SOURCES) {
     const site = SITES[s.site];
-    const itemId = idBySerial[s.serial];
-    if (!itemId) throw new Error(`La fuente "${s.name}" apunta a un activo inexistente`);
+    const assetId = idBySerial[s.serial];
+    if (!assetId) throw new Error(`La fuente "${s.name}" apunta a un activo inexistente`);
 
     const source = await prisma.energySource.create({
       data: {
@@ -258,7 +258,7 @@ async function main() {
         guaranteeOfOriginId: s.go,
         countryOfOrigin: 'ES',
         gridEmissionFactor: s.factor,
-        itemId,
+        assetId,
       },
     });
 

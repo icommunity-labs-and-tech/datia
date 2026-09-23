@@ -116,7 +116,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
 
     // Verificar productos existentes
     for (const row of itemRows) {
-      const existing = await prisma.item.findFirst({
+      const existing = await prisma.asset.findFirst({
         where: { id: row.id.trim(), organizationId },
       });
       if (existing) {

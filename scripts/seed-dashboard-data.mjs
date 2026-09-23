@@ -57,7 +57,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log(`✅ Usando organización: ${organization.nombre} (${organization.id})`);
+  console.log(`✅ Usando organización: ${organization.name} (${organization.id})`);
 
   // Obtener usuarios de la organización
   const users = await prisma.user.findMany({
@@ -73,7 +73,7 @@ async function main() {
   console.log(`✅ Encontrados ${users.length} usuarios`);
 
   // Obtener items existentes
-  const items = await prisma.item.findMany({
+  const items = await prisma.asset.findMany({
     where: { organizationId: organization.id },
     take: 10,
   });
@@ -202,7 +202,7 @@ async function main() {
       entityId = generateId();
       eventData = {
         stateTitle: `Estado ${Math.floor(Math.random() * 1000)}`,
-        itemId: items.length > 0 
+        assetId: items.length > 0 
           ? items[Math.floor(Math.random() * items.length)].id 
           : generateId(),
         userId: user.id,

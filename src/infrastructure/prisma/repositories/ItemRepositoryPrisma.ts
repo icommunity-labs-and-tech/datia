@@ -8,7 +8,7 @@ const toDomain = (i: any): ItemRecord => ({
   name: i.name,
   description: i.description,
   imageUrl: i.imageUrl ?? null,
-  evidenceID: i.evidenceID ?? null,
+  evidenceId: i.evidenceId ?? null,
   createdAt: i.createdAt,
   updatedAt: i.updatedAt,
   latitude: i.latitude ?? null,
@@ -22,7 +22,7 @@ function asJsonObject(value: Prisma.JsonValue): Prisma.JsonObject | null {
 export const itemRepository: ItemRepository = {
   async findByOrganization(organizationId: string): Promise<ItemRecord[]> {
     try {
-      const items = await prisma.item.findMany({ 
+      const items = await prisma.asset.findMany({ 
         where: { organizationId },
         orderBy: { createdAt: 'desc' } 
       });
@@ -34,14 +34,14 @@ export const itemRepository: ItemRepository = {
 
   async getById(id: string, organizationId: string): Promise<ItemRecord | null> {
     try {
-      const item = await prisma.item.findFirst({ 
+      const item = await prisma.asset.findFirst({ 
         where: { id, organizationId },
         select: {
           id: true,
           name: true,
           description: true,
           imageUrl: true,
-          evidenceID: true,
+          evidenceId: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -54,7 +54,7 @@ export const itemRepository: ItemRepository = {
 
   async getDetails(id: string, organizationId: string) {
     try {
-      const item = await prisma.item.findFirst({
+      const item = await prisma.asset.findFirst({
         where: { id, organizationId },
         select: {
           id: true,
@@ -78,7 +78,7 @@ export const itemRepository: ItemRepository = {
 
   async listForExport(organizationId: string, options: { fullPassport: boolean }) {
     try {
-      const rows = await prisma.item.findMany({
+      const rows = await prisma.asset.findMany({
         where: { organizationId },
         include: {
           // The only place name Datia holds today: assets carry coordinates but
@@ -109,7 +109,7 @@ export const itemRepository: ItemRepository = {
     try {
       const now = new Date();
       
-      const item = await prisma.item.create({
+      const item = await prisma.asset.create({
         data: {
           id: input.id,
           organizationId: input.organizationId,
@@ -131,15 +131,15 @@ export const itemRepository: ItemRepository = {
     }
   },
 
-  async updateEvidenceId(id: string, organizationId: string, evidenceID: string): Promise<void> {
+  async updateEvidenceId(id: string, organizationId: string, evidenceId: string): Promise<void> {
     try {
       // Verificar que el item pertenece a la organización
-      const existing = await prisma.item.findFirst({ where: { id, organizationId } });
+      const existing = await prisma.asset.findFirst({ where: { id, organizationId } });
       if (!existing) {
         throw new DbError({ message: 'Item no encontrado' }, 'Item no encontrado');
       }
       
-      await prisma.item.update({ where: { id }, data: { evidenceID } });
+      await prisma.asset.update({ where: { id }, data: { evidenceId } });
     } catch (e) {
       if (e instanceof DbError) throw e;
       throw new DbError(e);
@@ -149,12 +149,12 @@ export const itemRepository: ItemRepository = {
   async delete(id: string, organizationId: string): Promise<void> {
     try {
       // Verificar que el item pertenece a la organización
-      const existing = await prisma.item.findFirst({ where: { id, organizationId } });
+      const existing = await prisma.asset.findFirst({ where: { id, organizationId } });
       if (!existing) {
         throw new DbError({ message: 'Item no encontrado' }, 'Item no encontrado');
       }
       
-      await prisma.item.delete({ where: { id } });
+      await prisma.asset.delete({ where: { id } });
     } catch (e) {
       if (e instanceof DbError) throw e;
       throw new DbError(e);
@@ -170,7 +170,7 @@ export const itemRepository: ItemRepository = {
     try {
       const q = query.trim();
       if (!q) return [];
-      const items = await prisma.item.findMany({
+      const items = await prisma.asset.findMany({
         where: { 
           organizationId,
           OR: [{ name: { contains: q } }, { id: q }] 
@@ -193,7 +193,7 @@ export const itemRepository: ItemRepository = {
 
   async countTotalItems(organizationId: string): Promise<number> {
     try {
-      return await prisma.item.count({ where: { organizationId } });
+      return await prisma.asset.count({ where: { organizationId } });
     } catch (e) {
       throw new DbError(e);
     }
@@ -203,7 +203,7 @@ export const itemRepository: ItemRepository = {
     try {
       // Activity is what has been anchored for the asset: its state history is
       // gone (#63), and a proof is the only dated thing an asset gathers now.
-      return await prisma.item.count({
+      return await prisma.asset.count({
         where: {
           organizationId,
           EnergySource: {
@@ -230,7 +230,7 @@ export const itemRepository: ItemRepository = {
 
   async countItemsByMonth(organizationId: string, startDate: Date, endDate: Date): Promise<number> {
     try {
-      return await prisma.item.count({ 
+      return await prisma.asset.count({ 
         where: { 
           organizationId,
           createdAt: { gte: startDate, lt: endDate } 
@@ -247,7 +247,7 @@ export const itemRepository: ItemRepository = {
       await prisma.$transaction(async (tx) => {
         const now = new Date();
         for (const row of rows) {
-          await tx.item.create({
+          await tx.asset.create({
             data: {
               id: row.id,
               organizationId,
@@ -273,7 +273,7 @@ export const itemRepository: ItemRepository = {
       const whereClause: any = { organizationId };
       if (params.cursor) {
         // Get the cursor item to find its createdAt
-        const cursorItem = await prisma.item.findFirst({
+        const cursorItem = await prisma.asset.findFirst({
           where: { id: params.cursor, organizationId },
           select: { createdAt: true, id: true },
         });
@@ -290,7 +290,7 @@ export const itemRepository: ItemRepository = {
         }
       }
 
-      const items = await prisma.item.findMany({
+      const items = await prisma.asset.findMany({
         where: whereClause,
         select: {
           id: true,
@@ -326,7 +326,7 @@ export const itemRepository: ItemRepository = {
       };
 
       if (params.cursor) {
-        const cursorItem = await prisma.item.findFirst({
+        const cursorItem = await prisma.asset.findFirst({
           where: { 
             id: params.cursor, 
             organizationId,
@@ -352,7 +352,7 @@ export const itemRepository: ItemRepository = {
         }
       }
 
-      const items = await prisma.item.findMany({
+      const items = await prisma.asset.findMany({
         where: whereClause,
         select: {
           id: true,
