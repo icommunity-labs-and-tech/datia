@@ -909,7 +909,22 @@
     "unlocatedInstallation": "Sin ubicar",
     "certifiedRatio": "{certified} de {total} certificados",
     "installationEnergy": "{sources} fuente(s) · {capacity}",
-    "installationSources": "Fuentes de energía"
+    "installationSources": "Fuentes de energía",
+    "create": {
+      "button": "Nuevo activo",
+      "title": "Nuevo activo",
+      "idLabel": "ID",
+      "idHelp": "El identificador con el que trabajas tú; es el que llevará su QR.",
+      "nameLabel": "Nombre",
+      "descriptionLabel": "Descripción",
+      "latitudeLabel": "Latitud",
+      "longitudeLabel": "Longitud",
+      "submit": "Crear activo",
+      "errors": {
+        "required": "El ID y el nombre son obligatorios.",
+        "failed": "No se pudo crear el activo."
+      }
+    }
   },
   "energyHub": {
     "tabs": {
