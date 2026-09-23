@@ -909,7 +909,22 @@
     "unlocatedInstallation": "Unlocated",
     "certifiedRatio": "{certified} of {total} certified",
     "installationEnergy": "{sources} source(s) · {capacity}",
-    "installationSources": "Energy sources"
+    "installationSources": "Energy sources",
+    "create": {
+      "button": "New asset",
+      "title": "New asset",
+      "idLabel": "ID",
+      "idHelp": "The identifier you work with; it is what its QR will point at.",
+      "nameLabel": "Name",
+      "descriptionLabel": "Description",
+      "latitudeLabel": "Latitude",
+      "longitudeLabel": "Longitude",
+      "submit": "Create asset",
+      "errors": {
+        "required": "ID and name are required.",
+        "failed": "Could not create the asset."
+      }
+    }
   },
   "energyHub": {
     "tabs": {

@@ -17,7 +17,7 @@ import {
   ThemeIcon,
   Button,
 } from '@mantine/core';
-import { IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconX } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconX } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getItems } from '@/actions/items';
@@ -25,6 +25,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import InstallationsMap from '@/components/maps/InstallationsMapLazy';
 import { clusterInstallations, type Located } from '@/lib/map/installations';
 import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
+import CreateAssetModal from '@/components/assets/CreateAssetModal';
 import EnergySourcesPanel from '@/components/energy/EnergySourcesPanel';
 import type { EnergySourceRecord, EnergyConsumptionRecord } from '@/domain/energy/EnergyTypes';
 import classes from './ItemsGallery.module.css';
@@ -243,9 +244,12 @@ export default function ItemsGallery({
 
   const hasFilters = Boolean(search.trim() || installationId);
   const clearFilters = () => { setSearch(''); setInstallationId(null); };
+  const [creating, setCreating] = useState(false);
 
   return (
     <>
+      <CreateAssetModal opened={creating} onClose={() => setCreating(false)} onCreated={load} />
+
       <PageHeader
         title={t('title')}
         description={t('description')}
@@ -258,6 +262,9 @@ export default function ItemsGallery({
               value={search}
               onChange={(e) => setSearch(e.currentTarget.value)}
             />
+            <Button leftSection={<IconPlus size={15} stroke={1.9} />} onClick={() => setCreating(true)}>
+              {t('create.button')}
+            </Button>
             {withEnergy && <BmsSimulatorButton />}
           </Group>
         }
