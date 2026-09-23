@@ -1,10 +1,10 @@
 'use server';
 
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 import { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
-export async function getItemsPaginated(params: CursorPaginationParams): Promise<CursorPaginationResult<{
+export async function getAssetsPaginated(params: CursorPaginationParams): Promise<CursorPaginationResult<{
   id: string;
   name: string;
   description: string | null;
@@ -12,6 +12,6 @@ export async function getItemsPaginated(params: CursorPaginationParams): Promise
   createdAt: Date;
 }>> {
   const organizationId = await requireOrganizationId();
-  return await itemRepository.listPaginated(organizationId, params);
+  return await assetRepository.listPaginated(organizationId, params);
 }
 

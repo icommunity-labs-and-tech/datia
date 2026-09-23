@@ -1,15 +1,15 @@
 import { DashboardService } from './DashboardService';
 import type { DashboardKPIs, MonthlyActivity } from '@/types/dashboard';
 import type { UserRepository } from '@/domain/users/UserRepository';
-import type { ItemRepository } from '@/domain/items/ItemRepository';
+import type { AssetRepository } from '@/domain/assets/AssetRepository';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 import { certificationCounts } from '@/lib/certification/queries';
 
 export function createDashboardServiceImpl(deps: {
   userRepository: UserRepository;
-  itemRepository: ItemRepository;
+  assetRepository: AssetRepository;
 }): DashboardService {
-  const { userRepository: userRepo, itemRepository: itemRepo } = deps;
+  const { userRepository: userRepo, assetRepository: itemRepo } = deps;
 
   return {
     async getKPIs(): Promise<DashboardKPIs> {

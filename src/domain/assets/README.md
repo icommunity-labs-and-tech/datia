@@ -1,10 +1,10 @@
-# Items Domain Service
+# Assets Domain Service
 
-Handles item creation and business rules using Effect.ts.
+Handles asset creation and business rules using Effect.ts.
 
 ## Purpose
 
-The Items service manages the complete item creation flow including:
+The Items service manages the complete asset creation flow including:
 
 - **Input validation** and parsing
 - **Business rule enforcement** (unique IDs, user verification)
@@ -15,30 +15,30 @@ The Items service manages the complete item creation flow including:
 ## Interface
 
 ```typescript
-export class ItemService extends Context.Tag('ItemService')<
-  ItemService,
+export class AssetService extends Context.Tag('AssetService')<
+  AssetService,
   {
-    readonly createItem: (data: CreateItemRequest) => Effect<ItemResponse, ItemError>;
+    readonly createItem: (data: CreateAssetRequest) => Effect<AssetResponse, ItemError>;
   }
 >() {}
 ```
 
 ## Methods
 
-### `createItem(data: CreateItemRequest)`
-Complete item creation flow:
+### `createItem(data: CreateAssetRequest)`
+Complete asset creation flow:
 1. **Validation**: Checks required fields and business rules
 2. **User Verification**: Ensures user has valid signature and KYC status
-3. **Database Creation**: Creates item with rollback capability
+3. **Database Creation**: Creates asset with rollback capability
 4. **Evidence Creation**: Generates and submits evidence to iCommunity
-5. **Update**: Links evidence ID to item
+5. **Update**: Links evidence ID to asset
 6. **Cache Invalidation**: Refreshes UI cache
 
 ## Types
 
-### `CreateItemRequest`
+### `CreateAssetRequest`
 ```typescript
-interface CreateItemRequest {
+interface CreateAssetRequest {
   name: string;
   description: string;
   categoryId: string;
@@ -49,9 +49,9 @@ interface CreateItemRequest {
 }
 ```
 
-### `ItemResponse`
+### `AssetResponse`
 ```typescript
-interface ItemResponse {
+interface AssetResponse {
   id: string;
   name: string;
   description: string;
@@ -63,17 +63,17 @@ interface ItemResponse {
 
 ## Error Types
 
-- **`ItemInputError`** - Missing required fields (name, categoryId, customId)
-- **`ItemAlreadyExistsError`** - Duplicate item ID
+- **`AssetInputError`** - Missing required fields (name, categoryId, customId)
+- **`AssetAlreadyExistsError`** - Duplicate asset ID
 - **`UserNotVerifiedError`** - User lacks signature or KYC verification
-- **`ItemCreationRollbackError`** - Failed to rollback after evidence failure
+- **`AssetCreationRollbackError`** - Failed to rollback after evidence failure
 
 ## Business Rules
 
-1. **Unique ID**: Item ID must be unique across the system
+1. **Unique ID**: Asset ID must be unique across the system
 2. **User Verification**: User must have valid signature and VERIFIED status
 3. **Required Fields**: Name, description, and category are mandatory
-4. **Rollback**: If evidence creation fails, item is automatically deleted
+4. **Rollback**: If evidence creation fails, asset is automatically deleted
 
 ## Dependencies
 
@@ -85,16 +85,16 @@ interface ItemResponse {
 ## Usage
 
 ```typescript
-import { ItemService } from '@/domain/items/ItemService';
-import { ItemServiceLive } from '@/domain/items/ItemServiceLive';
+import { AssetService } from '@/domain/assets/AssetService';
+import { ItemServiceLive } from '@/domain/assets/ItemServiceLive';
 
 const program = Effect.gen(function* (_) {
-  const itemService = yield* _(ItemService);
+  const itemService = yield* _(AssetService);
   return yield* _(itemService.createItem({
-    name: 'Test Item',
+    name: 'Test Asset',
     description: 'Test Description',
     categoryId: 'cat-123',
-    customId: 'item-123',
+    customId: 'asset-123',
     imageUrl: 'https://example.com/image.jpg'
   }));
 }).pipe(Effect.provide(ItemServiceLive));
@@ -103,6 +103,6 @@ const program = Effect.gen(function* (_) {
 ## Implementation Details
 
 - **Declarative Rollback**: Uses `Effect.acquireRelease` for automatic cleanup
-- **Span Tracing**: Includes `item-creation.program` and `item-creation.evidence.create` spans
+- **Span Tracing**: Includes `asset-creation.program` and `asset-creation.evidence.create` spans
 - **Error Mapping**: Converts infrastructure errors to domain errors
 - **Retry Logic**: Inherits retry behavior from Evidence service

@@ -1,7 +1,7 @@
 'use server';
 
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
 import { recordEvent } from '@/lib/services/events';
@@ -41,7 +41,7 @@ export async function createBmsSource(
   if (!assetId) throw new Error('Activo requerido');
 
   const organizationId = await requireOrganizationId();
-  const item = await itemRepository.getById(assetId, organizationId);
+  const item = await assetRepository.getById(assetId, organizationId);
   if (!item) throw new Error('Activo no encontrado');
 
   const profile = resolveBmsProfile(profileId);

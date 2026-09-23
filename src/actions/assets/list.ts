@@ -1,15 +1,15 @@
 'use server';
 
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { certifiedItemIds } from '@/lib/certification/queries';
+import { certifiedAssetIds } from '@/lib/certification/queries';
 
-export async function getItems() {
+export async function getAssets() {
   try {
     const organizationId = await requireOrganizationId();
     const [rows, certified] = await Promise.all([
-      itemRepository.listForExport(organizationId, { fullPassport: false }),
-      certifiedItemIds(organizationId),
+      assetRepository.listForExport(organizationId, { fullPassport: false }),
+      certifiedAssetIds(organizationId),
     ]);
     return rows.map((r: any) => ({
       id: r.id,
@@ -24,7 +24,7 @@ export async function getItems() {
       siteName: r.siteName ?? null,
     }));
   } catch (error) {
-    console.error('Error ejecutando getItems:', error);
+    console.error('Error ejecutando getAssets:', error);
     throw error;
   }
 }

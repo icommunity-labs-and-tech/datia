@@ -4,12 +4,12 @@ import { parseCsv, type ParsedCsvRow } from '@/lib/csv';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 import { prisma } from '@/lib/prisma';
 import { InvalidCsvError } from '@/lib/import-job/errors';
-import { createItemWithEvidence } from '@/domain/items/ItemCreationHelper';
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
+import { createAssetWithEvidence } from '@/domain/assets/AssetCreationHelper';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
-import { OrganizationNotVerifiedError } from '@/domain/items/errors';
+import { OrganizationNotVerifiedError } from '@/domain/assets/errors';
 import { revalidatePath } from 'next/cache';
 import { MAX_CSV_FILE_SIZE, MAX_CSV_ROWS, formatFileSize, formatMaxFileSize } from './csvImportLimits';
 
@@ -64,7 +64,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
 
     const organizationId = await requireOrganizationId();
     
-    // Convertir a formato de filas de items
+    // Convertir a formato de filas de activos
     const itemRows = parsedRows.map((row) => ({
       line: row.line,
       id: row.values['id']?.trim() ?? '',
@@ -131,17 +131,17 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
       );
     }
 
-    // Crear items usando el servicio (con evidencia)
+    // Crear activos usando el servicio (con evidencia)
     // Nota: No podemos usar transacción aquí porque la creación de evidencia requiere llamadas externas
-    // El helper createItemWithEvidence maneja rollbacks automáticamente si falla la creación de evidencia
+    // El helper createAssetWithEvidence maneja rollbacks automáticamente si falla la creación de evidencia
     const evidenceService = createEvidenceServiceImpl({ icommunityService });
     const createdItems: string[] = [];
     const errors: string[] = [];
     
     for (const row of itemRows) {
       try {
-        await createItemWithEvidence(
-          { itemRepository, userRepository, evidenceService },
+        await createAssetWithEvidence(
+          { assetRepository, userRepository, evidenceService },
           {
             organizationId,
             id: row.id.trim(),
@@ -154,7 +154,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
         createdItems.push(row.id.trim());
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        errors.push(`Línea ${row.line}: Error al crear item "${row.id}": ${errorMessage}`);
+        errors.push(`Línea ${row.line}: Error al crear asset "${row.id}": ${errorMessage}`);
         
         // Si es un error crítico (organización no verificada), detener la importación
         if (error instanceof OrganizationNotVerifiedError) {
@@ -168,16 +168,16 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
     
     const createdCount = createdItems.length;
     
-    // Si hay errores pero se crearon algunos items, reportar ambos
+    // Si hay errores pero se crearon algunos activos, reportar ambos
     if (errors.length > 0 && createdCount > 0) {
       return {
         success: true,
         createdCount,
-        errors: [`Se crearon ${createdCount} items, pero hubo ${errors.length} error(es):`, ...errors],
+        errors: [`Se crearon ${createdCount} activos, pero hubo ${errors.length} error(es):`, ...errors],
       };
     }
     
-    // Si hay errores y no se creó ningún item, fallar
+    // Si hay errores y no se creó ningún asset, fallar
     if (errors.length > 0 && createdCount === 0) {
       return {
         success: false,

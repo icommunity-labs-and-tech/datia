@@ -1,7 +1,7 @@
-import { ItemRepository } from './ItemRepository';
+import { AssetRepository } from './AssetRepository';
 import { UserRepository } from '../users/UserRepository';
 import { EvidenceService } from '../evidence/EvidenceService';
-import { ItemCreationRollbackError, ItemInputError, OrganizationNotVerifiedError } from './errors';
+import { AssetCreationRollbackError, AssetInputError, OrganizationNotVerifiedError } from './errors';
 import { getCurrentUserWithDetails } from '@/lib/auth/shared/session';
 import { prisma } from '@/lib/prisma';
 
@@ -27,19 +27,19 @@ export interface CreateItemWithEvidenceResult {
 }
 
 /**
- * Helper function to create an item with evidence.
+ * Helper function to create an asset with evidence.
  * This encapsulates creating an asset and creating evidence.
- * Can be used both for single item creation and bulk imports.
+ * Can be used both for single asset creation and bulk imports.
  */
-export async function createItemWithEvidence(
+export async function createAssetWithEvidence(
   deps: {
-    itemRepository: ItemRepository;
+    assetRepository: AssetRepository;
     userRepository: UserRepository;
     evidenceService: EvidenceService;
   },
   input: CreateItemWithEvidenceInput
 ): Promise<CreateItemWithEvidenceResult> {
-  const { itemRepository: itemRepo, userRepository: userRepo, evidenceService: evidence } = deps;
+  const { assetRepository: itemRepo, userRepository: userRepo, evidenceService: evidence } = deps;
 
   const { organizationId } = input;
 
@@ -48,7 +48,7 @@ export async function createItemWithEvidence(
   if (userId === undefined) {
     const currentUser = await getCurrentUserWithDetails();
     if (!currentUser?.id) {
-      throw new ItemInputError('name', 'No se pudo obtener el usuario actual');
+      throw new AssetInputError('name', 'No se pudo obtener el usuario actual');
     }
     const user = await userRepo.getById(currentUser.id);
     userId = user.id;
@@ -65,7 +65,7 @@ export async function createItemWithEvidence(
   });
 
   if (!organization) {
-    throw new ItemInputError('name', 'Organización no encontrada');
+    throw new AssetInputError('name', 'Organización no encontrada');
   }
 
   if (!organization.signatureID) {
@@ -80,13 +80,13 @@ export async function createItemWithEvidence(
     throw new OrganizationNotVerifiedError(
       organization.id,
       'not_verified',
-      'La firma de tu organización no está verificada. Completa el proceso KYC de la organización antes de crear items.'
+      'La firma de tu organización no está verificada. Completa el proceso KYC de la organización antes de crear activos.'
     );
   }
 
   const signatureID = organization.signatureID;
 
-  // Create item in DB
+  // Create asset in DB
   let created;
   try {
     created = await itemRepo.create({
@@ -100,10 +100,10 @@ export async function createItemWithEvidence(
       createdByUserId: userId,
     });
   } catch (e) {
-    throw new ItemCreationRollbackError(
+    throw new AssetCreationRollbackError(
       input.id,
       'db_error',
-      `Failed to create item: ${e}`
+      `Failed to create asset: ${e}`
     );
   }
 
@@ -124,7 +124,7 @@ export async function createItemWithEvidence(
     try {
       evidenceId = await evidence.createItemEvidence({
         signatureID,
-        title: 'Creación de Item',
+        title: 'Creación de Asset',
         description: created.description || '',
         imageUrls: created.imageUrl ? [created.imageUrl] : [],
         metadata: {
@@ -135,21 +135,21 @@ export async function createItemWithEvidence(
         },
       });
 
-      // Update item with evidenceId
+      // Update asset with evidenceId
       try {
         await itemRepo.updateEvidenceId(created.id, organizationId, evidenceId);
       } catch (error) {
         await rollback();
-        throw new ItemCreationRollbackError(
+        throw new AssetCreationRollbackError(
           created.id,
           'db_error',
-          `Failed to update item with evidence: ${error}`
+          `Failed to update asset with evidence: ${error}`
         );
       }
     } catch (e) {
       await rollback();
-      if (e instanceof ItemCreationRollbackError) throw e;
-      throw new ItemCreationRollbackError(
+      if (e instanceof AssetCreationRollbackError) throw e;
+      throw new AssetCreationRollbackError(
         created.id,
         'evidence_failed',
         `Evidence creation failed: ${e}`
@@ -164,7 +164,7 @@ export async function createItemWithEvidence(
       evidenceId,
     };
   } catch (e) {
-    // If we get here, rollback was already called or item creation failed
+    // If we get here, rollback was already called or asset creation failed
     throw e;
   }
 }

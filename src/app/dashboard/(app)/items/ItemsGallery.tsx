@@ -20,7 +20,7 @@ import {
 import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconX } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { getItems } from '@/actions/items';
+import { getAssets } from '@/actions/assets';
 import PageHeader from '@/components/layout/PageHeader';
 import InstallationsMap from '@/components/maps/InstallationsMapLazy';
 import { clusterInstallations, type Located } from '@/lib/map/installations';
@@ -161,7 +161,7 @@ export default function ItemsGallery({
 
   const load = useCallback(async () => {
     try {
-      const data = await getItems();
+      const data = await getAssets();
       setItems(data ?? []);
     } finally {
       setLoading(false);

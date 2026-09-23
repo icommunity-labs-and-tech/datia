@@ -15,7 +15,7 @@ export interface ItemCategory {
   description?: string;
 }
 
-export type ItemData = {
+export type AssetData = {
   id: string;
   name: string;
   description: string | null;

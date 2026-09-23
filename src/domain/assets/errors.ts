@@ -1,16 +1,16 @@
-export class ItemInputError extends Error {
-  readonly _tag = 'ItemInputError';
+export class AssetInputError extends Error {
+  readonly _tag = 'AssetInputError';
   constructor(public readonly field: 'name' | 'categoryId' | 'customId' | 'description', message: string) {
     super(message);
-    this.name = 'ItemInputError';
+    this.name = 'AssetInputError';
   }
 }
 
-export class ItemAlreadyExistsError extends Error {
-  readonly _tag = 'ItemAlreadyExistsError';
+export class AssetAlreadyExistsError extends Error {
+  readonly _tag = 'AssetAlreadyExistsError';
   constructor(public readonly assetId: string, message: string) {
     super(message);
-    this.name = 'ItemAlreadyExistsError';
+    this.name = 'AssetAlreadyExistsError';
   }
 }
 
@@ -30,10 +30,10 @@ export class OrganizationNotVerifiedError extends Error {
   }
 }
 
-export class ItemCreationRollbackError extends Error {
-  readonly _tag = 'ItemCreationRollbackError';
+export class AssetCreationRollbackError extends Error {
+  readonly _tag = 'AssetCreationRollbackError';
   constructor(public readonly assetId: string, public readonly reason: 'evidence_failed' | 'db_error', message: string) {
     super(message);
-    this.name = 'ItemCreationRollbackError';
+    this.name = 'AssetCreationRollbackError';
   }
 }

@@ -10,7 +10,7 @@
  *   - IBS/iCommunity evidence service → never called in sandbox (verified via mock assertion)
  *
  * Real adapters used:
- *   - ItemRepositoryFilesystem
+ *   - AssetRepositoryFilesystem
  */
 
 import { existsSync, unlinkSync } from 'fs';
@@ -66,7 +66,7 @@ function makeRequest(method: string, path: string, body?: unknown): NextRequest 
 }
 
 function cleanSandboxFiles() {
-  for (const file of ['items.json', 'states.json', 'tokens.json']) {
+  for (const file of ['assets.json', 'tokens.json']) {
     const filePath = join(SANDBOX_DIR, file);
     if (existsSync(filePath)) unlinkSync(filePath);
   }
@@ -99,7 +99,7 @@ describe('Sandbox product lifecycle', () => {
     expect(body.name).toBe('Panel Solar 300W');
 
     // Filesystem file must exist
-    expect(existsSync(join(SANDBOX_DIR, 'items.json'))).toBe(true);
+    expect(existsSync(join(SANDBOX_DIR, 'assets.json'))).toBe(true);
   });
 
   it('2. retrieves the product from the sandbox filesystem', async () => {

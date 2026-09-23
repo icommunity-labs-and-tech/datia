@@ -11,14 +11,14 @@ vi.mock('@/lib/auth/tenant', async () => {
   const actual = await vi.importActual<typeof import('@/lib/auth/tenant')>('@/lib/auth/tenant');
   return { ...actual, requireOrganizationId: mockRequireOrg };
 });
-vi.mock('@/domain/items/ItemServiceImpl', () => ({
-  createItemServiceImpl: () => ({ createItem: mockCreateItem }),
+vi.mock('@/domain/assets/AssetServiceImpl', () => ({
+  createAssetServiceImpl: () => ({ createItem: mockCreateItem }),
 }));
 vi.mock('@/lib/services/events', () => ({ recordEvent: mockRecordEvent }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
-import { createAsset } from '@/actions/items/createAsset';
-import { ItemAlreadyExistsError, OrganizationNotVerifiedError } from '@/domain/items/errors';
+import { createAsset } from '@/actions/assets/createAsset';
+import { AssetAlreadyExistsError, OrganizationNotVerifiedError } from '@/domain/assets/errors';
 
 const input = { id: ' A-1 ', name: ' Turbina ', description: ' de prueba ', latitude: 41.31, longitude: -1.55 };
 
@@ -58,7 +58,7 @@ describe('createAsset', () => {
   });
 
   it('passes on what the domain says instead of a generic error', async () => {
-    mockCreateItem.mockRejectedValue(new ItemAlreadyExistsError('A-1', 'El ID "A-1" ya existe.'));
+    mockCreateItem.mockRejectedValue(new AssetAlreadyExistsError('A-1', 'El ID "A-1" ya existe.'));
     expect(await createAsset(input)).toEqual({ success: false, error: 'El ID "A-1" ya existe.' });
 
     mockCreateItem.mockRejectedValue(new OrganizationNotVerifiedError('org-a', 'no_signature', 'Completa el KYC.'));

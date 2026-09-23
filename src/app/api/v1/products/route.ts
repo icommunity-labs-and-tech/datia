@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createItemServiceImpl } from '@/domain/items/ItemServiceImpl';
+import { createAssetServiceImpl } from '@/domain/assets/AssetServiceImpl';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
-import { itemRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/ItemRepositoryFilesystem';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
+import { assetRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/AssetRepositoryFilesystem';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
-import { ItemInputError, ItemAlreadyExistsError, UserNotVerifiedError, ItemCreationRollbackError } from '@/domain/items/errors';
+import { AssetInputError, AssetAlreadyExistsError, UserNotVerifiedError, AssetCreationRollbackError } from '@/domain/assets/errors';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 
 /**
@@ -195,7 +195,7 @@ export async function GET(request: NextRequest) {
 
     // ── Sandbox: read from filesystem only ──────────────────────────────
     if (auth.isSandbox) {
-      const repo = itemRepositoryFilesystem;
+      const repo = assetRepositoryFilesystem;
       let result;
       if (q) {
         result = await repo.searchPaginated(q, auth.organizationId, paginationParams);
@@ -208,11 +208,11 @@ export async function GET(request: NextRequest) {
     // ── Production: delegate to server actions (Prisma) ─────────────────
     let result;
     if (q) {
-      const { searchItemsPaginated } = await import('@/actions/items/searchPaginated');
-      result = await searchItemsPaginated(q, paginationParams);
+      const { searchAssetsPaginated } = await import('@/actions/assets/searchPaginated');
+      result = await searchAssetsPaginated(q, paginationParams);
     } else {
-      const { getItemsPaginated } = await import('@/actions/items/listPaginated');
-      result = await getItemsPaginated(paginationParams);
+      const { getAssetsPaginated } = await import('@/actions/assets/listPaginated');
+      result = await getAssetsPaginated(paginationParams);
     }
 
     return NextResponse.json(result);
@@ -282,14 +282,14 @@ export async function POST(request: NextRequest) {
 
     // ── Sandbox: write to filesystem, skip evidence service ─────────────
     if (auth.isSandbox) {
-      const existing = await itemRepositoryFilesystem.getById(createRequest.customId, organizationId);
+      const existing = await assetRepositoryFilesystem.getById(createRequest.customId, organizationId);
       if (existing) {
         return NextResponse.json(
           { error: `Item with ID "${createRequest.customId}" already exists in the sandbox`, code: 'ITEM_EXISTS' },
           { status: 409 }
         );
       }
-      const sandboxItem = await itemRepositoryFilesystem.create({
+      const sandboxItem = await assetRepositoryFilesystem.create({
         id: createRequest.customId,
         organizationId,
         name: createRequest.name,
@@ -312,8 +312,8 @@ export async function POST(request: NextRequest) {
 
     // ── Production: full service with evidence ───────────────────────────
     const evidenceService = createEvidenceServiceImpl({ icommunityService });
-    const itemService = createItemServiceImpl({
-      itemRepository,
+    const itemService = createAssetServiceImpl({
+      assetRepository,
       userRepository,
       evidenceService,
     });
@@ -326,13 +326,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     // Map domain errors to HTTP responses
-    if (error instanceof ItemInputError) {
+    if (error instanceof AssetInputError) {
       return NextResponse.json(
         { error: error.message, code: 'VALIDATION_ERROR' },
         { status: 400 }
       );
     }
-    if (error instanceof ItemAlreadyExistsError) {
+    if (error instanceof AssetAlreadyExistsError) {
       return NextResponse.json(
         { error: error.message, code: 'ITEM_EXISTS' },
         { status: 409 }
@@ -344,7 +344,7 @@ export async function POST(request: NextRequest) {
         { status: 403 }
       );
     }
-    if (error instanceof ItemCreationRollbackError) {
+    if (error instanceof AssetCreationRollbackError) {
       return NextResponse.json(
         { error: error.message, code: 'CREATION_FAILED' },
         { status: 500 }

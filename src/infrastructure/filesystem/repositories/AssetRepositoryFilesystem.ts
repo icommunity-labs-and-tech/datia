@@ -1,7 +1,7 @@
 /**
- * Filesystem-backed implementation of ItemRepository.
+ * Filesystem-backed implementation of AssetRepository.
  *
- * Stores items as JSON in `$TMPDIR/datia-sandbox/items.json`.
+ * Stores assets as JSON in `$TMPDIR/datia-sandbox/assets.json`.
  * Intended exclusively for the sandbox/docs-preview context — zero DB impact.
  * Dashboard-specific analytics methods (counts, exports, backups) return
  * stubs since they are not exercised through the public API.
@@ -11,14 +11,14 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import type {
-  ItemRepository,
-  ItemRecord,
-  CreateItemInput,
-} from '@/domain/items/ItemRepository';
+  AssetRepository,
+  AssetRecord,
+  CreateAssetInput,
+} from '@/domain/assets/AssetRepository';
 import type { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
 const SANDBOX_DIR = join(tmpdir(), 'datia-sandbox');
-const ITEMS_FILE = join(SANDBOX_DIR, 'items.json');
+const ASSETS_FILE = join(SANDBOX_DIR, 'assets.json');
 
 // ── Storage helpers ────────────────────────────────────────────────────────
 
@@ -26,9 +26,9 @@ function ensureDir(): void {
   mkdirSync(SANDBOX_DIR, { recursive: true });
 }
 
-function readAll(): ItemRecord[] {
+function readAll(): AssetRecord[] {
   try {
-    const raw = readFileSync(ITEMS_FILE, 'utf-8');
+    const raw = readFileSync(ASSETS_FILE, 'utf-8');
     const parsed: Array<Record<string, unknown>> = JSON.parse(raw);
     return parsed.map((r) => ({
       id: r.id as string,
@@ -46,19 +46,19 @@ function readAll(): ItemRecord[] {
   }
 }
 
-function writeAll(items: ItemRecord[]): void {
+function writeAll(assets: AssetRecord[]): void {
   ensureDir();
-  writeFileSync(ITEMS_FILE, JSON.stringify(items, null, 2), 'utf-8');
+  writeFileSync(ASSETS_FILE, JSON.stringify(assets, null, 2), 'utf-8');
 }
 
 // Extended record stored on disk includes organizationId for multi-tenant filtering
-interface PersistedItem extends ItemRecord {
+interface PersistedAsset extends AssetRecord {
   organizationId: string;
 }
 
-function readRaw(): PersistedItem[] {
+function readRaw(): PersistedAsset[] {
   try {
-    const raw = readFileSync(ITEMS_FILE, 'utf-8');
+    const raw = readFileSync(ASSETS_FILE, 'utf-8');
     const parsed: Array<Record<string, unknown>> = JSON.parse(raw);
     return parsed.map((r) => ({
       id: r.id as string,
@@ -77,12 +77,12 @@ function readRaw(): PersistedItem[] {
   }
 }
 
-function writeRaw(items: PersistedItem[]): void {
+function writeRaw(assets: PersistedAsset[]): void {
   ensureDir();
-  writeFileSync(ITEMS_FILE, JSON.stringify(items, null, 2), 'utf-8');
+  writeFileSync(ASSETS_FILE, JSON.stringify(assets, null, 2), 'utf-8');
 }
 
-function toRecord(p: PersistedItem): ItemRecord {
+function toRecord(p: PersistedAsset): AssetRecord {
   const { organizationId: _org, ...record } = p;
   return record;
 }
@@ -90,11 +90,11 @@ function toRecord(p: PersistedItem): ItemRecord {
 // ── Cursor pagination helper ───────────────────────────────────────────────
 
 function paginateItems<T extends { id: string; createdAt: Date }>(
-  items: T[],
+  assets: T[],
   params: CursorPaginationParams
 ): CursorPaginationResult<T> {
   const limit = params.limit ?? 20;
-  const sorted = [...items].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  const sorted = [...assets].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   let startIdx = 0;
   if (params.cursor) {
     const idx = sorted.findIndex((i) => i.id === params.cursor);
@@ -111,11 +111,11 @@ function paginateItems<T extends { id: string; createdAt: Date }>(
 
 // ── Repository implementation ──────────────────────────────────────────────
 
-export const itemRepositoryFilesystem: ItemRepository = {
-  async create(input: CreateItemInput): Promise<ItemRecord> {
+export const assetRepositoryFilesystem: AssetRepository = {
+  async create(input: CreateAssetInput): Promise<AssetRecord> {
     const all = readRaw();
     const now = new Date();
-    const record: PersistedItem = {
+    const record: PersistedAsset = {
       id: input.id,
       organizationId: input.organizationId,
       name: input.name,
@@ -131,12 +131,12 @@ export const itemRepositoryFilesystem: ItemRepository = {
     return toRecord(record);
   },
 
-  async getById(id: string, organizationId: string): Promise<ItemRecord | null> {
+  async getById(id: string, organizationId: string): Promise<AssetRecord | null> {
     const found = readRaw().find((r) => r.id === id && r.organizationId === organizationId);
     return found ? toRecord(found) : null;
   },
 
-  async findByOrganization(organizationId: string): Promise<ItemRecord[]> {
+  async findByOrganization(organizationId: string): Promise<AssetRecord[]> {
     return readRaw()
       .filter((r) => r.organizationId === organizationId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
@@ -148,17 +148,17 @@ export const itemRepositoryFilesystem: ItemRepository = {
   },
 
   async updateEvidenceId(_id, _organizationId, _evidenceID): Promise<void> {
-    // No-op: sandbox items don't get blockchain evidence
+    // No-op: sandbox assets don't get blockchain evidence
   },
 
   async getDetails(id: string, organizationId: string) {
-    const item = readRaw().find((r) => r.id === id && r.organizationId === organizationId);
-    if (!item) return null;
+    const asset = readRaw().find((r) => r.id === id && r.organizationId === organizationId);
+    if (!asset) return null;
     return {
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      imageUrl: item.imageUrl,
+      id: asset.id,
+      name: asset.name,
+      description: asset.description,
+      imageUrl: asset.imageUrl,
       states: [],
       _count: { states: 0 },
     };
@@ -208,7 +208,7 @@ export const itemRepositoryFilesystem: ItemRepository = {
   },
 
   async listPaginated(organizationId, params) {
-    const items = readRaw()
+    const assets = readRaw()
       .filter((r) => r.organizationId === organizationId)
       .map((r) => ({
         id: r.id,
@@ -217,13 +217,13 @@ export const itemRepositoryFilesystem: ItemRepository = {
         imageUrl: r.imageUrl,
         createdAt: r.createdAt,
       }));
-    return paginateItems(items, params);
+    return paginateItems(assets, params);
   },
 
 
   async searchPaginated(query, organizationId, params) {
     const q = query.toLowerCase();
-    const items = readRaw()
+    const assets = readRaw()
       .filter(
         (r) =>
           r.organizationId === organizationId &&
@@ -236,6 +236,6 @@ export const itemRepositoryFilesystem: ItemRepository = {
         imageUrl: r.imageUrl,
         createdAt: r.createdAt,
       }));
-    return paginateItems(items, params);
+    return paginateItems(assets, params);
   },
 };

@@ -1,13 +1,13 @@
-import { ItemImportService, type ParsedItemRow, type ItemImportResult, ItemImportValidationError, type ImportItemRow } from './ItemImportService';
-import type { ItemRepository } from './ItemRepository';
+import { AssetImportService, type ParsedAssetRow, type AssetImportResult, AssetImportValidationError, type ImportAssetRow } from './AssetImportService';
+import type { AssetRepository } from './AssetRepository';
 
-export function createItemImportServiceImpl(deps: {
-  itemRepository: ItemRepository;
-}): ItemImportService {
-  const { itemRepository: itemRepo } = deps;
+export function createAssetImportServiceImpl(deps: {
+  assetRepository: AssetRepository;
+}): AssetImportService {
+  const { assetRepository: itemRepo } = deps;
 
   return {
-    async importItemsFromParsedRows(organizationId: string, rows: ParsedItemRow[]): Promise<ItemImportResult> {
+    async importAssetsFromParsedRows(organizationId: string, rows: ParsedAssetRow[]): Promise<AssetImportResult> {
       if (!rows.length) {
         return { createdCount: 0 };
       }
@@ -36,13 +36,13 @@ export function createItemImportServiceImpl(deps: {
       }
 
       if (errors.length > 0) {
-        throw new ItemImportValidationError(
+        throw new AssetImportValidationError(
           'Errores de validación en las filas del CSV',
           errors
         );
       }
 
-      // Check for existing items
+      // Check for existing activos
       const existingConflicts: string[] = [];
       for (const row of rows) {
         try {
@@ -54,14 +54,14 @@ export function createItemImportServiceImpl(deps: {
       }
 
       if (existingConflicts.length > 0) {
-        throw new ItemImportValidationError(
+        throw new AssetImportValidationError(
           'Se encontraron ids ya existentes; no se importó ningún item',
           existingConflicts
         );
       }
 
       // Build import rows
-      const importRows: ImportItemRow[] = rows.map((r) => ({
+      const importRows: ImportAssetRow[] = rows.map((r) => ({
         id: r.id.trim(),
         name: r.name.trim(),
         description: r.description ?? null,

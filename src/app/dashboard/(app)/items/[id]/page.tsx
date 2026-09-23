@@ -30,13 +30,13 @@ import {
   IconClock,
   IconArrowLeft,
 } from '@tabler/icons-react';
-import { getItem, deleteItem, getItemDetails } from '@/actions/items';
-import { getItemCertifications } from '@/actions/certifications/listByItem';
-import type { ItemCertification } from '@/lib/certification/queries';
+import { getAsset, deleteAsset, getAssetDetails } from '@/actions/assets';
+import { getAssetCertifications } from '@/actions/certifications/listByAsset';
+import type { AssetCertification } from '@/lib/certification/queries';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { getCascadeInfo } from '@/config/entityConfig';
-import ItemQrModal from '@/components/ItemQrModal';
+import AssetQrModal from '@/components/AssetQrModal';
 import ImageDisplay from '@/components/ImageDisplay';
 import PageHeader from '@/components/layout/PageHeader';
 import Link from 'next/link';
@@ -49,7 +49,7 @@ export default function ItemDetailPage() {
   const router = useRouter();
   const assetId = id as string;
   const [item, setItem] = useState<any>(null);
-  const [certifications, setCertifications] = useState<ItemCertification[]>([]);
+  const [certifications, setCertifications] = useState<AssetCertification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showQr, setShowQr] = useState(false);
 
@@ -60,7 +60,7 @@ export default function ItemDetailPage() {
     openDeleteModal,
     closeDeleteModal,
     handleDelete,
-  } = useDeleteEntity(deleteItem, {
+  } = useDeleteEntity(deleteAsset, {
     entityName: t('deleteEntityName'),
     redirectPath: '/dashboard/items',
     onSuccess: () => {
@@ -80,8 +80,8 @@ export default function ItemDetailPage() {
       setIsLoading(true);
       try {
         const [itemData, certificationData] = await Promise.all([
-          getItem(assetId).catch(() => null),
-          getItemCertifications(assetId).catch(() => []),
+          getAsset(assetId).catch(() => null),
+          getAssetCertifications(assetId).catch(() => []),
         ]);
         if (itemData) setItem(itemData);
         setCertifications(certificationData);
@@ -94,7 +94,7 @@ export default function ItemDetailPage() {
 
   const openDeleteModalWithDetails = async () => {
     try {
-      const detailedItem = await getItemDetails(assetId);
+      const detailedItem = await getAssetDetails(assetId);
       setItem(detailedItem);
       openDeleteModal(detailedItem);
     } catch {
@@ -306,7 +306,7 @@ export default function ItemDetailPage() {
         isLoading={isDeleting}
       />
 
-      <ItemQrModal
+      <AssetQrModal
         show={showQr}
         onHide={() => setShowQr(false)}
         assetId={assetId}

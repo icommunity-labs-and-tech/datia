@@ -5,14 +5,14 @@ import { Modal, Button, Group, Stack, Text } from '@mantine/core';
 import { IconQrcode, IconCopy, IconDownload } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 
-type ItemQrModalProps = {
+type AssetQrModalProps = {
   show: boolean;
   onHide: () => void;
   assetId: string;
   itemName?: string;
 };
 
-export default function ItemQrModal({ show, onHide, assetId, itemName }: ItemQrModalProps) {
+export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQrModalProps) {
   const t = useTranslations('itemDetail.qr');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiTracking } from '@/lib/auth/api-tokens/withApiTracking';
-import { getItem } from '@/actions/items';
+import { getAsset } from '@/actions/assets';
 import { decodeUrlParam } from '@/lib/api/decode-param';
-import { itemRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/ItemRepositoryFilesystem';
+import { assetRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/AssetRepositoryFilesystem';
 import { isSandboxRequest } from '@/lib/sandbox/context';
 
 /**
@@ -83,7 +83,7 @@ export const GET = withApiTracking(async (
 
     // ── Sandbox: read from filesystem ──────────────────────────────────
     if (isSandboxRequest()) {
-      const item = await itemRepositoryFilesystem.getById(id, auth.organizationId);
+      const item = await assetRepositoryFilesystem.getById(id, auth.organizationId);
       if (!item) {
         return NextResponse.json({ error: 'Item not found in sandbox' }, { status: 404 });
       }
@@ -91,7 +91,7 @@ export const GET = withApiTracking(async (
     }
 
     // ── Production ─────────────────────────────────────────────────────
-    const item = await getItem(id);
+    const item = await getAsset(id);
     if (!item) {
       return NextResponse.json({ error: 'Item no encontrado' }, { status: 404 });
     }

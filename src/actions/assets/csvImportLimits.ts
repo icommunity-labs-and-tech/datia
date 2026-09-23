@@ -1,5 +1,5 @@
 /**
- * Límites para la importación de items desde CSV
+ * Límites para la importación de activos desde CSV
  * Estos límites están diseñados para evitar timeouts y problemas de rendimiento
  */
 

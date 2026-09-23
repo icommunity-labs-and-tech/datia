@@ -1,6 +1,6 @@
 import { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
-export interface CreateItemInput {
+export interface CreateAssetInput {
   id: string;
   organizationId: string;
   name: string;
@@ -12,7 +12,7 @@ export interface CreateItemInput {
   longitude?: number | null;
 }
 
-export interface ItemRecord {
+export interface AssetRecord {
   id: string;
   name: string;
   description: string;
@@ -31,10 +31,10 @@ export class DbError extends Error {
   }
 }
 
-export interface ItemRepository {
+export interface AssetRepository {
   // Métodos con filtro por organización
-  findByOrganization(organizationId: string): Promise<ItemRecord[]>;
-  getById(id: string, organizationId: string): Promise<ItemRecord | null>;
+  findByOrganization(organizationId: string): Promise<AssetRecord[]>;
+  getById(id: string, organizationId: string): Promise<AssetRecord | null>;
   listForExport(organizationId: string, options: { fullPassport: boolean }): Promise<Array<{
     id: string;
     name: string;
@@ -45,7 +45,7 @@ export interface ItemRepository {
     longitude: number | null;
     imageUrl: string | null;
   }>>;
-  create(input: CreateItemInput): Promise<ItemRecord>;
+  create(input: CreateAssetInput): Promise<AssetRecord>;
   updateEvidenceId(id: string, organizationId: string, evidenceId: string): Promise<void>;
   delete(id: string, organizationId: string): Promise<void>;
   getDetails(id: string, organizationId: string): Promise<

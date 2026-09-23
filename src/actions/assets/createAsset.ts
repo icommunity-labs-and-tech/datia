@@ -1,19 +1,19 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { createItemServiceImpl } from '@/domain/items/ItemServiceImpl';
+import { createAssetServiceImpl } from '@/domain/assets/AssetServiceImpl';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
-import { itemRepository } from '@/infrastructure/prisma/repositories/ItemRepositoryPrisma';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { requireOrganizationId } from '@/lib/auth/tenant';
 import { recordEvent } from '@/lib/services/events';
 import {
-  ItemInputError,
-  ItemAlreadyExistsError,
+  AssetInputError,
+  AssetAlreadyExistsError,
   OrganizationNotVerifiedError,
-  ItemCreationRollbackError,
-} from '@/domain/items/errors';
+  AssetCreationRollbackError,
+} from '@/domain/assets/errors';
 
 export interface CreateAssetInput {
   /** The id the organisation uses for the asset; it is what the QR points at. */
@@ -48,8 +48,8 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
     if (!id) return { success: false, error: 'El ID es obligatorio.' };
     if (!name) return { success: false, error: 'El nombre es obligatorio.' };
 
-    const service = createItemServiceImpl({
-      itemRepository,
+    const service = createAssetServiceImpl({
+      assetRepository,
       userRepository,
       evidenceService: createEvidenceServiceImpl({ icommunityService }),
     });
@@ -74,10 +74,10 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
     return { success: true, id: asset.id };
   } catch (error) {
     if (
-      error instanceof ItemInputError ||
-      error instanceof ItemAlreadyExistsError ||
+      error instanceof AssetInputError ||
+      error instanceof AssetAlreadyExistsError ||
       error instanceof OrganizationNotVerifiedError ||
-      error instanceof ItemCreationRollbackError
+      error instanceof AssetCreationRollbackError
     ) {
       return { success: false, error: error.message };
     }

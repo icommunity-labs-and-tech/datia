@@ -1,17 +1,17 @@
-import { ItemInputError, ItemAlreadyExistsError, UserNotVerifiedError, ItemCreationRollbackError } from './errors';
+import { AssetInputError, AssetAlreadyExistsError, UserNotVerifiedError, AssetCreationRollbackError } from './errors';
 import { EvidenceInputError, ImageFetchError, ImageSizeExceededError, EvidenceBuildError } from '../evidence/errors';
 import { ICommunityConfigError, ICommunityHTTPError } from '../../infrastructure/icommunity/errors';
-import type { ItemRepository } from './ItemRepository';
+import type { AssetRepository } from './AssetRepository';
 import type { UserRepository } from '../users/UserRepository';
 import type { EvidenceService } from '../evidence/EvidenceService';
 
-export interface CreateItemRequest {
+export interface CreateAssetRequest {
   name: string;
   description: string;
   customId: string;
   imageUrl?: string;
   /**
-   * Who creates the item. Omitted: the signed-in user. `null`: nobody — an API
+   * Who creates the asset. Omitted: the signed-in user. `null`: nobody — an API
    * token belongs to the organization, not to a person.
    */
   createdByUserId?: string | null;
@@ -20,16 +20,16 @@ export interface CreateItemRequest {
   longitude?: number | null;
 }
 
-export interface ItemResponse {
+export interface AssetResponse {
   id: string;
   name: string;
   description: string;
   imageUrl?: string;
 }
 
-export interface ItemService {
+export interface AssetService {
   createItem(
     organizationId: string,
-    data: CreateItemRequest
-  ): Promise<ItemResponse>;
+    data: CreateAssetRequest
+  ): Promise<AssetResponse>;
 }

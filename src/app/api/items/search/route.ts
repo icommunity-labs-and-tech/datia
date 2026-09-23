@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { requireSessionOrganization } from '@/lib/api/require-session';
-import { searchItems } from '@/actions/items';
+import { searchAssets } from '@/actions/assets';
 
 export async function GET(request: NextRequest) {
   const session = await requireSessionOrganization();
@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    const items = await searchItems(q);
+    const items = await searchAssets(q);
     return NextResponse.json(items);
   } catch (error) {
     console.error('Error searching items:', error);

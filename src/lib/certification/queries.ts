@@ -11,7 +11,7 @@ import type { CertificationStatus } from '@/generated/prisma';
  */
 
 /** Assets with at least one proof already on chain. */
-export async function certifiedItemIds(organizationId: string): Promise<Set<string>> {
+export async function certifiedAssetIds(organizationId: string): Promise<Set<string>> {
   const rows = await prisma.asset.findMany({
     where: {
       organizationId,
@@ -28,7 +28,7 @@ export async function certifiedItemIds(organizationId: string): Promise<Set<stri
   return new Set(rows.map((r) => r.id));
 }
 
-export interface ItemCertification {
+export interface AssetCertification {
   id: string;
   status: CertificationStatus;
   /** Period the proof covers, as it was certified. */
@@ -46,11 +46,11 @@ const asText = (value: unknown) => (typeof value === 'string' ? value : null);
 const asNumber = (value: unknown) => (typeof value === 'number' ? value : null);
 
 /** The proofs of one asset, newest first. */
-export async function listItemCertifications(
+export async function listAssetCertifications(
   organizationId: string,
   assetId: string,
   limit = 50
-): Promise<ItemCertification[]> {
+): Promise<AssetCertification[]> {
   const rows = await prisma.certification.findMany({
     where: {
       organizationId,
