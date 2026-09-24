@@ -5,7 +5,7 @@ import { apiTokenRepository } from '@/infrastructure/prisma/repositories/ApiToke
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import { prisma } from '@/lib/prisma';
+import { requireScope } from '@/lib/auth/tenant';
 
 export async function deleteApiToken(tokenId: string) {
   try {
@@ -22,18 +22,11 @@ export async function deleteApiToken(tokenId: string) {
       throw new Error('No autorizado');
     }
 
-    // Get organization ID from user
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      select: { organizationId: true },
-    });
-
-    if (!user?.organizationId) {
-      throw new Error('Usuario no tiene organización asignada');
-    }
+    // Scope from the session: its organisation and, for a company account, its company
+    const scope = await requireScope();
 
     const apiTokenService = createApiTokenServiceImpl({ apiTokenRepository });
-    await apiTokenService.deleteToken(tokenId, user.organizationId);
+    await apiTokenService.deleteToken(tokenId, scope);
 
     return {
       success: true,

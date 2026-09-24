@@ -6,9 +6,10 @@ import { recordEvent, deliverEvent } from '../events';
 
 vi.mock('@/infrastructure/prisma/repositories/EventRepositoryPrisma', () => ({
   eventRepository: {
-    create: vi.fn(async (organizationId: string, input: any) => ({
+    create: vi.fn(async (scope: { organizationId: string; companyId: string | null }, input: any) => ({
       id: 'evt-1',
-      organizationId,
+      organizationId: scope.organizationId,
+      companyId: scope.companyId,
       ...input,
       createdAt: new Date('2026-09-15T10:00:00Z'),
     })),
@@ -32,9 +33,11 @@ const triggerWebhook = webhookTriggerService.triggerWebhook as ReturnType<typeof
 
 const input = { eventType: 'asset.created', entityType: 'asset', entityId: 'i-1', data: { id: 'i-1' } };
 const webhook = (id: string) => ({ id, url: `https://${id}.test`, secret: 's3cret', headers: null });
+const scope = { organizationId: 'org-1', companyId: 'co-1' };
 const event = {
   id: 'evt-1',
   organizationId: 'org-1',
+  companyId: 'co-1',
   ...input,
   createdAt: new Date('2026-09-15T10:00:00Z'),
 };
@@ -45,12 +48,13 @@ describe('recordEvent', () => {
   it('stores the event and sends it to the webhooks subscribed to its type', async () => {
     findByEvent.mockResolvedValueOnce([webhook('wh-1')]);
 
-    const recorded = await recordEvent('org-1', input);
+    const recorded = await recordEvent(scope, input);
 
     expect(recorded.id).toBe('evt-1');
-    expect(eventRepository.create).toHaveBeenCalledWith('org-1', input);
+    expect(eventRepository.create).toHaveBeenCalledWith(scope, input);
     await vi.waitFor(() => expect(updateTriggered).toHaveBeenCalledWith('wh-1', true));
-    expect(findByEvent).toHaveBeenCalledWith('org-1', 'asset.created');
+    // Webhooks are the company's, not the whole organisation's.
+    expect(findByEvent).toHaveBeenCalledWith(scope, 'asset.created');
     expect(triggerWebhook).toHaveBeenCalledWith(
       'https://wh-1.test',
       {
@@ -71,12 +75,12 @@ describe('recordEvent', () => {
     findByEvent.mockResolvedValueOnce([webhook('wh-slow')]);
     triggerWebhook.mockImplementationOnce(() => new Promise(() => {}));
 
-    await expect(recordEvent('org-1', input)).resolves.toMatchObject({ id: 'evt-1' });
+    await expect(recordEvent(scope, input)).resolves.toMatchObject({ id: 'evt-1' });
   });
 
   it('never fails the caller when delivery breaks', async () => {
     findByEvent.mockRejectedValueOnce(new Error('database down'));
-    await expect(recordEvent('org-1', input)).resolves.toMatchObject({ id: 'evt-1' });
+    await expect(recordEvent(scope, input)).resolves.toMatchObject({ id: 'evt-1' });
   });
 });
 

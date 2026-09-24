@@ -6,6 +6,7 @@ import type { EvidenceService } from '../evidence/EvidenceService';
 import { revalidatePath } from 'next/cache';
 import { createAssetWithEvidence } from './AssetCreationHelper';
 import { recordEvent } from '@/lib/services/events';
+import type { Scope } from '@/lib/scope';
 
 export function createAssetServiceImpl(deps: {
   assetRepository: AssetRepository;
@@ -15,11 +16,11 @@ export function createAssetServiceImpl(deps: {
   const { assetRepository: assetRepo, userRepository: userRepo, evidenceService: evidence } = deps;
 
   return {
-    async createAsset(organizationId: string, data: CreateAssetRequest): Promise<AssetResponse> {
+    async createAsset(scope: Scope, data: CreateAssetRequest): Promise<AssetResponse> {
       try {
         // 1. Validate policies - check if asset already exists
         try {
-          const existingItem = await assetRepo.getById(data.customId, organizationId);
+          const existingItem = await assetRepo.getById(data.customId, scope);
           if (existingItem) {
             throw new AssetAlreadyExistsError(
               data.customId,
@@ -35,7 +36,7 @@ export function createAssetServiceImpl(deps: {
         const result = await createAssetWithEvidence(
           { assetRepository: assetRepo, userRepository: userRepo, evidenceService: evidence },
           {
-            organizationId,
+            scope,
             id: data.customId,
             name: data.name,
             description: data.description,
@@ -49,7 +50,7 @@ export function createAssetServiceImpl(deps: {
         // 3. Announce it. Here and not in the callers: the dashboard and the API
         // both create assets through this service, and only the dashboard used
         // to emit the event, so integrators never heard about their own.
-        await recordEvent(organizationId, {
+        await recordEvent(scope, {
           eventType: 'asset.created',
           entityType: 'Asset',
           entityId: result.id,

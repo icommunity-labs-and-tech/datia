@@ -1,9 +1,9 @@
 'use server';
 
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 export async function searchAssets(query: string) {
-  const organizationId = await requireOrganizationId();
-  return await assetRepository.search(query, organizationId);
+  const scope = await requireScope();
+  return await assetRepository.search(query, scope);
 }

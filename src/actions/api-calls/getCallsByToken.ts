@@ -4,7 +4,7 @@ import { apiCallRepository } from '@/infrastructure/prisma/repositories/ApiCallR
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import { prisma } from '@/lib/prisma';
+import { requireScope } from '@/lib/auth/tenant';
 
 export interface GetCallsByTokenParams {
   apiTokenId: string;
@@ -35,23 +35,14 @@ export async function getCallsByToken(params: GetCallsByTokenParams) {
       throw new Error('No autorizado');
     }
 
-    // Get organization ID from user
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      select: { organizationId: true },
-    });
+    // Scope from the session: its organisation and, for a company account, its company
+    const scope = await requireScope();
 
-    if (!user?.organizationId) {
-      console.error('❌ getCallsByToken - Usuario sin organización');
-      throw new Error('Usuario no tiene organización asignada');
-    }
-
-    const organizationId = user.organizationId;
-    console.log('✅ getCallsByToken - OrganizationId:', organizationId);
+    console.log('✅ getCallsByToken - OrganizationId:', scope.organizationId);
 
     const calls = await apiCallRepository.getCallsByTokenAndPeriod(
       params.apiTokenId,
-      organizationId,
+      scope,
       params.startDate,
       params.endDate
     );

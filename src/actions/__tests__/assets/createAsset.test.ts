@@ -1,14 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TenantContextNotFoundError } from '@/lib/auth/tenant';
 
-const { mockRequireOrg, mockCreateAsset } = vi.hoisted(() => ({
-  mockRequireOrg: vi.fn(),
+const { mockRequireScope, mockCreateAsset } = vi.hoisted(() => ({
+  mockRequireScope: vi.fn(),
   mockCreateAsset: vi.fn(),
 }));
 
 vi.mock('@/lib/auth/tenant', async () => {
   const actual = await vi.importActual<typeof import('@/lib/auth/tenant')>('@/lib/auth/tenant');
-  return { ...actual, requireOrganizationId: mockRequireOrg };
+  return { ...actual, requireScope: mockRequireScope };
 });
 vi.mock('@/domain/assets/AssetServiceImpl', () => ({
   createAssetServiceImpl: () => ({ createAsset: mockCreateAsset }),
@@ -23,7 +23,7 @@ const input = { id: ' A-1 ', name: ' Turbina ', description: ' de prueba ', lati
 describe('createAsset', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRequireOrg.mockResolvedValue('org-a');
+    mockRequireScope.mockResolvedValue({ organizationId: 'org-a', companyId: 'co-a' });
     mockCreateAsset.mockResolvedValue({ id: 'A-1', name: 'Turbina', description: 'de prueba' });
   });
 
@@ -31,7 +31,7 @@ describe('createAsset', () => {
     const result = await createAsset(input);
 
     expect(result).toEqual({ success: true, id: 'A-1' });
-    expect(mockCreateAsset).toHaveBeenCalledWith('org-a', expect.objectContaining({
+    expect(mockCreateAsset).toHaveBeenCalledWith({ organizationId: 'org-a', companyId: 'co-a' }, expect.objectContaining({
       customId: 'A-1',
       name: 'Turbina',
       description: 'de prueba',
@@ -41,7 +41,7 @@ describe('createAsset', () => {
   });
 
   it('creates nothing without a session', async () => {
-    mockRequireOrg.mockRejectedValue(new TenantContextNotFoundError('sin sesión'));
+    mockRequireScope.mockRejectedValue(new TenantContextNotFoundError('sin sesión'));
     const result = await createAsset(input);
 
     expect(result.success).toBe(false);

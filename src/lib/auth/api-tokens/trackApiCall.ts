@@ -4,6 +4,7 @@ import { apiTokenRepository } from '@/infrastructure/prisma/repositories/ApiToke
 export interface ApiCallTrackingInfo {
   apiTokenId: string;
   organizationId: string;
+  companyId: string | null;
   method: string;
   path: string;
   statusCode: number;
@@ -21,6 +22,7 @@ export async function trackApiCall(info: ApiCallTrackingInfo): Promise<void> {
       await apiCallRepository.create({
         apiTokenId: info.apiTokenId,
         organizationId: info.organizationId,
+        companyId: info.companyId,
         method: info.method,
         path: info.path,
         statusCode: info.statusCode,

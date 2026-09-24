@@ -1,15 +1,15 @@
 'use server';
 
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { certifiedAssetIds } from '@/lib/certification/queries';
 
 export async function getAssets() {
   try {
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
     const [rows, certified] = await Promise.all([
-      assetRepository.listForExport(organizationId, { fullPassport: false }),
-      certifiedAssetIds(organizationId),
+      assetRepository.listForExport(scope, { fullPassport: false }),
+      certifiedAssetIds(scope),
     ]);
     return rows.map((r: any) => ({
       id: r.id,

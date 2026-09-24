@@ -1,3 +1,4 @@
+import type { Scope } from '@/lib/scope';
 export interface ApiCallRecord {
   id: string;
   apiTokenId: string;
@@ -11,6 +12,8 @@ export interface ApiCallRecord {
 export interface CreateApiCallInput {
   apiTokenId: string;
   organizationId: string;
+  /** The token's company; the organisation's default when the token has none. */
+  companyId?: string | null;
   method: string;
   path: string;
   statusCode: number;
@@ -26,16 +29,16 @@ export class DbError extends Error {
 
 export interface ApiCallRepository {
   create(input: CreateApiCallInput): Promise<ApiCallRecord>;
-  countByToken(apiTokenId: string, organizationId: string): Promise<number>;
+  countByToken(apiTokenId: string, scope: Scope): Promise<number>;
   countByTokenAndPeriod(
     apiTokenId: string,
-    organizationId: string,
+    scope: Scope,
     startDate: Date,
     endDate: Date
   ): Promise<number>;
   getCallsByTokenAndPeriod(
     apiTokenId: string,
-    organizationId: string,
+    scope: Scope,
     startDate: Date,
     endDate: Date
   ): Promise<ApiCallRecord[]>;

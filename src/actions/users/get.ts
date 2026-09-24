@@ -2,21 +2,21 @@
 
 import { verifyAdminAuth } from './helpers';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 const NOT_FOUND = 'Usuario no encontrado';
 
 export async function getUserById(id: string) {
   try {
     await verifyAdminAuth();
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
 
     const user = await userRepository.getById(id);
 
-    // getById looks the user up by id alone. An administrator only sees the
-    // users of their own organisation; anyone else answers exactly like a
-    // missing id, so the response does not reveal that it exists elsewhere.
-    if (user.organizationId !== organizationId) {
+    // getById looks the user up by id alone. An account only sees the users of
+    // its own company; anyone else answers exactly like a missing id, so the
+    // response does not reveal that it exists elsewhere.
+    if (user.organizationId !== scope.organizationId || (scope.companyId && user.companyId !== scope.companyId)) {
       return { success: false, error: NOT_FOUND };
     }
 

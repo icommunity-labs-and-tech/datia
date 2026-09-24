@@ -21,3 +21,11 @@ export function scopeWhere(scope: Scope): { organizationId: string; companyId?: 
     ? { organizationId: scope.organizationId, companyId: scope.companyId }
     : { organizationId: scope.organizationId };
 }
+
+/**
+ * What an API token is allowed to see: its organisation and, if it has one, its
+ * company. A token issued at organisation level has none and sees the set.
+ */
+export function authScope(auth: { organizationId: string; companyId: string | null }): Scope {
+  return { organizationId: auth.organizationId, companyId: auth.companyId };
+}

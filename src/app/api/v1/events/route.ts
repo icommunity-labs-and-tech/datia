@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
+import { authScope } from '@/lib/scope';
+import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 
 /**
@@ -114,8 +116,9 @@ export async function GET(request: NextRequest) {
     const entityType = searchParams.get('entityType') || undefined;
     const entityId = searchParams.get('entityId') || undefined;
 
-    const { getEventsPaginated } = await import('@/actions/events/listPaginated');
-    const result = await getEventsPaginated({
+    // The token says whose events these are; the session cookie, if the caller
+    // happens to carry one, must not.
+    const result = await eventRepository.listPaginated(authScope(auth), {
       ...paginationParams,
       eventType,
       entityType,

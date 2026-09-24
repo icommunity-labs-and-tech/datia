@@ -1,7 +1,7 @@
 'use server';
 
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
 export async function searchAssetsPaginated(
@@ -14,7 +14,7 @@ export async function searchAssetsPaginated(
   imageUrl: string | null;
   createdAt: Date;
 }>> {
-  const organizationId = await requireOrganizationId();
-  return await assetRepository.searchPaginated(query, organizationId, params);
+  const scope = await requireScope();
+  return await assetRepository.searchPaginated(query, scope, params);
 }
 

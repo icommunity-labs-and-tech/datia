@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
+import { authScope } from '@/lib/scope';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
@@ -35,13 +36,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const consumption = await validateConsumptionOwnership(parsed.data.energyConsumptionId, auth.organizationId);
+    const consumption = await validateConsumptionOwnership(parsed.data.energyConsumptionId, authScope(auth));
     if (!consumption) return NextResponse.json({ error: 'EnergyConsumption not found or does not belong to your organization' }, { status: 404 });
 
     const service = createEnergyServiceImpl({ energyRepository });
-    const record = await service.createEmission(auth.organizationId, parsed.data);
+    const record = await service.createEmission(authScope(auth), parsed.data);
 
-    await recordEvent(auth.organizationId, {
+    await recordEvent(authScope(auth), {
       eventType: 'co2_emission_event',
       entityType: 'EmissionRecord',
       entityId: record.id,
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest) {
     // it cannot, the reading is still stored and a later sweep anchors it.
     // Making a client's meter unable to write because a third party is down
     // would be a worse failure than a proof that arrives late.
-    const anchor = await anchorEmissionById(auth.organizationId, record.id);
+    const anchor = await anchorEmissionById(authScope(auth), record.id);
 
     return NextResponse.json(
       {
@@ -91,5 +92,5 @@ export async function GET(request: NextRequest) {
 
   const pagination = parseCursorPaginationParams(new URL(request.url).searchParams);
   const service = createEnergyServiceImpl({ energyRepository });
-  return NextResponse.json(await service.listEmissions(auth.organizationId, pagination));
+  return NextResponse.json(await service.listEmissions(authScope(auth), pagination));
 }

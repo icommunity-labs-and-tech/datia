@@ -2,7 +2,7 @@ import { DashboardService } from './DashboardService';
 import type { DashboardKPIs, MonthlyActivity } from '@/types/dashboard';
 import type { UserRepository } from '@/domain/users/UserRepository';
 import type { AssetRepository } from '@/domain/assets/AssetRepository';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { certificationCounts } from '@/lib/certification/queries';
 
 export function createDashboardServiceImpl(deps: {
@@ -14,14 +14,14 @@ export function createDashboardServiceImpl(deps: {
   return {
     async getKPIs(): Promise<DashboardKPIs> {
       try {
-        const organizationId = await requireOrganizationId();
+        const scope = await requireScope();
 
         const [totalItems, activeItems, certifications, totalUsers, verifiedUsers] = await Promise.all([
-          itemRepo.countTotalItems(organizationId),
-          itemRepo.countActiveItems(organizationId, 90),
-          certificationCounts(organizationId),
-          userRepo.countActiveUsers(organizationId, 30),
-          userRepo.countVerifiedUsers(organizationId),
+          itemRepo.countTotalItems(scope),
+          itemRepo.countActiveItems(scope, 90),
+          certificationCounts(scope),
+          userRepo.countActiveUsers(scope, 30),
+          userRepo.countVerifiedUsers(scope),
         ]);
 
         return {
@@ -50,7 +50,7 @@ export function createDashboardServiceImpl(deps: {
 
     async getMonthlyActivity(months = 12): Promise<MonthlyActivity[]> {
       try {
-        const organizationId = await requireOrganizationId();
+        const scope = await requireScope();
         
         const currentDate = new Date();
         const monthsData: Array<{ month: string; usersRegistered: number; itemsCreated: number }> = [];
@@ -60,8 +60,8 @@ export function createDashboardServiceImpl(deps: {
           const nextMonth = new Date(date.getFullYear(), date.getMonth() + 1, 1);
           
           const [usersCount, itemsCount] = await Promise.all([
-            userRepo.countUsersByMonth(organizationId, date, nextMonth),
-            itemRepo.countItemsByMonth(organizationId, date, nextMonth)
+            userRepo.countUsersByMonth(scope, date, nextMonth),
+            itemRepo.countItemsByMonth(scope, date, nextMonth)
           ]);
           
           const monthName = date.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });

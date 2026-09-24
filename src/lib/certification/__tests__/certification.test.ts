@@ -12,7 +12,7 @@ const { mockPrisma, mockCreateCertificationEvidence, mockGetEvidence, mockRecord
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
-vi.mock('@/lib/company', () => ({ defaultCompanyId: async () => 'company-1' }));
+vi.mock('@/lib/company', () => ({ companyFor: async (scope: { companyId: string | null }) => scope.companyId ?? 'company-default' }));
 vi.mock('@/lib/services/events', () => ({ recordEvent: mockRecordEvent }));
 vi.mock('@/domain/evidence/EvidenceServiceImpl', () => ({
   createEvidenceServiceImpl: () => ({ createCertificationEvidence: mockCreateCertificationEvidence }),
@@ -39,7 +39,7 @@ const issuedRow = {
 };
 
 const input = {
-  organizationId: 'org-1',
+  scope: { organizationId: 'org-1', companyId: 'co-1' },
   signatureID: 'sig-1',
   assetId: 'item-1',
   title: 'Emisión certificada',
@@ -58,7 +58,7 @@ describe('issueCertification', () => {
   it('records the proof as issued and links the records it covers', async () => {
     const cert = await issueCertification(input);
 
-    expect(cert).toMatchObject({ evidenceId: 'ev-1', organizationId: 'org-1' });
+    expect(cert).toMatchObject({ evidenceId: 'ev-1', organizationId: 'org-1', companyId: 'co-1' });
     // The checksum iBS will publish is recorded now: later it is the only way
     // to prove the stored payload is what was certified.
     expect(mockPrisma.certification.create.mock.calls[0][0].data.payloadChecksum).toBe('huella-1');

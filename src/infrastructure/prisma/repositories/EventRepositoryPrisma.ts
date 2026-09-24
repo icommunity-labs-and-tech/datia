@@ -1,12 +1,14 @@
 import { EventRepository, type EventLogRecord, type CreateEventLogInput, DbError } from '@/domain/events/EventRepository';
 import { prisma } from '@/lib/prisma';
-import { defaultCompanyId } from '@/lib/company';
+import { companyFor } from '@/lib/company';
+import { scopeWhere, type Scope } from '@/lib/scope';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 import { randomUUID } from 'crypto';
 
 const toDomain = (e: any): EventLogRecord => ({
   id: e.id,
   organizationId: e.organizationId,
+  companyId: e.companyId ?? null,
   eventType: e.eventType,
   entityType: e.entityType,
   entityId: e.entityId,
@@ -15,7 +17,7 @@ const toDomain = (e: any): EventLogRecord => ({
 });
 
 export const eventRepository: EventRepository = {
-  async list(organizationId: string, limit: number = 100): Promise<EventLogRecord[]> {
+  async list(scope: Scope, limit: number = 100): Promise<EventLogRecord[]> {
     try {
       if (!prisma.eventLog) {
         throw new DbError(
@@ -24,7 +26,7 @@ export const eventRepository: EventRepository = {
         );
       }
       const events = await prisma.eventLog.findMany({
-        where: { organizationId },
+        where: scopeWhere(scope),
         orderBy: { createdAt: 'desc' },
         take: limit,
       });
@@ -34,7 +36,7 @@ export const eventRepository: EventRepository = {
     }
   },
 
-  async create(organizationId: string, input: CreateEventLogInput): Promise<EventLogRecord> {
+  async create(scope: Scope, input: CreateEventLogInput): Promise<EventLogRecord> {
     try {
       if (!prisma.eventLog) {
         throw new DbError(
@@ -45,8 +47,8 @@ export const eventRepository: EventRepository = {
       const event = await prisma.eventLog.create({
         data: {
           id: randomUUID(),
-          organizationId,
-          companyId: await defaultCompanyId(organizationId),
+          organizationId: scope.organizationId,
+          companyId: await companyFor(scope),
           eventType: input.eventType,
           entityType: input.entityType,
           entityId: input.entityId,
@@ -59,7 +61,7 @@ export const eventRepository: EventRepository = {
     }
   },
 
-  async findByType(organizationId: string, eventType: string, limit: number = 100): Promise<EventLogRecord[]> {
+  async findByType(scope: Scope, eventType: string, limit: number = 100): Promise<EventLogRecord[]> {
     try {
       if (!prisma.eventLog) {
         throw new DbError(
@@ -68,7 +70,7 @@ export const eventRepository: EventRepository = {
         );
       }
       const events = await prisma.eventLog.findMany({
-        where: { organizationId, eventType },
+        where: { ...scopeWhere(scope), eventType },
         orderBy: { createdAt: 'desc' },
         take: limit,
       });
@@ -78,7 +80,7 @@ export const eventRepository: EventRepository = {
     }
   },
 
-  async findByEntity(organizationId: string, entityType: string, entityId: string): Promise<EventLogRecord[]> {
+  async findByEntity(scope: Scope, entityType: string, entityId: string): Promise<EventLogRecord[]> {
     try {
       if (!prisma.eventLog) {
         throw new DbError(
@@ -87,7 +89,7 @@ export const eventRepository: EventRepository = {
         );
       }
       const events = await prisma.eventLog.findMany({
-        where: { organizationId, entityType, entityId },
+        where: { ...scopeWhere(scope), entityType, entityId },
         orderBy: { createdAt: 'desc' },
       });
       return events.map(toDomain);
@@ -96,7 +98,7 @@ export const eventRepository: EventRepository = {
     }
   },
 
-  async getById(organizationId: string, id: string): Promise<EventLogRecord | null> {
+  async getById(scope: Scope, id: string): Promise<EventLogRecord | null> {
     try {
       if (!prisma.eventLog) {
         throw new DbError(
@@ -105,7 +107,7 @@ export const eventRepository: EventRepository = {
         );
       }
       const event = await prisma.eventLog.findFirst({
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
       });
       return event ? toDomain(event) : null;
     } catch (e) {
@@ -113,7 +115,7 @@ export const eventRepository: EventRepository = {
     }
   },
 
-  async listPaginated(organizationId: string, params: CursorPaginationParams & { eventType?: string; entityType?: string; entityId?: string }) {
+  async listPaginated(scope: Scope, params: CursorPaginationParams & { eventType?: string; entityType?: string; entityId?: string }) {
     try {
       if (!prisma.eventLog) {
         throw new DbError(
@@ -124,65 +126,34 @@ export const eventRepository: EventRepository = {
       const limit = params.limit || 20;
       const take = limit + 1; // Request one extra to determine if there's a next page
 
-      const whereClause: any = { organizationId };
-      
-      // Add optional filters
-      if (params.eventType) {
-        whereClause.eventType = params.eventType;
-      }
-      if (params.entityType) {
-        whereClause.entityType = params.entityType;
-      }
-      if (params.entityId) {
-        whereClause.entityId = params.entityId;
-      }
+      const filters: any[] = [scopeWhere(scope)];
+      if (params.eventType) filters.push({ eventType: params.eventType });
+      if (params.entityType) filters.push({ entityType: params.entityType });
+      if (params.entityId) filters.push({ entityId: params.entityId });
 
       if (params.cursor) {
         // Get the cursor event to find its createdAt
         const cursorEvent = await prisma.eventLog.findFirst({
-          where: { id: params.cursor, organizationId },
+          where: { id: params.cursor, ...scopeWhere(scope) },
           select: { createdAt: true, id: true },
         });
         if (cursorEvent) {
-          // Build AND conditions for cursor pagination
-          const andConditions: any[] = [];
-          
-          // Add organization filter
-          andConditions.push({ organizationId });
-          
-          // Add cursor pagination condition
-          andConditions.push({
+          filters.push({
             OR: [
               { createdAt: { lt: cursorEvent.createdAt } },
               { createdAt: cursorEvent.createdAt, id: { lt: params.cursor } },
             ],
           });
-          
-          // Add filters if they exist
-          if (params.eventType) {
-            andConditions.push({ eventType: params.eventType });
-          }
-          if (params.entityType) {
-            andConditions.push({ entityType: params.entityType });
-          }
-          if (params.entityId) {
-            andConditions.push({ entityId: params.entityId });
-          }
-          
-          whereClause.AND = andConditions;
-          // Remove top-level filters since they're now in AND
-          delete whereClause.organizationId;
-          delete whereClause.eventType;
-          delete whereClause.entityType;
-          delete whereClause.entityId;
         }
       }
+      const whereClause = { AND: filters };
 
       const events = await prisma.eventLog.findMany({
         where: whereClause,
         select: {
           id: true,
           organizationId: true,
+          companyId: true,
           eventType: true,
           entityType: true,
           entityId: true,

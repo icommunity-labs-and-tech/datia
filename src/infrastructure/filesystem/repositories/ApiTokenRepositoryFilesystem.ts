@@ -14,6 +14,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { tmpdir } from 'os';
 import { randomUUID } from 'crypto';
+import type { Scope } from '@/lib/scope';
 import type {
   ApiTokenRepository,
   ApiTokenRecord,
@@ -68,14 +69,14 @@ export const apiTokenRepositoryFilesystem: ApiTokenRepository = {
     return record;
   },
 
-  async findByOrganization(organizationId: string): Promise<ApiTokenRecord[]> {
+  async findByOrganization(scope: Scope): Promise<ApiTokenRecord[]> {
     return readAll()
-      .filter((t) => t.organizationId === organizationId)
+      .filter((t) => t.organizationId === scope.organizationId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   },
 
-  async findById(id: string, organizationId: string): Promise<ApiTokenRecord | null> {
-    return readAll().find((t) => t.id === id && t.organizationId === organizationId) ?? null;
+  async findById(id: string, scope: Scope): Promise<ApiTokenRecord | null> {
+    return readAll().find((t) => t.id === id && t.organizationId === scope.organizationId) ?? null;
   },
 
   async findByTokenHash(tokenHash: string): Promise<ApiTokenRecord | null> {
@@ -91,7 +92,7 @@ export const apiTokenRepositoryFilesystem: ApiTokenRepository = {
     }
   },
 
-  async delete(id: string, organizationId: string): Promise<void> {
-    writeAll(readAll().filter((t) => !(t.id === id && t.organizationId === organizationId)));
+  async delete(id: string, scope: Scope): Promise<void> {
+    writeAll(readAll().filter((t) => !(t.id === id && t.organizationId === scope.organizationId)));
   },
 };

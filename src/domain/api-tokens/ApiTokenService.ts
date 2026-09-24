@@ -1,3 +1,4 @@
+import type { Scope } from '@/lib/scope';
 import type { ApiTokenRepository } from './ApiTokenRepository';
 import { DbError } from './ApiTokenRepository';
 
@@ -43,8 +44,8 @@ export class ApiTokenExpiredError extends Error {
 
 export interface ApiTokenService {
   createToken(data: CreateApiTokenRequest): Promise<ApiTokenResponse>;
-  listTokens(organizationId: string): Promise<ApiTokenListResponse[]>;
-  deleteToken(id: string, organizationId: string): Promise<void>;
+  listTokens(scope: Scope): Promise<ApiTokenListResponse[]>;
+  deleteToken(id: string, scope: Scope): Promise<void>;
   validateToken(tokenHash: string): Promise<{ organizationId: string; companyId: string | null; tokenId: string }>;
 }
 

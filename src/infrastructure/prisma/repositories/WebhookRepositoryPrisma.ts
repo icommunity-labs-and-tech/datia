@@ -1,6 +1,7 @@
 import { WebhookRepository, type WebhookRecord, type CreateWebhookInput, type UpdateWebhookInput, DbError } from '@/domain/webhooks/WebhookRepository';
 import { prisma } from '@/lib/prisma';
-import { defaultCompanyId } from '@/lib/company';
+import { companyFor } from '@/lib/company';
+import { scopeWhere, type Scope } from '@/lib/scope';
 import { randomUUID } from 'crypto';
 
 const toDomain = (w: any): WebhookRecord => ({
@@ -21,7 +22,7 @@ const toDomain = (w: any): WebhookRecord => ({
 });
 
 export const webhookRepository: WebhookRepository = {
-  async list(organizationId: string): Promise<WebhookRecord[]> {
+  async list(scope: Scope): Promise<WebhookRecord[]> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -30,7 +31,7 @@ export const webhookRepository: WebhookRepository = {
         );
       }
       const webhooks = await prisma.webhook.findMany({
-        where: { organizationId },
+        where: scopeWhere(scope),
         orderBy: { createdAt: 'desc' },
       });
       return webhooks.map(toDomain);
@@ -39,7 +40,7 @@ export const webhookRepository: WebhookRepository = {
     }
   },
 
-  async getById(id: string, organizationId: string): Promise<WebhookRecord | null> {
+  async getById(id: string, scope: Scope): Promise<WebhookRecord | null> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -48,7 +49,7 @@ export const webhookRepository: WebhookRepository = {
         );
       }
       const webhook = await prisma.webhook.findFirst({
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
       });
       return webhook ? toDomain(webhook) : null;
     } catch (e) {
@@ -56,7 +57,7 @@ export const webhookRepository: WebhookRepository = {
     }
   },
 
-  async create(organizationId: string, input: CreateWebhookInput): Promise<WebhookRecord> {
+  async create(scope: Scope, input: CreateWebhookInput): Promise<WebhookRecord> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -68,8 +69,8 @@ export const webhookRepository: WebhookRepository = {
         data: {
           id: randomUUID(),
           updatedAt: new Date(),
-          organizationId,
-          companyId: await defaultCompanyId(organizationId),
+          organizationId: scope.organizationId,
+          companyId: await companyFor(scope),
           name: input.name,
           url: input.url,
           secret: input.secret ?? null,
@@ -84,7 +85,7 @@ export const webhookRepository: WebhookRepository = {
     }
   },
 
-  async update(id: string, organizationId: string, input: UpdateWebhookInput): Promise<WebhookRecord> {
+  async update(id: string, scope: Scope, input: UpdateWebhookInput): Promise<WebhookRecord> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -93,7 +94,7 @@ export const webhookRepository: WebhookRepository = {
         );
       }
       const existing = await prisma.webhook.findFirst({
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
       });
       if (!existing) {
         throw new DbError({ message: 'Webhook no encontrado' });
@@ -118,7 +119,7 @@ export const webhookRepository: WebhookRepository = {
     }
   },
 
-  async delete(id: string, organizationId: string): Promise<void> {
+  async delete(id: string, scope: Scope): Promise<void> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -127,7 +128,7 @@ export const webhookRepository: WebhookRepository = {
         );
       }
       const existing = await prisma.webhook.findFirst({
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
       });
       if (!existing) {
         throw new DbError({ message: 'Webhook no encontrado' });
@@ -170,7 +171,7 @@ export const webhookRepository: WebhookRepository = {
     }
   },
 
-  async findByOrganizationAndActive(organizationId: string, active: boolean): Promise<WebhookRecord[]> {
+  async findByOrganizationAndActive(scope: Scope, active: boolean): Promise<WebhookRecord[]> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -179,7 +180,7 @@ export const webhookRepository: WebhookRepository = {
         );
       }
       const webhooks = await prisma.webhook.findMany({
-        where: { organizationId, active },
+        where: { ...scopeWhere(scope), active },
         orderBy: { createdAt: 'desc' },
       });
       return webhooks.map(toDomain);
@@ -188,7 +189,7 @@ export const webhookRepository: WebhookRepository = {
     }
   },
 
-  async findByEvent(organizationId: string, eventType: string): Promise<WebhookRecord[]> {
+  async findByEvent(scope: Scope, eventType: string): Promise<WebhookRecord[]> {
     try {
       if (!prisma.webhook) {
         throw new DbError(
@@ -198,7 +199,7 @@ export const webhookRepository: WebhookRepository = {
       }
       const webhooks = await prisma.webhook.findMany({
         where: {
-          organizationId,
+          ...scopeWhere(scope),
           active: true,
           events: { has: eventType },
         },

@@ -1,3 +1,4 @@
+import type { Scope } from '@/lib/scope';
 import { AssetInputError, AssetAlreadyExistsError, UserNotVerifiedError, AssetCreationRollbackError } from './errors';
 import { EvidenceInputError, ImageFetchError, ImageSizeExceededError, EvidenceBuildError } from '../evidence/errors';
 import { ICommunityConfigError, ICommunityHTTPError } from '../../infrastructure/icommunity/errors';
@@ -29,7 +30,7 @@ export interface AssetResponse {
 
 export interface AssetService {
   createAsset(
-    organizationId: string,
+    scope: Scope,
     data: CreateAssetRequest
   ): Promise<AssetResponse>;
 }

@@ -4,6 +4,7 @@ import { getAsset } from '@/actions/assets';
 import { decodeUrlParam } from '@/lib/api/decode-param';
 import { assetRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/AssetRepositoryFilesystem';
 import { isSandboxRequest } from '@/lib/sandbox/context';
+import { authScope } from '@/lib/scope';
 
 /**
  * @swagger
@@ -83,7 +84,7 @@ export const GET = withApiTracking(async (
 
     // ── Sandbox: read from filesystem ──────────────────────────────────
     if (isSandboxRequest()) {
-      const item = await assetRepositoryFilesystem.getById(id, auth.organizationId);
+      const item = await assetRepositoryFilesystem.getById(id, authScope(auth));
       if (!item) {
         return NextResponse.json({ error: 'Item not found in sandbox' }, { status: 404 });
       }

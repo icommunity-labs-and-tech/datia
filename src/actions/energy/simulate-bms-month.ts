@@ -1,6 +1,6 @@
 'use server';
 
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { recordEvent } from '@/lib/services/events';
 import { BMS_MONTH_NAMES } from '@/lib/energy/bmsMonthNames';
 import {
@@ -12,6 +12,7 @@ import {
 } from '@/lib/energy/bmsProfiles';
 import { prisma } from '@/lib/prisma';
 import { issueCertification } from '@/lib/certification';
+import { scopeWhere } from '@/lib/scope';
 
 /**
  * A month of daily BMS readings.
@@ -47,7 +48,7 @@ export async function createBmsMonthReadings(
   monthIndex: number,
   profileId?: BmsProfileId
 ): Promise<BmsMonthResult> {
-  const organizationId = await requireOrganizationId();
+  const scope = await requireScope();
   const profile = resolveBmsProfile(profileId);
 
   const monthStart = new Date(Date.UTC(year, monthIndex, 1));
@@ -60,7 +61,7 @@ export async function createBmsMonthReadings(
     where: {
       energySourceId: sourceId,
       periodStart: { gte: monthStart, lte: monthEnd },
-      EnergySource: { Asset: { organizationId } },
+      EnergySource: { Asset: scopeWhere(scope) },
     },
     select: { id: true, consumptionKwh: true, EmissionRecord: { select: { id: true, co2eKg: true } } },
   });
@@ -139,7 +140,7 @@ export async function createBmsMonthReadings(
   const totalCo2eKg = sum(readings.map((r) => r.co2eKg));
 
   // One event for the month, not 365: the registry should stay readable.
-  await recordEvent(organizationId, {
+  await recordEvent(scope, {
     eventType: 'energy_consumption_event',
     entityType: 'EnergySource',
     entityId: sourceId,
@@ -195,10 +196,10 @@ export async function certifyBmsMonth(
   monthIndex: number,
   emissionIds: string[]
 ): Promise<BmsMonthCertification> {
-  const organizationId = await requireOrganizationId();
+  const scope = await requireScope();
 
   const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
+    where: { id: scope.organizationId },
     select: { signatureID: true, verificationStatus: true },
   });
   if (!org?.signatureID || org.verificationStatus !== 'VERIFIED') {
@@ -212,7 +213,7 @@ export async function certifyBmsMonth(
   }
 
   const source = await prisma.energySource.findFirst({
-    where: { id: sourceId, Asset: { organizationId } },
+    where: { id: sourceId, Asset: scopeWhere(scope) },
     select: { id: true, name: true, Asset: { select: { id: true, name: true } } },
   });
   if (!source) {
@@ -286,7 +287,7 @@ export async function certifyBmsMonth(
 
   try {
     const certification = await issueCertification({
-      organizationId,
+      scope,
       signatureID: org.signatureID,
       assetId: source.Asset.id,
       title: `Emisión certificada — ${period} · ${totalCo2eKg} kg CO₂e`,

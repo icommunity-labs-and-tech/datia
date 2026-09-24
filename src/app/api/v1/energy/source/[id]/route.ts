@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
+import { authScope } from '@/lib/scope';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
 
 export async function GET(
@@ -10,7 +11,7 @@ export async function GET(
   if (!auth) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  const source = await energyRepository.findSourceById(auth.organizationId, id);
+  const source = await energyRepository.findSourceById(authScope(auth), id);
   if (!source) return NextResponse.json({ error: 'Energy source not found' }, { status: 404 });
 
   return NextResponse.json({ data: source });

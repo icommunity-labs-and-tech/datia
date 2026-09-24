@@ -4,10 +4,11 @@ import { EvidenceService } from '../evidence/EvidenceService';
 import { AssetCreationRollbackError, AssetInputError, OrganizationNotVerifiedError } from './errors';
 import { getCurrentUserWithDetails } from '@/lib/auth/shared/session';
 import { prisma } from '@/lib/prisma';
+import type { Scope } from '@/lib/scope';
 
 export interface CreateItemWithEvidenceInput {
   /** Always passed in: never read from ambient request state (#30). */
-  organizationId: string;
+  scope: Scope;
   id: string;
   name: string;
   description: string;
@@ -41,7 +42,7 @@ export async function createAssetWithEvidence(
 ): Promise<CreateItemWithEvidenceResult> {
   const { assetRepository: itemRepo, userRepository: userRepo, evidenceService: evidence } = deps;
 
-  const { organizationId } = input;
+  const { scope } = input;
 
   // Get current user if not provided
   let userId = input.createdByUserId;
@@ -56,7 +57,7 @@ export async function createAssetWithEvidence(
 
   // Get organization and validate signature
   const organization = await prisma.organization.findUnique({
-    where: { id: organizationId },
+    where: { id: scope.organizationId },
     select: {
       id: true,
       signatureID: true,
@@ -91,7 +92,7 @@ export async function createAssetWithEvidence(
   try {
     created = await itemRepo.create({
       id: input.id,
-      organizationId,
+      scope,
       name: input.name,
       description: input.description,
       imageUrl: input.imageUrl ?? null,
@@ -110,7 +111,7 @@ export async function createAssetWithEvidence(
   // Rollback function
   const rollback = async () => {
     try {
-      await itemRepo.delete(created.id, organizationId);
+      await itemRepo.delete(created.id, scope);
     } catch (rollbackError) {
       console.error('Error during rollback:', rollbackError);
     }
@@ -137,7 +138,7 @@ export async function createAssetWithEvidence(
 
       // Update asset with evidenceId
       try {
-        await itemRepo.updateEvidenceId(created.id, organizationId, evidenceId);
+        await itemRepo.updateEvidenceId(created.id, scope, evidenceId);
       } catch (error) {
         await rollback();
         throw new AssetCreationRollbackError(

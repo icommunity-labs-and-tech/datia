@@ -2,17 +2,17 @@
 
 import { revalidatePath } from 'next/cache';
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 export async function deleteAsset(id: string) {
   try {
-    const organizationId = await requireOrganizationId();
-    const asset = await assetRepository.getById(id, organizationId);
+    const scope = await requireScope();
+    const asset = await assetRepository.getById(id, scope);
     if (!asset) {
       throw new Error('Activo no encontrado');
     }
     
-    await assetRepository.delete(id, organizationId);
+    await assetRepository.delete(id, scope);
 
     revalidatePath(`/dashboard/assets`);
     // Note: categoryId is not in AssetRecord, may need to fetch separately if needed
