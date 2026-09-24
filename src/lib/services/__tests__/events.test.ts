@@ -30,7 +30,7 @@ const findByEvent = webhookRepository.findByEvent as ReturnType<typeof vi.fn>;
 const updateTriggered = webhookRepository.updateTriggered as ReturnType<typeof vi.fn>;
 const triggerWebhook = webhookTriggerService.triggerWebhook as ReturnType<typeof vi.fn>;
 
-const input = { eventType: 'item.created', entityType: 'item', entityId: 'i-1', data: { id: 'i-1' } };
+const input = { eventType: 'asset.created', entityType: 'asset', entityId: 'i-1', data: { id: 'i-1' } };
 const webhook = (id: string) => ({ id, url: `https://${id}.test`, secret: 's3cret', headers: null });
 const event = {
   id: 'evt-1',
@@ -50,13 +50,13 @@ describe('recordEvent', () => {
     expect(recorded.id).toBe('evt-1');
     expect(eventRepository.create).toHaveBeenCalledWith('org-1', input);
     await vi.waitFor(() => expect(updateTriggered).toHaveBeenCalledWith('wh-1', true));
-    expect(findByEvent).toHaveBeenCalledWith('org-1', 'item.created');
+    expect(findByEvent).toHaveBeenCalledWith('org-1', 'asset.created');
     expect(triggerWebhook).toHaveBeenCalledWith(
       'https://wh-1.test',
       {
         id: 'evt-1',
-        event: 'item.created',
-        entityType: 'item',
+        event: 'asset.created',
+        entityType: 'asset',
         entityId: 'i-1',
         data: { id: 'i-1' },
         timestamp: '2026-09-15T10:00:00.000Z',

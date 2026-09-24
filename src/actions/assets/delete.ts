@@ -14,7 +14,7 @@ export async function deleteAsset(id: string) {
     
     await assetRepository.delete(id, organizationId);
 
-    revalidatePath(`/dashboard/items`);
+    revalidatePath(`/dashboard/assets`);
     // Note: categoryId is not in AssetRecord, may need to fetch separately if needed
 
     return {

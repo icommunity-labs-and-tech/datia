@@ -76,7 +76,7 @@ test.describe('UX journey — desktop', () => {
 
     // ── 3. Assets ──
     await page.getByRole('link', { name: /activos|assets/i }).first().click();
-    await page.waitForURL('**/dashboard/items');
+    await page.waitForURL('**/dashboard/assets');
     await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
     await page.waitForLoadState('networkidle');
     await shot(page, 'desktop', '03-assets');
@@ -136,7 +136,7 @@ test.describe('UX journey — mobile', () => {
     await shot(page, 'mobile', '02-drawer');
 
     await drawer.getByRole('link', { name: /activos|assets/i }).first().click();
-    await page.waitForURL('**/dashboard/items');
+    await page.waitForURL('**/dashboard/assets');
     await page.waitForLoadState('networkidle');
     await shot(page, 'mobile', '03-assets');
     await expectNoHorizontalScroll(page);
@@ -186,7 +186,7 @@ test.describe('UX journey — public passport', () => {
     await shot(page, 'desktop', '08-scanner');
     await expectNoHorizontalScroll(page);
 
-    await page.goto(`/customer/item/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/customer/asset/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
 
     // Certification status is the reason this page exists.
     await expect(
@@ -202,7 +202,7 @@ test.describe('UX journey — public passport', () => {
     await shot(page, 'desktop', '10-passport-energy');
 
     await page.setViewportSize(MOBILE);
-    await page.goto(`/customer/item/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/customer/asset/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
     await expect(page.getByRole('tab').first()).toBeVisible();
     await shot(page, 'mobile', '05-passport');
     await expectNoHorizontalScroll(page);
@@ -210,7 +210,7 @@ test.describe('UX journey — public passport', () => {
 
   test('energy certification report', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    await page.goto(`/customer/item/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/customer/asset/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
 
     await page.getByRole('tab', { name: /certificación energética|energy certification/i }).click();
     await expect(page.getByText(/co₂e certificado|certified co₂e/i)).toBeVisible();
@@ -221,10 +221,10 @@ test.describe('UX journey — public passport', () => {
   test('the old energy portal folds into the passport', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
 
-    // Printed QR codes point at /customer/item/<id>, so that is the URL that
+    // Printed QR codes point at /customer/asset/<id>, so that is the URL that
     // survives; /energy/* only forwards old links now.
     await page.goto(`/energy/${PASSPORT_ITEM_ID}`);
-    await expect(page).toHaveURL(new RegExp(`/customer/item/${PASSPORT_ITEM_ID}$`));
+    await expect(page).toHaveURL(new RegExp(`/customer/asset/${PASSPORT_ITEM_ID}$`));
 
     await page.goto('/energy');
     await expect(page).toHaveURL(/\/customer$/);
@@ -232,7 +232,7 @@ test.describe('UX journey — public passport', () => {
 
   test('unknown code shows a recoverable error', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    await page.goto('/customer/item/does-not-exist', { waitUntil: 'networkidle' });
+    await page.goto('/customer/asset/does-not-exist', { waitUntil: 'networkidle' });
 
     await expect(page.getByRole('button', { name: /volver al scanner|back to scanner/i })).toBeVisible();
     await shot(page, 'desktop', '11-passport-not-found');
@@ -256,7 +256,7 @@ test.describe('Vistas de energía', () => {
   test('links to the former hub still resolve', async ({ page }) => {
     // The hub's default view was sources, which now redirects to the assets page.
     await page.goto('/dashboard/energy');
-    await expect(page).toHaveURL(/\/dashboard\/items$/);
+    await expect(page).toHaveURL(/\/dashboard\/assets$/);
 
     await page.goto('/dashboard/energy?tab=consumption');
     await expect(page).toHaveURL(/\/dashboard\/energy\/consumption$/);

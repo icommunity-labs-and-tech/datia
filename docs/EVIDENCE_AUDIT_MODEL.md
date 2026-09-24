@@ -48,7 +48,7 @@ El archivo `issue_data.json` que se ancla en iBS tiene esta estructura:
   "description": "Emisión certificada por AENOR según ISO 14064-3",
   "imageUrls": [],
   "id": "state-uuid",
-  "itemId": "item-uuid",
+  "assetId": "item-uuid",
   "title": "Certificación Energética — 42.5 kg CO₂e",
   "createdAt": "2026-07-15T10:00:00.000Z",
   "templateConfig": {
@@ -158,7 +158,7 @@ Content-Type: application/json
     "verificationStatus": "VERIFIED",
     "stateId": "state-xyz789",
     "evidenceID": "ev_1a2b3c4d5e6f",
-    "itemId": "item-def456"
+    "assetId": "item-def456"
   }
 }
 ```

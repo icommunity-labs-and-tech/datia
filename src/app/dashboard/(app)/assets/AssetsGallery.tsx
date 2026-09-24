@@ -28,7 +28,7 @@ import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
 import CreateAssetModal from '@/components/assets/CreateAssetModal';
 import EnergySourcesPanel from '@/components/energy/EnergySourcesPanel';
 import type { EnergySourceRecord, EnergyConsumptionRecord } from '@/domain/energy/EnergyTypes';
-import classes from './ItemsGallery.module.css';
+import classes from './AssetsGallery.module.css';
 
 interface Item {
   id: string;
@@ -47,7 +47,7 @@ function ItemCard({ item }: { item: Item }) {
   return (
     <Card
       component={Link}
-      href={`/dashboard/items/${item.id}`}
+      href={`/dashboard/assets/${item.id}`}
       padding={0}
       radius="md"
       className={classes.card}
@@ -144,7 +144,7 @@ function InstallationCard({
   );
 }
 
-export default function ItemsGallery({
+export default function AssetsGallery({
   withEnergy = false,
   sources = [],
   consumption = [],

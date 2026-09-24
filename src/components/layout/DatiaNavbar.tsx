@@ -47,7 +47,7 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
 
   const mainLinks = [
     { href: '/dashboard', icon: IconHome2, label: t('home'), exact: true },
-    ...(showPassport ? [{ href: '/dashboard/items', icon: IconPackage, label: t('assets') }] : []),
+    ...(showPassport ? [{ href: '/dashboard/assets', icon: IconPackage, label: t('assets') }] : []),
     ...(showEnergy
       ? [
           { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption') },

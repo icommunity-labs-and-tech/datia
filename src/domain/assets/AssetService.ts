@@ -28,7 +28,7 @@ export interface AssetResponse {
 }
 
 export interface AssetService {
-  createItem(
+  createAsset(
     organizationId: string,
     data: CreateAssetRequest
   ): Promise<AssetResponse>;

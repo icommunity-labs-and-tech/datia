@@ -16,7 +16,7 @@ export default function CustomerPage() {
     (event: React.FormEvent) => {
       event.preventDefault();
       const trimmed = code.trim();
-      if (trimmed) router.push(`/customer/item/${trimmed}`);
+      if (trimmed) router.push(`/customer/asset/${trimmed}`);
     },
     [code, router]
   );

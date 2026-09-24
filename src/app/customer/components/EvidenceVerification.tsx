@@ -23,7 +23,7 @@ export function EvidenceVerification({ evidenceId, entityId, createdAt: _created
   useEffect(() => {
     if (!evidenceId) return;
 
-    const endpoint = `/api/checker/item/${encodeURIComponent(entityId)}`;
+    const endpoint = `/api/checker/asset/${encodeURIComponent(entityId)}`;
 
     let cancelled = false;
 

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button, Center, Loader, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { ItemPassport } from '../../components/ItemPassport';
+import { AssetPassport } from '../../components/AssetPassport';
 import PassportShell from '../../components/PassportShell';
 import { AssetData } from '../../types';
 
@@ -33,7 +33,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
         setLoading(true);
         setError(null);
 
-        const response = await fetch(`/api/customer/item/${assetId}`);
+        const response = await fetch(`/api/customer/asset/${assetId}`);
         if (!response.ok) {
           throw new Error(t('productNotFound'));
         }
@@ -89,7 +89,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
 
   return (
     <PassportShell organization={itemData.organization}>
-      <ItemPassport item={itemData} onBack={() => router.push('/customer')} />
+      <AssetPassport item={itemData} onBack={() => router.push('/customer')} />
     </PassportShell>
   );
 }

@@ -9,21 +9,21 @@ type AssetQrModalProps = {
   show: boolean;
   onHide: () => void;
   assetId: string;
-  itemName?: string;
+  assetName?: string;
 };
 
-export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQrModalProps) {
+export default function AssetQrModal({ show, onHide, assetId, assetName }: AssetQrModalProps) {
   const t = useTranslations('itemDetail.qr');
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const itemUrl = useMemo(() => {
+  const assetUrl = useMemo(() => {
     if (typeof window === 'undefined') return '';
     try {
       const origin = window.location.origin;
-      return `${origin}/customer/item/${encodeURIComponent(assetId)}`;
+      return `${origin}/customer/asset/${encodeURIComponent(assetId)}`;
     } catch {
-      return `/customer/item/${encodeURIComponent(assetId)}`;
+      return `/customer/asset/${encodeURIComponent(assetId)}`;
     }
   }, [assetId]);
 
@@ -38,7 +38,7 @@ export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQ
         const QR = mod.default ?? mod;
         const canvas = canvasRef.current;
         if (!canvas) return;
-        await QR.toCanvas(canvas, itemUrl, {
+        await QR.toCanvas(canvas, assetUrl, {
           errorCorrectionLevel: 'M',
           margin: 1,
           width: 260,
@@ -54,7 +54,7 @@ export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQ
 
     draw();
     return () => { cancelled = true; };
-  }, [show, itemUrl]);
+  }, [show, assetUrl]);
 
   const handleDownload = () => {
     const canvas = canvasRef.current;
@@ -62,7 +62,7 @@ export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQ
     const dataUrl = canvas.toDataURL('image/png');
     const a = document.createElement('a');
     a.href = dataUrl;
-    a.download = `qr_item_${assetId}.png`;
+    a.download = `qr_asset_${assetId}.png`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -70,7 +70,7 @@ export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQ
 
   const handleCopyUrl = async () => {
     try {
-      await navigator.clipboard.writeText(itemUrl);
+      await navigator.clipboard.writeText(assetUrl);
     } catch {}
   };
 
@@ -79,11 +79,11 @@ export default function AssetQrModal({ show, onHide, assetId, itemName }: AssetQ
       opened={show}
       onClose={onHide}
       centered
-      title={<Group gap={6}><IconQrcode size={17} stroke={1.7} />{itemName ? t('titleNamed', { name: itemName }) : t('title')}</Group>}
+      title={<Group gap={6}><IconQrcode size={17} stroke={1.7} />{assetName ? t('titleNamed', { name: assetName }) : t('title')}</Group>}
     >
       <Stack align="center" gap="xs">
         <canvas ref={canvasRef} style={{ width: 260, height: 260 }} />
-        <Text size="xs" c="dimmed" ta="center" style={{ wordBreak: 'break-all' }}>{itemUrl}</Text>
+        <Text size="xs" c="dimmed" ta="center" style={{ wordBreak: 'break-all' }}>{assetUrl}</Text>
         {error && <Text size="sm" c="red">{error}</Text>}
       </Stack>
       <Group justify="flex-end" mt="lg">

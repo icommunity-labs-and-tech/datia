@@ -42,7 +42,7 @@ import PageHeader from '@/components/layout/PageHeader';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
-export default function ItemDetailPage() {
+export default function AssetDetailPage() {
   const t = useTranslations('itemDetail');
   const tSidebar = useTranslations('sidebar');
   const { id } = useParams();
@@ -62,9 +62,9 @@ export default function ItemDetailPage() {
     handleDelete,
   } = useDeleteEntity(deleteAsset, {
     entityName: t('deleteEntityName'),
-    redirectPath: '/dashboard/items',
+    redirectPath: '/dashboard/assets',
     onSuccess: () => {
-      router.push('/dashboard/items');
+      router.push('/dashboard/assets');
     },
     onError: () => {
       alert(t('deleteError'));
@@ -135,7 +135,7 @@ export default function ItemDetailPage() {
       <Stack gap="md">
         <Anchor
           component={Link}
-          href="/dashboard/items"
+          href="/dashboard/assets"
           size="sm"
           c="dimmed"
           underline="never"
@@ -163,7 +163,7 @@ export default function ItemDetailPage() {
                 size="xs"
                 leftSection={<IconExternalLink size={15} />}
                 component="a"
-                href={`/customer/item/${encodeURIComponent(assetId)}`}
+                href={`/customer/asset/${encodeURIComponent(assetId)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -310,7 +310,7 @@ export default function ItemDetailPage() {
         show={showQr}
         onHide={() => setShowQr(false)}
         assetId={assetId}
-        itemName={item?.name}
+        assetName={item?.name}
       />
 
     </>

@@ -36,7 +36,7 @@ export default function EmissionDetailClient({ emission }: Props) {
       {/* Chain visualisation */}
       <div className="d-flex align-items-stretch gap-2 mb-4 flex-wrap">
         {[
-          { icon: 'bi-box', label: 'Hardware', value: item.name, href: `/dashboard/items/${item.id}` },
+          { icon: 'bi-box', label: 'Hardware', value: item.name, href: `/dashboard/assets/${item.id}` },
           { icon: 'bi-lightning-charge', label: 'Fuente', value: source.name, sub: source.energyCarrier },
           { icon: 'bi-speedometer2', label: 'Consumo', value: `${consumption.consumptionKwh} kWh`, sub: consumption.lifecycleStage },
           { icon: 'bi-cloud', label: 'Emisión', value: `${emission.co2eKg} kg CO₂e`, sub: emission.scope?.replace('_', ' ') },

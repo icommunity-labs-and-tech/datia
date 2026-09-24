@@ -4,7 +4,7 @@ import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { prisma } from '@/lib/prisma';
 import { listEnergySources } from '@/actions/energy/list-sources';
 import { listEnergyConsumption } from '@/actions/energy/list-consumption';
-import ItemsGallery from './ItemsGallery';
+import AssetsGallery from './AssetsGallery';
 
 export const dynamic = 'force-dynamic';
 
@@ -46,7 +46,7 @@ export default async function ItemsPage() {
     : [[], []];
 
   return (
-    <ItemsGallery
+    <AssetsGallery
       withEnergy={withEnergy}
       sources={sources ?? []}
       consumption={consumption ?? []}

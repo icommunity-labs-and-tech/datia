@@ -115,8 +115,8 @@ async function main() {
   console.log('\n📞 Creando llamadas API...');
   
   const apiPaths = [
-    '/api/items',
-    '/api/items/{id}',
+    '/api/assets',
+    '/api/assets/{id}',
     '/api/states',
     '/api/categories',
     '/api/users',
@@ -163,7 +163,7 @@ async function main() {
   console.log('\n📋 Creando eventos...');
   
   const eventTypes = [
-    'item.created',
+    'asset.created',
     'item.updated',
     'item.deleted',
     'state.created',
@@ -192,7 +192,7 @@ async function main() {
         ? items[Math.floor(Math.random() * items.length)].id 
         : generateId();
       eventData = {
-        itemName: `Item ${Math.floor(Math.random() * 1000)}`,
+        assetName: `Item ${Math.floor(Math.random() * 1000)}`,
         userId: user.id,
         userName: user.name,
         action: eventType.split('.')[1],

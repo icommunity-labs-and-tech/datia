@@ -43,12 +43,8 @@ const manualOpenApiSpec = {
   },
   tags: [
     {
-      name: 'Products',
-      description: 'Operations related to products management',
-    },
-    {
-      name: 'Categories',
-      description: 'Operations related to categories management',
+      name: 'Assets',
+      description: 'Operations related to assets management',
     },
     {
       name: 'Events',
@@ -64,44 +60,38 @@ const manualOpenApiSpec = {
     },
   ],
   paths: {
-    '/products': {
+    '/assets': {
       get: {
-        summary: 'List all products',
-        description: 'Retrieves a list of all products in the system. Requires a valid API token.',
-        operationId: 'listProducts',
-        tags: ['Products'],
+        summary: 'List all assets',
+        description: 'Retrieves a list of all assets in the system. Requires a valid API token.',
+        operationId: 'listAssets',
+        tags: ['Assets'],
         security: [{ BearerAuth: [] }],
             parameters: [
-              {
-                name: 'categoryId',
-                in: 'query',
-                schema: { type: 'string' },
-                description: 'Filter products by category ID (optional)',
-              },
               {
                 name: 'q',
                 in: 'query',
                 schema: { type: 'string' },
-                description: 'Search query to filter products by name or ID (optional)',
+                description: 'Search query to filter assets by name or ID (optional)',
               },
               {
                 name: 'cursor',
                 in: 'query',
                 schema: { type: 'string' },
-                description: 'Cursor for pagination (ID of the last product from previous page)',
-                example: 'PROD-001',
+                description: 'Cursor for pagination (ID of the last asset from previous page)',
+                example: 'ASSET-001',
               },
               {
                 name: 'limit',
                 in: 'query',
                 schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-                description: 'Maximum number of products to return',
+                description: 'Maximum number of assets to return',
                 example: 20,
               },
             ],
             responses: {
               '200': {
-                description: 'List of products retrieved successfully (paginated)',
+                description: 'List of assets retrieved successfully (paginated)',
                 content: {
                   'application/json': {
                     schema: {
@@ -112,7 +102,7 @@ const manualOpenApiSpec = {
                           items: {
                             type: 'object',
                             properties: {
-                              id: { type: 'string', example: 'PROD-001' },
+                              id: { type: 'string', example: 'ASSET-001' },
                               name: { type: 'string', example: 'Solar Panel 300W' },
                               description: { type: 'string', example: 'High efficiency solar panel' },
                               imageUrl: { type: 'string', nullable: true },
@@ -123,12 +113,12 @@ const manualOpenApiSpec = {
                         nextCursor: {
                           type: 'string',
                           nullable: true,
-                          description: 'ID of the last product in this page, use this as cursor for next page',
-                          example: 'PROD-020',
+                          description: 'ID of the last asset in this page, use this as cursor for next page',
+                          example: 'ASSET-020',
                         },
                         hasNextPage: {
                           type: 'boolean',
-                          description: 'Whether there are more products available',
+                          description: 'Whether there are more assets available',
                           example: true,
                         },
                       },
@@ -142,10 +132,10 @@ const manualOpenApiSpec = {
         },
       },
       post: {
-        summary: 'Create a new product',
-        description: 'Creates a new product in the system. Requires a valid API token.',
-        operationId: 'createProduct',
-        tags: ['Products'],
+        summary: 'Create a new asset',
+        description: 'Creates a new asset in the system. Requires a valid API token.',
+        operationId: 'createAsset',
+        tags: ['Assets'],
         security: [{ BearerAuth: [] }],
         requestBody: {
           required: true,
@@ -157,50 +147,48 @@ const manualOpenApiSpec = {
                 properties: {
                   id: {
                     type: 'string',
-                    description: 'Unique identifier for the product',
-                    example: 'PROD-001',
+                    description: 'Unique identifier for the asset',
+                    example: 'ASSET-001',
                   },
                   name: {
                     type: 'string',
-                    description: 'Name of the product',
+                    description: 'Name of the asset',
                     example: 'Solar Panel 300W',
                   },
                   description: {
                     type: 'string',
-                    description: 'Description of the product',
+                    description: 'Description of the asset',
                     example: 'High efficiency solar panel',
-                  },
-                  categoryIds: {
-                    type: 'array',
-                    items: { type: 'string' },
-                    description: 'Array of category IDs',
-                    example: ['cat-001'],
                   },
                   imageUrl: {
                     type: 'string',
                     format: 'uri',
-                    description: 'URL of the product image',
+                    description: 'URL of the asset image',
                     example: 'https://example.com/image.jpg',
                   },
-                  templateFields: {
-                    type: 'object',
-                    description: 'Additional template fields',
-                    additionalProperties: true,
+                  latitude: {
+                    type: 'number',
+                    minimum: -90,
+                    maximum: 90,
+                    description: 'Where the asset is. Without a position it stays off the map.',
+                    example: 40.4168,
                   },
-                  itemTemplate: {
-                    type: 'array',
-                    description: 'Product template configuration',
-                    items: { type: 'object' },
+                  longitude: {
+                    type: 'number',
+                    minimum: -180,
+                    maximum: 180,
+                    example: -3.7038,
                   },
                 },
               },
               examples: {
                 basic: {
                   value: {
-                    id: 'PROD-001',
+                    id: 'ASSET-001',
                     name: 'Solar Panel 300W',
                     description: 'High efficiency solar panel',
-                    categoryIds: ['cat-001'],
+                    latitude: 40.4168,
+                    longitude: -3.7038,
                   },
                 },
               },
@@ -209,7 +197,7 @@ const manualOpenApiSpec = {
         },
         responses: {
           '201': {
-            description: 'Product created successfully',
+            description: 'Asset created successfully',
             content: {
               'application/json': {
                 schema: {
@@ -219,15 +207,13 @@ const manualOpenApiSpec = {
                     name: { type: 'string' },
                     description: { type: 'string' },
                     imageUrl: { type: 'string', nullable: true },
-                    itemTemplate: { type: 'array', nullable: true },
                   },
                 },
                 example: {
-                  id: 'PROD-001',
+                  id: 'ASSET-001',
                   name: 'Solar Panel 300W',
                   description: 'High efficiency solar panel',
                   imageUrl: null,
-                  itemTemplate: [],
                 },
               },
             },
@@ -269,7 +255,7 @@ const manualOpenApiSpec = {
             },
           },
           '409': {
-            description: 'Conflict - product with this ID already exists',
+            description: 'Conflict - asset with this ID already exists',
             content: {
               'application/json': {
                 schema: {
@@ -307,26 +293,26 @@ const manualOpenApiSpec = {
         },
       },
     },
-    '/products/{id}': {
+    '/assets/{id}': {
       get: {
-        summary: 'Get a product by ID',
-        description: 'Retrieves detailed information about a specific product. Requires a valid API token.',
-        operationId: 'getProductById',
-        tags: ['Products'],
+        summary: 'Get a asset by ID',
+        description: 'Retrieves detailed information about a specific asset. Requires a valid API token.',
+        operationId: 'getAssetById',
+        tags: ['Assets'],
         security: [{ BearerAuth: [] }],
         parameters: [
           {
             name: 'id',
             in: 'path',
             required: true,
-            description: 'Product ID',
+            description: 'Asset ID',
             schema: { type: 'string' },
-            example: 'PROD-001',
+            example: 'ASSET-001',
           },
         ],
         responses: {
           '200': {
-            description: 'Product retrieved successfully',
+            description: 'Asset retrieved successfully',
             content: {
               'application/json': {
                 schema: {
@@ -357,7 +343,7 @@ const manualOpenApiSpec = {
             },
           },
           '404': {
-            description: 'Product not found',
+            description: 'Asset not found',
             content: {
               'application/json': {
                 schema: {
@@ -368,294 +354,6 @@ const manualOpenApiSpec = {
                 },
               },
             },
-          },
-        },
-      },
-    },
-    '/categories': {
-      get: {
-        summary: 'List all categories',
-        description: 'Retrieves a list of all categories in the system with pagination. Requires a valid API token.',
-        operationId: 'listCategories',
-        tags: ['Categories'],
-        security: [{ BearerAuth: [] }],
-        parameters: [
-          {
-            name: 'cursor',
-            in: 'query',
-            schema: { type: 'string' },
-            description: 'Cursor for pagination (ID of the last category from previous page)',
-            example: 'category-001',
-          },
-          {
-            name: 'limit',
-            in: 'query',
-            schema: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
-            description: 'Maximum number of categories to return',
-            example: 20,
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'List of categories retrieved successfully (paginated)',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    data: {
-                      type: 'array',
-                      items: {
-                        type: 'object',
-                        properties: {
-                          id: { type: 'string' },
-                          name: { type: 'string' },
-                          description: { type: 'string' },
-                          itemTemplate: { type: 'array' },
-                          createdAt: { type: 'string', format: 'date-time' },
-                          updatedAt: { type: 'string', format: 'date-time' },
-                        },
-                      },
-                    },
-                    nextCursor: {
-                      type: 'string',
-                      nullable: true,
-                      description: 'ID of the last category in this page, use this as cursor for next page',
-                      example: 'category-020',
-                    },
-                    hasNextPage: {
-                      type: 'boolean',
-                      description: 'Whether there are more categories available',
-                      example: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized - invalid or missing API token',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Internal server error',
-          },
-        },
-      },
-    },
-    '/categories/{id}': {
-      get: {
-        summary: 'Get a category by ID',
-        description: 'Retrieves detailed information about a specific category. Requires a valid API token.',
-        operationId: 'getCategoryById',
-        tags: ['Categories'],
-        security: [{ BearerAuth: [] }],
-        parameters: [
-          {
-            name: 'id',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: 'Unique identifier of the category',
-            example: 'category-001',
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'Category retrieved successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    id: { type: 'string' },
-                    name: { type: 'string' },
-                    description: { type: 'string' },
-                    itemTemplate: { type: 'array' },
-                    createdAt: { type: 'string', format: 'date-time' },
-                  },
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized - invalid or missing API token',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Category not found',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-    '/categories/{id}/products/{productId}': {
-      post: {
-        summary: 'Attach a product to a category',
-        description: 'Adds a product to a category. Requires a valid API token.',
-        operationId: 'attachProductToCategory',
-        tags: ['Categories'],
-        security: [{ BearerAuth: [] }],
-        parameters: [
-          {
-            name: 'id',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: 'Unique identifier of the category',
-            example: 'category-001',
-          },
-          {
-            name: 'productId',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: 'Unique identifier of the product',
-            example: 'PROD-001',
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'Product attached to category successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                  },
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized - invalid or missing API token',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Category or product not found',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Internal server error',
-          },
-        },
-      },
-      delete: {
-        summary: 'Detach a product from a category',
-        description: 'Removes a product from a category. Requires a valid API token.',
-        operationId: 'detachProductFromCategory',
-        tags: ['Categories'],
-        security: [{ BearerAuth: [] }],
-        parameters: [
-          {
-            name: 'id',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: 'Unique identifier of the category',
-            example: 'category-001',
-          },
-          {
-            name: 'productId',
-            in: 'path',
-            required: true,
-            schema: { type: 'string' },
-            description: 'Unique identifier of the product',
-            example: 'PROD-001',
-          },
-        ],
-        responses: {
-          '200': {
-            description: 'Product detached from category successfully',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    success: { type: 'boolean', example: true },
-                  },
-                },
-              },
-            },
-          },
-          '401': {
-            description: 'Unauthorized - invalid or missing API token',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                    code: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '404': {
-            description: 'Category or product not found',
-            content: {
-              'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: {
-                    error: { type: 'string' },
-                  },
-                },
-              },
-            },
-          },
-          '500': {
-            description: 'Internal server error',
           },
         },
       },
@@ -687,21 +385,21 @@ const manualOpenApiSpec = {
             in: 'query',
             schema: { type: 'string' },
             description: 'Filter events by event type (optional)',
-            example: 'product.created',
+            example: 'asset.created',
           },
           {
             name: 'entityType',
             in: 'query',
             schema: { type: 'string' },
             description: 'Filter events by entity type (optional)',
-            example: 'Product',
+            example: 'Asset',
           },
           {
             name: 'entityId',
             in: 'query',
             schema: { type: 'string' },
             description: 'Filter events by entity ID (optional)',
-            example: 'PROD-001',
+            example: 'ASSET-001',
           },
         ],
         responses: {
@@ -1021,33 +719,35 @@ const manualOpenApiSpec = {
     },
     '/emissions/{id}/certify': {
       post: {
-        summary: 'Certify an emission record',
-        description: 'Marks an emission record as verified and creates blockchain-anchored evidence on the hardware Item\'s digital passport. Requires the organization to have a valid signatureID (KYC completed).',
+        summary: 'Anchor an emission that has no proof yet',
+        description: 'Emissions are anchored as they are written, so this is only needed for one left without proof — because iBS was unreachable, or the organization had not finished KYC. It issues the proof; the emission becomes VERIFIED once iBS confirms it on chain (`evidence.certified`). Requires a valid signatureID.',
         tags: ['Emissions'],
         security: [{ BearerAuth: [] }],
         parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
-        requestBody: {
-          required: true,
-          content: {
-            'application/json': {
-              schema: {
-                type: 'object',
-                required: ['verifierBody'],
-                properties: {
-                  verifierBody: { type: 'string', example: 'Bureau Veritas' },
-                  verificationStandard: { type: 'string', example: 'ISO 14064-3', default: 'ISO 14064-3' },
-                },
-              },
-            },
-          },
-        },
         responses: {
           '201': { description: 'Proof issued. Returns the certification, certified once iBS confirms it on chain.' },
           '401': { description: 'Unauthorized' },
           '404': { description: 'Emission record not found' },
-          '409': { description: 'Already certified' },
+          '409': { description: 'The emission already has a certification' },
           '422': { description: 'Organization KYC incomplete' },
-          '502': { description: 'Blockchain evidence creation failed. Emission remains PENDING.' },
+          '502': { description: 'iBS rejected the evidence. The emission stays without proof.' },
+        },
+      },
+    },
+    '/emissions/{id}/verify': {
+      get: {
+        summary: 'Verify an emission against its proof on chain',
+        description: 'iBS publishes the checksum of the certified data, never the data itself, so this compares checksums: the one iBS publishes against the one recorded when the proof was issued. Then it compares the certified figures with the record as it stands today, which surfaces a figure changed after being certified.',
+        tags: ['Emissions'],
+        security: [{ BearerAuth: [] }],
+        parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
+        responses: {
+          '200': { description: 'Report: `verified`, `proof.intact`, the certified data and any discrepancies' },
+          '401': { description: 'Unauthorized' },
+          '404': { description: 'Emission record not found' },
+          '409': { description: 'The proof predates checksum recording and cannot be verified automatically' },
+          '422': { description: 'The emission has no certified proof yet' },
+          '502': { description: 'iBS could not be read, or publishes no checksum' },
         },
       },
     },

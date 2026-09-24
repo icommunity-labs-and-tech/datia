@@ -21,7 +21,7 @@ type IssueDataInput = {
   imageUrls?: string[];
   // Campos para cadena de custodia
   itemEvidenceID?: string | null;
-  itemName?: string;
+  assetName?: string;
   itemCreatedAt?: string;
 };
 
@@ -35,7 +35,7 @@ export function buildIssueDataObject(input: IssueDataInput) {
     templateConfig,
     imageUrls = [],
     itemEvidenceID,
-    itemName,
+    assetName,
     itemCreatedAt,
   } = input;
 
@@ -53,7 +53,7 @@ export function buildIssueDataObject(input: IssueDataInput) {
   
   // Campos de cadena de custodia
   if (itemEvidenceID !== undefined) result.itemEvidenceID = itemEvidenceID;
-  if (itemName) result.itemName = itemName;
+  if (assetName) result.assetName = assetName;
   if (itemCreatedAt) result.itemCreatedAt = itemCreatedAt;
 
   return result;

@@ -71,7 +71,7 @@ Archivo: `src/lib/evidenceUtils.ts`
 - ✅ `buildItemDataObject()`: Construye JSON determinístico para items
 - ✅ Actualizado `buildIssueDataObject()` para incluir campos de cadena de custodia:
   - `itemEvidenceID`: Referencia a evidencia del item
-  - `itemName`: Nombre del item
+  - `assetName`: Nombre del item
   - `itemCreatedAt`: Timestamp de creación del item
 
 ---
@@ -102,7 +102,7 @@ Archivo: `src/actions/states/create.ts`
 **Mejoras:**
 - ✅ Al crear state, incluye en metadata:
   - `itemEvidenceID`: ID de evidencia del item
-  - `itemName`: Nombre del item
+  - `assetName`: Nombre del item
   - `itemCreatedAt`: Timestamp del item
 - ✅ Establece **cadena de custodia** en blockchain
 
@@ -122,7 +122,7 @@ Archivo: `src/services/CheckerService.ts`
 
 **Funcionalidades:**
 
-#### `verifyItemEvidence(itemId)`
+#### `verifyItemEvidence(assetId)`
 - Compara `evidenceDataJson` local vs blockchain
 - Detecta manipulación de datos (tampering)
 - Retorna: `verified` | `tampered` | `no_evidence`
@@ -131,7 +131,7 @@ Archivo: `src/services/CheckerService.ts`
 - Similar a items pero para states
 - Usa `issueDataJson` para comparación
 
-#### `verifyItemChainOfCustody(itemId)`
+#### `verifyItemChainOfCustody(assetId)`
 - Verifica evidencia del item
 - Verifica evidencias de todos los states del item
 - Verifica que cada state referencie correctamente al item
@@ -146,9 +146,9 @@ Archivo: `src/services/CheckerService.ts`
 Archivo: `src/actions/checker.ts`
 
 **Acciones disponibles:**
-- ✅ `verifyItemEvidence(itemId)`
+- ✅ `verifyItemEvidence(assetId)`
 - ✅ `verifyStateEvidence(stateId)`
-- ✅ `verifyItemChainOfCustody(itemId)`
+- ✅ `verifyItemChainOfCustody(assetId)`
 
 ---
 
@@ -294,7 +294,7 @@ Archivo: `src/actions/items/__tests__/create-with-evidence.test.ts`
 ### 3. Verificar Cadena de Custodia
 ```bash
 # Crear varios states para un item
-# Usar verifyItemChainOfCustody(itemId)
+# Usar verifyItemChainOfCustody(assetId)
 # → Debe verificar que todos los states referencian el item
 ```
 

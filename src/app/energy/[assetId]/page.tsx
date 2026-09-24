@@ -8,8 +8,8 @@ import { redirect } from 'next/navigation';
 export default async function EnergyReportRedirect({
   params,
 }: {
-  params: Promise<{ itemId: string }>;
+  params: Promise<{ assetId: string }>;
 }) {
-  const { itemId } = await params;
-  redirect(`/customer/item/${encodeURIComponent(itemId)}`);
+  const { assetId } = await params;
+  redirect(`/customer/asset/${encodeURIComponent(assetId)}`);
 }

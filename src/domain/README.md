@@ -46,7 +46,7 @@ import { ItemServiceLive } from '@/domain/assets/ItemServiceLive';
 
 const program = Effect.gen(function* (_) {
   const itemService = yield* _(AssetService);
-  return yield* _(itemService.createItem(request));
+  return yield* _(itemService.createAsset(request));
 }).pipe(
   Effect.provide(ItemServiceLive)
 );

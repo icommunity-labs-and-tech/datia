@@ -6,7 +6,7 @@ test.describe('Admin - Items CRUD', () => {
   test.use({ storageState: ADMIN_STORAGE_STATE });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/items');
+    await page.goto('/dashboard/assets');
   });
 
   test('create, edit, and delete an item', async ({ page }) => {

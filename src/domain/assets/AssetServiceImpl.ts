@@ -5,20 +5,21 @@ import type { UserRepository } from '../users/UserRepository';
 import type { EvidenceService } from '../evidence/EvidenceService';
 import { revalidatePath } from 'next/cache';
 import { createAssetWithEvidence } from './AssetCreationHelper';
+import { recordEvent } from '@/lib/services/events';
 
 export function createAssetServiceImpl(deps: {
   assetRepository: AssetRepository;
   userRepository: UserRepository;
   evidenceService: EvidenceService;
 }): AssetService {
-  const { assetRepository: itemRepo, userRepository: userRepo, evidenceService: evidence } = deps;
+  const { assetRepository: assetRepo, userRepository: userRepo, evidenceService: evidence } = deps;
 
   return {
-    async createItem(organizationId: string, data: CreateAssetRequest): Promise<AssetResponse> {
+    async createAsset(organizationId: string, data: CreateAssetRequest): Promise<AssetResponse> {
       try {
         // 1. Validate policies - check if asset already exists
         try {
-          const existingItem = await itemRepo.getById(data.customId, organizationId);
+          const existingItem = await assetRepo.getById(data.customId, organizationId);
           if (existingItem) {
             throw new AssetAlreadyExistsError(
               data.customId,
@@ -27,12 +28,12 @@ export function createAssetServiceImpl(deps: {
           }
         } catch (e) {
           if (e instanceof AssetAlreadyExistsError) throw e;
-          // Item doesn't exist, continue
+          // Asset doesn't exist, continue
         }
 
         // 2. Use helper function to create asset with evidence
         const result = await createAssetWithEvidence(
-          { assetRepository: itemRepo, userRepository: userRepo, evidenceService: evidence },
+          { assetRepository: assetRepo, userRepository: userRepo, evidenceService: evidence },
           {
             organizationId,
             id: data.customId,
@@ -45,8 +46,18 @@ export function createAssetServiceImpl(deps: {
           }
         );
 
-        // 3. Revalidate cache
-        revalidatePath('/dashboard/items');
+        // 3. Announce it. Here and not in the callers: the dashboard and the API
+        // both create assets through this service, and only the dashboard used
+        // to emit the event, so integrators never heard about their own.
+        await recordEvent(organizationId, {
+          eventType: 'asset.created',
+          entityType: 'Asset',
+          entityId: result.id,
+          data: { id: result.id, name: result.name },
+        });
+
+        // 4. Revalidate cache
+        revalidatePath('/dashboard/assets');
 
         return {
           id: result.id,

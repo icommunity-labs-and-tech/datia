@@ -326,8 +326,7 @@ El usuario sigue el mismo proceso de activación que el administrador.
 | Ruta                        | USER | ADMIN | SUPER_ADMIN |
 |-----------------------------|------|-------|-------------|
 | `/dashboard`                | ✅   | ✅    | ✅          |
-| `/dashboard/categories`     | ✅   | ✅    | ✅          |
-| `/dashboard/items`          | ✅   | ✅    | ✅          |
+| `/dashboard/assets`         | ✅   | ✅    | ✅          |
 | `/dashboard/users`          | ❌   | ✅    | ✅          |
 | `/dashboard/profile`        | ✅   | ✅    | ✅          |
 | `/superadmin/organizations` | ❌   | ❌    | ✅          |

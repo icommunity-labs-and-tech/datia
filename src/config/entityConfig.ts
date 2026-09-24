@@ -26,8 +26,8 @@ export const entityConfigs: Record<string, EntityConfig> = {
     name: 'items',
     displayName: 'Item',
     icon: 'bi-list-columns',
-    listPath: '/dashboard/items',
-    detailPath: (id: string) => `/dashboard/items/${id}`,
+    listPath: '/dashboard/assets',
+    detailPath: (id: string) => `/dashboard/assets/${id}`,
     // Nothing of the asset is shown as cascade any more: its state history is
     // gone (#63) and its proofs survive it, linked to the emissions.
     hasCascade: false,

@@ -174,7 +174,7 @@
     "deleteUserError": "Error al eliminar el usuario",
     "deleteProductError": "Error al eliminar el activo",
     "columnLabels": {
-      "itemName": "Nombre del Item",
+      "assetName": "Nombre del Item",
       "status": "Estado",
       "image": "Imagen",
       "passport": "Pasaporte",
@@ -787,8 +787,8 @@
       "title": "Eventos",
       "filter": {
         "all": "Todos",
-        "itemCreated": "Item Creado",
-        "certification": "Certificaciones"
+        "certification": "Certificaciones",
+        "assetCreated": "Item Creado"
       },
       "noEvents": "No hay eventos registrados aún",
       "table": {

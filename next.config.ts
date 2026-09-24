@@ -30,6 +30,17 @@ const nextConfig: NextConfig = {
       'storage.googleapis.com',
     ],
   },
+  // Assets used to be «items» in the URLs (#26). Printed QR codes point at
+  // /customer/item/<id> and cannot be reissued, so those keep working for good;
+  // the dashboard route is internal, and is redirected only so bookmarks do not
+  // break. The API is not aliased: there were no integrators when it moved.
+  async redirects() {
+    return [
+      { source: '/customer/item/:id', destination: '/customer/asset/:id', permanent: true },
+      { source: '/dashboard/items', destination: '/dashboard/assets', permanent: true },
+      { source: '/dashboard/items/:id', destination: '/dashboard/assets/:id', permanent: true },
+    ];
+  },
   // /api/v1-sandbox/** → /api/v1/** (same handlers; sandbox mode is determined by the auth token)
   async rewrites() {
     return [

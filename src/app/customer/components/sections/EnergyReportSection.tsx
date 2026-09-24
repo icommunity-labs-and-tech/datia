@@ -92,7 +92,7 @@ export function EnergyReportSection({ assetId }: { assetId: string }) {
   useEffect(() => {
     let cancelled = false;
 
-    fetch(`/api/energy/item/${encodeURIComponent(assetId)}`)
+    fetch(`/api/energy/asset/${encodeURIComponent(assetId)}`)
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
       .then((data: EnergyReport) => { if (!cancelled) setReport(data); })
       .catch(() => { if (!cancelled) setError(t('loadError')); })

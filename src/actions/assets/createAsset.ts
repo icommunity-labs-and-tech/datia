@@ -7,7 +7,6 @@ import { icommunityService } from '@/infrastructure/icommunity/ICommunityService
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { requireOrganizationId } from '@/lib/auth/tenant';
-import { recordEvent } from '@/lib/services/events';
 import {
   AssetInputError,
   AssetAlreadyExistsError,
@@ -54,7 +53,7 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
       evidenceService: createEvidenceServiceImpl({ icommunityService }),
     });
 
-    const asset = await service.createItem(organizationId, {
+    const asset = await service.createAsset(organizationId, {
       customId: id,
       name,
       description: input.description.trim(),
@@ -63,14 +62,7 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
       longitude: input.longitude ?? null,
     });
 
-    await recordEvent(organizationId, {
-      eventType: 'item.created',
-      entityType: 'Item',
-      entityId: asset.id,
-      data: { id: asset.id, name: asset.name },
-    });
-
-    revalidatePath('/dashboard/items');
+    revalidatePath('/dashboard/assets');
     return { success: true, id: asset.id };
   } catch (error) {
     if (

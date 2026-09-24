@@ -12,7 +12,7 @@ test.describe('Customer - Item Passport', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test('renders the passport for a known code', async ({ page }) => {
-    await page.goto(`/customer/item/${KNOWN_CODE}`);
+    await page.goto(`/customer/asset/${KNOWN_CODE}`);
 
     // Identity and certification status are the two things the page must answer.
     await expect(page.getByRole('heading', { level: 3 })).toBeVisible();
@@ -28,8 +28,20 @@ test.describe('Customer - Item Passport', () => {
     await expect(page.getByRole('tab', { name: /historial|history/i })).toHaveCount(0);
   });
 
+  test('the URL printed on existing QR codes still reaches the passport', async ({ page, request }) => {
+    // Printed QR codes point at /customer/item/<id> and cannot be reissued: that
+    // URL has to keep working for good, redirecting to where the passport lives.
+    const res = await request.get(`/customer/item/${KNOWN_CODE}`, { maxRedirects: 0 });
+    expect(res.status()).toBe(308);
+    expect(res.headers()['location']).toContain(`/customer/asset/${KNOWN_CODE}`);
+
+    await page.goto(`/customer/item/${KNOWN_CODE}`);
+    await expect(page).toHaveURL(new RegExp(`/customer/asset/${KNOWN_CODE}$`));
+    await expect(page.getByRole('heading', { level: 3 })).toBeVisible();
+  });
+
   test('shows a recoverable error for an unknown code', async ({ page }) => {
-    await page.goto('/customer/item/invalid-e2e-code');
+    await page.goto('/customer/asset/invalid-e2e-code');
 
     await expect(
       page.getByText(/activo no encontrado|asset not found|product not found/i).first()
@@ -45,6 +57,6 @@ test.describe('Customer - Item Passport', () => {
     await page.getByRole('textbox').fill(KNOWN_CODE);
     await page.getByRole('button', { name: /buscar|search/i }).click();
 
-    await expect(page).toHaveURL(new RegExp(`/customer/item/${KNOWN_CODE}$`));
+    await expect(page).toHaveURL(new RegExp(`/customer/asset/${KNOWN_CODE}$`));
   });
 });

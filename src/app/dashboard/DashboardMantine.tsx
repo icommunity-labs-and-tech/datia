@@ -123,7 +123,7 @@ export default function DashboardMantine({
           <Paper p="md" radius="md">
             <Group justify="space-between" mb="sm" wrap="nowrap">
               <Text fw={600} size="sm">{t('recentAssets')}</Text>
-              <Anchor component={Link} href="/dashboard/items" size="xs" fw={550}>
+              <Anchor component={Link} href="/dashboard/assets" size="xs" fw={550}>
                 {t('viewAll')}
               </Anchor>
             </Group>
@@ -132,7 +132,7 @@ export default function DashboardMantine({
                 <Anchor
                   key={item.id}
                   component={Link}
-                  href={`/dashboard/items/${item.id}`}
+                  href={`/dashboard/assets/${item.id}`}
                   underline="never"
                   c="inherit"
                   px={8}

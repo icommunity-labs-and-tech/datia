@@ -7,8 +7,8 @@ import * as assetActions from '@/actions/assets';
 import * as userActions from '@/actions/users';
 import * as kpis from '../dashboard/kpis/route';
 import * as activity from '../dashboard/activity/route';
-import * as asset from '../items/[id]/route';
-import * as assetSearch from '../items/search/route';
+import * as asset from '../assets/[id]/route';
+import * as assetSearch from '../assets/search/route';
 import * as user from '../users/[id]/route';
 
 vi.mock('@/lib/auth/tenant', async () => {
@@ -32,8 +32,8 @@ const withId = (id: string) => ({ params: Promise.resolve({ id }) });
 const ROUTES = [
   { name: 'dashboard/kpis', call: () => (kpis as any).GET(), action: dashboardActions.getDashboardKPIs },
   { name: 'dashboard/activity', call: () => (activity as any).GET(req('/api/dashboard/activity?months=3')), action: dashboardActions.getMonthlyActivity },
-  { name: 'items/[id]', call: () => (asset as any).GET(req('/api/items/i-1'), withId('i-1')), action: assetActions.getAsset },
-  { name: 'items/search', call: () => (assetSearch as any).GET(req('/api/items/search?q=panel')), action: assetActions.searchAssets },
+  { name: 'assets/[id]', call: () => (asset as any).GET(req('/api/assets/i-1'), withId('i-1')), action: assetActions.getAsset },
+  { name: 'assets/search', call: () => (assetSearch as any).GET(req('/api/assets/search?q=panel')), action: assetActions.searchAssets },
   { name: 'users/[id]', call: () => (user as any).GET(req('/api/users/u-1'), withId('u-1')), action: userActions.getUserById },
 ];
 

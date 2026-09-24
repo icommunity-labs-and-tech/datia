@@ -4,8 +4,8 @@ import { triggerWebhookWithRetry, signWebhookPayload, type WebhookPayload } from
 
 const payload: WebhookPayload = {
   id: 'evt-1',
-  event: 'item.created',
-  entityType: 'item',
+  event: 'asset.created',
+  entityType: 'asset',
   entityId: 'i-1',
   data: { id: 'i-1' },
   timestamp: '2026-09-15T10:00:00.000Z',
