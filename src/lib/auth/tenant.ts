@@ -3,6 +3,9 @@ import { verifyAdminJWT } from './admin/jwt';
 import { verifySuperAdminJWT } from './superadmin/jwt';
 import { superadminAuthConfig } from './superadmin/config';
 import { adminAuthConfig } from './admin/config';
+import { prisma } from '@/lib/prisma';
+import type { Scope } from '@/lib/scope';
+import type { JWTPayload } from './shared/types';
 
 /**
  * Contexto del tenant actual
@@ -13,6 +16,12 @@ export interface TenantContext {
    * NULL para SUPER_ADMIN que puede acceder a todas las organizaciones
    */
   organizationId: string | null;
+
+  /**
+   * Empresa de la cuenta (#20). NULL para SUPER_ADMIN y para una sesión sin
+   * empresa: una cuenta de empresa no opera sin ella (ver `requireScope`).
+   */
+  companyId: string | null;
   
   /**
    * Role del usuario actual
@@ -30,6 +39,16 @@ export class TenantContextNotFoundError extends Error {
     super(message);
     this.name = 'TenantContextNotFoundError';
   }
+}
+
+/**
+ * La empresa de una sesión. Las anteriores a la fase 2 de #20 no la llevan en
+ * el JWT: se lee de la cuenta, que la tiene desde la migración.
+ */
+async function companyOf(payload: JWTPayload): Promise<string | null> {
+  if (payload.companyId !== undefined) return payload.companyId;
+  const user = await prisma.user.findUnique({ where: { id: payload.id }, select: { companyId: true } });
+  return user?.companyId ?? null;
 }
 
 /**
@@ -54,6 +73,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload?.organizationId) {
       return {
         organizationId: payload.organizationId,
+        companyId: await companyOf(payload),
         userRole: payload.role,
         userId: payload.id,
       };
@@ -66,6 +86,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload) {
       return {
         organizationId: null, // SUPER_ADMIN no tiene organización
+        companyId: null,
         userRole: payload.role,
         userId: payload.id,
       };
@@ -79,6 +100,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload) {
       return {
         organizationId: payload.organizationId,
+        companyId: await companyOf(payload),
         userRole: payload.role,
         userId: payload.id,
       };
@@ -126,4 +148,29 @@ export async function requireOrganizationId(): Promise<string> {
   }
   
   return tenant.organizationId;
+}
+
+/**
+ * Lo que la sesión actual puede ver: su organización y, si es una cuenta de
+ * empresa, solo esa empresa (#20).
+ *
+ * Falla si la cuenta pertenece a una organización pero no a una empresa: sin
+ * empresa no hay a qué restringir, y devolver la organización entera sería
+ * abrirle datos que no son suyos.
+ */
+export async function requireScope(): Promise<Scope> {
+  const tenant = await getCurrentTenant();
+
+  if (!tenant.organizationId) {
+    throw new TenantContextNotFoundError(
+      "organizationId es requerido para esta operación"
+    );
+  }
+  if (!tenant.companyId) {
+    throw new TenantContextNotFoundError(
+      "La cuenta no tiene empresa asignada"
+    );
+  }
+
+  return { organizationId: tenant.organizationId, companyId: tenant.companyId };
 }

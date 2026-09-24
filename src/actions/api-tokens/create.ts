@@ -25,7 +25,7 @@ export async function createApiToken(name: string, expiresAt?: Date | null) {
     // Get organization ID from user
     const user = await prisma.user.findUnique({
       where: { id: payload.id },
-      select: { organizationId: true },
+      select: { organizationId: true, companyId: true },
     });
 
     if (!user?.organizationId) {
@@ -35,6 +35,7 @@ export async function createApiToken(name: string, expiresAt?: Date | null) {
     const request = {
       name: name.trim(),
       organizationId: user.organizationId,
+      companyId: user.companyId,
       expiresAt: expiresAt || null,
     };
 

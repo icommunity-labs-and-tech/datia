@@ -7,6 +7,7 @@ const toDomain = (t: any): ApiTokenRecord => ({
   name: t.name,
   tokenHash: t.tokenHash,
   organizationId: t.organizationId,
+  companyId: t.companyId ?? null,
   lastUsedAt: t.lastUsedAt,
   expiresAt: t.expiresAt,
   createdAt: t.createdAt,
@@ -21,7 +22,7 @@ export const apiTokenRepository: ApiTokenRepository = {
           name: input.name,
           tokenHash: input.tokenHash,
           organizationId: input.organizationId,
-          companyId: await defaultCompanyId(input.organizationId),
+          companyId: input.companyId ?? await defaultCompanyId(input.organizationId),
           expiresAt: input.expiresAt ?? null,
         },
       });

@@ -4,6 +4,7 @@ import { DbError } from './ApiTokenRepository';
 export interface CreateApiTokenRequest {
   name: string;
   organizationId: string;
+  companyId?: string | null;
   expiresAt?: Date | null;
 }
 
@@ -44,7 +45,7 @@ export interface ApiTokenService {
   createToken(data: CreateApiTokenRequest): Promise<ApiTokenResponse>;
   listTokens(organizationId: string): Promise<ApiTokenListResponse[]>;
   deleteToken(id: string, organizationId: string): Promise<void>;
-  validateToken(tokenHash: string): Promise<{ organizationId: string; tokenId: string }>;
+  validateToken(tokenHash: string): Promise<{ organizationId: string; companyId: string | null; tokenId: string }>;
 }
 
 

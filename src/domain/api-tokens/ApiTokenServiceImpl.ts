@@ -28,6 +28,7 @@ export function createApiTokenServiceImpl(deps: {
           name: data.name,
           tokenHash,
           organizationId: data.organizationId,
+          companyId: data.companyId,
           expiresAt: data.expiresAt,
         });
 
@@ -80,7 +81,7 @@ export function createApiTokenServiceImpl(deps: {
       }
     },
 
-    async validateToken(tokenHash: string): Promise<{ organizationId: string; tokenId: string }> {
+    async validateToken(tokenHash: string): Promise<{ organizationId: string; companyId: string | null; tokenId: string }> {
       try {
         const token = await repo.findByTokenHash(tokenHash);
 
@@ -98,6 +99,7 @@ export function createApiTokenServiceImpl(deps: {
 
         return {
           organizationId: token.organizationId,
+          companyId: token.companyId,
           tokenId: token.id,
         };
       } catch (e) {
