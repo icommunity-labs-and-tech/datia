@@ -1,4 +1,5 @@
 import { PrismaClient } from '../src/generated/prisma/index.js';
+import { companyIdFor } from './lib/company.mjs';
 import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -59,6 +60,8 @@ async function main() {
 
   console.log(`✅ Usando organización: ${organization.name} (${organization.id})`);
 
+  const companyId = await companyIdFor(prisma, organization.id);
+
   // Obtener usuarios de la organización
   const users = await prisma.user.findMany({
     where: { organizationId: organization.id },
@@ -101,6 +104,7 @@ async function main() {
         name: tokenNames[i],
         tokenHash,
         organizationId: organization.id,
+        companyId,
         lastUsedAt: randomDate(7),
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Expira en 1 año
         createdAt: randomDate(90),
@@ -146,6 +150,7 @@ async function main() {
           id: generateId(),
           apiTokenId: token.id,
           organizationId: organization.id,
+          companyId,
           method,
           path,
           statusCode,
@@ -224,6 +229,7 @@ async function main() {
       data: {
         id: generateId(),
         organizationId: organization.id,
+        companyId,
         eventType,
         entityType,
         entityId,

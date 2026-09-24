@@ -17,6 +17,7 @@
  */
 import { PrismaClient } from '../src/generated/prisma/index.js';
 import { createHash, randomBytes } from 'node:crypto';
+import { companyIdFor } from './lib/company.mjs';
 
 const prisma = new PrismaClient();
 const ORG_SLUG = 'datia';
@@ -193,6 +194,7 @@ const VERIFIERS = ['AENOR', 'Bureau Veritas', 'TÜV Rheinland', 'SGS'];
 async function main() {
   const org = await prisma.organization.findUnique({ where: { slug: ORG_SLUG } });
   if (!org) throw new Error(`No existe la organización "${ORG_SLUG}"`);
+  const companyId = await companyIdFor(prisma, org.id);
 
   const admin = await prisma.user.findFirst({
     where: { organizationId: org.id, role: { in: ['ADMIN', 'SUPER_ADMIN'] } },
@@ -222,6 +224,7 @@ async function main() {
         description: a.desc,
         imageUrl: a.img ?? null,
         organizationId: org.id,
+        companyId,
         createdByUserId: admin?.id ?? null,
         evidenceId: itemEvidence(),
         createdAt: created,
