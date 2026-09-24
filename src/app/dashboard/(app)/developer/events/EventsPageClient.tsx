@@ -35,7 +35,7 @@ interface EventLog {
 
 /** One accent per event type, so table badges and chart lines agree. */
 function eventColor(eventType: string) {
-  if (eventType === 'item.created') return { badge: 'datiaBlue', line: colors.blue };
+  if (eventType === 'asset.created') return { badge: 'datiaBlue', line: colors.blue };
   if (eventType === 'co2_certification_event') return { badge: 'cyan', line: colors.sky };
   return { badge: 'gray', line: colors.amber };
 }
@@ -138,7 +138,7 @@ export default function EventsPageClient() {
       aria-label={t('filter.all')}
       data={[
         { value: 'all', label: t('filter.all') },
-        { value: 'item.created', label: t('filter.itemCreated') },
+        { value: 'asset.created', label: t('filter.assetCreated') },
         { value: 'co2_certification_event', label: t('filter.certification') },
       ]}
     />

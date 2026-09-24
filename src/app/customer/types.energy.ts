@@ -1,4 +1,4 @@
-/** Payload of GET /api/energy/item/[assetId] — the ESPR certification report. */
+/** Payload of GET /api/energy/asset/[assetId] — the ESPR certification report. */
 
 export interface ReportEmission {
   id: string;

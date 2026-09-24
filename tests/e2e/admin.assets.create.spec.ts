@@ -13,7 +13,7 @@ test.use({ storageState: ADMIN_STORAGE_STATE });
  */
 test.describe('Admin - alta de activos', () => {
   test('el formulario valida y explica por qué no puede certificar', async ({ page }) => {
-    await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
 
     await page.getByRole('button', { name: text('itemsPage.create.button') }).click();
     const dialog = page.getByRole('dialog', { name: text('itemsPage.create.title') });

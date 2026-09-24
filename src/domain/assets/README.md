@@ -18,14 +18,14 @@ The Items service manages the complete asset creation flow including:
 export class AssetService extends Context.Tag('AssetService')<
   AssetService,
   {
-    readonly createItem: (data: CreateAssetRequest) => Effect<AssetResponse, ItemError>;
+    readonly createAsset: (data: CreateAssetRequest) => Effect<AssetResponse, ItemError>;
   }
 >() {}
 ```
 
 ## Methods
 
-### `createItem(data: CreateAssetRequest)`
+### `createAsset(data: CreateAssetRequest)`
 Complete asset creation flow:
 1. **Validation**: Checks required fields and business rules
 2. **User Verification**: Ensures user has valid signature and KYC status
@@ -90,7 +90,7 @@ import { ItemServiceLive } from '@/domain/assets/ItemServiceLive';
 
 const program = Effect.gen(function* (_) {
   const itemService = yield* _(AssetService);
-  return yield* _(itemService.createItem({
+  return yield* _(itemService.createAsset({
     name: 'Test Asset',
     description: 'Test Description',
     categoryId: 'cat-123',

@@ -7,7 +7,7 @@ test.describe('Admin - Exports CSV', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/dashboard/(app)/items');
     if (!/\/dashboard\/.*/.test(page.url())) {
-      await page.goto('/dashboard/items');
+      await page.goto('/dashboard/assets');
     }
   });
 

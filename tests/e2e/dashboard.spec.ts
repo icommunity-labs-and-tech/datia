@@ -12,7 +12,7 @@ import { logoutUser, ADMIN_STORAGE_STATE } from './utils/auth';
  */
 
 /** Content sections in the top bar. Settings deliberately lives elsewhere. */
-const NAV_LINKS = ['/dashboard', '/dashboard/items', '/dashboard/api'];
+const NAV_LINKS = ['/dashboard', '/dashboard/assets', '/dashboard/api'];
 
 test.describe('Unauthenticated', () => {
   test.use({ storageState: { cookies: [], origins: [] } });
@@ -41,12 +41,12 @@ test.describe('Dashboard Flow', () => {
 
     await page.locator('header').getByRole('link', { name: /activos|assets/i }).click();
 
-    await expect(page).toHaveURL(/\/dashboard\/items$/);
+    await expect(page).toHaveURL(/\/dashboard\/assets$/);
     await expect(page.getByRole('heading', { name: /activos|assets/i, level: 2 })).toBeVisible();
   });
 
   test('should show the assets gallery once loaded', async ({ page }) => {
-    await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
 
     // Installations come first; the count shows once loading is over, never a
     // stuck skeleton.

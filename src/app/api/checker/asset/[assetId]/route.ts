@@ -34,7 +34,7 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ itemId: string }> }
+  { params }: { params: Promise<{ assetId: string }> }
 ) {
   const ip = getClientIp(req);
   const rl = checkRateLimit(ip);
@@ -45,16 +45,16 @@ export async function GET(
     );
   }
 
-  const { itemId: rawItemId } = await params;
-  if (!rawItemId || typeof rawItemId !== 'string') {
-    return NextResponse.json({ error: 'Parámetro itemId inválido' }, { status: 400 });
+  const { assetId: rawAssetId } = await params;
+  if (!rawAssetId || typeof rawAssetId !== 'string') {
+    return NextResponse.json({ error: 'Parámetro assetId inválido' }, { status: 400 });
   }
 
-  const itemId = decodeUrlParam(rawItemId);
+  const assetId = decodeUrlParam(rawAssetId);
 
   // Buscar el item para obtener el evidenceId
   const item = await prisma.asset.findUnique({
-    where: { id: itemId },
+    where: { id: assetId },
     select: { id: true, name: true, evidenceId: true, imageUrl: true },
   });
 
@@ -108,7 +108,7 @@ export async function GET(
       localAssets.push({ name, url: item.imageUrl });
     }
 
-    return NextResponse.json({ evidenceId, itemName: item.name, data, localAssets });
+    return NextResponse.json({ evidenceId, assetName: item.name, data, localAssets });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
       return NextResponse.json({ error: 'Tiempo de espera excedido (30s)' }, { status: 504 });

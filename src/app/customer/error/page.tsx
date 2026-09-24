@@ -34,7 +34,7 @@ function ErrorPageContent() {
                 <Button
                   variant="subtle"
                   size="xs"
-                  onClick={() => router.push(`/customer/item/${code}`)}
+                  onClick={() => router.push(`/customer/asset/${code}`)}
                 >
                   {t('tryWithCode', { code })}
                 </Button>

@@ -52,11 +52,11 @@ test('recorrido completo', async ({ page }) => {
 
   await shot(page, '02-inicio');
 
-  await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
+  await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
   await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
   await shot(page, '03-inventario');
 
-  await page.goto(`/dashboard/items/${FEATURED}`, { waitUntil: 'networkidle' });
+  await page.goto(`/dashboard/assets/${FEATURED}`, { waitUntil: 'networkidle' });
   await expect(page.getByText(/certificaciones|certifications|resumen|summary/i).first()).toBeVisible();
   await shot(page, '04-detalle-activo');
 

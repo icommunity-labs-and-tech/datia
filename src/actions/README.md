@@ -52,7 +52,7 @@ export async function addItem(formData: Record<string, any>) {
   try {
     const program = Effect.gen(function* (_) {
       const itemService = yield* _(AssetService);
-      return yield* _(itemService.createItem(parseInput(formData)));
+      return yield* _(itemService.createAsset(parseInput(formData)));
     }).pipe(Effect.provide(ItemServiceLive));
 
     const result = await Effect.runPromise(program);

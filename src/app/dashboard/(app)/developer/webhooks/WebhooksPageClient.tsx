@@ -65,7 +65,7 @@ interface FormState {
 }
 
 const AVAILABLE_EVENTS = [
-  'item.created',
+  'asset.created',
   'energy_source_event',
   'energy_consumption_event',
   'co2_emission_event',

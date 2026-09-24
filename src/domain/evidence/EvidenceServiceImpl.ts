@@ -135,7 +135,7 @@ async function buildFiles(
       createdAt: input.metadata.createdAt as string,
       templateConfig: input.metadata.templateConfig,
       itemEvidenceID: input.metadata.itemEvidenceID as string | null | undefined,
-      itemName: input.metadata.itemName as string | undefined,
+      assetName: input.metadata.assetName as string | undefined,
       itemCreatedAt: input.metadata.itemCreatedAt as string | undefined,
     });
     fileName = 'issue_data.json';

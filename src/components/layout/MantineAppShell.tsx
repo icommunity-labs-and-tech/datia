@@ -109,7 +109,7 @@ export default function DatiaAppShell({
   const mainLinks = [
     { href: '/dashboard', icon: IconHome2, label: tSidebar('home'), exact: true },
     ...(showPassport
-      ? [{ href: '/dashboard/items', icon: IconPackage, label: tSidebar('assets'), exact: false }]
+      ? [{ href: '/dashboard/assets', icon: IconPackage, label: tSidebar('assets'), exact: false }]
       : []),
     ...(showEnergy
       ? [

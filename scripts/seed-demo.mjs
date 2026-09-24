@@ -211,7 +211,7 @@ async function main() {
         organizationId: org.id,
         name: 'ERP · Alta de activos',
         url: 'https://erp.example.com/hooks/datia',
-        events: ['item.created', 'state.created', 'co2_certification_event'],
+        events: ['asset.created', 'state.created', 'co2_certification_event'],
         active: true,
         lastTriggeredAt: daysAgo(2),
         lastSuccessAt: daysAgo(2),

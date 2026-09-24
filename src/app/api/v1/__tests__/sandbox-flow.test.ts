@@ -83,7 +83,7 @@ describe('Sandbox product lifecycle', () => {
   });
 
   it('1. creates a product in the sandbox filesystem (no DB)', async () => {
-    const { POST } = await import('@/app/api/v1/products/route');
+    const { POST } = await import('@/app/api/v1/assets/route');
 
     const request = makeRequest('POST', '/products', {
       id: PRODUCT_ID,
@@ -104,7 +104,7 @@ describe('Sandbox product lifecycle', () => {
 
   it('2. retrieves the product from the sandbox filesystem', async () => {
     // Setup: create the product first
-    const { POST } = await import('@/app/api/v1/products/route');
+    const { POST } = await import('@/app/api/v1/assets/route');
     await POST(makeRequest('POST', '/products', {
       id: PRODUCT_ID,
       name: 'Panel Solar 300W',
@@ -112,7 +112,7 @@ describe('Sandbox product lifecycle', () => {
     }));
 
     // Test: retrieve it
-    const { GET } = await import('@/app/api/v1/products/[id]/route');
+    const { GET } = await import('@/app/api/v1/assets/[id]/route');
     const response = await GET(
       makeRequest('GET', `/products/${PRODUCT_ID}`),
       { params: Promise.resolve({ id: PRODUCT_ID }) }
@@ -125,7 +125,7 @@ describe('Sandbox product lifecycle', () => {
   });
 
   it('returns 404 when retrieving a non-existent product from sandbox', async () => {
-    const { GET } = await import('@/app/api/v1/products/[id]/route');
+    const { GET } = await import('@/app/api/v1/assets/[id]/route');
 
     const response = await GET(
       makeRequest('GET', '/products/NON-EXISTENT'),
@@ -136,7 +136,7 @@ describe('Sandbox product lifecycle', () => {
   });
 
   it('returns 409 when creating a duplicate product in sandbox', async () => {
-    const { POST } = await import('@/app/api/v1/products/route');
+    const { POST } = await import('@/app/api/v1/assets/route');
 
     const payload = { id: PRODUCT_ID, name: 'Panel Solar 300W', description: 'Desc' };
     await POST(makeRequest('POST', '/products', payload));

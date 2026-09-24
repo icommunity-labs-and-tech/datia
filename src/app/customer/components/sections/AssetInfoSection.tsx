@@ -6,7 +6,7 @@ import { AssetData } from '../../types';
 import { EvidenceVerification } from '../EvidenceVerification';
 import GeolocationMap from '@/components/GeolocationMapClient';
 
-interface ItemInfoSectionProps {
+interface AssetInfoSectionProps {
   item: AssetData;
 }
 
@@ -54,7 +54,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
-export function ItemInfoSection({ item }: ItemInfoSectionProps) {
+export function AssetInfoSection({ item }: AssetInfoSectionProps) {
   const t = useTranslations('customer');
 
   return (

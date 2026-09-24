@@ -21,7 +21,7 @@ test.describe('Authenticated User Flow (Admin)', () => {
   });
 
   test('should navigate between dashboard sections', async ({ page }) => {
-    await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { name: /activos|assets/i, level: 2 })).toBeVisible();
 
     await page.goto('/dashboard/api', { waitUntil: 'networkidle' });
@@ -81,7 +81,7 @@ test.describe('Authenticated User Flow (Admin)', () => {
 
 test.describe('Assets gallery', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/items', { waitUntil: 'networkidle' });
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
   });
 
   test('opening an installation shows as many assets as its card says', async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe('Assets gallery', () => {
 
     await card.click();
 
-    await expect(page.locator('a[href^="/dashboard/items/"]')).toHaveCount(count);
+    await expect(page.locator('a[href^="/dashboard/assets/"]')).toHaveCount(count);
   });
 
   test('search with no match offers a way back', async ({ page }) => {

@@ -1,2 +1,2 @@
-export { ItemInfoSection } from './ItemInfoSection';
+export { AssetInfoSection } from './AssetInfoSection';
 export { EnergyReportSection } from './EnergyReportSection';

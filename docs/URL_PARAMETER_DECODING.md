@@ -10,7 +10,7 @@ An item with ID `batería - 123456` can appear in URLs as:
 - Single encoded: `bater%C3%ADa%20-%20123456`
 - Double encoded: `bater%25C3%25ADa%2520-%2520123456`
 
-When Next.js receives these parameters in dynamic routes (e.g., `/api/customer/item/[code]`), it may partially decode them, but not always completely, especially in cases of double encoding.
+When Next.js receives these parameters in dynamic routes (e.g., `/api/customer/asset/[code]`), it may partially decode them, but not always completely, especially in cases of double encoding.
 
 ## Solution
 
@@ -45,9 +45,9 @@ export async function GET(
 
 The following API routes have been updated to use `decodeUrlParam`:
 
-1. `/api/customer/item/[code]/route.ts` - Customer-facing item lookup
-2. `/api/items/[id]/route.ts` - Internal item API
-3. `/api/checker/item/[itemId]/route.ts` - Checker verification API
+1. `/api/customer/asset/[code]/route.ts` - Customer-facing item lookup
+2. `/api/assets/[id]/route.ts` - Internal item API
+3. `/api/checker/asset/[assetId]/route.ts` - Checker verification API
 4. `/api/v1/items/[id]/route.ts` - Public API v1 item endpoint
 
 ## When to Use
@@ -84,5 +84,5 @@ See `src/lib/api/__tests__/decode-param.test.ts` for test cases.
 
 ## Related Issues
 
-This fix resolves the issue where items with special characters in their IDs couldn't be accessed through the customer-facing URL (`/customer/item/[id]`), resulting in "Item not found" errors even though the item existed in the database.
+This fix resolves the issue where items with special characters in their IDs couldn't be accessed through the customer-facing URL (`/customer/asset/[id]`), resulting in "Item not found" errors even though the item existed in the database.
 

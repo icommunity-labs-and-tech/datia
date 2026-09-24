@@ -23,16 +23,16 @@ import {
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { AssetData } from '../types';
-import { ItemInfoSection, EnergyReportSection } from './sections';
+import { AssetInfoSection, EnergyReportSection } from './sections';
 import { VerifiedBadge } from './ui';
 import { formatDate } from '../utils/dateFormatters';
 
-interface ItemPassportProps {
+interface AssetPassportProps {
   item: AssetData;
   onBack?: () => void;
 }
 
-export function ItemPassport({ item, onBack }: ItemPassportProps) {
+export function AssetPassport({ item, onBack }: AssetPassportProps) {
   const t = useTranslations('common');
   const tCustomer = useTranslations('customer');
   const tPassport = useTranslations('customer.passport');
@@ -121,7 +121,7 @@ export function ItemPassport({ item, onBack }: ItemPassportProps) {
           </Tabs.List>
 
           <Tabs.Panel value="info">
-            <ItemInfoSection item={item} />
+            <AssetInfoSection item={item} />
           </Tabs.Panel>
           {showEnergy && (
             <Tabs.Panel value="energy">

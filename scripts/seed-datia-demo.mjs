@@ -87,9 +87,9 @@ async function main() {
   console.log('   /dashboard/energy/consumption  — consumos por fuente y etapa');
   console.log('   /dashboard/energy/emissions    — emisiones multi-scope');
   console.log('\n🌐 PORTAL PÚBLICO (activos con certif. ancladas)');
-  console.log('   http://localhost:3000/customer/item/DATIA-PV-001');
-  console.log('   http://localhost:3000/customer/item/DATIA-EV-001');
-  console.log('   http://localhost:3000/customer/item/DATIA-WIND-001');
+  console.log('   http://localhost:3000/customer/asset/DATIA-PV-001');
+  console.log('   http://localhost:3000/customer/asset/DATIA-EV-001');
+  console.log('   http://localhost:3000/customer/asset/DATIA-WIND-001');
   console.log('─────────────────────────────────────────────────────────────');
   console.log('✅ Seed completado\n');
 }

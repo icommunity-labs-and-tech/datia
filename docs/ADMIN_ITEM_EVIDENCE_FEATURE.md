@@ -119,7 +119,7 @@ Modificar la función `addItem` para:
      description: created.description || '',
      imageUrls: created.imageUrl ? [created.imageUrl] : [],
      metadata: {
-       itemId: created.id,
+       assetId: created.id,
        categoryId: created.categoryId,
        name: created.name,
        createdAt: created.createdAt.toISOString(),
@@ -166,7 +166,7 @@ Mejorar el `EvidenceBuilder` para soportar items:
      imageUrls: string[];
      metadata: Record<string, unknown> & {
        type?: 'state' | 'item_creation';
-       itemId?: string;
+       assetId?: string;
        categoryId?: string;
        // ... otros campos
      };
@@ -178,7 +178,7 @@ Mejorar el `EvidenceBuilder` para soportar items:
    function buildItemDataObject(metadata: any): any {
      return {
        type: 'item_creation',
-       itemId: metadata.itemId,
+       assetId: metadata.assetId,
        categoryId: metadata.categoryId,
        name: metadata.name,
        description: metadata.description,
@@ -231,13 +231,13 @@ const builder = new EvidenceBuilder({
   imageUrls: Array.isArray(newState.imageUrls) ? newState.imageUrls.filter((url): url is string => typeof url === 'string') : [],
   metadata: {
     id: newState.id,
-    itemId,
+    assetId,
     createdAt: newState.createdAt.toISOString(),
     type: 'state',
     
     // NUEVO: Incluir referencia a la evidencia del item
     itemEvidenceID: item.evidenceID || null,  // TX del item en blockchain
-    itemName: item.name,
+    assetName: item.name,
     itemCreatedAt: item.createdAt.toISOString(),
   },
 });
@@ -300,7 +300,7 @@ En `src/components/AddItemModal.tsx`:
 Actualizar página de detalle de items para mostrar:
 
 ```typescript
-// En /dashboard/items/[id]/page.tsx
+// En /dashboard/assets/[id]/page.tsx
 <Box>
   <BoxHeader title="Evidencia de Creación">
     <ItemEvidenceInfo 
@@ -412,9 +412,9 @@ export class CheckerService {
   /**
    * Verifica la evidencia de un item
    */
-  async verifyItemEvidence(itemId: string): Promise<VerificationResult> {
+  async verifyItemEvidence(assetId: string): Promise<VerificationResult> {
     const item = await prisma.item.findUnique({
-      where: { id: itemId },
+      where: { id: assetId },
       include: { createdBy: true }
     });
     
@@ -446,13 +446,13 @@ export class CheckerService {
   /**
    * Verifica la cadena de custodia completa de un item
    */
-  async verifyItemChainOfCustody(itemId: string): Promise<ChainVerificationResult> {
+  async verifyItemChainOfCustody(assetId: string): Promise<ChainVerificationResult> {
     // 1. Verificar evidencia del item
-    const itemVerification = await this.verifyItemEvidence(itemId);
+    const itemVerification = await this.verifyItemEvidence(assetId);
     
     // 2. Obtener y verificar todos los states del item
     const states = await prisma.state.findMany({
-      where: { itemId },
+      where: { assetId },
       orderBy: { createdAt: 'asc' }
     });
     
@@ -483,13 +483,13 @@ export class CheckerService {
 **Componente**: `ItemEvidenceChecker.tsx`
 
 ```typescript
-export default function ItemEvidenceChecker({ itemId }: Props) {
+export default function ItemEvidenceChecker({ assetId }: Props) {
   const [verification, setVerification] = useState<VerificationResult | null>(null);
   const [loading, setLoading] = useState(false);
   
   const handleVerify = async () => {
     setLoading(true);
-    const result = await verifyItemEvidence(itemId);
+    const result = await verifyItemEvidence(assetId);
     setVerification(result);
     setLoading(false);
   };
