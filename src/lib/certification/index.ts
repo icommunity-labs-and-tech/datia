@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import type { Certification } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 import { recordEvent } from '@/lib/services/events';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
@@ -58,6 +59,7 @@ export async function issueCertification(input: IssueCertificationInput): Promis
       data: {
         id,
         organizationId: input.organizationId,
+        companyId: await defaultCompanyId(input.organizationId),
         evidenceId,
         payloadChecksum,
         payload: input.payload as object,

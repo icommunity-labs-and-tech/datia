@@ -1,5 +1,6 @@
 import { EventRepository, type EventLogRecord, type CreateEventLogInput, DbError } from '@/domain/events/EventRepository';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 import { randomUUID } from 'crypto';
 
@@ -45,6 +46,7 @@ export const eventRepository: EventRepository = {
         data: {
           id: randomUUID(),
           organizationId,
+          companyId: await defaultCompanyId(organizationId),
           eventType: input.eventType,
           entityType: input.entityType,
           entityId: input.entityId,

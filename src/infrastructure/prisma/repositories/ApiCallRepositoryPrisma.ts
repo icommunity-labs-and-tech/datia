@@ -1,6 +1,7 @@
 import { ApiCallRepository, type ApiCallRecord, type CreateApiCallInput, DbError } from '@/domain/api-calls/ApiCallRepository';
 import type { ApiCall } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 
 const toDomain = (c: ApiCall): ApiCallRecord => ({
   id: c.id,
@@ -20,6 +21,7 @@ export const apiCallRepository: ApiCallRepository = {
           id: crypto.randomUUID(),
           apiTokenId: input.apiTokenId,
           organizationId: input.organizationId,
+          companyId: await defaultCompanyId(input.organizationId),
           method: input.method,
           path: input.path,
           statusCode: input.statusCode,

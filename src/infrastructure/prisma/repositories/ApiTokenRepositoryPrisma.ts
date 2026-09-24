@@ -1,5 +1,6 @@
 import { ApiTokenRepository, type ApiTokenRecord, type CreateApiTokenInput, DbError } from '@/domain/api-tokens/ApiTokenRepository';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 
 const toDomain = (t: any): ApiTokenRecord => ({
   id: t.id,
@@ -20,6 +21,7 @@ export const apiTokenRepository: ApiTokenRepository = {
           name: input.name,
           tokenHash: input.tokenHash,
           organizationId: input.organizationId,
+          companyId: await defaultCompanyId(input.organizationId),
           expiresAt: input.expiresAt ?? null,
         },
       });

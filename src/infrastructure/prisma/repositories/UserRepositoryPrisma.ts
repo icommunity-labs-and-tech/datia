@@ -1,5 +1,6 @@
 import { UserRepository, type UserRecord, type CreateUserInput, type UpdateUserInput, DbError } from '@/domain/users/UserRepository';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 import { UserAlreadyExistsError, UserInputError, UserNotFoundError } from '@/domain/users/errors';
 import crypto from 'crypto';
 
@@ -84,6 +85,7 @@ export const userRepository: UserRepository = {
         data: {
           id: crypto.randomUUID(),
           organizationId: input.organizationId,
+          companyId: input.organizationId ? await defaultCompanyId(input.organizationId) : null,
           email: input.email,
           password: input.passwordHash ?? '',
           name: input.name,

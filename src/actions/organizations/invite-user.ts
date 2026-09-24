@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getCurrentTenant } from "@/lib/auth/tenant";
+import { defaultCompanyId } from "@/lib/company";
 import { sendInvitationEmail } from "./helpers";
 import crypto from "crypto";
 
@@ -88,6 +89,8 @@ export async function inviteUser(
       };
     }
 
+    const companyId = await defaultCompanyId(tenant.organizationId!);
+
     // Crear usuario e invitación en una transacción
     // Si falla el email después, se eliminará todo
     const result = await prisma.$transaction(async (tx) => {
@@ -97,6 +100,7 @@ export async function inviteUser(
         data: {
           id: crypto.randomUUID(),
           organizationId: tenant.organizationId!,
+          companyId,
           email: input.email,
           name: input.name,
           phone: input.phone,

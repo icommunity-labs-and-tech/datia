@@ -12,6 +12,7 @@ const { mockPrisma, mockCreateCertificationEvidence, mockGetEvidence, mockRecord
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
+vi.mock('@/lib/company', () => ({ defaultCompanyId: async () => 'company-1' }));
 vi.mock('@/lib/services/events', () => ({ recordEvent: mockRecordEvent }));
 vi.mock('@/domain/evidence/EvidenceServiceImpl', () => ({
   createEvidenceServiceImpl: () => ({ createCertificationEvidence: mockCreateCertificationEvidence }),

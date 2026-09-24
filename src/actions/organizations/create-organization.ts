@@ -151,11 +151,18 @@ export async function createOrganizationWithAdmin(
         },
       });
       
+      // Toda organización tiene su empresa por defecto (#20): a ella pertenece
+      // lo que registre su primera cuenta.
+      const company = await tx.company.create({
+        data: { organizationId: organization.id, name: organization.name },
+      });
+
       // Crear primer admin (PENDING, sin password aún)
       const admin = await tx.user.create({
         data: {
           id: crypto.randomUUID(),
           organizationId: organization.id,
+          companyId: company.id,
           email: input.adminEmail,
           name: input.adminName,
           phone: input.adminPhone,
