@@ -3,6 +3,7 @@ export interface ApiTokenRecord {
   name: string;
   tokenHash: string;
   organizationId: string;
+  companyId: string | null;
   lastUsedAt: Date | null;
   expiresAt: Date | null;
   createdAt: Date;
@@ -12,6 +13,8 @@ export interface CreateApiTokenInput {
   name: string;
   tokenHash: string;
   organizationId: string;
+  /** The company the token acts for; the organisation's default when omitted. */
+  companyId?: string | null;
   expiresAt?: Date | null;
 }
 

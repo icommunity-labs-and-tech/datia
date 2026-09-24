@@ -38,6 +38,7 @@ export async function POST(request: NextRequest) {
         name: true,
         role: true,
         organizationId: true,
+        companyId: true,
       },
     });
 
@@ -55,6 +56,7 @@ export async function POST(request: NextRequest) {
       name: user.name,
       role: user.role,
       organizationId: user.organizationId!,
+      companyId: user.companyId,
       context: 'admin' as const,
     };
 

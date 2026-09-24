@@ -4,6 +4,8 @@ export interface JWTPayload {
   name: string;
   role: string;
   organizationId: string | null; // NULL para SUPER_ADMIN
+  /** Empresa de la cuenta (#20). Ausente en las sesiones anteriores a la fase 2. */
+  companyId?: string | null;
   context: 'admin' | 'superadmin';
   iat?: number;
   exp?: number;

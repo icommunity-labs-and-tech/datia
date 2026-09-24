@@ -17,6 +17,7 @@ export async function authenticateUser(email: string, password: string): Promise
         password: true,
         role: true,
         organizationId: true, // Incluir organizationId
+        companyId: true,
         status: true, // Verificar si está activo
       }
     });
@@ -46,6 +47,7 @@ export async function authenticateUser(email: string, password: string): Promise
       name: user.name,
       role: user.role,
       organizationId: user.organizationId, // Incluir en el payload
+      companyId: user.companyId,
       context: 'admin', // Se sobrescribirá según el contexto
     };
   } catch (error) {

@@ -18,6 +18,8 @@ function extractBearerToken(request: NextRequest): string | null {
 
 export interface ApiTokenAuthResult {
   organizationId: string;
+  /** The company the token acts for; null for a token issued at organisation level. */
+  companyId: string | null;
   tokenId: string;
   /** True when authenticated via the sandbox (filesystem) repository. */
   isSandbox: boolean;
