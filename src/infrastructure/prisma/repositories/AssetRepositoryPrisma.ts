@@ -1,6 +1,7 @@
 import { AssetRepository, type AssetRecord, type CreateAssetInput, DbError } from '@/domain/assets/AssetRepository';
 import type { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 
 const toDomain = (i: any): AssetRecord => ({
@@ -113,6 +114,7 @@ export const assetRepository: AssetRepository = {
         data: {
           id: input.id,
           organizationId: input.organizationId,
+          companyId: await defaultCompanyId(input.organizationId),
           name: input.name,
           description: input.description,
           imageUrl: input.imageUrl ?? null,
@@ -244,6 +246,7 @@ export const assetRepository: AssetRepository = {
 
   async importMany(organizationId: string, rows: Array<{ id: string; name: string; description: string; imageUrl?: string | null }>): Promise<void> {
     try {
+      const companyId = await defaultCompanyId(organizationId);
       await prisma.$transaction(async (tx) => {
         const now = new Date();
         for (const row of rows) {
@@ -251,6 +254,7 @@ export const assetRepository: AssetRepository = {
             data: {
               id: row.id,
               organizationId,
+              companyId,
               name: row.name,
               description: row.description,
               imageUrl: row.imageUrl ?? null,

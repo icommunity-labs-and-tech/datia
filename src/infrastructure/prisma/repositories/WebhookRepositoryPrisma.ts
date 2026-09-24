@@ -1,5 +1,6 @@
 import { WebhookRepository, type WebhookRecord, type CreateWebhookInput, type UpdateWebhookInput, DbError } from '@/domain/webhooks/WebhookRepository';
 import { prisma } from '@/lib/prisma';
+import { defaultCompanyId } from '@/lib/company';
 import { randomUUID } from 'crypto';
 
 const toDomain = (w: any): WebhookRecord => ({
@@ -68,6 +69,7 @@ export const webhookRepository: WebhookRepository = {
           id: randomUUID(),
           updatedAt: new Date(),
           organizationId,
+          companyId: await defaultCompanyId(organizationId),
           name: input.name,
           url: input.url,
           secret: input.secret ?? null,

@@ -14,17 +14,20 @@ model ApiCall {
   id             String       @id
   apiTokenId     String
   organizationId String
+  companyId       String?
   method         String
   path           String
   statusCode     Int
   createdAt      DateTime     @default(now())
   ApiToken       ApiToken     @relation(fields: [apiTokenId], references: [id], onDelete: Cascade)
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([apiTokenId])
   @@index([organizationId])
   @@index([createdAt])
   @@index([apiTokenId, createdAt])
+  @@index([companyId])
 }
 
 model ApiToken {
@@ -32,30 +35,36 @@ model ApiToken {
   name           String
   tokenHash      String       @unique
   organizationId String
+  companyId       String?
   lastUsedAt     DateTime?
   expiresAt      DateTime?
   createdAt      DateTime     @default(now())
   ApiCall        ApiCall[]
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([organizationId])
   @@index([tokenHash])
+  @@index([companyId])
 }
 
 model EventLog {
   id             String       @id
   organizationId String
+  companyId       String?
   eventType      String
   entityType     String
   entityId       String
   data           Json
   createdAt      DateTime     @default(now())
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([createdAt])
   @@index([organizationId, entityType, entityId])
   @@index([organizationId, eventType])
   @@index([organizationId])
+  @@index([companyId])
 }
 
 model Invitation {
@@ -92,12 +101,15 @@ model Asset {
   evidenceId          String?
   createdByUserId     String?
   organizationId      String
+  companyId       String?
   User                User?          @relation(fields: [createdByUserId], references: [id])
   Organization        Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   EnergySource        EnergySource[]
 
   @@index([createdByUserId])
   @@index([organizationId])
+  @@index([companyId])
 }
 
 model Notification {
@@ -121,6 +133,30 @@ model Notification {
   @@index([userId])
 }
 
+/// Whoever operates the dashboard: one account per company, and the company owns
+/// what it registers — assets, tokens, webhooks, events and proofs (#20). It
+/// belongs to a single organization.
+model Company {
+  id             String       @id @default(uuid())
+  organizationId String
+  name           String
+  active         Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Asset          Asset[]
+  ApiToken       ApiToken[]
+  ApiCall        ApiCall[]
+  Webhook        Webhook[]
+  EventLog       EventLog[]
+  Certification  Certification[]
+  User           User[]
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
+}
+
 model Organization {
   id                String             @id
   name              String
@@ -139,6 +175,7 @@ model Organization {
   ApiCall           ApiCall[]
   ApiToken          ApiToken[]
   Certification     Certification[]
+  Company           Company[]
   EventLog          EventLog[]
   Invitation        Invitation[]
   Asset              Asset[]
@@ -195,6 +232,7 @@ model User {
   createdAt            DateTime             @default(now())
   updatedAt            DateTime
   organizationId       String?
+  companyId            String?
   activationToken      String?
   activatedAt          DateTime?
   status               UserStatus           @default(ACTIVE)
@@ -204,6 +242,7 @@ model User {
   Notification         Notification[]
   PasswordResetToken   PasswordResetToken[]
   Organization         Organization?        @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company              Company?             @relation(fields: [companyId], references: [id])
   ImportJobUploadedBy  ImportJob[]          @relation("ImportJobUploadedBy")
   ImportJobExecutedBy  ImportJob[]          @relation("ImportJobExecutedBy")
 
@@ -217,6 +256,7 @@ model User {
 model Webhook {
   id              String       @id
   organizationId  String
+  companyId       String?
   name            String
   url             String
   secret          String?
@@ -230,9 +270,11 @@ model Webhook {
   createdAt       DateTime     @default(now())
   updatedAt       DateTime
   Organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, active])
   @@index([organizationId])
+  @@index([companyId])
 }
 
 enum NotificationType {
@@ -402,6 +444,7 @@ model EmissionRecord {
 model Certification {
   id               String              @id @default(uuid())
   organizationId   String
+  companyId       String?
   evidenceId       String              @unique
   status           CertificationStatus @default(ISSUED)
   /// What the evidence certifies, exactly as it was sent to iBS.
@@ -417,9 +460,11 @@ model Certification {
   updatedAt        DateTime            @updatedAt
 
   Organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   EmissionRecord EmissionRecord[]
 
   @@index([organizationId, status])
+  @@index([companyId])
 }
 
 enum EmissionScope {
