@@ -164,13 +164,8 @@ async function main() {
   
   const eventTypes = [
     'asset.created',
-    'item.updated',
-    'item.deleted',
-    'state.created',
-    'state.updated',
-    'state.backed',
-    'category.created',
-    'category.updated',
+    'asset.updated',
+    'asset.deleted',
     'user.created',
     'user.updated',
     'export.completed',
@@ -186,36 +181,16 @@ async function main() {
     
     let entityType, entityId, eventData;
     
-    if (eventType.startsWith('item.')) {
-      entityType = 'item';
+    if (eventType.startsWith('asset.')) {
+      entityType = 'Asset';
       entityId = items.length > 0 
         ? items[Math.floor(Math.random() * items.length)].id 
         : generateId();
       eventData = {
-        assetName: `Item ${Math.floor(Math.random() * 1000)}`,
+        assetName: `Activo ${Math.floor(Math.random() * 1000)}`,
         userId: user.id,
         userName: user.name,
         action: eventType.split('.')[1],
-      };
-    } else if (eventType.startsWith('state.')) {
-      entityType = 'state';
-      entityId = generateId();
-      eventData = {
-        stateTitle: `Estado ${Math.floor(Math.random() * 1000)}`,
-        assetId: items.length > 0 
-          ? items[Math.floor(Math.random() * items.length)].id 
-          : generateId(),
-        userId: user.id,
-        userName: user.name,
-        backed: eventType === 'state.backed',
-      };
-    } else if (eventType.startsWith('category.')) {
-      entityType = 'category';
-      entityId = generateId();
-      eventData = {
-        categoryName: `Categoría ${Math.floor(Math.random() * 100)}`,
-        userId: user.id,
-        userName: user.name,
       };
     } else if (eventType.startsWith('user.')) {
       entityType = 'user';
