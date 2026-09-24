@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import type { Scope } from '@/lib/scope';
 
 /**
  * The company an organization's data belongs to.
@@ -41,4 +42,13 @@ export async function defaultCompanyId(organizationId: string): Promise<string> 
     if (raced) return raced.id;
     throw error;
   }
+}
+
+/**
+ * The company a new row is filed under: the scope's own, or — for the account
+ * that operates the whole organisation, which has none — the default one until
+ * it can choose (#20, phase 3).
+ */
+export async function companyFor(scope: Scope): Promise<string> {
+  return scope.companyId ?? defaultCompanyId(scope.organizationId);
 }

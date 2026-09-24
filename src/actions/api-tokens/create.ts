@@ -5,7 +5,7 @@ import { apiTokenRepository } from '@/infrastructure/prisma/repositories/ApiToke
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import { prisma } from '@/lib/prisma';
+import { requireScope } from '@/lib/auth/tenant';
 
 export async function createApiToken(name: string, expiresAt?: Date | null) {
   try {
@@ -22,20 +22,13 @@ export async function createApiToken(name: string, expiresAt?: Date | null) {
       throw new Error('No autorizado');
     }
 
-    // Get organization ID from user
-    const user = await prisma.user.findUnique({
-      where: { id: payload.id },
-      select: { organizationId: true, companyId: true },
-    });
-
-    if (!user?.organizationId) {
-      throw new Error('Usuario no tiene organización asignada');
-    }
+    // Scope from the session: its organisation and, for a company account, its company
+    const scope = await requireScope();
 
     const request = {
       name: name.trim(),
-      organizationId: user.organizationId,
-      companyId: user.companyId,
+      organizationId: scope.organizationId,
+      companyId: scope.companyId,
       expiresAt: expiresAt || null,
     };
 

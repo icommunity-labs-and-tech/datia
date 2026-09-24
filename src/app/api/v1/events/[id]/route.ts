@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
-import { getEvent } from '@/actions/events/get';
+import { authScope } from '@/lib/scope';
+import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
 
 /**
  * @swagger
@@ -81,7 +82,7 @@ export async function GET(
     }
 
     const { id } = await params;
-    const event = await getEvent(id);
+    const event = await eventRepository.getById(authScope(auth), id);
     
     if (!event) {
       return NextResponse.json(

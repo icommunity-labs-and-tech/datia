@@ -9,6 +9,7 @@
 import { PrismaClient } from '../src/generated/prisma/index.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
+import { companyIdFor } from './lib/company.mjs';
 
 const prisma = new PrismaClient();
 
@@ -89,6 +90,7 @@ async function main() {
         role: 'ADMIN',
         status: 'ACTIVE',
         organizationId: org.id,
+        companyId: await companyIdFor(prisma, org.id),
         updatedAt: new Date(),
       },
     });

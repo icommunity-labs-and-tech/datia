@@ -1,7 +1,7 @@
 'use server';
 
 import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 function validateUrl(url: string): boolean {
   try {
@@ -37,7 +37,7 @@ export async function updateWebhook(
   }
 
   try {
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
     
     const updateData: any = {};
     if (data.name !== undefined) updateData.name = data.name.trim();
@@ -47,7 +47,7 @@ export async function updateWebhook(
     if (data.active !== undefined) updateData.active = data.active;
     if (data.headers !== undefined) updateData.headers = data.headers;
     
-    const webhook = await webhookRepository.update(id, organizationId, updateData);
+    const webhook = await webhookRepository.update(id, scope, updateData);
     return { success: true, data: webhook };
   } catch (error) {
     console.error('Error updating webhook:', error);

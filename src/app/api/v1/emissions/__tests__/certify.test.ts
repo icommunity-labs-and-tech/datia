@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const ORG_ID = 'org-test-1';
+const COMPANY_ID = 'company-test-1';
+const SCOPE = { organizationId: ORG_ID, companyId: COMPANY_ID };
 const EMISSION_ID = 'emission-test-1';
 const CERT_ID = 'cert-test-1';
 const EVIDENCE_ID = 'evidence-test-1';
@@ -46,7 +48,7 @@ const issued = {
 describe('POST /api/v1/emissions/[id]/certify', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, tokenId: 't', isSandbox: false });
+    mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, companyId: COMPANY_ID, tokenId: 't', isSandbox: false });
     mockPrisma.emissionRecord.findFirst.mockResolvedValue({ id: EMISSION_ID, Certification: null });
     mockPrisma.organization.findUnique.mockResolvedValue({ signatureID: 'sig', verificationStatus: 'VERIFIED' });
     mockPrisma.certification.findUnique.mockResolvedValue(issued);
@@ -83,7 +85,7 @@ describe('POST /api/v1/emissions/[id]/certify', () => {
   it('issues the proof through the same anchoring as ingestion', async () => {
     const res = await certify();
     expect(res.status).toBe(201);
-    expect(mockAnchor).toHaveBeenCalledWith(ORG_ID, EMISSION_ID);
+    expect(mockAnchor).toHaveBeenCalledWith(SCOPE, EMISSION_ID);
     // Issued, not certified: the emission is verified only when iBS confirms.
     expect((await res.json()).data).toMatchObject({ id: CERT_ID, status: 'issued', evidenceId: EVIDENCE_ID });
   });

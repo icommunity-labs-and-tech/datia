@@ -40,8 +40,10 @@ function makeDeps() {
   } as any;
 }
 
+const scopeOf = (organizationId: string) => ({ organizationId, companyId: `co-${organizationId}` });
+
 const input = (organizationId: string, id: string, extra: Record<string, unknown> = {}) => ({
-  organizationId,
+  scope: scopeOf(organizationId),
   id,
   name: id,
   description: '',
@@ -61,11 +63,11 @@ describe('createAssetWithEvidence', () => {
     ]);
 
     const organizationOf = Object.fromEntries(
-      deps.assetRepository.create.mock.calls.map(([data]: any[]) => [data.id, data.organizationId])
+      deps.assetRepository.create.mock.calls.map(([data]: any[]) => [data.id, data.scope.organizationId])
     );
     expect(organizationOf).toEqual({ 'item-a': 'org-a', 'item-b': 'org-b' });
-    expect(deps.assetRepository.updateEvidenceId).toHaveBeenCalledWith('item-a', 'org-a', 'ev_1');
-    expect(deps.assetRepository.updateEvidenceId).toHaveBeenCalledWith('item-b', 'org-b', 'ev_1');
+    expect(deps.assetRepository.updateEvidenceId).toHaveBeenCalledWith('item-a', scopeOf('org-a'), 'ev_1');
+    expect(deps.assetRepository.updateEvidenceId).toHaveBeenCalledWith('item-b', scopeOf('org-b'), 'ev_1');
 
     const signedWith = deps.evidenceService.createItemEvidence.mock.calls
       .map(([args]: any[]) => args.signatureID)
@@ -91,7 +93,7 @@ describe('createAssetWithEvidence', () => {
     await createAssetWithEvidence(deps, input('org-a', 'item-a', { createdByUserId: undefined }));
 
     expect(deps.assetRepository.create).toHaveBeenCalledWith(
-      expect.objectContaining({ organizationId: 'org-a', createdByUserId: 'user-1' })
+      expect.objectContaining({ scope: scopeOf('org-a'), createdByUserId: 'user-1' })
     );
   });
 });

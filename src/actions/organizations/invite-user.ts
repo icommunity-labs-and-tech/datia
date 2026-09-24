@@ -89,7 +89,8 @@ export async function inviteUser(
       };
     }
 
-    const companyId = await defaultCompanyId(tenant.organizationId!);
+    // The invited account joins the inviter's company.
+    const companyId = tenant.companyId ?? (await defaultCompanyId(tenant.organizationId!));
 
     // Crear usuario e invitación en una transacción
     // Si falla el email después, se eliminará todo

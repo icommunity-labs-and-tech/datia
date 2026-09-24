@@ -1,8 +1,11 @@
+import type { Scope } from '@/lib/scope';
 import { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
 export interface EventLogRecord {
   id: string;
   organizationId: string;
+  /** The company the event belongs to; where its webhooks are looked up. */
+  companyId: string | null;
   eventType: string;
   entityType: string;
   entityId: string;
@@ -25,13 +28,13 @@ export class DbError extends Error {
 }
 
 export interface EventRepository {
-  list(organizationId: string, limit?: number): Promise<EventLogRecord[]>;
-  create(organizationId: string, input: CreateEventLogInput): Promise<EventLogRecord>;
-  findByType(organizationId: string, eventType: string, limit?: number): Promise<EventLogRecord[]>;
-  findByEntity(organizationId: string, entityType: string, entityId: string): Promise<EventLogRecord[]>;
-  getById(organizationId: string, id: string): Promise<EventLogRecord | null>;
+  list(scope: Scope, limit?: number): Promise<EventLogRecord[]>;
+  create(scope: Scope, input: CreateEventLogInput): Promise<EventLogRecord>;
+  findByType(scope: Scope, eventType: string, limit?: number): Promise<EventLogRecord[]>;
+  findByEntity(scope: Scope, entityType: string, entityId: string): Promise<EventLogRecord[]>;
+  getById(scope: Scope, id: string): Promise<EventLogRecord | null>;
   listPaginated(
-    organizationId: string,
+    scope: Scope,
     params: CursorPaginationParams & { eventType?: string; entityType?: string; entityId?: string }
   ): Promise<CursorPaginationResult<EventLogRecord>>;
 }

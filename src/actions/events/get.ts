@@ -1,11 +1,11 @@
 'use server';
 
 import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 export async function getEvent(id: string) {
-  const organizationId = await requireOrganizationId();
-  const event = await eventRepository.getById(organizationId, id);
+  const scope = await requireScope();
+  const event = await eventRepository.getById(scope, id);
   return event;
 }
 

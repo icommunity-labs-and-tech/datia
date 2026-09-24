@@ -1,6 +1,6 @@
 'use server';
 
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
@@ -12,6 +12,7 @@ import {
   type BmsProfileId,
 } from '@/lib/energy/bmsProfiles';
 import { prisma } from '@/lib/prisma';
+import { scopeWhere } from '@/lib/scope';
 
 /**
  * The energy source a simulated BMS reports against.
@@ -40,8 +41,8 @@ export async function createBmsSource(
 ): Promise<BmsSourceResult> {
   if (!assetId) throw new Error('Activo requerido');
 
-  const organizationId = await requireOrganizationId();
-  const item = await assetRepository.getById(assetId, organizationId);
+  const scope = await requireScope();
+  const item = await assetRepository.getById(assetId, scope);
   if (!item) throw new Error('Activo no encontrado');
 
   const profile = resolveBmsProfile(profileId);
@@ -50,16 +51,16 @@ export async function createBmsSource(
   // The asset, year and profile identify the source: a second run must land on
   // the same one rather than add a twin.
   const existing = await prisma.energySource.findFirst({
-    where: { assetId, name, Asset: { organizationId } },
+    where: { assetId, name, Asset: scopeWhere(scope) },
     select: { id: true, name: true },
   });
   if (existing) {
-    return { sourceId: existing.id, sourceName: existing.name, organizationId, reused: true };
+    return { sourceId: existing.id, sourceName: existing.name, organizationId: scope.organizationId, reused: true };
   }
 
   const service = createEnergyServiceImpl({ energyRepository });
 
-  const source = await service.createSource(organizationId, {
+  const source = await service.createSource(scope, {
     name,
     energyCarrier: profile.energyCarrier,
     generationTechnology: profile.generationTechnology,
@@ -71,7 +72,7 @@ export async function createBmsSource(
     assetId,
   });
 
-  await recordEvent(organizationId, {
+  await recordEvent(scope, {
     eventType: 'energy_source_event',
     entityType: 'EnergySource',
     entityId: source.id,
@@ -85,5 +86,5 @@ export async function createBmsSource(
     },
   });
 
-  return { sourceId: source.id, sourceName: source.name, organizationId, reused: false };
+  return { sourceId: source.id, sourceName: source.name, organizationId: scope.organizationId, reused: false };
 }

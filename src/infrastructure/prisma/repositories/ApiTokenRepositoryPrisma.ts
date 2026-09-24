@@ -1,6 +1,7 @@
 import { ApiTokenRepository, type ApiTokenRecord, type CreateApiTokenInput, DbError } from '@/domain/api-tokens/ApiTokenRepository';
 import { prisma } from '@/lib/prisma';
 import { defaultCompanyId } from '@/lib/company';
+import { scopeWhere, type Scope } from '@/lib/scope';
 
 const toDomain = (t: any): ApiTokenRecord => ({
   id: t.id,
@@ -32,7 +33,7 @@ export const apiTokenRepository: ApiTokenRepository = {
     }
   },
 
-  async findByOrganization(organizationId: string): Promise<ApiTokenRecord[]> {
+  async findByOrganization(scope: Scope): Promise<ApiTokenRecord[]> {
     try {
       if (!prisma.apiToken) {
         throw new DbError(
@@ -41,7 +42,7 @@ export const apiTokenRepository: ApiTokenRepository = {
         );
       }
       const tokens = await prisma.apiToken.findMany({ 
-        where: { organizationId },
+        where: scopeWhere(scope),
         orderBy: { createdAt: 'desc' } 
       });
       return tokens.map(toDomain);
@@ -50,7 +51,7 @@ export const apiTokenRepository: ApiTokenRepository = {
     }
   },
 
-  async findById(id: string, organizationId: string): Promise<ApiTokenRecord | null> {
+  async findById(id: string, scope: Scope): Promise<ApiTokenRecord | null> {
     try {
       if (!prisma.apiToken) {
         throw new DbError(
@@ -58,7 +59,7 @@ export const apiTokenRepository: ApiTokenRepository = {
           'Prisma Client no tiene el modelo apiToken. Por favor, reinicia el servidor de desarrollo.'
         );
       }
-      const token = await prisma.apiToken.findFirst({ where: { id, organizationId } });
+      const token = await prisma.apiToken.findFirst({ where: { id, ...scopeWhere(scope) } });
       return token ? toDomain(token) : null;
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');
@@ -97,7 +98,7 @@ export const apiTokenRepository: ApiTokenRepository = {
     }
   },
 
-  async delete(id: string, organizationId: string): Promise<void> {
+  async delete(id: string, scope: Scope): Promise<void> {
     try {
       if (!prisma.apiToken) {
         throw new DbError(
@@ -106,7 +107,7 @@ export const apiTokenRepository: ApiTokenRepository = {
         );
       }
       await prisma.apiToken.deleteMany({
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
       });
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');

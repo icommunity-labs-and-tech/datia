@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import type { Certification } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
-import { defaultCompanyId } from '@/lib/company';
+import { companyFor } from '@/lib/company';
+import type { Scope } from '@/lib/scope';
 import { recordEvent } from '@/lib/services/events';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
@@ -20,7 +21,7 @@ import type { EvidenceData } from '@/infrastructure/icommunity/ICommunityService
  */
 
 export interface IssueCertificationInput {
-  organizationId: string;
+  scope: Scope;
   signatureID: string;
   /** The asset the proof is about, recorded in the evidence metadata. */
   assetId: string;
@@ -58,8 +59,8 @@ export async function issueCertification(input: IssueCertificationInput): Promis
     prisma.certification.create({
       data: {
         id,
-        organizationId: input.organizationId,
-        companyId: await defaultCompanyId(input.organizationId),
+        organizationId: input.scope.organizationId,
+        companyId: await companyFor(input.scope),
         evidenceId,
         payloadChecksum,
         payload: input.payload as object,
@@ -71,7 +72,7 @@ export async function issueCertification(input: IssueCertificationInput): Promis
     }),
   ]);
 
-  await recordEvent(input.organizationId, {
+  await recordEvent(input.scope, {
     eventType: 'co2_certification_event',
     entityType: 'Certification',
     entityId: id,
@@ -142,7 +143,7 @@ export async function applyCertification(evidenceId: string): Promise<AppliedCer
     }),
   ]);
 
-  await recordEvent(existing.organizationId, {
+  await recordEvent({ organizationId: existing.organizationId, companyId: existing.companyId }, {
     eventType: 'co2_certification_event',
     entityType: 'Certification',
     entityId: existing.id,

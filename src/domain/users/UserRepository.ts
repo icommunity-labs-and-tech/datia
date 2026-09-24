@@ -1,7 +1,10 @@
+import type { Scope } from '@/lib/scope';
 import { UserInputError, UserNotFoundError, UserAlreadyExistsError } from './errors';
 
 export interface CreateUserInput {
   organizationId?: string | null; // NULL para SUPER_ADMIN
+  /** Empresa de la cuenta; la de la organización por defecto si se omite. */
+  companyId?: string | null;
   email: string;
   name: string;
   role: 'ADMIN' | 'SUPER_ADMIN';
@@ -21,6 +24,7 @@ export interface UpdateUserInput {
 export interface UserRecord {
   id: string;
   organizationId: string | null;
+  companyId: string | null;
   email: string;
   name: string | null;
   role: 'ADMIN' | 'SUPER_ADMIN';
@@ -42,16 +46,16 @@ export interface UserRepository {
   getById(id: string): Promise<UserRecord>;
   getByEmail(email: string): Promise<UserRecord>;
   getPasswordHash(id: string): Promise<string>;
-  findByOrganization(organizationId: string): Promise<UserRecord[]>;
+  findByOrganization(scope: Scope): Promise<UserRecord[]>;
   create(input: CreateUserInput & { passwordHash?: string }): Promise<UserRecord>;
-  update(id: string, organizationId: string, changes: UpdateUserInput): Promise<UserRecord>;
-  delete(id: string, organizationId: string): Promise<void>;
+  update(id: string, scope: Scope | null, changes: UpdateUserInput): Promise<UserRecord>;
+  delete(id: string, scope: Scope): Promise<void>;
   // Dashboard-specific queries
-  countActiveUsers(organizationId: string, days: number): Promise<number>;
-  countVerifiedUsers(organizationId: string): Promise<number>;
-  countAdmins(organizationId: string): Promise<number>;
-  countUsersByMonth(organizationId: string, startDate: Date, endDate: Date): Promise<number>;
-  listUsersForDashboard(organizationId: string): Promise<Array<{ id: string; name: string | null }>>;
+  countActiveUsers(scope: Scope, days: number): Promise<number>;
+  countVerifiedUsers(scope: Scope): Promise<number>;
+  countAdmins(scope: Scope): Promise<number>;
+  countUsersByMonth(scope: Scope, startDate: Date, endDate: Date): Promise<number>;
+  listUsersForDashboard(scope: Scope): Promise<Array<{ id: string; name: string | null }>>;
   // Para SUPER_ADMIN
   findAll(): Promise<UserRecord[]>;
 }

@@ -1,3 +1,4 @@
+import type { Scope } from '@/lib/scope';
 export interface ApiTokenRecord {
   id: string;
   name: string;
@@ -28,11 +29,11 @@ export class DbError extends Error {
 
 export interface ApiTokenRepository {
   create(input: CreateApiTokenInput): Promise<ApiTokenRecord>;
-  findByOrganization(organizationId: string): Promise<ApiTokenRecord[]>;
-  findById(id: string, organizationId: string): Promise<ApiTokenRecord | null>;
+  findByOrganization(scope: Scope): Promise<ApiTokenRecord[]>;
+  findById(id: string, scope: Scope): Promise<ApiTokenRecord | null>;
   findByTokenHash(tokenHash: string): Promise<ApiTokenRecord | null>;
   updateLastUsed(id: string): Promise<void>;
-  delete(id: string, organizationId: string): Promise<void>;
+  delete(id: string, scope: Scope): Promise<void>;
 }
 
 

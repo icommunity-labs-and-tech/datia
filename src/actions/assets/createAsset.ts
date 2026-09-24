@@ -6,7 +6,7 @@ import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import {
   AssetInputError,
   AssetAlreadyExistsError,
@@ -40,7 +40,7 @@ export interface CreateAssetResult {
  */
 export async function createAsset(input: CreateAssetInput): Promise<CreateAssetResult> {
   try {
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
 
     const id = input.id.trim();
     const name = input.name.trim();
@@ -53,7 +53,7 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
       evidenceService: createEvidenceServiceImpl({ icommunityService }),
     });
 
-    const asset = await service.createAsset(organizationId, {
+    const asset = await service.createAsset(scope, {
       customId: id,
       name,
       description: input.description.trim(),

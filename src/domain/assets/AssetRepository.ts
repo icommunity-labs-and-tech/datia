@@ -1,8 +1,9 @@
+import type { Scope } from '@/lib/scope';
 import { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
 
 export interface CreateAssetInput {
   id: string;
-  organizationId: string;
+  scope: Scope;
   name: string;
   description: string;
   imageUrl?: string | null;
@@ -32,10 +33,10 @@ export class DbError extends Error {
 }
 
 export interface AssetRepository {
-  // Métodos con filtro por organización
-  findByOrganization(organizationId: string): Promise<AssetRecord[]>;
-  getById(id: string, organizationId: string): Promise<AssetRecord | null>;
-  listForExport(organizationId: string, options: { fullPassport: boolean }): Promise<Array<{
+  // Métodos con filtro por alcance (organización y, si la hay, empresa)
+  findByOrganization(scope: Scope): Promise<AssetRecord[]>;
+  getById(id: string, scope: Scope): Promise<AssetRecord | null>;
+  listForExport(scope: Scope, options: { fullPassport: boolean }): Promise<Array<{
     id: string;
     name: string;
     description: string | null;
@@ -46,9 +47,9 @@ export interface AssetRepository {
     imageUrl: string | null;
   }>>;
   create(input: CreateAssetInput): Promise<AssetRecord>;
-  updateEvidenceId(id: string, organizationId: string, evidenceId: string): Promise<void>;
-  delete(id: string, organizationId: string): Promise<void>;
-  getDetails(id: string, organizationId: string): Promise<
+  updateEvidenceId(id: string, scope: Scope, evidenceId: string): Promise<void>;
+  delete(id: string, scope: Scope): Promise<void>;
+  getDetails(id: string, scope: Scope): Promise<
     | ({
         id: string;
         name: string;
@@ -57,18 +58,18 @@ export interface AssetRepository {
       })
     | null
   >;
-  search(query: string, organizationId: string): Promise<Array<{
+  search(query: string, scope: Scope): Promise<Array<{
     id: string;
     name: string;
     description: string | null;
     imageUrl: string | null;
     createdAt: Date;
   }>>;
-  countTotalItems(organizationId: string): Promise<number>;
-  countActiveItems(organizationId: string, days: number): Promise<number>;
-  countItemsByMonth(organizationId: string, startDate: Date, endDate: Date): Promise<number>;
+  countTotalItems(scope: Scope): Promise<number>;
+  countActiveItems(scope: Scope, days: number): Promise<number>;
+  countItemsByMonth(scope: Scope, startDate: Date, endDate: Date): Promise<number>;
   importMany(
-    organizationId: string,
+    scope: Scope,
     rows: Array<{
       id: string;
       name: string;
@@ -78,7 +79,7 @@ export interface AssetRepository {
   ): Promise<void>;
   // Cursor-based pagination
   listPaginated(
-    organizationId: string,
+    scope: Scope,
     params: CursorPaginationParams
   ): Promise<CursorPaginationResult<{
     id: string;
@@ -89,7 +90,7 @@ export interface AssetRepository {
   }>>;
   searchPaginated(
     query: string,
-    organizationId: string,
+    scope: Scope,
     params: CursorPaginationParams
   ): Promise<CursorPaginationResult<{
     id: string;

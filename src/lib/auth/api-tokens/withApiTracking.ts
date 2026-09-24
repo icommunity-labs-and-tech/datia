@@ -54,6 +54,7 @@ export function withApiTracking<T extends Record<string, any>>(
       trackApiCall({
         apiTokenId: auth.tokenId,
         organizationId: auth.organizationId,
+        companyId: auth.companyId,
         method,
         path,
         statusCode: response.status,
@@ -71,6 +72,7 @@ export function withApiTracking<T extends Record<string, any>>(
       trackApiCall({
         apiTokenId: auth.tokenId,
         organizationId: auth.organizationId,
+        companyId: auth.companyId,
         method,
         path,
         statusCode,

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { issueCertification } from '@/lib/certification';
+import { scopeWhere, type Scope } from '@/lib/scope';
 
 /**
  * Anchors the energy record without anyone having to ask.
@@ -103,7 +104,7 @@ export function periodLabel(start: Date, end: Date): string {
 }
 
 async function anchorOne(
-  organizationId: string,
+  scope: Scope,
   emission: EmissionRow,
   ctx: AnchorContext
 ): Promise<AnchorDetail> {
@@ -138,7 +139,7 @@ async function anchorOne(
 
   try {
     const certification = await issueCertification({
-      organizationId,
+      scope,
       signatureID: ctx.signatureID,
       assetId: item.id,
       title: `Emisión certificada — ${period} · ${emission.co2eKg} kg CO₂e`,
@@ -175,11 +176,11 @@ async function anchorOne(
  * be issued must not cost the client the reading itself.
  */
 export async function anchorEmissionById(
-  organizationId: string,
+  scope: Scope,
   emissionId: string
 ): Promise<AnchorDetail | null> {
   try {
-    const ctx = await loadContext(organizationId);
+    const ctx = await loadContext(scope.organizationId);
     if (!ctx) return null;
 
     const emission = (await prisma.emissionRecord.findFirst({
@@ -188,13 +189,13 @@ export async function anchorEmissionById(
         // An issued proof is waiting for the chain; a second one would pay for
         // another transaction for the same figure.
         certificationId: null,
-        EnergyConsumption: { EnergySource: { Asset: { organizationId } } },
+        EnergyConsumption: { EnergySource: { Asset: scopeWhere(scope) } },
       },
       select: EMISSION_SELECT,
     })) as EmissionRow | null;
     if (!emission) return null;
 
-    return await anchorOne(organizationId, emission, ctx);
+    return await anchorOne(scope, emission, ctx);
   } catch {
     return null;
   }

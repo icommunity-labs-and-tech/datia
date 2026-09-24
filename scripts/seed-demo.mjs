@@ -11,6 +11,7 @@
 import { PrismaClient } from '../src/generated/prisma/index.js';
 import { randomUUID } from 'node:crypto';
 import bcrypt from 'bcryptjs';
+import { companyIdFor } from './lib/company.mjs';
 
 const prisma = new PrismaClient();
 
@@ -81,6 +82,7 @@ const evidenceId = () => `evd_${randomUUID().replace(/-/g, '').slice(0, 22)}`;
 async function main() {
   const org = await prisma.organization.findUnique({ where: { slug: ORG_SLUG } });
   if (!org) throw new Error(`Organización "${ORG_SLUG}" no encontrada`);
+  const companyId = await companyIdFor(prisma, org.id);
 
   // ── 1. Organisation: both modules on, identity verified ───────────────────
   await prisma.organization.update({
@@ -100,7 +102,7 @@ async function main() {
   if (existing) {
     await prisma.user.update({
       where: { email: DEMO_ADMIN.email },
-      data: { password, organizationId: org.id, role: 'ADMIN', status: 'ACTIVE', updatedAt: new Date() },
+      data: { password, organizationId: org.id, companyId, role: 'ADMIN', status: 'ACTIVE', updatedAt: new Date() },
     });
   } else {
     await prisma.user.create({
@@ -112,6 +114,7 @@ async function main() {
         role: 'ADMIN',
         status: 'ACTIVE',
         organizationId: org.id,
+        companyId,
         updatedAt: new Date(),
       },
     });
@@ -209,6 +212,7 @@ async function main() {
       data: {
         id: hookId,
         organizationId: org.id,
+        companyId,
         name: 'ERP · Alta de activos',
         url: 'https://erp.example.com/hooks/datia',
         events: ['asset.created', 'co2_certification_event'],

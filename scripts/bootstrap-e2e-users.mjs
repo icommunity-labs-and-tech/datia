@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { PrismaClient } from '../src/generated/prisma-e2e/index.js';
 import bcrypt from 'bcryptjs';
+import { companyIdFor } from './lib/company.mjs';
 
 const prisma = new PrismaClient();
 
@@ -36,6 +37,7 @@ async function bootstrapE2EUsers() {
         },
       }));
     console.log(`✅ Organization: ${org.name} (${org.slug})`);
+    const companyId = await companyIdFor(prisma, org.id);
 
     for (const { email, password, name, role } of USERS) {
       const existing = await prisma.user.findUnique({ where: { email } });
@@ -52,6 +54,7 @@ async function bootstrapE2EUsers() {
           role,
           status: 'ACTIVE',
           organizationId: org.id,
+          companyId,
           updatedAt: now,
         },
       });
@@ -67,6 +70,7 @@ async function bootstrapE2EUsers() {
           name,
           description: 'Activo de demostración para pruebas end-to-end.',
           organizationId: org.id,
+          companyId,
           updatedAt: now,
           // Posición en columnas propias desde #37; el mapa lee de aquí.
           latitude: 41.31 + index * 0.004,

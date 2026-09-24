@@ -8,7 +8,7 @@ vi.mock('@/actions/users/helpers', () => ({
   generateTemporaryPassword: vi.fn(() => 'Temporal2345'),
 }));
 vi.mock('@/lib/auth/tenant', () => ({
-  requireOrganizationId: vi.fn(async () => 'org-a'),
+  requireScope: vi.fn(async () => ({ organizationId: 'org-a', companyId: 'co-a' })),
 }));
 
 import { createUserServiceImpl } from '@/domain/users/UserServiceImpl';
@@ -33,7 +33,7 @@ describe('UserService: roles asignables desde una organización', () => {
   it('crea usuarios ADMIN', async () => {
     const service = createUserServiceImpl({ userRepository: repo });
     await service.createUser({ email: 'a@example.com', name: 'A', role: 'ADMIN' });
-    expect(repo.create).toHaveBeenCalledWith(expect.objectContaining({ role: 'ADMIN', organizationId: 'org-a' }));
+    expect(repo.create).toHaveBeenCalledWith(expect.objectContaining({ role: 'ADMIN', organizationId: 'org-a', companyId: 'co-a' }));
   });
 
   it.each(['SUPER_ADMIN', '', null, undefined])('no crea usuarios con rol %s', async (role) => {

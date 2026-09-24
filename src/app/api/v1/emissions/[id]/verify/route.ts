@@ -3,6 +3,7 @@ import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { prisma } from '@/lib/prisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import type { EmissionVerificationReport } from '@/domain/energy/EnergyTypes';
+import { authScope, scopeWhere } from '@/lib/scope';
 
 /**
  * Verifies an emission against its proof on chain.
@@ -26,7 +27,7 @@ export async function GET(
   const emission = await prisma.emissionRecord.findFirst({
     where: {
       id,
-      EnergyConsumption: { EnergySource: { Asset: { organizationId: auth.organizationId } } },
+      EnergyConsumption: { EnergySource: { Asset: scopeWhere(authScope(auth)) } },
     },
     include: { Certification: true },
   });

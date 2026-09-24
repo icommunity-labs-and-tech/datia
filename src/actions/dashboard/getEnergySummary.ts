@@ -1,7 +1,8 @@
 'use server';
 
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { prisma } from '@/lib/prisma';
+import { scopeWhere } from '@/lib/scope';
 
 export interface EnergySummary {
   totalSources: number;
@@ -12,26 +13,26 @@ export interface EnergySummary {
 }
 
 export async function getEnergySummary(): Promise<EnergySummary> {
-  const organizationId = await requireOrganizationId();
+  const scope = await requireScope();
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
   const [sources, consumptionAgg, emissionsAgg] = await Promise.all([
     prisma.energySource.findMany({
-      where: { Asset: { organizationId } },
+      where: { Asset: scopeWhere(scope) },
       select: { id: true, renewableShare: true, latitude: true, longitude: true },
     }),
     prisma.energyConsumption.aggregate({
       where: {
-        EnergySource: { Asset: { organizationId } },
+        EnergySource: { Asset: scopeWhere(scope) },
         periodStart: { gte: monthStart },
       },
       _sum: { consumptionKwh: true },
     }),
     prisma.emissionRecord.aggregate({
       where: {
-        EnergyConsumption: { EnergySource: { Asset: { organizationId } } },
+        EnergyConsumption: { EnergySource: { Asset: scopeWhere(scope) } },
         createdAt: { gte: monthStart },
       },
       _sum: { co2eKg: true },

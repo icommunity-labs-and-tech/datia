@@ -2,6 +2,7 @@ import { ApiTokenService, type CreateApiTokenRequest, type ApiTokenResponse, typ
 import type { ApiTokenRepository } from './ApiTokenRepository';
 import { DbError } from './ApiTokenRepository';
 import { randomBytes, createHash } from 'crypto';
+import type { Scope } from '@/lib/scope';
 
 // Generate a secure random token (32 bytes = 64 hex characters)
 function generateToken(): string {
@@ -47,9 +48,9 @@ export function createApiTokenServiceImpl(deps: {
       }
     },
 
-    async listTokens(organizationId: string): Promise<ApiTokenListResponse[]> {
+    async listTokens(scope: Scope): Promise<ApiTokenListResponse[]> {
       try {
-        const tokens = await repo.findByOrganization(organizationId);
+        const tokens = await repo.findByOrganization(scope);
 
         return tokens.map((t) => ({
           id: t.id,
@@ -65,15 +66,15 @@ export function createApiTokenServiceImpl(deps: {
       }
     },
 
-    async deleteToken(id: string, organizationId: string): Promise<void> {
+    async deleteToken(id: string, scope: Scope): Promise<void> {
       try {
-        const existing = await repo.findById(id, organizationId);
+        const existing = await repo.findById(id, scope);
 
         if (!existing) {
           throw new ApiTokenNotFoundError(id);
         }
 
-        await repo.delete(id, organizationId);
+        await repo.delete(id, scope);
       } catch (e) {
         if (e instanceof ApiTokenNotFoundError) throw e;
         if (e instanceof DbError) throw e;

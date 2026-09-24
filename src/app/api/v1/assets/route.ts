@@ -6,6 +6,7 @@ import { assetRepositoryFilesystem } from '@/infrastructure/filesystem/repositor
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
+import { authScope } from '@/lib/scope';
 import { AssetInputError, AssetAlreadyExistsError, UserNotVerifiedError, AssetCreationRollbackError } from '@/domain/assets/errors';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 
@@ -198,9 +199,9 @@ export async function GET(request: NextRequest) {
       const repo = assetRepositoryFilesystem;
       let result;
       if (q) {
-        result = await repo.searchPaginated(q, auth.organizationId, paginationParams);
+        result = await repo.searchPaginated(q, authScope(auth), paginationParams);
       } else {
-        result = await repo.listPaginated(auth.organizationId, paginationParams);
+        result = await repo.listPaginated(authScope(auth), paginationParams);
       }
       return NextResponse.json(result);
     }
@@ -236,7 +237,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { organizationId } = auth;
+    const scope = authScope(auth);
 
     // Parse request body
     const body = await request.json().catch(() => null);
@@ -282,7 +283,7 @@ export async function POST(request: NextRequest) {
 
     // ── Sandbox: write to filesystem, skip evidence service ─────────────
     if (auth.isSandbox) {
-      const existing = await assetRepositoryFilesystem.getById(createRequest.customId, organizationId);
+      const existing = await assetRepositoryFilesystem.getById(createRequest.customId, scope);
       if (existing) {
         return NextResponse.json(
           { error: `Item with ID "${createRequest.customId}" already exists in the sandbox`, code: 'ITEM_EXISTS' },
@@ -291,7 +292,7 @@ export async function POST(request: NextRequest) {
       }
       const sandboxItem = await assetRepositoryFilesystem.create({
         id: createRequest.customId,
-        organizationId,
+        scope,
         name: createRequest.name,
         description: createRequest.description,
         imageUrl: createRequest.imageUrl ?? null,
@@ -322,7 +323,7 @@ export async function POST(request: NextRequest) {
     // to be parked in module state for the length of the request, where every
     // concurrent request on the instance read it as its own (#30). A token has
     // no person behind it, so the item has no creator.
-    const result = await itemService.createAsset(organizationId, { ...createRequest, createdByUserId: null });
+    const result = await itemService.createAsset(scope, { ...createRequest, createdByUserId: null });
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
     // Map domain errors to HTTP responses

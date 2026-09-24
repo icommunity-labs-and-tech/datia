@@ -1,8 +1,9 @@
 'use server';
 
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { applyCertification } from '@/lib/certification';
 import { prisma } from '@/lib/prisma';
+import { scopeWhere, type Scope } from '@/lib/scope';
 
 /**
  * Follows evidence from issued to anchored.
@@ -37,9 +38,9 @@ export interface BmsEvidenceStatus {
   justConfirmed: boolean;
 }
 
-async function readOne(evidenceId: string, organizationId: string): Promise<BmsEvidenceStatus> {
+async function readOne(evidenceId: string, scope: Scope): Promise<BmsEvidenceStatus> {
   const certification = await prisma.certification.findFirst({
-    where: { evidenceId: evidenceId, organizationId },
+    where: { evidenceId: evidenceId, ...scopeWhere(scope) },
   });
   if (!certification) {
     return { evidenceId, status: 'unknown', confirmed: false, justConfirmed: false };
@@ -75,6 +76,6 @@ async function readOne(evidenceId: string, organizationId: string): Promise<BmsE
  */
 export async function confirmBmsEvidences(evidenceIDs: string[]): Promise<BmsEvidenceStatus[]> {
   if (!evidenceIDs.length) return [];
-  const organizationId = await requireOrganizationId();
-  return Promise.all(evidenceIDs.map((id) => readOne(id, organizationId)));
+  const scope = await requireScope();
+  return Promise.all(evidenceIDs.map((id) => readOne(id, scope)));
 }

@@ -2,7 +2,7 @@ import { UserService, type CreateUserRequest, type UpdateUserRequest, type Chang
 import { UserInputError, UserAlreadyExistsError, UserNotFoundError, AuthorizationError, InvalidCredentialsError, PasswordValidationError } from './errors';
 import type { UserRepository } from './UserRepository';
 import { DbError } from './UserRepository';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { verifyAdminAuth, verifyUserAuth, generateTemporaryPassword } from '@/actions/users/helpers';
 import bcrypt from 'bcryptjs';
 
@@ -31,7 +31,7 @@ export function createUserServiceImpl(deps: {
   return {
     async createUser(data: CreateUserRequest): Promise<{ user: UserResponse; temporaryPassword: string }> {
       try {
-        const organizationId = await requireOrganizationId();
+        const scope = await requireScope();
         
         // auth
         await verifyAdminAuth();
@@ -55,7 +55,8 @@ export function createUserServiceImpl(deps: {
         const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
 
         const created = await userRepo.create({
-          organizationId,
+          organizationId: scope.organizationId,
+          companyId: scope.companyId,
           email: data.email,
           name: data.name,
           role: data.role,
@@ -74,7 +75,7 @@ export function createUserServiceImpl(deps: {
 
     async updateUser(data: UpdateUserRequest): Promise<{ user: UserResponse }> {
       try {
-        const organizationId = await requireOrganizationId();
+        const scope = await requireScope();
         
         await verifyAdminAuth();
 
@@ -99,7 +100,7 @@ export function createUserServiceImpl(deps: {
           }
         }
 
-        const updated = await userRepo.update(data.id, organizationId, {
+        const updated = await userRepo.update(data.id, scope, {
           name: data.name ?? null,
           email: data.email ?? null,
           role: data.role ?? null,
@@ -117,11 +118,11 @@ export function createUserServiceImpl(deps: {
 
     async deleteUser(id: string): Promise<void> {
       try {
-        const organizationId = await requireOrganizationId();
+        const scope = await requireScope();
         
         await verifyAdminAuth();
 
-        await userRepo.delete(id, organizationId);
+        await userRepo.delete(id, scope);
       } catch (e) {
         if (e instanceof AuthorizationError) throw e;
         if (e instanceof DbError) throw new UserNotFoundError(id, 'Usuario no encontrado');
@@ -155,8 +156,10 @@ export function createUserServiceImpl(deps: {
         }
 
         const hashed = await bcrypt.hash(data.newPassword, 10);
-        const userOrgId = payload.organizationId ?? null;
-        await userRepo.update(payload.id, userOrgId!, { passwordHash: hashed });
+        const ownScope = payload.organizationId
+          ? { organizationId: payload.organizationId, companyId: payload.companyId ?? null }
+          : null;
+        await userRepo.update(payload.id, ownScope, { passwordHash: hashed });
       } catch (e) {
         if (e instanceof InvalidCredentialsError || e instanceof PasswordValidationError || e instanceof UserNotFoundError) throw e;
         if (e instanceof DbError) throw new UserNotFoundError(data.userId, 'Usuario no encontrado');

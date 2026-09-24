@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import { scopeWhere, type Scope } from '@/lib/scope';
 import type { EnergyRepository } from '@/domain/energy/EnergyRepository';
 import { createPaginationResponse, type CursorPaginationParams } from '@/lib/api/cursor-pagination';
 import type {
@@ -61,10 +62,10 @@ const toEmission = (r: any): EmissionRecord => ({
   createdAt: r.createdAt,
 });
 
-// Org filter travels through the relation chain — no organizationId on energy models
-const orgViaItem = (organizationId: string) => ({ Asset: { organizationId } });
-const orgViaSource = (organizationId: string) => ({ EnergySource: orgViaItem(organizationId) });
-const orgViaConsumption = (organizationId: string) => ({ EnergyConsumption: orgViaSource(organizationId) });
+// The scope travels through the relation chain — no organizationId or companyId on energy models
+const orgViaItem = (scope: Scope) => ({ Asset: scopeWhere(scope) });
+const orgViaSource = (scope: Scope) => ({ EnergySource: orgViaItem(scope) });
+const orgViaConsumption = (scope: Scope) => ({ EnergyConsumption: orgViaSource(scope) });
 
 
 /** Groups rows into a YYYY-MM series so the client formats the label locally. */
@@ -87,7 +88,7 @@ function toMonthlySeries<T>(
 }
 
 export const energyRepository: EnergyRepository = {
-  async createSource(organizationId, input: CreateEnergySourceInput) {
+  async createSource(scope, input: CreateEnergySourceInput) {
     const r = await prisma.energySource.create({
       data: {
         name: input.name,
@@ -108,10 +109,10 @@ export const energyRepository: EnergyRepository = {
     return toSource(r);
   },
 
-  async findSourcesByOrganization(organizationId, limit = 20, pagination?: CursorPaginationParams) {
+  async findSourcesByOrganization(scope, limit = 20, pagination?: CursorPaginationParams) {
     const take = (pagination?.limit ?? limit) + 1;
     const rows = await prisma.energySource.findMany({
-      where: orgViaItem(organizationId),
+      where: orgViaItem(scope),
       orderBy: { createdAt: 'desc' },
       ...(pagination?.cursor ? { cursor: { id: pagination.cursor }, skip: 1 } : {}),
       take,
@@ -119,14 +120,14 @@ export const energyRepository: EnergyRepository = {
     return createPaginationResponse(rows.map(toSource), pagination?.limit ?? limit);
   },
 
-  async findSourceById(organizationId, id) {
+  async findSourceById(scope, id) {
     const r = await prisma.energySource.findFirst({
-      where: { id, ...orgViaItem(organizationId) },
+      where: { id, ...orgViaItem(scope) },
     });
     return r ? toSource(r) : null;
   },
 
-  async createConsumption(organizationId, input: CreateEnergyConsumptionInput) {
+  async createConsumption(scope, input: CreateEnergyConsumptionInput) {
     const r = await prisma.energyConsumption.create({
       data: {
         energySourceId: input.energySourceId,
@@ -144,10 +145,10 @@ export const energyRepository: EnergyRepository = {
     return toConsumption(r);
   },
 
-  async findConsumptionByOrganization(organizationId, limit = 20, pagination?: CursorPaginationParams) {
+  async findConsumptionByOrganization(scope, limit = 20, pagination?: CursorPaginationParams) {
     const take = (pagination?.limit ?? limit) + 1;
     const rows = await prisma.energyConsumption.findMany({
-      where: orgViaSource(organizationId),
+      where: orgViaSource(scope),
       orderBy: { createdAt: 'desc' },
       ...(pagination?.cursor ? { cursor: { id: pagination.cursor }, skip: 1 } : {}),
       take,
@@ -155,14 +156,14 @@ export const energyRepository: EnergyRepository = {
     return createPaginationResponse(rows.map(toConsumption), pagination?.limit ?? limit);
   },
 
-  async findConsumptionById(organizationId, id) {
+  async findConsumptionById(scope, id) {
     const r = await prisma.energyConsumption.findFirst({
-      where: { id, ...orgViaSource(organizationId) },
+      where: { id, ...orgViaSource(scope) },
     });
     return r ? toConsumption(r) : null;
   },
 
-  async createEmission(organizationId, input: CreateEmissionRecordInput) {
+  async createEmission(scope, input: CreateEmissionRecordInput) {
     const r = await prisma.emissionRecord.create({
       data: {
         energyConsumptionId: input.energyConsumptionId,
@@ -181,10 +182,10 @@ export const energyRepository: EnergyRepository = {
     return toEmission(r);
   },
 
-  async findEmissionsByOrganization(organizationId, limit = 20, pagination?: CursorPaginationParams) {
+  async findEmissionsByOrganization(scope, limit = 20, pagination?: CursorPaginationParams) {
     const take = (pagination?.limit ?? limit) + 1;
     const rows = await prisma.emissionRecord.findMany({
-      where: orgViaConsumption(organizationId),
+      where: orgViaConsumption(scope),
       orderBy: { createdAt: 'desc' },
       ...(pagination?.cursor ? { cursor: { id: pagination.cursor }, skip: 1 } : {}),
       take,
@@ -192,9 +193,9 @@ export const energyRepository: EnergyRepository = {
     return createPaginationResponse(rows.map(toEmission), pagination?.limit ?? limit);
   },
 
-  async findEmissionById(organizationId, id) {
+  async findEmissionById(scope, id) {
     const r = await prisma.emissionRecord.findFirst({
-      where: { id, ...orgViaConsumption(organizationId) },
+      where: { id, ...orgViaConsumption(scope) },
     });
     return r ? toEmission(r) : null;
   },
@@ -204,8 +205,8 @@ export const energyRepository: EnergyRepository = {
    * are paginated on purpose; these totals are what the summary must show, so
    * the figure on screen is never a page total wearing the label of a real one.
    */
-  async getConsumptionTotals(organizationId) {
-    const where = orgViaSource(organizationId);
+  async getConsumptionTotals(scope) {
+    const where = orgViaSource(scope);
     const [aggregate, rows] = await Promise.all([
       prisma.energyConsumption.aggregate({ where, _count: true, _sum: { consumptionKwh: true } }),
       prisma.energyConsumption.findMany({
@@ -222,8 +223,8 @@ export const energyRepository: EnergyRepository = {
     };
   },
 
-  async getEmissionTotals(organizationId) {
-    const where = orgViaConsumption(organizationId);
+  async getEmissionTotals(scope) {
+    const where = orgViaConsumption(scope);
     const [aggregate, verified, rows] = await Promise.all([
       prisma.emissionRecord.aggregate({ where, _count: true, _sum: { co2eKg: true } }),
       prisma.emissionRecord.count({ where: { ...where, verificationStatus: 'VERIFIED' } }),

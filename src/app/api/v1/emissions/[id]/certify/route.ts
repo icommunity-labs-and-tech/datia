@@ -3,6 +3,7 @@ import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { prisma } from '@/lib/prisma';
 import { anchorEmissionById } from '@/lib/energy/anchor-service';
 import { certificationSummary } from '@/lib/certification';
+import { authScope, scopeWhere } from '@/lib/scope';
 
 /**
  * Anchors an emission that was left without proof — because iBS was down when
@@ -24,7 +25,7 @@ export async function POST(
   const emission = await prisma.emissionRecord.findFirst({
     where: {
       id,
-      EnergyConsumption: { EnergySource: { Asset: { organizationId: auth.organizationId } } },
+      EnergyConsumption: { EnergySource: { Asset: scopeWhere(authScope(auth)) } },
     },
     select: { id: true, Certification: true },
   });
@@ -56,7 +57,7 @@ export async function POST(
     return NextResponse.json({ error: 'Organization verification is not complete.' }, { status: 422 });
   }
 
-  const anchored = await anchorEmissionById(auth.organizationId, id);
+  const anchored = await anchorEmissionById(authScope(auth), id);
 
   if (!anchored?.certificationId) {
     return NextResponse.json(

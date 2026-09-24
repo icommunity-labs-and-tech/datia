@@ -1,8 +1,9 @@
 import { prisma } from '@/lib/prisma';
 import type { CertificationStatus } from '@/generated/prisma';
+import { scopeWhere, type Scope } from '@/lib/scope';
 
 /**
- * Reads over the proofs of an organisation.
+ * Reads over the proofs of an organisation, or of one of its companies.
  *
  * An asset is certified through its energy: source → consumption → emission →
  * certification. Assets used to carry their own `State` history and the badge
@@ -11,10 +12,10 @@ import type { CertificationStatus } from '@/generated/prisma';
  */
 
 /** Assets with at least one proof already on chain. */
-export async function certifiedAssetIds(organizationId: string): Promise<Set<string>> {
+export async function certifiedAssetIds(scope: Scope): Promise<Set<string>> {
   const rows = await prisma.asset.findMany({
     where: {
-      organizationId,
+      ...scopeWhere(scope),
       EnergySource: {
         some: {
           EnergyConsumption: {
@@ -47,13 +48,13 @@ const asNumber = (value: unknown) => (typeof value === 'number' ? value : null);
 
 /** The proofs of one asset, newest first. */
 export async function listAssetCertifications(
-  organizationId: string,
+  scope: Scope,
   assetId: string,
   limit = 50
 ): Promise<AssetCertification[]> {
   const rows = await prisma.certification.findMany({
     where: {
-      organizationId,
+      ...scopeWhere(scope),
       EmissionRecord: { some: { EnergyConsumption: { EnergySource: { assetId } } } },
     },
     orderBy: { createdAt: 'desc' },
@@ -85,15 +86,15 @@ export interface CertificationCounts {
   thisMonth: number;
 }
 
-export async function certificationCounts(organizationId: string): Promise<CertificationCounts> {
+export async function certificationCounts(scope: Scope): Promise<CertificationCounts> {
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
 
   const [total, certified, thisMonth] = await Promise.all([
-    prisma.certification.count({ where: { organizationId } }),
-    prisma.certification.count({ where: { organizationId, status: 'CERTIFIED' } }),
-    prisma.certification.count({ where: { organizationId, createdAt: { gte: startOfMonth } } }),
+    prisma.certification.count({ where: scopeWhere(scope) }),
+    prisma.certification.count({ where: { ...scopeWhere(scope), status: 'CERTIFIED' } }),
+    prisma.certification.count({ where: { ...scopeWhere(scope), createdAt: { gte: startOfMonth } } }),
   ]);
 
   return { total, certified, issued: total - certified, thisMonth };

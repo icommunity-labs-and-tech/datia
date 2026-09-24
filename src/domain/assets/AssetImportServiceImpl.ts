@@ -1,5 +1,6 @@
 import { AssetImportService, type ParsedAssetRow, type AssetImportResult, AssetImportValidationError, type ImportAssetRow } from './AssetImportService';
 import type { AssetRepository } from './AssetRepository';
+import type { Scope } from '@/lib/scope';
 
 export function createAssetImportServiceImpl(deps: {
   assetRepository: AssetRepository;
@@ -7,7 +8,7 @@ export function createAssetImportServiceImpl(deps: {
   const { assetRepository: itemRepo } = deps;
 
   return {
-    async importAssetsFromParsedRows(organizationId: string, rows: ParsedAssetRow[]): Promise<AssetImportResult> {
+    async importAssetsFromParsedRows(scope: Scope, rows: ParsedAssetRow[]): Promise<AssetImportResult> {
       if (!rows.length) {
         return { createdCount: 0 };
       }
@@ -46,7 +47,7 @@ export function createAssetImportServiceImpl(deps: {
       const existingConflicts: string[] = [];
       for (const row of rows) {
         try {
-          await itemRepo.getById(row.id, organizationId);
+          await itemRepo.getById(row.id, scope);
           existingConflicts.push(`Línea ${row.line}: id "${row.id}" ya existe en la base de datos`);
         } catch {
           // Item doesn't exist, continue
@@ -68,7 +69,7 @@ export function createAssetImportServiceImpl(deps: {
         imageUrl: r.imageUrl ?? null,
       }));
 
-      await itemRepo.importMany(organizationId, importRows);
+      await itemRepo.importMany(scope, importRows);
 
       return { createdCount: importRows.length };
     },

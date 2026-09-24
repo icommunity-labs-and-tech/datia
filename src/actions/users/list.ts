@@ -2,7 +2,7 @@
 
 import { verifyAdminAuth } from './helpers';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
-import { getCurrentTenant } from '@/lib/auth/tenant';
+import { getCurrentTenant, requireScope } from '@/lib/auth/tenant';
 
 export async function getUsers() {
   try {
@@ -16,12 +16,12 @@ export async function getUsers() {
       return { success: true, users };
     }
     
-    // Si es ADMIN, solo ve usuarios de su organización
+    // Si es ADMIN, solo ve las cuentas de su alcance: su empresa
     if (!tenant.organizationId) {
       throw new Error('ADMIN debe tener una organización asignada');
     }
     
-    const users = await userRepository.findByOrganization(tenant.organizationId);
+    const users = await userRepository.findByOrganization(await requireScope());
     return { success: true, users };
   } catch (error) {
     console.error('Error al obtener usuarios:', error);

@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const ORG_ID = 'org-test-1';
+const COMPANY_ID = 'company-test-1';
+const SCOPE = { organizationId: ORG_ID, companyId: COMPANY_ID };
 const EMISSION_ID = 'emission-test-1';
 const CERT_ID = 'cert-test-1';
 const EVIDENCE_ID = 'evd_test1';
@@ -72,7 +74,7 @@ const evidence = {
 describe('GET /api/v1/emissions/[id]/verify', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID });
+    mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, companyId: COMPANY_ID });
     mockPrisma.emissionRecord.findFirst.mockResolvedValue(emission);
     mockGetEvidence.mockResolvedValue(evidence);
   });

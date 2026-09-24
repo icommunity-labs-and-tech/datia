@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getUserById } from '../../users/get';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
-import { requireOrganizationId, TenantContextNotFoundError } from '@/lib/auth/tenant';
+import { requireScope, TenantContextNotFoundError } from '@/lib/auth/tenant';
 import { UserNotFoundError } from '@/domain/users/errors';
 
 vi.mock('../../users/helpers', () => ({
@@ -10,7 +10,7 @@ vi.mock('../../users/helpers', () => ({
 
 vi.mock('@/lib/auth/tenant', async () => {
   const actual = await vi.importActual<typeof import('@/lib/auth/tenant')>('@/lib/auth/tenant');
-  return { ...actual, requireOrganizationId: vi.fn(async () => 'org-a') };
+  return { ...actual, requireScope: vi.fn(async () => ({ organizationId: 'org-a', companyId: 'co-a' })) };
 });
 
 vi.mock('@/infrastructure/prisma/repositories/UserRepositoryPrisma', () => ({
@@ -18,9 +18,10 @@ vi.mock('@/infrastructure/prisma/repositories/UserRepositoryPrisma', () => ({
 }));
 
 const getById = userRepository.getById as unknown as ReturnType<typeof vi.fn>;
-const user = (id: string, organizationId: string | null) => ({
+const user = (id: string, organizationId: string | null, companyId: string | null = organizationId ? 'co-a' : null) => ({
   id,
   organizationId,
+  companyId,
   email: `${id}@example.com`,
   name: id,
   role: 'ADMIN',
@@ -65,8 +66,14 @@ describe('getUserById', () => {
     await expect(getUserById('superadmin')).resolves.toEqual({ success: false, error: 'Usuario no encontrado' });
   });
 
+  it('does not return a user of another company of the same organisation', async () => {
+    getById.mockResolvedValueOnce(user('user-c', 'org-a', 'co-b'));
+
+    await expect(getUserById('user-c')).resolves.toEqual({ success: false, error: 'Usuario no encontrado' });
+  });
+
   it('refuses without a session and never reads the user', async () => {
-    (requireOrganizationId as any).mockRejectedValueOnce(new TenantContextNotFoundError('no session'));
+    (requireScope as any).mockRejectedValueOnce(new TenantContextNotFoundError('no session'));
 
     await expect(getUserById('user-a')).resolves.toMatchObject({ success: false });
     expect(getById).not.toHaveBeenCalled();

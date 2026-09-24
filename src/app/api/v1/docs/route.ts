@@ -1,9 +1,10 @@
 import { ApiReference } from '@scalar/nextjs-api-reference';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { listApiTokens } from '@/actions/api-tokens/list';
 import { createApiTokenServiceImpl } from '@/domain/api-tokens/ApiTokenServiceImpl';
 import { apiTokenRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/ApiTokenRepositoryFilesystem';
 import { prisma } from '@/lib/prisma';
+import { scopeWhere, type Scope } from '@/lib/scope';
 
 const DOCS_PREVIEW_TOKEN_NAME = 'Docs Preview (auto)';
 
@@ -102,21 +103,22 @@ Use **POST /products/{id}/states**. Select a status type from the **Examples** d
  * a new one, so there is always at most one active preview token per org.
  * The plaintext is only available at creation time — inject it directly into Scalar.
  */
-async function provisionDocsToken(organizationId: string): Promise<string | null> {
+async function provisionDocsToken(scope: Scope): Promise<string | null> {
   try {
     // Rotate: delete any stale preview tokens for this org from the filesystem store
-    const existing = await apiTokenRepositoryFilesystem.findByOrganization(organizationId);
+    const existing = await apiTokenRepositoryFilesystem.findByOrganization(scope);
     await Promise.all(
       existing
         .filter((t) => t.name === DOCS_PREVIEW_TOKEN_NAME)
-        .map((t) => apiTokenRepositoryFilesystem.delete(t.id, organizationId))
+        .map((t) => apiTokenRepositoryFilesystem.delete(t.id, scope))
     );
 
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
     const apiTokenService = createApiTokenServiceImpl({ apiTokenRepository: apiTokenRepositoryFilesystem });
     const result = await apiTokenService.createToken({
       name: DOCS_PREVIEW_TOKEN_NAME,
-      organizationId,
+      organizationId: scope.organizationId,
+      companyId: scope.companyId,
       expiresAt,
     });
 
@@ -146,11 +148,11 @@ function injectItemIdExamples(paths: Record<string, any>, exampleItemId: string)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function buildPersonalizedSpec(baseUrl: string, organizationId: string, docsToken: string | null): Promise<Record<string, any>> {
+async function buildPersonalizedSpec(baseUrl: string, scope: Scope, docsToken: string | null): Promise<Record<string, any>> {
   const [baseSpecRes, recentItemsRaw, tokenResult] = await Promise.all([
     fetch(`${baseUrl}/api/openapi.json`),
     prisma.asset.findMany({
-      where: { organizationId },
+      where: scopeWhere(scope),
       orderBy: { createdAt: 'desc' },
       take: 3,
       select: { id: true, name: true },
@@ -252,10 +254,10 @@ export async function GET(request: Request) {
   let docsToken: string | null = null;
 
   try {
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
     isAuthenticated = true;
-    docsToken = await provisionDocsToken(organizationId);
-    personalizedSpec = await buildPersonalizedSpec(baseUrl, organizationId, docsToken);
+    docsToken = await provisionDocsToken(scope);
+    personalizedSpec = await buildPersonalizedSpec(baseUrl, scope, docsToken);
   } catch (err) {
     console.error('[api/v1/docs] auth/spec error:', err);
     isAuthenticated = false;

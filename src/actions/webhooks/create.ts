@@ -1,7 +1,7 @@
 'use server';
 
 import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 function validateUrl(url: string): boolean {
   try {
@@ -38,8 +38,8 @@ export async function createWebhook(data: {
   }
 
   try {
-    const organizationId = await requireOrganizationId();
-    const webhook = await webhookRepository.create(organizationId, {
+    const scope = await requireScope();
+    const webhook = await webhookRepository.create(scope, {
       name: data.name.trim(),
       url: data.url.trim(),
       secret: data.secret?.trim() || null,

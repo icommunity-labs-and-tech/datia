@@ -1,7 +1,8 @@
 import { AssetRepository, type AssetRecord, type CreateAssetInput, DbError } from '@/domain/assets/AssetRepository';
 import type { Prisma } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
-import { defaultCompanyId } from '@/lib/company';
+import { companyFor } from '@/lib/company';
+import { scopeWhere, type Scope } from '@/lib/scope';
 import { CursorPaginationParams, createPaginationResponse } from '@/lib/api/cursor-pagination';
 
 const toDomain = (i: any): AssetRecord => ({
@@ -21,10 +22,10 @@ function asJsonObject(value: Prisma.JsonValue): Prisma.JsonObject | null {
 }
 
 export const assetRepository: AssetRepository = {
-  async findByOrganization(organizationId: string): Promise<AssetRecord[]> {
+  async findByOrganization(scope: Scope): Promise<AssetRecord[]> {
     try {
       const activos = await prisma.asset.findMany({ 
-        where: { organizationId },
+        where: scopeWhere(scope),
         orderBy: { createdAt: 'desc' } 
       });
       return activos.map(toDomain);
@@ -33,10 +34,10 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async getById(id: string, organizationId: string): Promise<AssetRecord | null> {
+  async getById(id: string, scope: Scope): Promise<AssetRecord | null> {
     try {
       const asset = await prisma.asset.findFirst({ 
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
         select: {
           id: true,
           name: true,
@@ -53,10 +54,10 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async getDetails(id: string, organizationId: string) {
+  async getDetails(id: string, scope: Scope) {
     try {
       const asset = await prisma.asset.findFirst({
-        where: { id, organizationId },
+        where: { id, ...scopeWhere(scope) },
         select: {
           id: true,
           name: true,
@@ -77,10 +78,10 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async listForExport(organizationId: string, options: { fullPassport: boolean }) {
+  async listForExport(scope: Scope, options: { fullPassport: boolean }) {
     try {
       const rows = await prisma.asset.findMany({
-        where: { organizationId },
+        where: scopeWhere(scope),
         include: {
           // The only place name Datia holds today: assets carry coordinates but
           // no site name, and the source attached to one declares it.
@@ -113,8 +114,8 @@ export const assetRepository: AssetRepository = {
       const asset = await prisma.asset.create({
         data: {
           id: input.id,
-          organizationId: input.organizationId,
-          companyId: await defaultCompanyId(input.organizationId),
+          organizationId: input.scope.organizationId,
+          companyId: await companyFor(input.scope),
           name: input.name,
           description: input.description,
           imageUrl: input.imageUrl ?? null,
@@ -133,10 +134,10 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async updateEvidenceId(id: string, organizationId: string, evidenceId: string): Promise<void> {
+  async updateEvidenceId(id: string, scope: Scope, evidenceId: string): Promise<void> {
     try {
       // Verificar que el activo pertenece a la organización
-      const existing = await prisma.asset.findFirst({ where: { id, organizationId } });
+      const existing = await prisma.asset.findFirst({ where: { id, ...scopeWhere(scope) } });
       if (!existing) {
         throw new DbError({ message: 'Activo no encontrado' }, 'Activo no encontrado');
       }
@@ -148,10 +149,10 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async delete(id: string, organizationId: string): Promise<void> {
+  async delete(id: string, scope: Scope): Promise<void> {
     try {
       // Verificar que el activo pertenece a la organización
-      const existing = await prisma.asset.findFirst({ where: { id, organizationId } });
+      const existing = await prisma.asset.findFirst({ where: { id, ...scopeWhere(scope) } });
       if (!existing) {
         throw new DbError({ message: 'Activo no encontrado' }, 'Activo no encontrado');
       }
@@ -168,13 +169,13 @@ export const assetRepository: AssetRepository = {
   
   
 
-  async search(query: string, organizationId: string) {
+  async search(query: string, scope: Scope) {
     try {
       const q = query.trim();
       if (!q) return [];
       const activos = await prisma.asset.findMany({
         where: { 
-          organizationId,
+          ...scopeWhere(scope),
           OR: [{ name: { contains: q } }, { id: q }] 
         },
         select: { id: true, name: true, description: true, imageUrl: true, createdAt: true },
@@ -193,21 +194,21 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async countTotalItems(organizationId: string): Promise<number> {
+  async countTotalItems(scope: Scope): Promise<number> {
     try {
-      return await prisma.asset.count({ where: { organizationId } });
+      return await prisma.asset.count({ where: scopeWhere(scope) });
     } catch (e) {
       throw new DbError(e);
     }
   },
 
-  async countActiveItems(organizationId: string, days: number): Promise<number> {
+  async countActiveItems(scope: Scope, days: number): Promise<number> {
     try {
       // Activity is what has been anchored for the asset: its state history is
       // gone (#63), and a proof is the only dated thing an asset gathers now.
       return await prisma.asset.count({
         where: {
-          organizationId,
+          ...scopeWhere(scope),
           EnergySource: {
             some: {
               EnergyConsumption: {
@@ -230,11 +231,11 @@ export const assetRepository: AssetRepository = {
     }
   },
 
-  async countItemsByMonth(organizationId: string, startDate: Date, endDate: Date): Promise<number> {
+  async countItemsByMonth(scope: Scope, startDate: Date, endDate: Date): Promise<number> {
     try {
       return await prisma.asset.count({ 
         where: { 
-          organizationId,
+          ...scopeWhere(scope),
           createdAt: { gte: startDate, lt: endDate } 
         } 
       });
@@ -244,16 +245,16 @@ export const assetRepository: AssetRepository = {
   },
 
 
-  async importMany(organizationId: string, rows: Array<{ id: string; name: string; description: string; imageUrl?: string | null }>): Promise<void> {
+  async importMany(scope: Scope, rows: Array<{ id: string; name: string; description: string; imageUrl?: string | null }>): Promise<void> {
     try {
-      const companyId = await defaultCompanyId(organizationId);
+      const companyId = await companyFor(scope);
       await prisma.$transaction(async (tx) => {
         const now = new Date();
         for (const row of rows) {
           await tx.asset.create({
             data: {
               id: row.id,
-              organizationId,
+              organizationId: scope.organizationId,
               companyId,
               name: row.name,
               description: row.description,
@@ -269,16 +270,16 @@ export const assetRepository: AssetRepository = {
   },
 
   // Cursor-based pagination
-  async listPaginated(organizationId: string, params: CursorPaginationParams) {
+  async listPaginated(scope: Scope, params: CursorPaginationParams) {
     try {
       const limit = params.limit || 20;
       const take = limit + 1; // Request one extra to determine if there's a next page
 
-      const whereClause: any = { organizationId };
+      const whereClause: any = scopeWhere(scope);
       if (params.cursor) {
         // Get the cursor asset to find its createdAt
         const cursorItem = await prisma.asset.findFirst({
-          where: { id: params.cursor, organizationId },
+          where: { id: params.cursor, ...scopeWhere(scope) },
           select: { createdAt: true, id: true },
         });
         if (cursorItem) {
@@ -314,7 +315,7 @@ export const assetRepository: AssetRepository = {
   },
 
 
-  async searchPaginated(query: string, organizationId: string, params: CursorPaginationParams) {
+  async searchPaginated(query: string, scope: Scope, params: CursorPaginationParams) {
     try {
       const q = query.trim();
       if (!q) {
@@ -324,37 +325,24 @@ export const assetRepository: AssetRepository = {
       const limit = params.limit || 20;
       const take = limit + 1;
 
-      const whereClause: any = {
-        organizationId,
-        OR: [{ name: { contains: q } }, { id: q }],
-      };
+      const matches = { OR: [{ name: { contains: q } }, { id: q }] };
+      const conditions: any[] = [scopeWhere(scope), matches];
 
       if (params.cursor) {
         const cursorItem = await prisma.asset.findFirst({
-          where: { 
-            id: params.cursor, 
-            organizationId,
-            OR: [{ name: { contains: q } }, { id: q }], // Verify cursor belongs to search results
-          },
+          where: { id: params.cursor, ...scopeWhere(scope), ...matches }, // Verify cursor belongs to search results
           select: { createdAt: true, id: true },
         });
         if (cursorItem) {
-          // Build AND conditions preserving all filters
-          const andConditions: any[] = [
-            { organizationId },
-            { OR: [{ name: { contains: q } }, { id: q }] },
-            {
-              OR: [
-                { createdAt: { lt: cursorItem.createdAt } },
-                { createdAt: cursorItem.createdAt, id: { lt: params.cursor } },
-              ],
-            },
-          ];
-          whereClause.AND = andConditions;
-          delete whereClause.organizationId;
-          delete whereClause.OR;
+          conditions.push({
+            OR: [
+              { createdAt: { lt: cursorItem.createdAt } },
+              { createdAt: cursorItem.createdAt, id: { lt: params.cursor } },
+            ],
+          });
         }
       }
+      const whereClause = { AND: conditions };
 
       const activos = await prisma.asset.findMany({
         where: whereClause,

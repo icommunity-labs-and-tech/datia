@@ -1,3 +1,4 @@
+import type { Scope } from '@/lib/scope';
 export interface WebhookRecord {
   id: string;
   organizationId: string;
@@ -42,13 +43,13 @@ export class DbError extends Error {
 }
 
 export interface WebhookRepository {
-  list(organizationId: string): Promise<WebhookRecord[]>;
-  getById(id: string, organizationId: string): Promise<WebhookRecord | null>;
-  create(organizationId: string, input: CreateWebhookInput): Promise<WebhookRecord>;
-  update(id: string, organizationId: string, input: UpdateWebhookInput): Promise<WebhookRecord>;
-  delete(id: string, organizationId: string): Promise<void>;
+  list(scope: Scope): Promise<WebhookRecord[]>;
+  getById(id: string, scope: Scope): Promise<WebhookRecord | null>;
+  create(scope: Scope, input: CreateWebhookInput): Promise<WebhookRecord>;
+  update(id: string, scope: Scope, input: UpdateWebhookInput): Promise<WebhookRecord>;
+  delete(id: string, scope: Scope): Promise<void>;
   updateTriggered(id: string, success: boolean): Promise<void>;
-  findByOrganizationAndActive(organizationId: string, active: boolean): Promise<WebhookRecord[]>;
-  findByEvent(organizationId: string, eventType: string): Promise<WebhookRecord[]>;
+  findByOrganizationAndActive(scope: Scope, active: boolean): Promise<WebhookRecord[]>;
+  findByEvent(scope: Scope, eventType: string): Promise<WebhookRecord[]>;
 }
 

@@ -1,12 +1,14 @@
 import { UserRepository, type UserRecord, type CreateUserInput, type UpdateUserInput, DbError } from '@/domain/users/UserRepository';
 import { prisma } from '@/lib/prisma';
 import { defaultCompanyId } from '@/lib/company';
+import { scopeWhere, type Scope } from '@/lib/scope';
 import { UserAlreadyExistsError, UserInputError, UserNotFoundError } from '@/domain/users/errors';
 import crypto from 'crypto';
 
 const toDomain = (u: any): UserRecord => ({
   id: u.id,
   organizationId: u.organizationId ?? null,
+  companyId: u.companyId ?? null,
   email: u.email,
   name: u.name ?? null,
   role: u.role,
@@ -57,10 +59,10 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async findByOrganization(organizationId: string): Promise<UserRecord[]> {
+  async findByOrganization(scope: Scope): Promise<UserRecord[]> {
     try {
       const rows = await prisma.user.findMany({ 
-        where: { organizationId },
+        where: scopeWhere(scope),
         orderBy: { createdAt: 'desc' } 
       });
       return rows.map(toDomain);
@@ -85,7 +87,7 @@ export const userRepository: UserRepository = {
         data: {
           id: crypto.randomUUID(),
           organizationId: input.organizationId,
-          companyId: input.organizationId ? await defaultCompanyId(input.organizationId) : null,
+          companyId: input.companyId ?? (input.organizationId ? await defaultCompanyId(input.organizationId) : null),
           email: input.email,
           password: input.passwordHash ?? '',
           name: input.name,
@@ -104,14 +106,14 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async update(id: string, organizationId: string, changes: UpdateUserInput): Promise<UserRecord> {
+  async update(id: string, scope: Scope | null, changes: UpdateUserInput): Promise<UserRecord> {
     try {
-      // Verificar que el usuario pertenece a la organización. Un SUPER_ADMIN no
+      // Verificar que el usuario está dentro del alcance. Un SUPER_ADMIN no
       // tiene organización: solo se le encuentra si se busca sin organización
       // (cambio de su propia contraseña), nunca desde la de otro.
       const existing = await prisma.user.findFirst({
-        where: organizationId
-          ? { id, organizationId }
+        where: scope
+          ? { id, ...scopeWhere(scope) }
           : { id, organizationId: null, role: 'SUPER_ADMIN' },
       });
       
@@ -135,14 +137,11 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async delete(id: string, organizationId: string): Promise<void> {
+  async delete(id: string, scope: Scope): Promise<void> {
     try {
       // Verificar que el usuario pertenece a la organización
       const existing = await prisma.user.findFirst({ 
-        where: { 
-          id,
-          organizationId
-        }
+        where: { id, ...scopeWhere(scope) }
       });
       if (!existing) {
         throw new UserNotFoundError(id, 'Usuario no encontrado');
@@ -156,11 +155,11 @@ export const userRepository: UserRepository = {
   },
 
   // Dashboard-specific queries
-  async countActiveUsers(organizationId: string, days: number): Promise<number> {
+  async countActiveUsers(scope: Scope, days: number): Promise<number> {
     try {
       return await prisma.user.count({
         where: {
-          organizationId,
+          ...scopeWhere(scope),
           updatedAt: {
             gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000)
           }
@@ -171,17 +170,17 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async countVerifiedUsers(organizationId: string): Promise<number> {
+  async countVerifiedUsers(scope: Scope): Promise<number> {
     // KYC is now at organization level, not user level
     // Return 0 as users are no longer individually verified
     return 0;
   },
 
-  async countAdmins(organizationId: string): Promise<number> {
+  async countAdmins(scope: Scope): Promise<number> {
     try {
       return await prisma.user.count({ 
         where: { 
-          organizationId,
+          ...scopeWhere(scope),
           role: 'ADMIN' 
         }
       });
@@ -190,11 +189,11 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async countUsersByMonth(organizationId: string, startDate: Date, endDate: Date): Promise<number> {
+  async countUsersByMonth(scope: Scope, startDate: Date, endDate: Date): Promise<number> {
     try {
       return await prisma.user.count({ 
         where: { 
-          organizationId,
+          ...scopeWhere(scope),
           createdAt: { gte: startDate, lt: endDate } 
         }
       });
@@ -203,10 +202,10 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async listUsersForDashboard(organizationId: string) {
+  async listUsersForDashboard(scope: Scope) {
     try {
       return await prisma.user.findMany({ 
-        where: { organizationId },
+        where: scopeWhere(scope),
         select: { id: true, name: true } 
       });
     } catch (e) {

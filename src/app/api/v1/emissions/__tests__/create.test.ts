@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 const ORG_ID = 'org-test-1';
+const COMPANY_ID = 'company-test-1';
+const SCOPE = { organizationId: ORG_ID, companyId: COMPANY_ID };
 const CONSUMPTION_ID = 'consumption-test-1';
 const EMISSION_ID = 'emission-test-1';
 const EVIDENCE_ID = 'evd_test1';
@@ -66,7 +68,7 @@ const record = { id: EMISSION_ID, ...validBody, energyConsumptionId: CONSUMPTION
 describe('POST /api/v1/emissions', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, isSandbox: false });
+    mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, companyId: COMPANY_ID, isSandbox: false });
     mockValidateConsumptionOwnership.mockResolvedValue({ id: CONSUMPTION_ID });
     mockCreateEmission.mockResolvedValue(record);
     mockAnchorEmissionById.mockResolvedValue({
@@ -87,7 +89,7 @@ describe('POST /api/v1/emissions', () => {
     });
 
     it('refuses the energy module in sandbox', async () => {
-      mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, isSandbox: true });
+      mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, companyId: COMPANY_ID, isSandbox: true });
       expect((await post()).status).toBe(422);
     });
 
@@ -109,7 +111,7 @@ describe('POST /api/v1/emissions', () => {
       const json = await res.json();
 
       expect(res.status).toBe(201);
-      expect(mockAnchorEmissionById).toHaveBeenCalledWith(ORG_ID, EMISSION_ID);
+      expect(mockAnchorEmissionById).toHaveBeenCalledWith(SCOPE, EMISSION_ID);
       expect(json.certification).toEqual({
         status: 'pending_anchor',
         evidenceId: EVIDENCE_ID,
@@ -166,7 +168,7 @@ describe('POST /api/v1/emissions', () => {
       await post();
 
       expect(mockEventCreate).toHaveBeenCalledWith(
-        ORG_ID,
+        SCOPE,
         expect.objectContaining({ eventType: 'co2_emission_event', entityId: EMISSION_ID })
       );
     });

@@ -1,12 +1,12 @@
 'use server';
 
 import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookRepositoryPrisma';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 
 export async function listWebhooks() {
   try {
-    const organizationId = await requireOrganizationId();
-    const webhooks = await webhookRepository.list(organizationId);
+    const scope = await requireScope();
+    const webhooks = await webhookRepository.list(scope);
     return { success: true, data: webhooks };
   } catch (error: any) {
     console.error('Exception listing webhooks:', error);

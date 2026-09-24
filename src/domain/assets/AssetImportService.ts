@@ -1,3 +1,4 @@
+import type { Scope } from '@/lib/scope';
 import { AssetRepository, DbError as ItemDbError } from './AssetRepository';
 
 export interface ParsedAssetRow {
@@ -29,7 +30,7 @@ export class AssetImportValidationError extends Error {
 
 export interface AssetImportService {
   importAssetsFromParsedRows(
-    organizationId: string,
+    scope: Scope,
     rows: ParsedAssetRow[],
   ): Promise<AssetImportResult>;
 }

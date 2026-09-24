@@ -1,7 +1,8 @@
 'use server';
 
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import { prisma } from '@/lib/prisma';
+import { scopeWhere } from '@/lib/scope';
 
 /**
  * The series the home page is built around.
@@ -57,10 +58,10 @@ function percentChange(current: number, previous: number): number | null {
 }
 
 export async function getCertificationTrend(): Promise<CertificationTrend> {
-  const organizationId = await requireOrganizationId();
+  const scope = await requireScope();
 
   const rows = await prisma.energyConsumption.findMany({
-    where: { EnergySource: { Asset: { organizationId } } },
+    where: { EnergySource: { Asset: scopeWhere(scope) } },
     select: {
       periodStart: true,
       consumptionKwh: true,

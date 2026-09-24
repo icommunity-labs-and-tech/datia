@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
+import { authScope } from '@/lib/scope';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 import { createEnergyServiceImpl } from '@/domain/energy/EnergyServiceImpl';
 import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
@@ -36,16 +37,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const item = await validateItemOwnership(parsed.data.assetId, auth.organizationId);
+    const item = await validateItemOwnership(parsed.data.assetId, authScope(auth));
     if (!item) return NextResponse.json({ error: 'Item not found or does not belong to your organization' }, { status: 404 });
 
     const service = createEnergyServiceImpl({ energyRepository });
-    const source = await service.createSource(auth.organizationId, {
+    const source = await service.createSource(authScope(auth), {
       ...parsed.data,
       installationDate: parsed.data.installationDate ? new Date(parsed.data.installationDate) : undefined,
     });
 
-    await recordEvent(auth.organizationId, {
+    await recordEvent(authScope(auth), {
       eventType: 'energy_source_event',
       entityType: 'EnergySource',
       entityId: source.id,
@@ -68,5 +69,5 @@ export async function GET(request: NextRequest) {
 
   const pagination = parseCursorPaginationParams(new URL(request.url).searchParams);
   const service = createEnergyServiceImpl({ energyRepository });
-  return NextResponse.json(await service.listSources(auth.organizationId, pagination));
+  return NextResponse.json(await service.listSources(authScope(auth), pagination));
 }

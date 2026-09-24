@@ -1,7 +1,8 @@
 'use server';
 
 import { parseCsv, type ParsedCsvRow } from '@/lib/csv';
-import { requireOrganizationId } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
+import { scopeWhere } from '@/lib/scope';
 import { prisma } from '@/lib/prisma';
 import { InvalidCsvError } from '@/lib/import-job/errors';
 import { createAssetWithEvidence } from '@/domain/assets/AssetCreationHelper';
@@ -62,7 +63,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
       };
     }
 
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
     
     // Convertir a formato de filas de activos
     const itemRows = parsedRows.map((row) => ({
@@ -117,7 +118,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
     // Verificar productos existentes
     for (const row of itemRows) {
       const existing = await prisma.asset.findFirst({
-        where: { id: row.id.trim(), organizationId },
+        where: { id: row.id.trim(), ...scopeWhere(scope) },
       });
       if (existing) {
         existingConflicts.push(`Línea ${row.line}: id "${row.id}" ya existe`);
@@ -143,7 +144,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
         await createAssetWithEvidence(
           { assetRepository, userRepository, evidenceService },
           {
-            organizationId,
+            scope,
             id: row.id.trim(),
             name: row.name.trim(),
             description: row.description || '',

@@ -16,6 +16,7 @@ import type {
   CreateAssetInput,
 } from '@/domain/assets/AssetRepository';
 import type { CursorPaginationParams, CursorPaginationResult } from '@/lib/api/cursor-pagination';
+import type { Scope } from '@/lib/scope';
 
 const SANDBOX_DIR = join(tmpdir(), 'datia-sandbox');
 const ASSETS_FILE = join(SANDBOX_DIR, 'assets.json');
@@ -117,7 +118,7 @@ export const assetRepositoryFilesystem: AssetRepository = {
     const now = new Date();
     const record: PersistedAsset = {
       id: input.id,
-      organizationId: input.organizationId,
+      organizationId: input.scope.organizationId,
       name: input.name,
       description: input.description,
       imageUrl: input.imageUrl ?? null,
@@ -131,28 +132,28 @@ export const assetRepositoryFilesystem: AssetRepository = {
     return toRecord(record);
   },
 
-  async getById(id: string, organizationId: string): Promise<AssetRecord | null> {
-    const found = readRaw().find((r) => r.id === id && r.organizationId === organizationId);
+  async getById(id: string, scope: Scope): Promise<AssetRecord | null> {
+    const found = readRaw().find((r) => r.id === id && r.organizationId === scope.organizationId);
     return found ? toRecord(found) : null;
   },
 
-  async findByOrganization(organizationId: string): Promise<AssetRecord[]> {
+  async findByOrganization(scope: Scope): Promise<AssetRecord[]> {
     return readRaw()
-      .filter((r) => r.organizationId === organizationId)
+      .filter((r) => r.organizationId === scope.organizationId)
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .map(toRecord);
   },
 
-  async delete(id: string, organizationId: string): Promise<void> {
-    writeRaw(readRaw().filter((r) => !(r.id === id && r.organizationId === organizationId)));
+  async delete(id: string, scope: Scope): Promise<void> {
+    writeRaw(readRaw().filter((r) => !(r.id === id && r.organizationId === scope.organizationId)));
   },
 
   async updateEvidenceId(_id, _organizationId, _evidenceID): Promise<void> {
     // No-op: sandbox assets don't get blockchain evidence
   },
 
-  async getDetails(id: string, organizationId: string) {
-    const asset = readRaw().find((r) => r.id === id && r.organizationId === organizationId);
+  async getDetails(id: string, scope: Scope) {
+    const asset = readRaw().find((r) => r.id === id && r.organizationId === scope.organizationId);
     if (!asset) return null;
     return {
       id: asset.id,
@@ -169,12 +170,12 @@ export const assetRepositoryFilesystem: AssetRepository = {
 
 
 
-  async search(query: string, organizationId: string) {
+  async search(query: string, scope: Scope) {
     const q = query.toLowerCase();
     return readRaw()
       .filter(
         (r) =>
-          r.organizationId === organizationId &&
+          r.organizationId === scope.organizationId &&
           (r.name.toLowerCase().includes(q) || r.id.toLowerCase().includes(q))
       )
       .map((r) => ({
@@ -186,8 +187,8 @@ export const assetRepositoryFilesystem: AssetRepository = {
       }));
   },
 
-  async countTotalItems(organizationId: string): Promise<number> {
-    return readRaw().filter((r) => r.organizationId === organizationId).length;
+  async countTotalItems(scope: Scope): Promise<number> {
+    return readRaw().filter((r) => r.organizationId === scope.organizationId).length;
   },
 
   async countActiveItems(_organizationId, _days): Promise<number> {
@@ -207,9 +208,9 @@ export const assetRepositoryFilesystem: AssetRepository = {
     return [];
   },
 
-  async listPaginated(organizationId, params) {
+  async listPaginated(scope, params) {
     const assets = readRaw()
-      .filter((r) => r.organizationId === organizationId)
+      .filter((r) => r.organizationId === scope.organizationId)
       .map((r) => ({
         id: r.id,
         name: r.name,
@@ -221,12 +222,12 @@ export const assetRepositoryFilesystem: AssetRepository = {
   },
 
 
-  async searchPaginated(query, organizationId, params) {
+  async searchPaginated(query, scope, params) {
     const q = query.toLowerCase();
     const assets = readRaw()
       .filter(
         (r) =>
-          r.organizationId === organizationId &&
+          r.organizationId === scope.organizationId &&
           (r.name.toLowerCase().includes(q) || r.id.toLowerCase().includes(q))
       )
       .map((r) => ({

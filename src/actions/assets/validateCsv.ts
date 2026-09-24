@@ -1,7 +1,8 @@
 'use server';
 
 import { parseCsv, type ParsedCsvRow } from '@/lib/csv';
-import { requireOrganizationId, TenantContextNotFoundError } from '@/lib/auth/tenant';
+import { requireScope, TenantContextNotFoundError } from '@/lib/auth/tenant';
+import { scopeWhere } from '@/lib/scope';
 import { prisma } from '@/lib/prisma';
 import { MAX_CSV_FILE_SIZE, MAX_CSV_ROWS, formatFileSize, formatMaxFileSize } from './csvImportLimits';
 
@@ -150,7 +151,7 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
       };
     }
 
-    const organizationId = await requireOrganizationId();
+    const scope = await requireScope();
     
     // Convertir a formato de filas de activos
     const itemRows = parsedRows.map((row) => ({
@@ -210,7 +211,7 @@ export async function validateCsv(formData: FormData): Promise<ValidateCsvResult
     for (const id of uniqueIds) {
       try {
         const existing = await prisma.asset.findFirst({
-          where: { id, organizationId },
+          where: { id, ...scopeWhere(scope) },
         });
         if (existing) {
           // Encontrar todas las líneas con este ID

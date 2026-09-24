@@ -1,12 +1,13 @@
 import { eventRepository } from '@/infrastructure/prisma/repositories/EventRepositoryPrisma';
 import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookRepositoryPrisma';
 import type { CreateEventLogInput, EventLogRecord } from '@/domain/events/EventRepository';
+import type { Scope } from '@/lib/scope';
 import { webhookTriggerService, type WebhookPayload } from './webhook';
 
 const MAX_CONCURRENT_DELIVERIES = 5;
 
 /**
- * Records an event and sends it to the organisation's active webhooks subscribed
+ * Records an event and sends it to the active webhooks of its company subscribed
  * to its type. Every place that emits an event goes through here, so a webhook
  * fires for whatever the events page lists (#35).
  *
@@ -15,10 +16,10 @@ const MAX_CONCURRENT_DELIVERIES = 5;
  * (--no-cpu-throttling); with throttling the sends and their retries would stall.
  */
 export async function recordEvent(
-  organizationId: string,
+  scope: Scope,
   input: CreateEventLogInput
 ): Promise<EventLogRecord> {
-  const event = await eventRepository.create(organizationId, input);
+  const event = await eventRepository.create(scope, input);
   void deliverEvent(event);
   return event;
 }
@@ -30,7 +31,10 @@ export async function recordEvent(
  */
 export async function deliverEvent(event: EventLogRecord): Promise<void> {
   try {
-    const webhooks = await webhookRepository.findByEvent(event.organizationId, event.eventType);
+    const webhooks = await webhookRepository.findByEvent(
+      { organizationId: event.organizationId, companyId: event.companyId },
+      event.eventType
+    );
     if (webhooks.length === 0) return;
 
     const payload: WebhookPayload = {

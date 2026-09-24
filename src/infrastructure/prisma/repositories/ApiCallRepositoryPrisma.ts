@@ -2,6 +2,7 @@ import { ApiCallRepository, type ApiCallRecord, type CreateApiCallInput, DbError
 import type { ApiCall } from '@/generated/prisma';
 import { prisma } from '@/lib/prisma';
 import { defaultCompanyId } from '@/lib/company';
+import { scopeWhere, type Scope } from '@/lib/scope';
 
 const toDomain = (c: ApiCall): ApiCallRecord => ({
   id: c.id,
@@ -21,7 +22,7 @@ export const apiCallRepository: ApiCallRepository = {
           id: crypto.randomUUID(),
           apiTokenId: input.apiTokenId,
           organizationId: input.organizationId,
-          companyId: await defaultCompanyId(input.organizationId),
+          companyId: input.companyId ?? await defaultCompanyId(input.organizationId),
           method: input.method,
           path: input.path,
           statusCode: input.statusCode,
@@ -33,22 +34,22 @@ export const apiCallRepository: ApiCallRepository = {
     }
   },
 
-  async countByToken(apiTokenId: string, organizationId: string): Promise<number> {
+  async countByToken(apiTokenId: string, scope: Scope): Promise<number> {
     try {
       return await prisma.apiCall.count({
-        where: { apiTokenId, organizationId },
+        where: { apiTokenId, ...scopeWhere(scope) },
       });
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');
     }
   },
 
-  async countByTokenAndPeriod(apiTokenId: string, organizationId: string, startDate: Date, endDate: Date): Promise<number> {
+  async countByTokenAndPeriod(apiTokenId: string, scope: Scope, startDate: Date, endDate: Date): Promise<number> {
     try {
       return await prisma.apiCall.count({
         where: {
           apiTokenId,
-          organizationId,
+          ...scopeWhere(scope),
           createdAt: {
             gte: startDate,
             lte: endDate,
@@ -60,12 +61,12 @@ export const apiCallRepository: ApiCallRepository = {
     }
   },
 
-  async getCallsByTokenAndPeriod(apiTokenId: string, organizationId: string, startDate: Date, endDate: Date): Promise<ApiCallRecord[]> {
+  async getCallsByTokenAndPeriod(apiTokenId: string, scope: Scope, startDate: Date, endDate: Date): Promise<ApiCallRecord[]> {
     try {
       const calls = await prisma.apiCall.findMany({
         where: {
           apiTokenId,
-          organizationId,
+          ...scopeWhere(scope),
           createdAt: {
             gte: startDate,
             lte: endDate,
