@@ -6,6 +6,7 @@ import { adminAuthConfig } from './admin/config';
 import { prisma } from '@/lib/prisma';
 import type { Scope } from '@/lib/scope';
 import type { JWTPayload } from './shared/types';
+import { isOrganizationRole } from './roles';
 
 /**
  * Contexto del tenant actual
@@ -46,6 +47,8 @@ export class TenantContextNotFoundError extends Error {
  * el JWT: se lee de la cuenta, que la tiene desde la migración.
  */
 async function companyOf(payload: JWTPayload): Promise<string | null> {
+  // The account that operates the organization has no company of its own.
+  if (isOrganizationRole(payload.role)) return null;
   if (payload.companyId !== undefined) return payload.companyId;
   const user = await prisma.user.findUnique({ where: { id: payload.id }, select: { companyId: true } });
   return user?.companyId ?? null;
@@ -154,9 +157,9 @@ export async function requireOrganizationId(): Promise<string> {
  * Lo que la sesión actual puede ver: su organización y, si es una cuenta de
  * empresa, solo esa empresa (#20).
  *
- * Falla si la cuenta pertenece a una organización pero no a una empresa: sin
- * empresa no hay a qué restringir, y devolver la organización entera sería
- * abrirle datos que no son suyos.
+ * Falla si una cuenta de empresa no tiene empresa: sin ella no hay a qué
+ * restringir, y devolver la organización entera sería abrirle datos que no son
+ * suyos. Solo la cuenta de la organización (ORG_ADMIN) las ve todas.
  */
 export async function requireScope(): Promise<Scope> {
   const tenant = await getCurrentTenant();
@@ -166,7 +169,9 @@ export async function requireScope(): Promise<Scope> {
       "organizationId es requerido para esta operación"
     );
   }
-  if (!tenant.companyId) {
+  // The organization's own account sees the set of its companies. Any other
+  // account needs its company: without one there is nothing to restrict to.
+  if (!tenant.companyId && !isOrganizationRole(tenant.userRole)) {
     throw new TenantContextNotFoundError(
       "La cuenta no tiene empresa asignada"
     );

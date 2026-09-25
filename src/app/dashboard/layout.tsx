@@ -4,6 +4,7 @@ import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { redirect } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { appConfig } from '@/config/app';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export const metadata: Metadata = {
   title: `Dashboard - ${appConfig.name}`,
@@ -30,7 +31,7 @@ export default async function DashboardRootLayout({
   }
 
   // Verificar que sea admin (solo admins pueden acceder al dashboard)
-  if (user.role !== 'ADMIN') {
+  if (!isDashboardRole(user.role)) {
     redirect('/auth/admin/login?error=AccessDenied');
   }
 

@@ -20,6 +20,7 @@ import OrgKycCard from '@/app/dashboard/profile/OrgKycCard';
 import OrgLogoCard from '@/app/dashboard/profile/OrgLogoCard';
 import OrgColorsCard from '@/app/dashboard/profile/OrgColorsCard';
 import OrgLoginUrlsCard from '@/app/dashboard/profile/OrgLoginUrlsCard';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 interface SectionProps {
   icon: React.ElementType;
@@ -62,7 +63,7 @@ export default function OrganizationSettings({ user }: { user: any }) {
   const org = user?.Organization ?? null;
   const [logoUrl, setLogoUrl] = useState<string | null>(org?.logoUrl ?? null);
 
-  const isAdmin = user?.role === 'ADMIN';
+  const isAdmin = isDashboardRole(user?.role);
   const orgInitial = (org?.name ?? 'O').trim().charAt(0).toUpperCase();
 
   return (

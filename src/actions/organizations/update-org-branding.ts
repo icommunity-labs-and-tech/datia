@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { requireOrganizationId, getCurrentTenant } from '@/lib/auth/tenant';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 const HEX_RE = /^#[0-9a-fA-F]{6}$/;
 
@@ -17,7 +18,7 @@ export async function updateOrgBranding(data: {
     const tenant = await getCurrentTenant();
     const organizationId = await requireOrganizationId();
 
-    if (tenant.userRole !== 'ADMIN') {
+    if (!isDashboardRole(tenant.userRole)) {
       return { error: 'Solo los administradores pueden cambiar la identidad visual' };
     }
 

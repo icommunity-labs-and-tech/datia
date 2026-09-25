@@ -7,7 +7,7 @@ export interface CreateUserInput {
   companyId?: string | null;
   email: string;
   name: string;
-  role: 'ADMIN' | 'SUPER_ADMIN';
+  role: 'ADMIN' | 'ORG_ADMIN' | 'SUPER_ADMIN';
   phone?: string | null;
   notes?: string | null;
 }
@@ -27,7 +27,7 @@ export interface UserRecord {
   companyId: string | null;
   email: string;
   name: string | null;
-  role: 'ADMIN' | 'SUPER_ADMIN';
+  role: 'ADMIN' | 'ORG_ADMIN' | 'SUPER_ADMIN';
   phone: string | null;
   notes: string | null;
   signsWithCertificate: boolean;

@@ -157,16 +157,17 @@ export async function createOrganizationWithAdmin(
         data: { organizationId: organization.id, name: organization.name },
       });
 
-      // Crear primer admin (PENDING, sin password aún)
+      // Crear primer admin (PENDING, sin password aún). Opera la organización,
+      // no una empresa: no tiene empresa propia y ve todas las de la organización.
       const admin = await tx.user.create({
         data: {
           id: crypto.randomUUID(),
           organizationId: organization.id,
-          companyId: company.id,
+          companyId: null,
           email: input.adminEmail,
           name: input.adminName,
           phone: input.adminPhone,
-          role: "ADMIN",
+          role: "ORG_ADMIN",
           status: "PENDING",
           password: null, // Se establecerá cuando active la cuenta
           activationToken,

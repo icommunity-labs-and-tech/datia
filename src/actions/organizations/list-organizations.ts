@@ -53,7 +53,7 @@ export async function listOrganizations(): Promise<ListOrganizationsResult> {
         },
         User: {
           where: {
-            role: 'ADMIN',
+            role: { in: ['ADMIN', 'ORG_ADMIN'] },
           },
           orderBy: {
             createdAt: 'asc',

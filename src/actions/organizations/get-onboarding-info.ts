@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export interface OnboardingInfo {
   isFirstAdmin: boolean;
@@ -49,7 +50,7 @@ export async function getOnboardingInfo(
             verificationStatus: true,
             User: {
               where: {
-                role: "ADMIN",
+                role: { in: ['ADMIN', 'ORG_ADMIN'] },
               },
               orderBy: {
                 createdAt: "asc",
@@ -81,10 +82,10 @@ export async function getOnboardingInfo(
 
     // Verificar si es el primer admin
     // Es primer admin si:
-    // 1. Es ADMIN
+    // 1. Es ADMIN o ORG_ADMIN
     // 2. Es el primer usuario ADMIN creado en la organización (ordenado por createdAt)
     const isFirstAdmin =
-      user.role === "ADMIN" &&
+      isDashboardRole(user.role) &&
       user.Organization !== null &&
       user.Organization.User.length > 0 &&
       user.Organization.User[0].id === user.id;

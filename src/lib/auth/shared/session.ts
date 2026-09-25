@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '../admin/jwt';
 import { adminAuthConfig } from '../admin/config';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export interface UserSession {
   id: string;
@@ -17,7 +18,7 @@ export async function getCurrentUserSession(): Promise<UserSession | null> {
     const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
     if (adminToken) {
       const adminUser = await verifyAdminJWT(adminToken);
-      if (adminUser && adminUser.role === 'ADMIN') {
+      if (adminUser && isDashboardRole(adminUser.role)) {
         return {
           id: adminUser.id,
           email: adminUser.email,

@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { requireScope } from '@/lib/auth/tenant';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export interface GetCallsByTokenParams {
   apiTokenId: string;
@@ -30,7 +31,7 @@ export async function getCallsByToken(params: GetCallsByTokenParams) {
     }
 
     const payload = await verifyAdminJWT(token);
-    if (!payload || payload.role !== 'ADMIN') {
+    if (!payload || !isDashboardRole(payload.role)) {
       console.error('❌ getCallsByToken - Usuario no autorizado, role:', payload?.role);
       throw new Error('No autorizado');
     }
