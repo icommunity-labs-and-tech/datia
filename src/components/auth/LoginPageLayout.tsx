@@ -42,6 +42,9 @@ export interface LoginPageLayoutProps {
   crossLinkLabel?: string;
   crossLinkCta?: string;
   crossLinkHref?: string;
+  /** Link to password recovery, under the password field. */
+  forgotLabel?: string;
+  forgotHref?: string;
   /** Form state */
   email: string;
   password: string;
@@ -66,6 +69,8 @@ export default function LoginPageLayout({
   crossLinkLabel,
   crossLinkCta,
   crossLinkHref,
+  forgotLabel,
+  forgotHref,
   email,
   password,
   isLoading,
@@ -234,6 +239,14 @@ export default function LoginPageLayout({
                 </button>
               </div>
             </div>
+
+            {forgotLabel && forgotHref && (
+              <div style={{ textAlign: 'right', margin: '-1rem 0 1.25rem' }}>
+                <Link href={forgotHref} style={{ fontSize: '0.8rem', color: brandColor, textDecoration: 'none', fontWeight: 500 }}>
+                  {forgotLabel}
+                </Link>
+              </div>
+            )}
 
             {error && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '0.6rem 0.9rem', marginBottom: '1.25rem', fontSize: '0.85rem', color: '#dc2626' }}>

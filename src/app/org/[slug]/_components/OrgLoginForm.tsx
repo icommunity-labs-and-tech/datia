@@ -18,6 +18,7 @@ interface OrgLoginFormProps {
 
 function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSecondary }: OrgLoginFormProps) {
   const t = useTranslations('auth.login.org.admin');
+  const tRecovery = useTranslations('auth.recovery');
   const tCommon = useTranslations('common.actions');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -86,6 +87,8 @@ function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSeconda
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}
+      forgotLabel={tRecovery('forgotLink')}
+      forgotHref="/auth/forgot-password"
     />
   );
 }

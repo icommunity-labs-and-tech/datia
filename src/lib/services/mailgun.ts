@@ -1,9 +1,16 @@
-import type { InvitationEmailData } from '../mailgun/types';
+import type { InvitationEmailData, PasswordResetEmailData } from '../mailgun/types';
 import { MailgunConfigError, MailgunHTTPError } from '../mailgun/errors';
-import { generateInvitationEmailHTML, generateInvitationEmailText } from '../mailgun/templates';
+import {
+  generateInvitationEmailHTML,
+  generateInvitationEmailText,
+  generatePasswordResetEmailHTML,
+  generatePasswordResetEmailText,
+  passwordResetSubject,
+} from '../mailgun/templates';
 
 export interface MailgunService {
   sendInvitationEmail(data: InvitationEmailData): Promise<void>;
+  sendPasswordResetEmail(data: PasswordResetEmailData): Promise<void>;
 }
 import Mailgun from 'mailgun.js';
 import FormData from 'form-data';
@@ -136,6 +143,35 @@ export function createMailgunService(): MailgunService {
           subject,
           html,
           text
+        );
+      } catch (error) {
+        if (error instanceof MailgunConfigError || error instanceof MailgunHTTPError) {
+          throw error;
+        }
+        throw new MailgunHTTPError('sendInvitationEmail', `Unexpected error: ${error}`);
+      }
+    },
+
+    async sendPasswordResetEmail(data: PasswordResetEmailData): Promise<void> {
+      try {
+        const config = getConfig();
+        const shared = {
+          recipientName: data.recipientName,
+          appName: data.appName,
+          resetUrl: data.resetUrl,
+          expiresInMinutes: data.expiresInMinutes,
+          language: data.language,
+        };
+
+        await sendEmailWithRetry(
+          config.domain,
+          config.apiKey,
+          config.fromEmail,
+          config.fromName,
+          data.recipientEmail,
+          passwordResetSubject(data.appName, data.language),
+          generatePasswordResetEmailHTML({ ...shared, appUrl: data.appUrl }),
+          generatePasswordResetEmailText(shared)
         );
       } catch (error) {
         if (error instanceof MailgunConfigError || error instanceof MailgunHTTPError) {
