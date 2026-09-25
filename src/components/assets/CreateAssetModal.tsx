@@ -61,7 +61,7 @@ export default function CreateAssetModal({ opened, onClose, onCreated }: CreateA
       });
 
       if (!result.success) {
-        setError(result.code === 'company_required' ? t('errors.companyRequired') : (result.error ?? t('errors.failed')));
+        setError(result.error ?? t('errors.failed'));
         return;
       }
 

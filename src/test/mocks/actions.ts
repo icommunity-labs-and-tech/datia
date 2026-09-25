@@ -14,9 +14,11 @@ const localStorageMock = {
   clear: vi.fn(() => { Object.keys(store).forEach(k => delete store[k]); }),
 };
 
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-});
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'localStorage', {
+    value: localStorageMock
+  });
+}
 
 // Mock TanStack Table for future use
 vi.mock('@tanstack/react-table', () => ({

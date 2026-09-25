@@ -6,8 +6,8 @@ import { adminAuthConfig } from './admin/config';
 import { prisma } from '@/lib/prisma';
 import type { Scope } from '@/lib/scope';
 import type { JWTPayload } from './shared/types';
-import { isOrganizationRole } from './roles';
-import { COMPANY_SCOPE_COOKIE } from './company-scope';
+import { verifyOrganizationJWT } from './organization/jwt';
+import { organizationAuthConfig } from './organization/config';
 
 /**
  * Contexto del tenant actual
@@ -20,8 +20,9 @@ export interface TenantContext {
   organizationId: string | null;
 
   /**
-   * Empresa de la cuenta (#20). NULL para SUPER_ADMIN y para una sesión sin
-   * empresa: una cuenta de empresa no opera sin ella (ver `requireScope`).
+   * Empresa de la cuenta (#20). NULL para SUPER_ADMIN, para la cuenta de la
+   * organización y para una sesión sin empresa: el dashboard no opera sin ella
+   * (ver `requireScope`).
    */
   companyId: string | null;
   
@@ -47,21 +48,7 @@ export class TenantContextNotFoundError extends Error {
  * La empresa de una sesión. Las anteriores a la fase 2 de #20 no la llevan en
  * el JWT: se lee de la cuenta, que la tiene desde la migración.
  */
-async function companyOf(
-  payload: JWTPayload,
-  cookieStore: { get(name: string): { value: string } | undefined }
-): Promise<string | null> {
-  // The account that operates the organization has no company of its own; it
-  // may be looking at one, which has to be one of its organization's.
-  if (isOrganizationRole(payload.role)) {
-    const chosen = cookieStore.get(COMPANY_SCOPE_COOKIE)?.value;
-    if (!chosen || !payload.organizationId) return null;
-    const company = await prisma.company.findFirst({
-      where: { id: chosen, organizationId: payload.organizationId },
-      select: { id: true },
-    });
-    return company?.id ?? null;
-  }
+async function companyOf(payload: JWTPayload): Promise<string | null> {
   if (payload.companyId !== undefined) return payload.companyId;
   const user = await prisma.user.findUnique({ where: { id: payload.id }, select: { companyId: true } });
   return user?.companyId ?? null;
@@ -89,7 +76,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload?.organizationId) {
       return {
         organizationId: payload.organizationId,
-        companyId: await companyOf(payload, cookieStore),
+        companyId: await companyOf(payload),
         userRole: payload.role,
         userId: payload.id,
       };
@@ -109,6 +96,22 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     }
   }
 
+  // La cuenta que opera una organización: su organización, sin empresa. Solo
+  // vale para lo que ese panel hace con una empresa concreta y validada; nunca
+  // para el ámbito del dashboard (`requireScope` la rechaza).
+  const organizationToken = cookieStore.get(organizationAuthConfig.cookieName)?.value;
+  if (organizationToken) {
+    const payload = await verifyOrganizationJWT(organizationToken);
+    if (payload) {
+      return {
+        organizationId: payload.organizationId,
+        companyId: null,
+        userRole: payload.role,
+        userId: payload.id,
+      };
+    }
+  }
+
   // Una sesión de admin sin organización: válida para identificar al usuario,
   // insuficiente para operar sobre datos de una organización.
   if (adminToken) {
@@ -116,7 +119,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload) {
       return {
         organizationId: payload.organizationId,
-        companyId: await companyOf(payload, cookieStore),
+        companyId: await companyOf(payload),
         userRole: payload.role,
         userId: payload.id,
       };
@@ -167,12 +170,12 @@ export async function requireOrganizationId(): Promise<string> {
 }
 
 /**
- * Lo que la sesión actual puede ver: su organización y, si es una cuenta de
- * empresa, solo esa empresa (#20).
+ * El ámbito del dashboard: la organización y la empresa de la cuenta (#20).
  *
- * Falla si una cuenta de empresa no tiene empresa: sin ella no hay a qué
- * restringir, y devolver la organización entera sería abrirle datos que no son
- * suyos. Solo la cuenta de la organización (ORG_ADMIN) las ve todas.
+ * Falla sin empresa: sin ella no hay a qué restringir, y devolver la
+ * organización entera sería abrirle datos que no son suyos. También rechaza a la
+ * cuenta de la organización, que no usa el dashboard y accede a sus empresas
+ * desde su panel, una a una.
  */
 export async function requireScope(): Promise<Scope> {
   const tenant = await getCurrentTenant();
@@ -182,32 +185,11 @@ export async function requireScope(): Promise<Scope> {
       "organizationId es requerido para esta operación"
     );
   }
-  // The organization's own account sees the set of its companies. Any other
-  // account needs its company: without one there is nothing to restrict to.
-  if (!tenant.companyId && !isOrganizationRole(tenant.userRole)) {
+  if (!tenant.companyId) {
     throw new TenantContextNotFoundError(
       "La cuenta no tiene empresa asignada"
     );
   }
 
   return { organizationId: tenant.organizationId, companyId: tenant.companyId };
-}
-
-export class CompanyRequiredError extends Error {
-  constructor() {
-    super('Elige una empresa para hacer esto');
-    this.name = 'CompanyRequiredError';
-  }
-}
-
-/**
- * Como `requireScope`, pero para lo que se crea: un activo o un webhook
- * pertenece a una empresa, y la cuenta de la organización, que las ve todas,
- * tiene que haber elegido una en el selector. Sin esto lo que creara caería en
- * la empresa por defecto sin que lo supiera.
- */
-export async function requireCompanyScope(): Promise<Scope & { companyId: string }> {
-  const scope = await requireScope();
-  if (!scope.companyId) throw new CompanyRequiredError();
-  return { organizationId: scope.organizationId, companyId: scope.companyId };
 }

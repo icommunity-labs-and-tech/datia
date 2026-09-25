@@ -3,6 +3,9 @@ import { activateAccount } from '@/actions/organizations/activate-account';
 import { signAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { prisma } from '@/lib/prisma';
+import { isOrganizationRole } from '@/lib/auth/roles';
+import { signOrganizationJWT } from '@/lib/auth/organization/jwt';
+import { organizationAuthConfig } from '@/lib/auth/organization/config';
 
 export async function POST(request: NextRequest) {
   try {
@@ -59,6 +62,25 @@ export async function POST(request: NextRequest) {
       companyId: user.companyId,
       context: 'admin' as const,
     };
+
+    // The account that operates the organization signs in to its own panel, not
+    // to the dashboard, which belongs to the companies.
+    if (isOrganizationRole(user.role)) {
+      const organizationToken = await signOrganizationJWT({ ...jwtPayload, context: 'organization' });
+      const organizationResponse = NextResponse.json({
+        success: true,
+        message: 'Cuenta activada exitosamente',
+        user: result.user,
+      });
+      organizationResponse.cookies.set(organizationAuthConfig.cookieName, organizationToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+        maxAge: organizationAuthConfig.sessionDuration,
+      });
+      return organizationResponse;
+    }
 
     const jwtToken = await signAdminJWT(jwtPayload);
 

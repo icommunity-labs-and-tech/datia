@@ -6,7 +6,7 @@ import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
-import { requireCompanyScope, CompanyRequiredError } from '@/lib/auth/tenant';
+import { requireScope } from '@/lib/auth/tenant';
 import {
   AssetInputError,
   AssetAlreadyExistsError,
@@ -28,8 +28,6 @@ export interface CreateAssetResult {
   success: boolean;
   id?: string;
   error?: string;
-  /** Set when the reason is one the interface words itself. */
-  code?: 'company_required';
 }
 
 /**
@@ -42,7 +40,7 @@ export interface CreateAssetResult {
  */
 export async function createAsset(input: CreateAssetInput): Promise<CreateAssetResult> {
   try {
-    const scope = await requireCompanyScope();
+    const scope = await requireScope();
 
     const id = input.id.trim();
     const name = input.name.trim();
@@ -67,9 +65,6 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
     revalidatePath('/dashboard/assets');
     return { success: true, id: asset.id };
   } catch (error) {
-    if (error instanceof CompanyRequiredError) {
-      return { success: false, error: error.message, code: 'company_required' };
-    }
     if (
       error instanceof AssetInputError ||
       error instanceof AssetAlreadyExistsError ||

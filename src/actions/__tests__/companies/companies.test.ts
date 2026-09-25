@@ -5,32 +5,32 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * (#20): a company account cannot create its own siblings.
  */
 
-const { mockPrisma, mockTenant, mockInvite } = vi.hoisted(() => ({
+const { mockPrisma, mockVerify, mockInvite } = vi.hoisted(() => ({
   mockPrisma: {
     company: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn() },
   },
-  mockTenant: vi.fn(),
+  mockVerify: vi.fn(),
   mockInvite: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
-vi.mock('@/actions/organizations/invite-user', () => ({ inviteUser: mockInvite }));
-vi.mock('@/lib/auth/tenant', async () => {
-  const actual = await vi.importActual<typeof import('@/lib/auth/tenant')>('@/lib/auth/tenant');
-  return { ...actual, getCurrentTenant: mockTenant };
-});
+// The organization account's own session: a cookie, verified as such.
+vi.mock('next/headers', () => ({
+  cookies: async () => ({ get: (name: string) => (name === 'organization-auth-token' ? { value: 'tok' } : undefined) }),
+}));
+vi.mock('@/lib/auth/organization/jwt', () => ({ verifyOrganizationJWT: mockVerify }));
+vi.mock('@/actions/organizations/invite-account', () => ({ inviteAccount: mockInvite }));
 
 import { createCompany } from '@/actions/companies/create';
 import { listCompanies } from '@/actions/companies/list';
 import { inviteCompanyAccount } from '@/actions/companies/invite';
 
-const orgAccount = { organizationId: 'org-1', companyId: null, userRole: 'ORG_ADMIN', userId: 'u-org' };
-const companyAccount = { organizationId: 'org-1', companyId: 'co-1', userRole: 'ADMIN', userId: 'u-co' };
+const actor = { organizationId: 'org-1', companyId: null, userRole: 'ORG_ADMIN', userId: 'u-org' };
 
 beforeEach(() => {
   vi.clearAllMocks();
-  mockTenant.mockResolvedValue(orgAccount);
+  mockVerify.mockResolvedValue({ id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1' });
   mockPrisma.company.findFirst.mockResolvedValue(null);
   // Like the real client with `select: { id, name }`.
   mockPrisma.company.create.mockImplementation(async ({ data }: any) => ({ id: 'co-new', name: data.name }));
@@ -53,7 +53,7 @@ describe('createCompany', () => {
     });
 
     expect(result.success).toBe(true);
-    expect(mockInvite).toHaveBeenCalledWith({
+    expect(mockInvite).toHaveBeenCalledWith(actor, {
       companyId: 'co-new',
       name: 'Ana',
       email: 'ana@norte.test',
@@ -69,17 +69,12 @@ describe('createCompany', () => {
     expect(result).toMatchObject({ success: true, inviteError: 'Mailgun caído', company: { id: 'co-new' } });
   });
 
-  it('is refused to a company account', async () => {
-    mockTenant.mockResolvedValue(companyAccount);
+  it('is refused to anyone without an organization session: a company account has none', async () => {
+    mockVerify.mockResolvedValue(null);
     const result = await createCompany({ name: 'Hermana' });
 
     expect(result).toEqual({ success: false, error: 'forbidden' });
     expect(mockPrisma.company.create).not.toHaveBeenCalled();
-  });
-
-  it('is refused without a session', async () => {
-    mockTenant.mockRejectedValue(new Error('sin sesión'));
-    expect(await createCompany({ name: 'X' })).toEqual({ success: false, error: 'forbidden' });
   });
 
   it('needs a name', async () => {
@@ -121,8 +116,8 @@ describe('listCompanies', () => {
     expect(mockPrisma.company.findMany.mock.calls[0][0].where).toEqual({ organizationId: 'org-1' });
   });
 
-  it('is refused to a company account', async () => {
-    mockTenant.mockResolvedValue(companyAccount);
+  it('is refused without an organization session', async () => {
+    mockVerify.mockResolvedValue(null);
     await expect(listCompanies()).rejects.toThrow();
     expect(mockPrisma.company.findMany).not.toHaveBeenCalled();
   });
@@ -133,11 +128,11 @@ describe('inviteCompanyAccount', () => {
 
   it('invites into the chosen company', async () => {
     expect(await inviteCompanyAccount(input)).toEqual({ success: true });
-    expect(mockInvite).toHaveBeenCalledWith(expect.objectContaining({ companyId: 'co-2', role: 'ADMIN' }));
+    expect(mockInvite).toHaveBeenCalledWith(actor, expect.objectContaining({ companyId: 'co-2', role: 'ADMIN' }));
   });
 
-  it('is refused to a company account', async () => {
-    mockTenant.mockResolvedValue(companyAccount);
+  it('is refused without an organization session', async () => {
+    mockVerify.mockResolvedValue(null);
     expect(await inviteCompanyAccount(input)).toEqual({ success: false, error: 'forbidden' });
     expect(mockInvite).not.toHaveBeenCalled();
   });

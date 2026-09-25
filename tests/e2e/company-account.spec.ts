@@ -1,16 +1,17 @@
 import { test, expect } from '@playwright/test';
 import { ADMIN_STORAGE_STATE } from './utils/auth';
 
-/** A company's own account does not manage companies (#20). */
+/** A company's own account has the dashboard and nothing of the organization's panel (#20). */
 
 test.use({ storageState: ADMIN_STORAGE_STATE });
 
 test.describe('Company account', () => {
-  test('has no companies page and no link to it', async ({ page }) => {
+  test('opens the dashboard but not the organization panel', async ({ page }) => {
     await page.goto('/dashboard', { waitUntil: 'networkidle' });
-    await expect(page.getByRole('link', { name: /^(empresas|companies)$/i })).toHaveCount(0);
+    await expect(page).toHaveURL(/\/dashboard$/);
 
-    const response = await page.goto('/dashboard/companies');
-    expect(response?.status()).toBe(404);
+    // Its session is not one of the panel's: it is sent to that panel's login.
+    await page.goto('/superadmin/companies');
+    await expect(page).toHaveURL(/\/auth\/superadmin\/login/);
   });
 });
