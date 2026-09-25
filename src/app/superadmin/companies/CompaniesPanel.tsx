@@ -4,6 +4,7 @@ import { useState } from 'react';
 import {
   ActionIcon,
   Alert,
+  Anchor,
   Badge,
   Button,
   Center,
@@ -20,6 +21,7 @@ import {
 } from '@mantine/core';
 import { IconAlertTriangleFilled, IconBuilding, IconPlus, IconUserPlus } from '@tabler/icons-react';
 import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
 import { listCompanies, type CompanySummary } from '@/actions/companies/list';
 import { createCompany, type CompanyError } from '@/actions/companies/create';
@@ -173,7 +175,11 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
               <Table.Tbody>
                 {companies.map((company) => (
                   <Table.Tr key={company.id}>
-                    <Table.Td><Text size="sm" fw={550}>{company.name}</Text></Table.Td>
+                    <Table.Td>
+                      <Anchor component={Link} href={`/superadmin/companies/${company.id}`} size="sm" fw={550}>
+                        {company.name}
+                      </Anchor>
+                    </Table.Td>
                     <Table.Td ta="right"><Text size="sm">{company.assets}</Text></Table.Td>
                     <Table.Td ta="right"><Text size="sm">{company.accounts}</Text></Table.Td>
                     <Table.Td>

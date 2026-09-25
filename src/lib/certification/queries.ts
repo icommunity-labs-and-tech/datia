@@ -46,6 +46,32 @@ export interface AssetCertification {
 const asText = (value: unknown) => (typeof value === 'string' ? value : null);
 const asNumber = (value: unknown) => (typeof value === 'number' ? value : null);
 
+function toAssetCertification(row: {
+  id: string;
+  status: CertificationStatus;
+  payload: unknown;
+  hash: string | null;
+  network: string | null;
+  checkerUrl: string | null;
+  certifiedAt: Date | null;
+  createdAt: Date;
+}): AssetCertification {
+  const payload = (row.payload ?? {}) as Record<string, unknown>;
+  return {
+    id: row.id,
+    status: row.status,
+    period: asText(payload.period),
+    // A monthly proof carries the aggregate; a single one, its own figure.
+    co2eKg: asNumber(payload.totalCo2eKg) ?? asNumber(payload.co2eKg),
+    readings: asNumber(payload.readings),
+    hash: row.hash,
+    network: row.network,
+    checkerUrl: row.checkerUrl,
+    certifiedAt: row.certifiedAt,
+    createdAt: row.createdAt,
+  };
+}
+
 /** The proofs of one asset, newest first. */
 export async function listAssetCertifications(
   scope: Scope,
@@ -61,22 +87,18 @@ export async function listAssetCertifications(
     take: limit,
   });
 
-  return rows.map((row) => {
-    const payload = (row.payload ?? {}) as Record<string, unknown>;
-    return {
-      id: row.id,
-      status: row.status,
-      period: asText(payload.period),
-      // A monthly proof carries the aggregate; a single one, its own figure.
-      co2eKg: asNumber(payload.totalCo2eKg) ?? asNumber(payload.co2eKg),
-      readings: asNumber(payload.readings),
-      hash: row.hash,
-      network: row.network,
-      checkerUrl: row.checkerUrl,
-      certifiedAt: row.certifiedAt,
-      createdAt: row.createdAt,
-    };
+  return rows.map(toAssetCertification);
+}
+
+/** The latest proofs of everything inside the scope, newest first. */
+export async function listCertifications(scope: Scope, limit = 100): Promise<AssetCertification[]> {
+  const rows = await prisma.certification.findMany({
+    where: scopeWhere(scope),
+    orderBy: { createdAt: 'desc' },
+    take: limit,
   });
+
+  return rows.map(toAssetCertification);
 }
 
 export interface CertificationCounts {
