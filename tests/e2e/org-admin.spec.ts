@@ -19,3 +19,31 @@ test.describe('Organization account (ORG_ADMIN)', () => {
     await expect(page.getByText(/^4 (activos|assets)$/i)).toBeVisible();
   });
 });
+
+test.describe('Companies page', () => {
+  test('the organization account creates a company and sees it listed', async ({ page }) => {
+    await loginAdmin(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
+
+    // It is in the navigation only for this account.
+    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: /^(empresas|companies)$/i }).first().click();
+    await expect(page).toHaveURL(/\/dashboard\/companies$/);
+    await expect(page.getByRole('heading', { name: /empresas|companies/i, level: 2 })).toBeVisible();
+    // The company the seeded assets belong to, with them counted.
+    await expect(page.getByRole('row', { name: /Datia E2E/ })).toContainText('4');
+
+    const name = `Filial ${Date.now()}`;
+    await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel(/nombre de la empresa|company name/i).fill(name);
+    await dialog.getByRole('button', { name: /crear empresa|create company/i }).click();
+
+    await expect(page.getByRole('row', { name })).toBeVisible();
+
+    // The same name again is refused.
+    await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
+    await page.getByRole('dialog').getByLabel(/nombre de la empresa|company name/i).fill(name);
+    await page.getByRole('dialog').getByRole('button', { name: /crear empresa|create company/i }).click();
+    await expect(page.getByRole('dialog')).toContainText(/ya hay una empresa|already a company/i);
+  });
+});
