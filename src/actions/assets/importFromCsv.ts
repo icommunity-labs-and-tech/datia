@@ -1,6 +1,6 @@
 'use server';
 
-import { requireScope } from '@/lib/auth/tenant';
+import { requireCompanyScope } from '@/lib/auth/tenant';
 import { createAssetImportServiceImpl } from '@/domain/assets/AssetImportServiceImpl';
 import { AssetImportValidationError, type ParsedAssetRow } from '@/domain/assets/AssetImportService';
 import { parseCsv } from '@/lib/csv';
@@ -36,7 +36,7 @@ export async function importAssetsFromCsv(formData: FormData): Promise<ImportIte
     const itemImportService = createAssetImportServiceImpl({
       assetRepository,
     });
-    const result = await itemImportService.importAssetsFromParsedRows(await requireScope(), rows);
+    const result = await itemImportService.importAssetsFromParsedRows(await requireCompanyScope(), rows);
     return {
       success: true,
       createdCount: result.createdCount,

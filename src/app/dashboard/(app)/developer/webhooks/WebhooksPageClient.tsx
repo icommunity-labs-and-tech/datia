@@ -246,7 +246,7 @@ export default function WebhooksPageClient() {
         await loadWebhooks();
         flashSuccess(t('createSuccess'));
       } else {
-        setError(result.error || t('createError'));
+        setError(result.code === 'company_required' ? t('companyRequired') : (result.error || t('createError')));
       }
     } catch {
       setError(t('createError'));

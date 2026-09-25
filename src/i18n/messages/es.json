@@ -780,7 +780,8 @@
       "deleteTitle": "Eliminar webhook",
       "edit": "Editar",
       "activate": "Activar",
-      "deactivate": "Desactivar"
+      "deactivate": "Desactivar",
+      "companyRequired": "Elige una empresa en el selector de la barra para crear un webhook."
     },
     "events": {
       "whatAreEvents": "¿Qué son los eventos?",
@@ -923,7 +924,8 @@
       "submit": "Crear activo",
       "errors": {
         "required": "El ID y el nombre son obligatorios.",
-        "failed": "No se pudo crear el activo."
+        "failed": "No se pudo crear el activo.",
+        "companyRequired": "Elige una empresa en el selector de la barra para crear un activo."
       }
     }
   },
@@ -1133,6 +1135,10 @@
       "inviteFailedDetail": "No se pudo enviar la invitación: {detail}",
       "forbidden": "Solo la cuenta de la organización gestiona las empresas.",
       "failed": "No se pudo completar la operación. Inténtalo de nuevo."
+    },
+    "switcher": {
+      "label": "Empresa",
+      "all": "Todas las empresas"
     }
   }
 }

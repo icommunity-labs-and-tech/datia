@@ -7,6 +7,7 @@ import { prisma } from '@/lib/prisma';
 import type { Scope } from '@/lib/scope';
 import type { JWTPayload } from './shared/types';
 import { isOrganizationRole } from './roles';
+import { COMPANY_SCOPE_COOKIE } from './company-scope';
 
 /**
  * Contexto del tenant actual
@@ -46,9 +47,21 @@ export class TenantContextNotFoundError extends Error {
  * La empresa de una sesión. Las anteriores a la fase 2 de #20 no la llevan en
  * el JWT: se lee de la cuenta, que la tiene desde la migración.
  */
-async function companyOf(payload: JWTPayload): Promise<string | null> {
-  // The account that operates the organization has no company of its own.
-  if (isOrganizationRole(payload.role)) return null;
+async function companyOf(
+  payload: JWTPayload,
+  cookieStore: { get(name: string): { value: string } | undefined }
+): Promise<string | null> {
+  // The account that operates the organization has no company of its own; it
+  // may be looking at one, which has to be one of its organization's.
+  if (isOrganizationRole(payload.role)) {
+    const chosen = cookieStore.get(COMPANY_SCOPE_COOKIE)?.value;
+    if (!chosen || !payload.organizationId) return null;
+    const company = await prisma.company.findFirst({
+      where: { id: chosen, organizationId: payload.organizationId },
+      select: { id: true },
+    });
+    return company?.id ?? null;
+  }
   if (payload.companyId !== undefined) return payload.companyId;
   const user = await prisma.user.findUnique({ where: { id: payload.id }, select: { companyId: true } });
   return user?.companyId ?? null;
@@ -76,7 +89,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload?.organizationId) {
       return {
         organizationId: payload.organizationId,
-        companyId: await companyOf(payload),
+        companyId: await companyOf(payload, cookieStore),
         userRole: payload.role,
         userId: payload.id,
       };
@@ -103,7 +116,7 @@ export async function getCurrentTenant(): Promise<TenantContext> {
     if (payload) {
       return {
         organizationId: payload.organizationId,
-        companyId: await companyOf(payload),
+        companyId: await companyOf(payload, cookieStore),
         userRole: payload.role,
         userId: payload.id,
       };
@@ -178,4 +191,23 @@ export async function requireScope(): Promise<Scope> {
   }
 
   return { organizationId: tenant.organizationId, companyId: tenant.companyId };
+}
+
+export class CompanyRequiredError extends Error {
+  constructor() {
+    super('Elige una empresa para hacer esto');
+    this.name = 'CompanyRequiredError';
+  }
+}
+
+/**
+ * Como `requireScope`, pero para lo que se crea: un activo o un webhook
+ * pertenece a una empresa, y la cuenta de la organización, que las ve todas,
+ * tiene que haber elegido una en el selector. Sin esto lo que creara caería en
+ * la empresa por defecto sin que lo supiera.
+ */
+export async function requireCompanyScope(): Promise<Scope & { companyId: string }> {
+  const scope = await requireScope();
+  if (!scope.companyId) throw new CompanyRequiredError();
+  return { organizationId: scope.organizationId, companyId: scope.companyId };
 }
