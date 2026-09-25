@@ -53,6 +53,7 @@
   },
   "sidebar": {
     "home": "Inicio",
+    "companies": "Empresas",
     "organizations": "Organizaciones",
     "management": "GESTIÓN",
     "developer": "DESARROLLADOR",
@@ -1087,6 +1088,51 @@
       "tooLong": "El asunto o el mensaje son demasiado largos.",
       "unauthorized": "Tu sesión ha caducado. Vuelve a iniciar sesión.",
       "unexpected": "No se pudo enviar el mensaje. Inténtalo de nuevo."
+    }
+  },
+  "companiesPage": {
+    "title": "Empresas",
+    "description": "Las empresas de tu organización y sus cuentas. Cada cuenta de empresa solo ve los datos de su empresa; tú los ves todos.",
+    "newCompany": "Nueva empresa",
+    "empty": "Todavía no hay empresas.",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "inviteAccount": "Invitar una cuenta",
+    "inviteAccountFor": "Invitar una cuenta a {name}",
+    "accountNameLabel": "Nombre de la persona",
+    "accountEmailLabel": "Correo electrónico",
+    "table": {
+      "name": "Empresa",
+      "assets": "Activos",
+      "accounts": "Cuentas",
+      "created": "Creada",
+      "status": "Estado"
+    },
+    "create": {
+      "title": "Nueva empresa",
+      "nameLabel": "Nombre de la empresa",
+      "accountTitle": "Primera cuenta (opcional)",
+      "accountHelp": "Recibirá una invitación por correo para activar su acceso al panel de esta empresa.",
+      "submit": "Crear empresa"
+    },
+    "invite": {
+      "title": "Invitar una cuenta a {name}",
+      "submit": "Enviar invitación"
+    },
+    "notice": {
+      "created": "Empresa «{name}» creada.",
+      "createdAndInvited": "Empresa «{name}» creada e invitación enviada a {email}.",
+      "createdWithoutInvite": "Empresa «{name}» creada, pero no se pudo enviar la invitación. Inténtalo desde su fila.",
+      "invited": "Invitación enviada a {email} para {name}."
+    },
+    "errors": {
+      "nameRequired": "Indica el nombre de la empresa.",
+      "nameTaken": "Ya hay una empresa con ese nombre.",
+      "emailInvalid": "Indica el nombre y un correo válido de la persona, o deja ambos vacíos.",
+      "inviteFailed": "No se pudo enviar la invitación.",
+      "inviteFailedDetail": "No se pudo enviar la invitación: {detail}",
+      "forbidden": "Solo la cuenta de la organización gestiona las empresas.",
+      "failed": "No se pudo completar la operación. Inténtalo de nuevo."
     }
   }
 }

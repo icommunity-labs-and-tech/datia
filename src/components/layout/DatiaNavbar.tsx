@@ -17,6 +17,7 @@ import {
   IconSettings,
   IconCode,
   IconBuilding,
+  IconBuildingSkyscraper,
   IconExternalLink,
   IconUserCircle,
 } from '@tabler/icons-react';
@@ -24,6 +25,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
+import { isOrganizationRole } from '@/lib/auth/roles';
 import Logo from '@/components/Logo';
 import type { OrgModules } from '@/app/dashboard/(app)/layout';
 
@@ -47,6 +49,10 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
 
   const mainLinks = [
     { href: '/dashboard', icon: IconHome2, label: t('home'), exact: true },
+    // Only the organization's own account manages its companies (#20).
+    ...(!loading && isOrganizationRole(user?.role)
+      ? [{ href: '/dashboard/companies', icon: IconBuildingSkyscraper, label: t('companies') }]
+      : []),
     ...(showPassport ? [{ href: '/dashboard/assets', icon: IconPackage, label: t('assets') }] : []),
     ...(showEnergy
       ? [

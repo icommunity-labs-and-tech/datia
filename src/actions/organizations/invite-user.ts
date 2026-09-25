@@ -5,13 +5,20 @@ import { getCurrentTenant } from "@/lib/auth/tenant";
 import { defaultCompanyId } from "@/lib/company";
 import { sendInvitationEmail } from "./helpers";
 import crypto from "crypto";
-import { isDashboardRole } from '@/lib/auth/roles';
+import { isDashboardRole, isOrganizationRole } from '@/lib/auth/roles';
 
 export interface InviteUserInput {
   email: string;
   name: string;
   role: "ADMIN";
   phone?: string;
+  /**
+   * The company the account joins. Only the organization's own account may
+   * choose it; anyone else invites into their own company.
+   */
+  companyId?: string;
+  /** Language of the invitation email. */
+  language?: 'es' | 'en';
 }
 
 export interface InviteUserResult {
@@ -90,8 +97,22 @@ export async function inviteUser(
       };
     }
 
-    // The invited account joins the inviter's company.
-    const companyId = tenant.companyId ?? (await defaultCompanyId(tenant.organizationId!));
+    let companyId: string;
+    if (input.companyId) {
+      if (!isOrganizationRole(tenant.userRole)) {
+        throw new Error("Solo la cuenta de la organización puede elegir la empresa");
+      }
+      // Scoped to the organization: a company id from another one matches nothing.
+      const company = await prisma.company.findFirst({
+        where: { id: input.companyId, organizationId: tenant.organizationId! },
+        select: { id: true },
+      });
+      if (!company) throw new Error("Empresa no encontrada");
+      companyId = company.id;
+    } else {
+      // The invited account joins the inviter's company.
+      companyId = tenant.companyId ?? (await defaultCompanyId(tenant.organizationId!));
+    }
 
     // Crear usuario e invitación en una transacción
     // Si falla el email después, se eliminará todo
@@ -139,6 +160,7 @@ export async function inviteUser(
         recipientName: input.name,
         organizationName: organization.name,
         activationToken,
+        language: input.language,
       });
     } catch (emailError) {
       // Si falla el email, eliminar todo lo creado (rollback manual)
