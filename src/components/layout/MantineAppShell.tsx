@@ -29,7 +29,9 @@ import {
   IconCode,
   IconChevronDown,
   IconLifebuoy,
+  IconBuildingSkyscraper,
 } from '@tabler/icons-react';
+import { isOrganizationRole } from '@/lib/auth/roles';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import DatiaNavbar from './DatiaNavbar';
 import SupportMessageModal from '@/components/support/SupportMessageModal';
@@ -116,6 +118,10 @@ export default function DatiaAppShell({
           { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
           { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
         ]
+      : []),
+    // Only the organization's own account manages its companies (#20).
+    ...(isOrganizationRole(user?.role)
+      ? [{ href: '/dashboard/companies', icon: IconBuildingSkyscraper, label: tSidebar('companies'), exact: false }]
       : []),
     { href: '/dashboard/api', icon: IconCode, label: tSidebar('api'), exact: false },
   ];

@@ -53,6 +53,7 @@
   },
   "sidebar": {
     "home": "Home",
+    "companies": "Companies",
     "organizations": "Organizations",
     "management": "MANAGEMENT",
     "developer": "DEVELOPER",
@@ -1087,6 +1088,51 @@
       "tooLong": "The subject or the message is too long.",
       "unauthorized": "Your session has expired. Please sign in again.",
       "unexpected": "The message could not be sent. Please try again."
+    }
+  },
+  "companiesPage": {
+    "title": "Companies",
+    "description": "Your organisation's companies and their accounts. A company account only sees its own company's data; you see all of it.",
+    "newCompany": "New company",
+    "empty": "There are no companies yet.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "inviteAccount": "Invite an account",
+    "inviteAccountFor": "Invite an account to {name}",
+    "accountNameLabel": "Person's name",
+    "accountEmailLabel": "Email",
+    "table": {
+      "name": "Company",
+      "assets": "Assets",
+      "accounts": "Accounts",
+      "created": "Created",
+      "status": "Status"
+    },
+    "create": {
+      "title": "New company",
+      "nameLabel": "Company name",
+      "accountTitle": "First account (optional)",
+      "accountHelp": "They will get an email invitation to activate access to this company's dashboard.",
+      "submit": "Create company"
+    },
+    "invite": {
+      "title": "Invite an account to {name}",
+      "submit": "Send invitation"
+    },
+    "notice": {
+      "created": "Company “{name}” created.",
+      "createdAndInvited": "Company “{name}” created and invitation sent to {email}.",
+      "createdWithoutInvite": "Company “{name}” created, but the invitation could not be sent. Try again from its row.",
+      "invited": "Invitation sent to {email} for {name}."
+    },
+    "errors": {
+      "nameRequired": "Enter the company name.",
+      "nameTaken": "There is already a company with that name.",
+      "emailInvalid": "Enter the person's name and a valid email, or leave both empty.",
+      "inviteFailed": "The invitation could not be sent.",
+      "inviteFailedDetail": "The invitation could not be sent: {detail}",
+      "forbidden": "Only the organisation's own account manages companies.",
+      "failed": "The operation could not be completed. Try again."
     }
   }
 }
