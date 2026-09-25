@@ -47,3 +47,47 @@ test.describe('Companies page', () => {
     await expect(page.getByRole('dialog')).toContainText(/ya hay una empresa|already a company/i);
   });
 });
+
+test.describe('Company selector', () => {
+  test('narrows the dashboard to one company and asks for one before creating', async ({ page }) => {
+    await loginAdmin(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
+
+    const name = `Selector ${Date.now()}`;
+    await page.goto('/dashboard/companies', { waitUntil: 'networkidle' });
+    await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
+    await page.getByRole('dialog').getByLabel(/nombre de la empresa|company name/i).fill(name);
+    await page.getByRole('dialog').getByRole('button', { name: /crear empresa|create company/i }).click();
+    await expect(page.getByRole('row', { name })).toBeVisible();
+
+    const selector = () => page.getByRole('textbox', { name: /^(empresa|company)$/i });
+    const assetCount = page.getByText(/^4 (activos|assets)$/i);
+
+    // Looking at all of them, it sees the organization's four assets and cannot
+    // create one: it would land in a company it did not pick.
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
+    await expect(assetCount).toBeVisible();
+    await page.getByRole('button', { name: /nuevo activo|new asset/i }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel(/^id|identificador/i).first().fill('sel-1');
+    await dialog.getByLabel(/nombre|name/i).first().fill('Activo de prueba');
+    await dialog.getByRole('button', { name: /crear|create/i }).click();
+    await expect(dialog).toContainText(/elige una empresa|pick a company/i);
+    await page.keyboard.press('Escape');
+
+    // Narrowed to the new company, it sees none of them.
+    // The page reloads once the choice is stored; wait for that before moving on.
+    await selector().click();
+    await Promise.all([page.waitForEvent('load'), page.getByRole('option', { name }).click()]);
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
+    await expect(assetCount).toHaveCount(0);
+
+    // And back to all of them.
+    await selector().click();
+    await Promise.all([
+      page.waitForEvent('load'),
+      page.getByRole('option', { name: /todas las empresas|all companies/i }).click(),
+    ]);
+    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
+    await expect(assetCount).toBeVisible();
+  });
+});

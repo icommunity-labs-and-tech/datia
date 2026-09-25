@@ -32,6 +32,7 @@ import {
   IconBuildingSkyscraper,
 } from '@tabler/icons-react';
 import { isOrganizationRole } from '@/lib/auth/roles';
+import CompanySwitcher from './CompanySwitcher';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import DatiaNavbar from './DatiaNavbar';
 import SupportMessageModal from '@/components/support/SupportMessageModal';
@@ -191,6 +192,7 @@ export default function DatiaAppShell({
 
             {/* Right actions */}
             <Group gap={6} ml="auto" style={{ flexShrink: 0 }}>
+              {isOrganizationRole(user?.role) && <CompanySwitcher />}
               <Menu shadow="lg" width={168} position="bottom-end">
                 <Menu.Target>
                   <ActionIcon

@@ -1,7 +1,7 @@
 'use server';
 
 import { parseCsv, type ParsedCsvRow } from '@/lib/csv';
-import { requireScope } from '@/lib/auth/tenant';
+import { requireCompanyScope } from '@/lib/auth/tenant';
 import { scopeWhere } from '@/lib/scope';
 import { prisma } from '@/lib/prisma';
 import { InvalidCsvError } from '@/lib/import-job/errors';
@@ -63,7 +63,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
       };
     }
 
-    const scope = await requireScope();
+    const scope = await requireCompanyScope();
     
     // Convertir a formato de filas de activos
     const itemRows = parsedRows.map((row) => ({

@@ -780,7 +780,8 @@
       "deleteTitle": "Delete webhook",
       "edit": "Edit",
       "activate": "Activate",
-      "deactivate": "Deactivate"
+      "deactivate": "Deactivate",
+      "companyRequired": "Pick a company in the selector at the top to create a webhook."
     },
     "events": {
       "whatAreEvents": "What are events?",
@@ -923,7 +924,8 @@
       "submit": "Create asset",
       "errors": {
         "required": "ID and name are required.",
-        "failed": "Could not create the asset."
+        "failed": "Could not create the asset.",
+        "companyRequired": "Pick a company in the selector at the top to create an asset."
       }
     }
   },
@@ -1133,6 +1135,10 @@
       "inviteFailedDetail": "The invitation could not be sent: {detail}",
       "forbidden": "Only the organisation's own account manages companies.",
       "failed": "The operation could not be completed. Try again."
+    },
+    "switcher": {
+      "label": "Company",
+      "all": "All companies"
     }
   }
 }

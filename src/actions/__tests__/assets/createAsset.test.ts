@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { TenantContextNotFoundError } from '@/lib/auth/tenant';
+import { TenantContextNotFoundError, CompanyRequiredError } from '@/lib/auth/tenant';
 
 const { mockRequireScope, mockCreateAsset } = vi.hoisted(() => ({
   mockRequireScope: vi.fn(),
@@ -8,7 +8,7 @@ const { mockRequireScope, mockCreateAsset } = vi.hoisted(() => ({
 
 vi.mock('@/lib/auth/tenant', async () => {
   const actual = await vi.importActual<typeof import('@/lib/auth/tenant')>('@/lib/auth/tenant');
-  return { ...actual, requireScope: mockRequireScope };
+  return { ...actual, requireCompanyScope: mockRequireScope };
 });
 vi.mock('@/domain/assets/AssetServiceImpl', () => ({
   createAssetServiceImpl: () => ({ createAsset: mockCreateAsset }),
@@ -45,6 +45,14 @@ describe('createAsset', () => {
     const result = await createAsset(input);
 
     expect(result.success).toBe(false);
+    expect(mockCreateAsset).not.toHaveBeenCalled();
+  });
+
+  it('asks the organization account to choose a company first', async () => {
+    mockRequireScope.mockRejectedValue(new CompanyRequiredError());
+    const result = await createAsset(input);
+
+    expect(result).toMatchObject({ success: false, code: 'company_required' });
     expect(mockCreateAsset).not.toHaveBeenCalled();
   });
 

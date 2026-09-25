@@ -1,7 +1,7 @@
 'use server';
 
 import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookRepositoryPrisma';
-import { requireScope } from '@/lib/auth/tenant';
+import { requireCompanyScope, CompanyRequiredError } from '@/lib/auth/tenant';
 
 function validateUrl(url: string): boolean {
   try {
@@ -38,7 +38,7 @@ export async function createWebhook(data: {
   }
 
   try {
-    const scope = await requireScope();
+    const scope = await requireCompanyScope();
     const webhook = await webhookRepository.create(scope, {
       name: data.name.trim(),
       url: data.url.trim(),
@@ -49,6 +49,9 @@ export async function createWebhook(data: {
     });
     return { success: true, data: webhook };
   } catch (error: any) {
+    if (error instanceof CompanyRequiredError) {
+      return { success: false, error: error.message, code: 'company_required' as const };
+    }
     console.error('Error creating webhook:', error);
     if (error._tag === 'WebhookUrlInvalidError' || error._tag === 'WebhookValidationError') {
       return { success: false, error: error.message || 'Error de validación' };
