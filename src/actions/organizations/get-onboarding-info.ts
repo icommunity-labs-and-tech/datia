@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { isDashboardRole } from '@/lib/auth/roles';
+import { isDashboardRole, isOrganizationRole } from '@/lib/auth/roles';
 
 export interface OnboardingInfo {
   isFirstAdmin: boolean;
@@ -85,7 +85,7 @@ export async function getOnboardingInfo(
     // 1. Es ADMIN o ORG_ADMIN
     // 2. Es el primer usuario ADMIN creado en la organización (ordenado por createdAt)
     const isFirstAdmin =
-      isDashboardRole(user.role) &&
+      (isDashboardRole(user.role) || isOrganizationRole(user.role)) &&
       user.Organization !== null &&
       user.Organization.User.length > 0 &&
       user.Organization.User[0].id === user.id;

@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireOrganizationAccount } from './access';
-import { inviteUser } from '@/actions/organizations/invite-user';
+import { inviteAccount } from '@/actions/organizations/invite-account';
 
 export interface CreateCompanyInput {
   name: string;
@@ -24,12 +24,13 @@ export interface CreateCompanyResult {
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function createCompany(input: CreateCompanyInput): Promise<CreateCompanyResult> {
-  let organizationId: string;
+  let actor: Awaited<ReturnType<typeof requireOrganizationAccount>>;
   try {
-    ({ organizationId } = await requireOrganizationAccount());
+    actor = await requireOrganizationAccount();
   } catch {
     return { success: false, error: 'forbidden' };
   }
+  const { organizationId } = actor;
 
   const name = input.name?.trim();
   if (!name) return { success: false, error: 'name_required' };
@@ -50,7 +51,7 @@ export async function createCompany(input: CreateCompanyInput): Promise<CreateCo
     revalidatePath('/dashboard/companies');
 
     if (admin) {
-      const invited = await inviteUser({
+      const invited = await inviteAccount(actor, {
         companyId: company.id,
         name: admin.name.trim(),
         email: admin.email.trim(),

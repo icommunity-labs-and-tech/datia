@@ -1,7 +1,7 @@
 import { test as setup } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loginAdmin, ADMIN_STORAGE_STATE } from './utils/auth';
+import { loginAdmin, loginOrganization, ADMIN_STORAGE_STATE, ORGANIZATION_STORAGE_STATE } from './utils/auth';
 
 /**
  * Logs in once per run and stores the session, so specs can start authenticated
@@ -19,4 +19,11 @@ setup('authenticate as admin', async ({ page }) => {
 
   await loginAdmin(page, email, password);
   await page.context().storageState({ path: ADMIN_STORAGE_STATE });
+});
+
+setup('authenticate as organization account', async ({ page }) => {
+  fs.mkdirSync(path.dirname(ORGANIZATION_STORAGE_STATE), { recursive: true });
+
+  await loginOrganization(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
+  await page.context().storageState({ path: ORGANIZATION_STORAGE_STATE });
 });

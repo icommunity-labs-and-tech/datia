@@ -6,7 +6,7 @@ export interface JWTPayload {
   organizationId: string | null; // NULL para SUPER_ADMIN
   /** Empresa de la cuenta (#20). Ausente en las sesiones anteriores a la fase 2. */
   companyId?: string | null;
-  context: 'admin' | 'superadmin';
+  context: 'admin' | 'superadmin' | 'organization';
   iat?: number;
   exp?: number;
   [key: string]: any; // Para compatibilidad con jose
@@ -33,4 +33,4 @@ export interface AuthConfig {
   rateLimitMax: number;
 }
 
-export type AuthContext = 'admin' | 'superadmin';
+export type AuthContext = 'admin' | 'superadmin' | 'organization';

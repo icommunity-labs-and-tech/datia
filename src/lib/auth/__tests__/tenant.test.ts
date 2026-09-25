@@ -7,9 +7,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  */
 
 const cookieJar = new Map<string, string>();
-const { findUnique, findCompany } = vi.hoisted(() => ({ findUnique: vi.fn(), findCompany: vi.fn() }));
+const { findUnique } = vi.hoisted(() => ({ findUnique: vi.fn() }));
 
-vi.mock('@/lib/prisma', () => ({ prisma: { user: { findUnique }, company: { findFirst: findCompany } } }));
+vi.mock('@/lib/prisma', () => ({ prisma: { user: { findUnique } } }));
 
 vi.mock('next/headers', () => ({
   cookies: async () => ({
@@ -24,10 +24,6 @@ vi.mock('../admin/jwt', () => ({
       ? { id: 'u-admin', role: 'ADMIN', organizationId: 'org-1', companyId: 'co-1' }
       : token === 'admin-sesion-antigua'
         ? { id: 'u-admin', role: 'ADMIN', organizationId: 'org-1' }
-        : token === 'org-admin'
-          ? { id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1', companyId: null }
-          : token === 'org-admin-con-empresa-residual'
-            ? { id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1', companyId: 'co-1' }
         : token === 'admin-sin-empresa'
           ? { id: 'u-admin', role: 'ADMIN', organizationId: 'org-1', companyId: null }
       : token === 'admin-sin-org'
@@ -40,18 +36,21 @@ vi.mock('../superadmin/jwt', () => ({
     token === 'super-ok' ? { id: 'u-super', role: 'SUPER_ADMIN' } : null,
 }));
 
+vi.mock('../organization/jwt', () => ({
+  verifyOrganizationJWT: async (token: string) =>
+    token === 'org-ok' ? { id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1' } : null,
+}));
+vi.mock('../organization/config', () => ({ organizationAuthConfig: { cookieName: 'organization-auth-token' } }));
 vi.mock('../admin/config', () => ({ adminAuthConfig: { cookieName: 'admin-auth-token' } }));
 vi.mock('../superadmin/config', () => ({
   superadminAuthConfig: { cookieName: 'superadmin-auth-token' },
 }));
 
-const { getCurrentTenant, isSuperAdmin, requireOrganizationId, requireScope, requireCompanyScope, CompanyRequiredError } =
-  await import('../tenant');
+const { getCurrentTenant, isSuperAdmin, requireOrganizationId, requireScope } = await import('../tenant');
 
 beforeEach(() => {
   cookieJar.clear();
   findUnique.mockReset();
-  findCompany.mockReset();
 });
 
 describe('getCurrentTenant', () => {
@@ -179,77 +178,30 @@ describe('requireScope', () => {
 });
 
 describe('the organization account (ORG_ADMIN, #20)', () => {
-  it('has no company and sees the set of them', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    await expect(getCurrentTenant()).resolves.toMatchObject({ organizationId: 'org-1', companyId: null, userRole: 'ORG_ADMIN' });
-    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: null });
-  });
+  it('is its organization with no company, from its own session', async () => {
+    cookieJar.set('organization-auth-token', 'org-ok');
 
-  it('is not narrowed to a company by a stale one in the token', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin-con-empresa-residual');
-    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: null });
-  });
-
-  it('does not read the account for a company: it has none', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    await getCurrentTenant();
+    await expect(getCurrentTenant()).resolves.toEqual({
+      organizationId: 'org-1',
+      companyId: null,
+      userRole: 'ORG_ADMIN',
+      userId: 'u-org',
+    });
     expect(findUnique).not.toHaveBeenCalled();
   });
-});
 
-describe('the company the organization account is looking at (#20)', () => {
-  it('narrows the scope to the chosen company of its organization', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    cookieJar.set('datia-company-scope', 'co-9');
-    findCompany.mockResolvedValue({ id: 'co-9' });
-
-    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: 'co-9' });
-    // Looked up inside its own organization: a company id from another matches nothing.
-    expect(findCompany).toHaveBeenCalledWith({
-      where: { id: 'co-9', organizationId: 'org-1' },
-      select: { id: true },
-    });
+  it('is refused the dashboard scope: it has no company, and that panel is the companies\'', async () => {
+    cookieJar.set('organization-auth-token', 'org-ok');
+    await expect(requireScope()).rejects.toThrow(/empresa/);
   });
 
-  it('ignores a company that is not one of its organization', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    cookieJar.set('datia-company-scope', 'co-ajena');
-    findCompany.mockResolvedValue(null);
-
-    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: null });
+  it('is refused by a token that is not an organization one', async () => {
+    cookieJar.set('organization-auth-token', 'admin-ok');
+    await expect(getCurrentTenant()).rejects.toThrow();
   });
 
-  it('sees them all with no choice made', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: null });
-    expect(findCompany).not.toHaveBeenCalled();
-  });
-
-  it('is not something a company account can use to reach another company', async () => {
+  it('does not take a dashboard session for an organization one', async () => {
     cookieJar.set('admin-auth-token', 'admin-ok');
-    cookieJar.set('datia-company-scope', 'co-9');
-
-    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: 'co-1' });
-    expect(findCompany).not.toHaveBeenCalled();
-  });
-});
-
-describe('requireCompanyScope', () => {
-  it('asks the organization account to choose a company before creating', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    await expect(requireCompanyScope()).rejects.toBeInstanceOf(CompanyRequiredError);
-  });
-
-  it('gives the chosen company once there is one', async () => {
-    cookieJar.set('admin-auth-token', 'org-admin');
-    cookieJar.set('datia-company-scope', 'co-9');
-    findCompany.mockResolvedValue({ id: 'co-9' });
-
-    await expect(requireCompanyScope()).resolves.toEqual({ organizationId: 'org-1', companyId: 'co-9' });
-  });
-
-  it('is what a company account always has', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
-    await expect(requireCompanyScope()).resolves.toEqual({ organizationId: 'org-1', companyId: 'co-1' });
+    await expect(getCurrentTenant()).resolves.toMatchObject({ userRole: 'ADMIN', companyId: 'co-1' });
   });
 });

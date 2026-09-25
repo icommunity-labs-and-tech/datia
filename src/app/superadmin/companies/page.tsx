@@ -1,4 +1,3 @@
-import { notFound } from 'next/navigation';
 import { requireOrganizationAccount } from '@/actions/companies/access';
 import { listCompanies } from '@/actions/companies/list';
 import CompaniesPanel from './CompaniesPanel';
@@ -10,7 +9,9 @@ export default async function CompaniesPage() {
   try {
     await requireOrganizationAccount();
   } catch {
-    notFound();
+    // Not an organization session: nothing to show. The panel's layout, which
+    // knows who is signed in, sends the visitor to the login or to its own half.
+    return null;
   }
 
   return <CompaniesPanel initial={await listCompanies()} />;

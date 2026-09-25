@@ -1,93 +1,48 @@
 import { test, expect } from '@playwright/test';
-import { loginAdmin } from './utils/auth';
+import { ORGANIZATION_STORAGE_STATE } from './utils/auth';
 
 /**
- * The organization's own account has no company and sees all of them (#20). It
- * opens the dashboard like a company account and reads the organization's data.
+ * The organization's own account operates from the superadmin panel, limited to
+ * its organization, and has no dashboard: that one is the companies' (#20).
  * Seeded by scripts/bootstrap-e2e-users.mjs.
  */
 
-test.describe('Organization account (ORG_ADMIN)', () => {
-  test('signs in and sees the organization\'s assets', async ({ page }) => {
-    await loginAdmin(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
+test.use({ storageState: ORGANIZATION_STORAGE_STATE });
 
-    await expect(page).toHaveURL(/\/dashboard/);
-    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: /activos|assets/i, level: 2 })).toBeVisible();
-    // The seeded assets belong to the organization's company, which this account
-    // reaches through the organization rather than through a company of its own.
-    await expect(page.getByText(/^4 (activos|assets)$/i)).toBeVisible();
-  });
-});
+test.describe('Organization account', () => {
+  test('signs in to the panel and lands on its companies, without the platform half', async ({ page }) => {
+    await page.goto('/superadmin', { waitUntil: 'networkidle' });
 
-test.describe('Companies page', () => {
-  test('the organization account creates a company and sees it listed', async ({ page }) => {
-    await loginAdmin(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
-
-    // It is in the navigation only for this account.
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
-    await page.getByRole('link', { name: /^(empresas|companies)$/i }).first().click();
-    await expect(page).toHaveURL(/\/dashboard\/companies$/);
+    await expect(page).toHaveURL(/\/superadmin\/companies$/);
     await expect(page.getByRole('heading', { name: /empresas|companies/i, level: 2 })).toBeVisible();
     // The company the seeded assets belong to, with them counted.
     await expect(page.getByRole('row', { name: /Datia E2E/ })).toContainText('4');
+
+    // Organizations and support messages are the platform's.
+    await expect(page.getByRole('link', { name: /^organizaciones$/i })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /^soporte$/i })).toHaveCount(0);
+    await page.goto('/superadmin/organizations');
+    await expect(page).toHaveURL(/\/superadmin\/companies$/);
+  });
+
+  test('has no dashboard: its address leads back to the panel', async ({ page }) => {
+    await page.goto('/dashboard/assets');
+    await expect(page).toHaveURL(/\/superadmin\/companies$/);
+  });
+
+  test('creates a company and sees it listed; the same name is refused', async ({ page }) => {
+    await page.goto('/superadmin/companies', { waitUntil: 'networkidle' });
 
     const name = `Filial ${Date.now()}`;
     await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
     const dialog = page.getByRole('dialog');
     await dialog.getByLabel(/nombre de la empresa|company name/i).fill(name);
     await dialog.getByRole('button', { name: /crear empresa|create company/i }).click();
-
     await expect(page.getByRole('row', { name })).toBeVisible();
 
-    // The same name again is refused.
     await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
     await page.getByRole('dialog').getByLabel(/nombre de la empresa|company name/i).fill(name);
     await page.getByRole('dialog').getByRole('button', { name: /crear empresa|create company/i }).click();
     await expect(page.getByRole('dialog')).toContainText(/ya hay una empresa|already a company/i);
-  });
-});
-
-test.describe('Company selector', () => {
-  test('narrows the dashboard to one company and asks for one before creating', async ({ page }) => {
-    await loginAdmin(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
-
-    const name = `Selector ${Date.now()}`;
-    await page.goto('/dashboard/companies', { waitUntil: 'networkidle' });
-    await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
-    await page.getByRole('dialog').getByLabel(/nombre de la empresa|company name/i).fill(name);
-    await page.getByRole('dialog').getByRole('button', { name: /crear empresa|create company/i }).click();
-    await expect(page.getByRole('row', { name })).toBeVisible();
-
-    const selector = () => page.getByRole('textbox', { name: /^(empresa|company)$/i });
-    const assetCount = page.getByText(/^4 (activos|assets)$/i);
-
-    // Looking at all of them, it sees the organization's four assets and cannot
-    // create one: it would land in a company it did not pick.
-    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
-    await expect(assetCount).toBeVisible();
-    await page.getByRole('button', { name: /nuevo activo|new asset/i }).click();
-    const dialog = page.getByRole('dialog');
-    await dialog.getByLabel(/^id|identificador/i).first().fill('sel-1');
-    await dialog.getByLabel(/nombre|name/i).first().fill('Activo de prueba');
-    await dialog.getByRole('button', { name: /crear|create/i }).click();
-    await expect(dialog).toContainText(/elige una empresa|pick a company/i);
-    await page.keyboard.press('Escape');
-
-    // Narrowed to the new company, it sees none of them.
-    // The page reloads once the choice is stored; wait for that before moving on.
-    await selector().click();
-    await Promise.all([page.waitForEvent('load'), page.getByRole('option', { name }).click()]);
-    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
-    await expect(assetCount).toHaveCount(0);
-
-    // And back to all of them.
-    await selector().click();
-    await Promise.all([
-      page.waitForEvent('load'),
-      page.getByRole('option', { name: /todas las empresas|all companies/i }).click(),
-    ]);
-    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
-    await expect(assetCount).toBeVisible();
   });
 });

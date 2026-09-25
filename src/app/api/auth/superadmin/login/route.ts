@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateSuperAdmin } from '@/lib/auth/superadmin/jwt';
-import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
+import { authenticatePanel } from '@/lib/auth/panel-login';
 import { createRateLimiter, getClientIp } from '@/lib/auth/rate-limit';
 
 // 5 intentos por IP cada 15 minutos
@@ -28,7 +27,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await authenticateSuperAdmin(email, password);
+    const result = await authenticatePanel(email, password);
 
     if (!result.success) {
       console.warn(`[superadmin/login] Failed attempt — ip=${ip} email=${email}`);
@@ -37,11 +36,11 @@ export async function POST(request: NextRequest) {
 
     const response = NextResponse.json({ success: true, user: result.user });
 
-    response.cookies.set(superadminAuthConfig.cookieName, result.token!, {
+    response.cookies.set(result.cookie!.name, result.token!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: superadminAuthConfig.sessionDuration,
+      maxAge: result.cookie!.maxAge,
       path: '/',
     });
 

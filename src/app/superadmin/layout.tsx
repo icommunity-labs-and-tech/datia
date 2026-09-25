@@ -5,11 +5,20 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Button, Center, Group, Loader, Stack, Text } from '@mantine/core';
 import Link from 'next/link';
 
-const NAV_LINKS = [
+// The platform account and the organization account share this panel and see
+// different halves of it: the first manages organizations, the second the
+// companies of its own (#20).
+const PLATFORM_LINKS = [
   { href: '/superadmin', icon: 'bi-house', label: 'Inicio' },
   { href: '/superadmin/organizations', icon: 'bi-building', label: 'Organizaciones' },
   { href: '/superadmin/support-messages', icon: 'bi-chat-dots', label: 'Soporte' },
 ];
+const ORGANIZATION_LINKS = [
+  { href: '/superadmin/companies', icon: 'bi-buildings', label: 'Empresas' },
+];
+const ORGANIZATION_HOME = '/superadmin/companies';
+
+const isCompaniesPath = (path: string) => path === ORGANIZATION_HOME || path.startsWith(ORGANIZATION_HOME + '/');
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -39,6 +48,18 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       setLoading(false);
     }
   };
+
+  const isOrganization = user?.role === 'ORG_ADMIN';
+  const navLinks = isOrganization ? ORGANIZATION_LINKS : PLATFORM_LINKS;
+
+  // Each account only reaches its own half. The pages and actions refuse the
+  // other one too; this keeps a wrong URL from showing a screen that cannot work.
+  const home = isOrganization ? ORGANIZATION_HOME : '/superadmin';
+  const allowed = !user || (isOrganization === isCompaniesPath(pathname));
+
+  useEffect(() => {
+    if (user && !allowed) router.replace(home);
+  }, [user, allowed, home, router]);
 
   const handleLogout = async () => {
     try {
@@ -80,11 +101,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               <i className="bi bi-shield-lock-fill" style={{ fontSize: '1.25rem', color: '#dc2626' }} />
             </div>
             <Text fw={600} fz="lg" c="#1f2937">Datia</Text>
+            {isOrganization && user?.organizationName && (
+              <Text size="sm" c="dimmed">{user.organizationName}</Text>
+            )}
           </Group>
 
           <Group gap={4}>
-            {NAV_LINKS.map(({ href, icon, label }) => {
-              const active = pathname === href;
+            {navLinks.map(({ href, icon, label }) => {
+              const active = pathname === href || (href !== '/superadmin' && pathname.startsWith(href + '/'));
               return (
                 <Link
                   key={href}
@@ -130,7 +154,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
       {/* Main content */}
       <main style={{ flexGrow: 1, padding: '48px 24px' }}>
-        {children}
+        {allowed ? children : null}
       </main>
 
       {/* Footer */}
@@ -145,7 +169,9 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       >
         <Group justify="center" gap={8} mb={6}>
           <i className="bi bi-shield-check" style={{ color: '#dc2626' }} />
-          <Text size="sm" c="dimmed" fw={500}>Panel de Super Administrador - Datia</Text>
+          <Text size="sm" c="dimmed" fw={500}>
+            {isOrganization ? 'Panel de organización - Datia' : 'Panel de Super Administrador - Datia'}
+          </Text>
         </Group>
         <Text size="xs" c="dimmed">Acceso Restringido • Solo personal autorizado</Text>
       </footer>
