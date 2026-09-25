@@ -2,6 +2,7 @@ import { randomInt } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export async function verifyAdminAuth() {
   const cookieStore = await cookies();
@@ -12,7 +13,7 @@ export async function verifyAdminAuth() {
   }
 
   const payload = await verifyAdminJWT(token);
-  if (!payload || payload.role !== 'ADMIN') {
+  if (!payload || !isDashboardRole(payload.role)) {
     throw new Error('Solo los administradores pueden realizar esta acción');
   }
 
@@ -25,7 +26,7 @@ export async function verifyUserAuth() {
   const adminToken = cookieStore.get(adminAuthConfig.cookieName)?.value;
   if (adminToken) {
     const payload = await verifyAdminJWT(adminToken);
-    if (payload && (payload.role === 'ADMIN' || payload.role === 'SUPER_ADMIN')) {
+    if (payload && (isDashboardRole(payload.role) || payload.role === 'SUPER_ADMIN')) {
       return payload;
     }
   }

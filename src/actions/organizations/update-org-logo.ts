@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { requireOrganizationId, getCurrentTenant } from '@/lib/auth/tenant';
 import { getStorage } from '@/lib/storage';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 const MAX_LOGO_BYTES = 2 * 1024 * 1024; // 2 MB
 
@@ -13,7 +14,7 @@ export async function updateOrgLogo(
     const tenant = await getCurrentTenant();
     const organizationId = await requireOrganizationId();
 
-    if (tenant.userRole !== 'ADMIN') {
+    if (!isDashboardRole(tenant.userRole)) {
       return { error: 'Solo los administradores pueden cambiar el logo' };
     }
 

@@ -24,6 +24,10 @@ vi.mock('../admin/jwt', () => ({
       ? { id: 'u-admin', role: 'ADMIN', organizationId: 'org-1', companyId: 'co-1' }
       : token === 'admin-sesion-antigua'
         ? { id: 'u-admin', role: 'ADMIN', organizationId: 'org-1' }
+        : token === 'org-admin'
+          ? { id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1', companyId: null }
+          : token === 'org-admin-con-empresa-residual'
+            ? { id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1', companyId: 'co-1' }
         : token === 'admin-sin-empresa'
           ? { id: 'u-admin', role: 'ADMIN', organizationId: 'org-1', companyId: null }
       : token === 'admin-sin-org'
@@ -169,5 +173,24 @@ describe('requireScope', () => {
   it('refuses a session with no organisation', async () => {
     cookieJar.set('superadmin-auth-token', 'super-ok');
     await expect(requireScope()).rejects.toThrow(/organizationId/);
+  });
+});
+
+describe('the organization account (ORG_ADMIN, #20)', () => {
+  it('has no company and sees the set of them', async () => {
+    cookieJar.set('admin-auth-token', 'org-admin');
+    await expect(getCurrentTenant()).resolves.toMatchObject({ organizationId: 'org-1', companyId: null, userRole: 'ORG_ADMIN' });
+    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: null });
+  });
+
+  it('is not narrowed to a company by a stale one in the token', async () => {
+    cookieJar.set('admin-auth-token', 'org-admin-con-empresa-residual');
+    await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: null });
+  });
+
+  it('does not read the account for a company: it has none', async () => {
+    cookieJar.set('admin-auth-token', 'org-admin');
+    await getCurrentTenant();
+    expect(findUnique).not.toHaveBeenCalled();
   });
 });

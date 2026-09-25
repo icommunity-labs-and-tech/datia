@@ -6,6 +6,7 @@ import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { requireScope } from '@/lib/auth/tenant';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export async function listApiTokens() {
   try {
@@ -18,7 +19,7 @@ export async function listApiTokens() {
     }
 
     const payload = await verifyAdminJWT(token);
-    if (!payload || payload.role !== 'ADMIN') {
+    if (!payload || !isDashboardRole(payload.role)) {
       throw new Error('No autorizado');
     }
 

@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthSeparated, AuthProvider } from '@/hooks/useAuthSeparated';
 import { useTranslations } from 'next-intl';
 import LoginPageLayout from '@/components/auth/LoginPageLayout';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 interface OrgLoginFormProps {
   slug: string;
@@ -31,7 +32,7 @@ function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSeconda
 
   useEffect(() => {
     if (!user || loading) return;
-    if (user.role === 'ADMIN') router.push('/dashboard');
+    if (isDashboardRole(user.role)) router.push('/dashboard');
   }, [user, loading, router]);
 
   useEffect(() => {

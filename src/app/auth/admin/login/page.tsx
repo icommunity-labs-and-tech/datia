@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthSeparated, AuthProvider } from '@/hooks/useAuthSeparated';
 import { useTranslations } from 'next-intl';
 import LoginPageLayout from '@/components/auth/LoginPageLayout';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 function AdminLoginContent() {
   const t = useTranslations('auth.login.admin');
@@ -22,7 +23,7 @@ function AdminLoginContent() {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (user && !loading && user.role === 'ADMIN') router.push('/dashboard');
+    if (user && !loading && isDashboardRole(user.role)) router.push('/dashboard');
   }, [user, loading, router]);
 
   useEffect(() => {

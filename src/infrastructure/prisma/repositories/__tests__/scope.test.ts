@@ -152,6 +152,19 @@ describe('a company account cannot reach into another company', () => {
     expect(lastWhere('apiToken', 'deleteMany')).toMatchObject({ id: 't-1', ...company });
   });
 
+  it('a role change reaches a company account and nothing else', async () => {
+    db.user.findFirst.mockResolvedValueOnce({ id: 'u-1', role: 'ADMIN' });
+    await userRepository.update('u-1', company, { role: 'ADMIN' });
+    expect(db.user.update.mock.calls[0][0].data).toMatchObject({ role: 'ADMIN' });
+
+    // The account form always sends ADMIN: applied to the organization's own
+    // account it would demote it.
+    db.user.update.mockClear();
+    db.user.findFirst.mockResolvedValueOnce({ id: 'u-2', role: 'ORG_ADMIN' });
+    await userRepository.update('u-2', organisation, { role: 'ADMIN', name: 'Nuevo' });
+    expect(db.user.update.mock.calls[0][0].data).toEqual({ name: 'Nuevo' });
+  });
+
   it('updating a user checks the company first', async () => {
     await expect(userRepository.update('u-1', company, { name: 'X' })).rejects.toThrow();
     expect(lastWhere('user', 'findFirst')).toMatchObject({ id: 'u-1', ...company });

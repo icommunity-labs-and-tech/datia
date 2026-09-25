@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { prisma } from '@/lib/prisma';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export async function GET(request: NextRequest) {
   const token = request.cookies.get(adminAuthConfig.cookieName)?.value;
@@ -37,7 +38,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Verificar que sigue siendo admin
-    if (user.role !== 'ADMIN') {
+    if (!isDashboardRole(user.role)) {
       const response = NextResponse.json({ user: null });
       response.cookies.delete(adminAuthConfig.cookieName);
       return response;

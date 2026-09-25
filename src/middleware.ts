@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { isLocale, routing } from './i18n/routing';
 import { getAdminJwtSecret } from './lib/auth/admin/config';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 function getLocale(request: NextRequest): string {
   const cookieLocale = request.cookies.get('NEXT_LOCALE')?.value;
@@ -38,7 +39,7 @@ async function verifyAdminJWT(token: string) {
       audience: 'datia-dashboard',
     });
 
-    if (payload.context !== 'admin' || payload.role !== 'ADMIN') {
+    if (payload.context !== 'admin' || !isDashboardRole(payload.role)) {
       return null;
     }
 
@@ -112,7 +113,7 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
 
     const user = await verifyAdminJWT(token);
 
-    if (!user || user.role !== 'ADMIN') {
+    if (!user || !isDashboardRole(user.role)) {
       return NextResponse.redirect(new URL('/auth/admin/login?error=AccessDenied', request.url));
     }
 
@@ -124,7 +125,7 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
 
     if (token) {
       const user = await verifyAdminJWT(token);
-      if (user && user.role === 'ADMIN') {
+      if (user && isDashboardRole(user.role)) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     }

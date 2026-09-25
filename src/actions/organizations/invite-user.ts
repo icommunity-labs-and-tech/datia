@@ -5,6 +5,7 @@ import { getCurrentTenant } from "@/lib/auth/tenant";
 import { defaultCompanyId } from "@/lib/company";
 import { sendInvitationEmail } from "./helpers";
 import crypto from "crypto";
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export interface InviteUserInput {
   email: string;
@@ -35,7 +36,7 @@ export async function inviteUser(
     const tenant = await getCurrentTenant();
     
     // Solo ADMIN puede invitar
-    if (tenant.userRole !== "ADMIN" && tenant.userRole !== "SUPER_ADMIN") {
+    if (!isDashboardRole(tenant.userRole) && tenant.userRole !== "SUPER_ADMIN") {
       throw new Error("Solo administradores pueden invitar usuarios");
     }
     

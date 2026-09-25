@@ -1,6 +1,7 @@
 import { compare } from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { JWTPayload } from './types';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 /**
  * Autentica un usuario verificando email y contraseña
@@ -61,7 +62,7 @@ export async function authenticateUser(email: string, password: string): Promise
  */
 export function validateUserRole(user: JWTPayload, context: 'admin'): boolean {
   if (context === 'admin') {
-    return user.role === 'ADMIN' || user.role === 'SUPER_ADMIN';
+    return isDashboardRole(user.role) || user.role === 'SUPER_ADMIN';
   }
   return false;
 }

@@ -2,13 +2,14 @@
 
 import { prisma } from '@/lib/prisma';
 import { requireOrganizationId, getCurrentTenant } from '@/lib/auth/tenant';
+import { isDashboardRole } from '@/lib/auth/roles';
 
 export async function deleteOrgLogo(): Promise<{ error?: string }> {
   try {
     const tenant = await getCurrentTenant();
     const organizationId = await requireOrganizationId();
 
-    if (tenant.userRole !== 'ADMIN') {
+    if (!isDashboardRole(tenant.userRole)) {
       return { error: 'Solo los administradores pueden cambiar el logo' };
     }
 

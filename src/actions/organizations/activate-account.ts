@@ -40,7 +40,7 @@ export async function activateAccount(
             verificationStatus: true,
             User: {
               where: {
-                role: "ADMIN",
+                role: { in: ['ADMIN', 'ORG_ADMIN'] },
               },
               orderBy: {
                 createdAt: "asc",

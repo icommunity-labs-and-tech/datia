@@ -67,7 +67,7 @@ export async function getOrganizationById(id: string): Promise<GetOrganizationRe
         },
         User: {
           where: {
-            role: 'ADMIN',
+            role: { in: ['ADMIN', 'ORG_ADMIN'] },
           },
           orderBy: {
             createdAt: 'asc',

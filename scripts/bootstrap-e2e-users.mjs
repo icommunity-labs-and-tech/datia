@@ -9,6 +9,8 @@ const ORG_SLUG = 'datia-e2e';
 
 const USERS = [
   { email: 'admin@datia.icommunitylabs.com', password: 'admin123', name: 'Admin E2E', role: 'ADMIN' },
+  // The account that operates the organization: no company, sees all of them (#20).
+  { email: 'orgadmin@datia.icommunitylabs.com', password: 'orgadmin123', name: 'Org Admin E2E', role: 'ORG_ADMIN', organizationScope: true },
   { email: 'superadmin@datia.icommunitylabs.com', password: 'superadmin123', name: 'Super Admin E2E', role: 'SUPER_ADMIN' },
 ];
 
@@ -39,7 +41,7 @@ async function bootstrapE2EUsers() {
     console.log(`✅ Organization: ${org.name} (${org.slug})`);
     const companyId = await companyIdFor(prisma, org.id);
 
-    for (const { email, password, name, role } of USERS) {
+    for (const { email, password, name, role, organizationScope } of USERS) {
       const existing = await prisma.user.findUnique({ where: { email } });
       if (existing) {
         console.log(`⚠️  User already exists: ${email}`);
@@ -54,7 +56,7 @@ async function bootstrapE2EUsers() {
           role,
           status: 'ACTIVE',
           organizationId: org.id,
-          companyId,
+          companyId: organizationScope ? null : companyId,
           updatedAt: now,
         },
       });

@@ -124,7 +124,10 @@ export const userRepository: UserRepository = {
       const data: any = {};
       if (changes.name !== undefined) data.name = changes.name;
       if (changes.email !== undefined && changes.email !== null) data.email = changes.email;
-      if (changes.role !== undefined && changes.role !== null) data.role = changes.role;
+      // Only a company account can be given a role: the form that edits accounts
+      // always sends ADMIN, and applying it to the organization's own account
+      // would quietly demote it.
+      if (changes.role !== undefined && changes.role !== null && existing.role === 'ADMIN') data.role = changes.role;
       if (changes.phone !== undefined) data.phone = changes.phone;
       if (changes.notes !== undefined) data.notes = changes.notes;
       if (changes.passwordHash !== undefined && changes.passwordHash !== null) data.password = changes.passwordHash;
