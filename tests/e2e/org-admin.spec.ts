@@ -25,6 +25,26 @@ test.describe('Organization account', () => {
     await expect(page).toHaveURL(/\/superadmin\/companies$/);
   });
 
+  test('reads what a company holds, without acting on it', async ({ page }) => {
+    await page.goto('/superadmin/companies', { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: 'Datia E2E' }).click();
+
+    await expect(page).toHaveURL(/\/superadmin\/companies\/[^/]+$/);
+    await expect(page.getByRole('heading', { name: 'Datia E2E', level: 2 })).toBeVisible();
+    await expect(page.getByText(/solo lectura|read-only/i).first()).toBeVisible();
+    await expect(page.getByRole('row', { name: /Turbina eólica T-100/ })).toBeVisible();
+
+    await page.getByRole('tab', { name: /cuentas|accounts/i }).click();
+    await expect(page.getByRole('cell', { name: 'admin@datia.icommunitylabs.com', exact: true })).toBeVisible();
+
+    // Reading only: nothing here creates, edits or deletes.
+    await expect(page.getByRole('button', { name: /nuevo|new|crear|create|eliminar|delete/i })).toHaveCount(0);
+
+    // A company that is not one of its own shows nothing.
+    await page.goto('/superadmin/companies/no-es-de-esta-organizacion', { waitUntil: 'networkidle' });
+    await expect(page.getByRole('heading', { level: 2 })).toHaveCount(0);
+  });
+
   test('has no dashboard: its address leads back to the panel', async ({ page }) => {
     await page.goto('/dashboard/assets');
     await expect(page).toHaveURL(/\/superadmin\/companies$/);
