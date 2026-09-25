@@ -333,6 +333,43 @@
         "title": "¡Todo listo!",
         "redirecting": "Redirigiendo al dashboard..."
       }
+    },
+    "recovery": {
+      "emailLabel": "Correo electrónico",
+      "backToLogin": "Volver al inicio de sesión",
+      "forgotLink": "¿Has olvidado tu contraseña?",
+      "request": {
+        "title": "Recupera tu contraseña",
+        "description": "Indica el correo de tu cuenta y te enviaremos un enlace para elegir una contraseña nueva.",
+        "submit": "Enviar enlace"
+      },
+      "sent": {
+        "title": "Revisa tu correo",
+        "body": "Si {email} tiene una cuenta activa, en unos minutos recibirás un enlace para elegir una contraseña nueva.",
+        "hint": "El enlace es de un solo uso y caduca en una hora. Si no llega, mira en la carpeta de correo no deseado."
+      },
+      "reset": {
+        "title": "Elige una contraseña nueva",
+        "description": "Mínimo {min} caracteres.",
+        "passwordLabel": "Contraseña nueva",
+        "confirmLabel": "Repite la contraseña",
+        "submit": "Guardar contraseña"
+      },
+      "done": {
+        "title": "Contraseña actualizada",
+        "body": "Ya puedes iniciar sesión con la contraseña nueva."
+      },
+      "invalid": {
+        "title": "Enlace no válido",
+        "body": "Este enlace ya se ha usado o ha caducado.",
+        "askAgain": "Pedir un enlace nuevo"
+      },
+      "errors": {
+        "weakPassword": "La contraseña debe tener al menos {min} caracteres.",
+        "mismatch": "Las contraseñas no coinciden.",
+        "tooManyAttempts": "Demasiados intentos. Inténtalo de nuevo más tarde.",
+        "failed": "No se pudo completar la operación. Inténtalo de nuevo."
+      }
     }
   },
   "customer": {

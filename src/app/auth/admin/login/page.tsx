@@ -10,6 +10,7 @@ import { isDashboardRole } from '@/lib/auth/roles';
 
 function AdminLoginContent() {
   const t = useTranslations('auth.login.admin');
+  const tRecovery = useTranslations('auth.recovery');
   const tCommon = useTranslations('common.actions');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -69,6 +70,8 @@ function AdminLoginContent() {
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}
+      forgotLabel={tRecovery('forgotLink')}
+      forgotHref="/auth/forgot-password"
     />
   );
 }

@@ -2,6 +2,17 @@
  * Types for Mailgun service
  */
 
+export interface PasswordResetEmailData {
+  recipientEmail: string;
+  recipientName: string;
+  appName: string;
+  resetUrl: string;
+  /** Minutes the link stays valid, said in the email. */
+  expiresInMinutes: number;
+  appUrl?: string;
+  language?: 'es' | 'en';
+}
+
 export interface InvitationEmailData {
   recipientEmail: string;
   recipientName: string;

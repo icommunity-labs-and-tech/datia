@@ -1,4 +1,4 @@
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
 import { PrismaClient } from '../src/generated/prisma-e2e/index.js';
 import bcrypt from 'bcryptjs';
 import { companyIdFor } from './lib/company.mjs';
@@ -6,6 +6,9 @@ import { companyIdFor } from './lib/company.mjs';
 const prisma = new PrismaClient();
 
 const ORG_SLUG = 'datia-e2e';
+
+const RESET_EMAIL = 'reset-e2e@datia.icommunitylabs.com';
+const RESET_TOKEN = 'e2e-reset-token-known-value';
 
 const USERS = [
   { email: 'admin@datia.icommunitylabs.com', password: 'admin123', name: 'Admin E2E', role: 'ADMIN' },
@@ -61,6 +64,34 @@ async function bootstrapE2EUsers() {
         },
       });
       console.log(`✅ Created ${role}: ${email} / ${password}`);
+    }
+
+    // An account with a recovery link already outstanding, so the e2e can walk the
+    // reset flow (#36). The link is stored hashed, like the app does.
+    const resetUser = await prisma.user.findUnique({ where: { email: RESET_EMAIL } });
+    if (!resetUser) {
+      const created = await prisma.user.create({
+        data: {
+          id: randomUUID(),
+          email: RESET_EMAIL,
+          password: await bcrypt.hash('antigua-123', 10),
+          name: 'Reset E2E',
+          role: 'ADMIN',
+          status: 'ACTIVE',
+          organizationId: org.id,
+          companyId,
+          updatedAt: now,
+        },
+      });
+      await prisma.passwordResetToken.create({
+        data: {
+          id: randomUUID(),
+          userId: created.id,
+          tokenHash: createHash('sha256').update(RESET_TOKEN).digest('hex'),
+          expiresAt: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+        },
+      });
+      console.log(`✅ Created ${RESET_EMAIL} with a recovery link`);
     }
 
     for (const [index, name] of ITEMS.entries()) {

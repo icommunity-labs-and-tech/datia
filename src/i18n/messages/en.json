@@ -333,6 +333,43 @@
         "title": "All set!",
         "redirecting": "Redirecting to dashboard..."
       }
+    },
+    "recovery": {
+      "emailLabel": "Email",
+      "backToLogin": "Back to sign in",
+      "forgotLink": "Forgot your password?",
+      "request": {
+        "title": "Recover your password",
+        "description": "Enter your account's email and we will send you a link to choose a new password.",
+        "submit": "Send link"
+      },
+      "sent": {
+        "title": "Check your email",
+        "body": "If {email} has an active account, you will get a link to choose a new password in a few minutes.",
+        "hint": "The link can be used once and expires in an hour. If it does not arrive, check your spam folder."
+      },
+      "reset": {
+        "title": "Choose a new password",
+        "description": "At least {min} characters.",
+        "passwordLabel": "New password",
+        "confirmLabel": "Repeat the password",
+        "submit": "Save password"
+      },
+      "done": {
+        "title": "Password updated",
+        "body": "You can now sign in with the new password."
+      },
+      "invalid": {
+        "title": "Invalid link",
+        "body": "This link has already been used or has expired.",
+        "askAgain": "Ask for a new link"
+      },
+      "errors": {
+        "weakPassword": "The password must be at least {min} characters.",
+        "mismatch": "The passwords do not match.",
+        "tooManyAttempts": "Too many attempts. Try again later.",
+        "failed": "The operation could not be completed. Try again."
+      }
     }
   },
   "customer": {

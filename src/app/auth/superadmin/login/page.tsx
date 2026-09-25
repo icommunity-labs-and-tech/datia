@@ -10,6 +10,7 @@ const SUPERADMIN_COLOR = '#b91c1c';
 
 export default function SuperAdminLoginPage() {
   const t = useTranslations('auth.login.superadmin');
+  const tRecovery = useTranslations('auth.recovery');
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -61,6 +62,8 @@ export default function SuperAdminLoginPage() {
       onEmailChange={setEmail}
       onPasswordChange={setPassword}
       onSubmit={handleSubmit}
+      forgotLabel={tRecovery('forgotLink')}
+      forgotHref="/auth/forgot-password"
     />
   );
 }
