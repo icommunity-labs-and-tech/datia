@@ -137,12 +137,17 @@ model Notification {
 /// what it registers — assets, tokens, webhooks, events and proofs (#20). It
 /// belongs to a single organization.
 model Company {
-  id             String       @id @default(uuid())
-  organizationId String
-  name           String
-  active         Boolean      @default(true)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
+  id                 String             @id @default(uuid())
+  organizationId     String
+  name               String
+  active             Boolean            @default(true)
+  // KYC propio de la empresa (#23): antes vivía en Organization, con una sola
+  // firma por organización. Cada empresa certifica con la suya.
+  signatureID        String?
+  kycURL             String?
+  verificationStatus VerificationStatus @default(NOT_VERIFIED)
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
 
   Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   Asset          Asset[]
@@ -155,6 +160,7 @@ model Company {
 
   @@unique([organizationId, name])
   @@index([organizationId])
+  @@index([signatureID])
 }
 
 model Organization {
