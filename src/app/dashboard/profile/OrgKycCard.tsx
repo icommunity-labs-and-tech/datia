@@ -4,27 +4,27 @@ import { Alert, Badge, Button, Card, Group, Stack, Text } from '@mantine/core';
 import { IconAlertTriangle, IconCircleCheck, IconClock, IconInfoCircle, IconRefresh } from '@tabler/icons-react';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { retryOrganizationKyc } from '@/actions/organizations/retry-organization-kyc';
+import { retryCompanyKyc } from '@/actions/kyc/retry';
 
 interface Props {
-  organization: {
+  company: {
     name: string;
     verificationStatus: string;
     kycURL?: string | null;
   };
 }
 
-export default function OrgKycCard({ organization }: Props) {
+export default function OrgKycCard({ company }: Props) {
   const t = useTranslations('profile');
   const [retrying, setRetrying] = useState(false);
   const [retryError, setRetryError] = useState<string | null>(null);
-  const [status, setStatus] = useState(organization.verificationStatus);
+  const [status, setStatus] = useState(company.verificationStatus);
 
   const handleRetryKyc = async () => {
     setRetrying(true);
     setRetryError(null);
     try {
-      const result = await retryOrganizationKyc();
+      const result = await retryCompanyKyc();
       if (result.success) {
         if (result.kycURL) {
           window.open(result.kycURL, '_blank', 'noopener,noreferrer');
@@ -57,8 +57,8 @@ export default function OrgKycCard({ organization }: Props) {
     <Card p="lg" radius="md">
       <Stack gap="sm">
         <Group justify="space-between" wrap="nowrap">
-          <Text size="sm" c="dimmed">{t('kyc.organization').replace(':', '')}</Text>
-          <Text size="sm" fw={550}>{organization.name}</Text>
+          <Text size="sm" c="dimmed">{t('kyc.company').replace(':', '')}</Text>
+          <Text size="sm" fw={550}>{company.name}</Text>
         </Group>
         <Group justify="space-between" wrap="nowrap">
           <Text size="sm" c="dimmed">{t('kyc.status').replace(':', '')}</Text>

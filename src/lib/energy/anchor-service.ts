@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { issueCertification } from '@/lib/certification';
+import { companyKycStatus } from '@/lib/kyc/company-status';
 import { scopeWhere, type Scope } from '@/lib/scope';
 
 /**
@@ -57,7 +58,7 @@ const EMISSION_SELECT = {
       consumptionKwh: true,
       measurementStandard: true,
       EnergySource: {
-        select: { id: true, name: true, Asset: { select: { id: true, name: true } } },
+        select: { id: true, name: true, Asset: { select: { id: true, name: true, companyId: true } } },
       },
     },
   },
@@ -78,23 +79,21 @@ type EmissionRow = {
     periodEnd: Date;
     consumptionKwh: number;
     measurementStandard: string | null;
-    EnergySource: { id: string; name: string; Asset: { id: string; name: string } };
+    EnergySource: { id: string; name: string; Asset: { id: string; name: string; companyId: string | null } };
   };
 };
 
 /**
- * Loads what anchoring needs, or nothing when the organisation cannot sign.
+ * Loads what anchoring needs, or nothing when the company cannot sign (#23).
  * Without a verified identity there is nobody to sign the evidence, and records
  * stay pending rather than being marked certified on a signature that is not.
  */
-async function loadContext(organizationId: string): Promise<AnchorContext | null> {
-  const org = await prisma.organization.findUnique({
-    where: { id: organizationId },
-    select: { signatureID: true, verificationStatus: true },
-  });
-  if (!org?.signatureID || org.verificationStatus !== 'VERIFIED') return null;
+async function loadContext(companyId: string | null): Promise<AnchorContext | null> {
+  if (!companyId) return null;
+  const status = await companyKycStatus(companyId);
+  if (!status.signatureID || !status.verified) return null;
 
-  return { signatureID: org.signatureID };
+  return { signatureID: status.signatureID };
 }
 
 /** The period a reading covers, rendered for a title a person can read. */
@@ -180,9 +179,6 @@ export async function anchorEmissionById(
   emissionId: string
 ): Promise<AnchorDetail | null> {
   try {
-    const ctx = await loadContext(scope.organizationId);
-    if (!ctx) return null;
-
     const emission = (await prisma.emissionRecord.findFirst({
       where: {
         id: emissionId,
@@ -194,6 +190,12 @@ export async function anchorEmissionById(
       select: EMISSION_SELECT,
     })) as EmissionRow | null;
     if (!emission) return null;
+
+    // The signature that matters is the one of the company the asset actually
+    // belongs to — not the scope's, which for an organisation-level token
+    // covers every company and would otherwise pick an arbitrary one.
+    const ctx = await loadContext(emission.EnergyConsumption.EnergySource.Asset.companyId);
+    if (!ctx) return null;
 
     return await anchorOne(scope, emission, ctx);
   } catch {

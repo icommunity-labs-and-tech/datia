@@ -3,10 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, Button, Alert, Spinner } from '@/components/legacy/bootstrap-compat';
 import { useLocale } from 'next-intl';
-import { checkKycStatus } from '@/actions/organizations/check-kyc-status';
+import { checkKycStatus } from '@/actions/kyc/status';
 
 interface KycStepProps {
-  organizationId: string;
+  companyId: string;
   activationToken: string;
   kycURL: string | null;
   initialStatus: 'NOT_VERIFIED' | 'WAITING' | 'VERIFIED' | 'REJECTED';
@@ -17,7 +17,7 @@ interface KycStepProps {
 }
 
 export default function KycStep({
-  organizationId,
+  companyId,
   activationToken,
   kycURL,
   initialStatus,
@@ -95,7 +95,7 @@ export default function KycStep({
     } catch (err) {
       console.error('Error checking KYC status:', err);
     }
-  }, [organizationId, showEmbedded, onVerified]);
+  }, [companyId, showEmbedded, onVerified]);
 
   // Verificar estado inicial al montar
   useEffect(() => {

@@ -1,13 +1,16 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { isDashboardRole, isOrganizationRole } from '@/lib/auth/roles';
 
 export interface OnboardingInfo {
   isFirstAdmin: boolean;
+  /** Decides where activation lands: ORG_ADMIN has no dashboard, it has its own panel. */
+  role: string;
   userName: string;
   organizationName: string;
   organizationId: string;
+  companyId: string | null;
+  companyName: string | null;
   kycURL: string | null;
   verificationStatus: "NOT_VERIFIED" | "WAITING" | "VERIFIED" | "REJECTED";
   tokenValid: boolean;
@@ -22,8 +25,10 @@ export interface GetOnboardingInfoResult {
 }
 
 /**
- * Obtiene información necesaria para el onboarding desde el token de activación
- * Determina si el usuario es el primer admin y retorna información relevante
+ * Obtiene información necesaria para el onboarding desde el token de
+ * activación. Determina si el usuario es el primer administrador de su
+ * empresa — solo una cuenta de empresa hace KYC (#23); la cuenta de
+ * organización (ORG_ADMIN) no tiene empresa y nunca lo completa.
  */
 export async function getOnboardingInfo(
   activationToken: string
@@ -45,12 +50,17 @@ export async function getOnboardingInfo(
             id: true,
             name: true,
             active: true,
-            signatureID: true,
+          },
+        },
+        Company: {
+          select: {
+            id: true,
+            name: true,
             kycURL: true,
             verificationStatus: true,
             User: {
               where: {
-                role: { in: ['ADMIN', 'ORG_ADMIN'] },
+                role: 'ADMIN',
               },
               orderBy: {
                 createdAt: "asc",
@@ -80,15 +90,15 @@ export async function getOnboardingInfo(
     // Verificar si ya está activado
     const alreadyActivated = user.status === "ACTIVE" && user.password !== null;
 
-    // Verificar si es el primer admin
+    // Verificar si es el primer admin de su empresa
     // Es primer admin si:
-    // 1. Es ADMIN o ORG_ADMIN
-    // 2. Es el primer usuario ADMIN creado en la organización (ordenado por createdAt)
+    // 1. Es ADMIN (cuenta de empresa; ORG_ADMIN no tiene empresa)
+    // 2. Es el primer usuario ADMIN creado en la empresa (ordenado por createdAt)
     const isFirstAdmin =
-      (isDashboardRole(user.role) || isOrganizationRole(user.role)) &&
-      user.Organization !== null &&
-      user.Organization.User.length > 0 &&
-      user.Organization.User[0].id === user.id;
+      user.role === 'ADMIN' &&
+      user.Company !== null &&
+      user.Company.User.length > 0 &&
+      user.Company.User[0].id === user.id;
 
     if (!user.Organization) {
       return {
@@ -101,11 +111,14 @@ export async function getOnboardingInfo(
       success: true,
       info: {
         isFirstAdmin,
+        role: user.role,
         userName: user.name,
         organizationName: user.Organization.name,
         organizationId: user.Organization.id,
-        kycURL: user.Organization.kycURL,
-        verificationStatus: user.Organization.verificationStatus,
+        companyId: user.Company?.id ?? null,
+        companyName: user.Company?.name ?? null,
+        kycURL: user.Company?.kycURL ?? null,
+        verificationStatus: user.Company?.verificationStatus ?? 'NOT_VERIFIED',
         tokenValid: true,
         tokenExpired,
         alreadyActivated,

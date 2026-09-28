@@ -10,7 +10,7 @@ import { requireScope } from '@/lib/auth/tenant';
 import {
   AssetInputError,
   AssetAlreadyExistsError,
-  OrganizationNotVerifiedError,
+  CompanyNotVerifiedError,
   AssetCreationRollbackError,
 } from '@/domain/assets/errors';
 
@@ -68,7 +68,7 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
     if (
       error instanceof AssetInputError ||
       error instanceof AssetAlreadyExistsError ||
-      error instanceof OrganizationNotVerifiedError ||
+      error instanceof CompanyNotVerifiedError ||
       error instanceof AssetCreationRollbackError
     ) {
       return { success: false, error: error.message };

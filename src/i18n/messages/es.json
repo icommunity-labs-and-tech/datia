@@ -662,6 +662,7 @@
       "title": "Verificación de Identidad (KYC)",
       "orgVerificationStatus": "Estado de Verificación de la Organización",
       "organization": "Organización:",
+      "company": "Empresa:",
       "status": "Estado:",
       "verified": "Verificado",
       "waiting": "En proceso",
@@ -675,7 +676,7 @@
       "retry": "Reintentar KYC",
       "retrying": "Creando nueva firma...",
       "noUrlError": "No se pudo obtener una URL de verificación. Por favor, intenta más tarde.",
-      "verifiedMessage": "Tu organización está verificada. Ya puedes certificar en blockchain.",
+      "verifiedMessage": "Tu empresa está verificada. Ya puedes certificar en blockchain.",
       "needKycNote": "Necesitarás completar el KYC para poder certificar en blockchain."
     },
     "password": {

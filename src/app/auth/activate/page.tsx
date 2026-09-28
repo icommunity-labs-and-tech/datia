@@ -76,9 +76,11 @@ function ActivateAccountForm() {
   // Estados para información de onboarding
   const [onboardingInfo, setOnboardingInfo] = useState<{
     isFirstAdmin: boolean;
+    role: string;
     userName: string;
     organizationName: string;
     organizationId: string;
+    companyId: string | null;
     kycURL: string | null;
     verificationStatus: 'NOT_VERIFIED' | 'WAITING' | 'VERIFIED' | 'REJECTED';
   } | null>(null);
@@ -186,18 +188,22 @@ function ActivateAccountForm() {
         }
 
         if (info.alreadyActivated) {
-          // Si ya está activado, limpiar estado guardado y redirigir
+          // Si ya está activado, limpiar estado guardado y redirigir. La cuenta
+          // de organización (sin empresa) tiene su propio panel.
           clearOnboardingState();
-          router.push('/auth/admin/login?message=account-activated');
+          const loginPath = info.role === 'ORG_ADMIN' ? '/auth/superadmin/login' : '/auth/admin/login';
+          router.push(`${loginPath}?message=account-activated`);
           return;
         }
 
         setTokenValid(true);
         setOnboardingInfo({
           isFirstAdmin: info.isFirstAdmin,
+          role: info.role,
           userName: info.userName,
           organizationName: info.organizationName,
           organizationId: info.organizationId,
+          companyId: info.companyId,
           kycURL: info.kycURL,
           verificationStatus: info.verificationStatus,
         });
@@ -311,9 +317,11 @@ function ActivateAccountForm() {
 
       if (data.success) {
         // Si es primer admin, el flujo continúa en el paso 4 (completado)
-        // Si no es primer admin, redirigir al login
+        // Si no es primer admin, redirigir al login: la cuenta de organización
+        // (ORG_ADMIN, sin empresa) tiene su propio panel, no el dashboard.
         if (!onboardingInfo?.isFirstAdmin) {
-          router.push('/auth/admin/login?message=account-activated');
+          const loginPath = onboardingInfo?.role === 'ORG_ADMIN' ? '/auth/superadmin/login' : '/auth/admin/login';
+          router.push(`${loginPath}?message=account-activated`);
         }
         // Para primer admin, handleKycVerified maneja la activación y avance al paso 4
       } else {
@@ -1091,7 +1099,7 @@ function ActivateAccountForm() {
             {currentStep === 3 && (
               <div>
                 <KycStep
-                  organizationId={onboardingInfo.organizationId}
+                  companyId={onboardingInfo.companyId!}
                   activationToken={token!}
                   kycURL={onboardingInfo.kycURL}
                   initialStatus={onboardingInfo.verificationStatus}

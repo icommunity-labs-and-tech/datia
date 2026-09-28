@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 
 vi.mock('@/lib/prisma', () => ({
-  prisma: { organization: { updateMany: vi.fn(async () => ({ count: 1 })) } },
+  prisma: { company: { updateMany: vi.fn(async () => ({ count: 1 })) } },
 }));
 
 vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
@@ -13,12 +13,12 @@ vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
 
 const SIG = 'sig_DkudvEreeP6kv4C8EMpwEK';
 const getSignature = icommunityService.getSignature as ReturnType<typeof vi.fn>;
-const updateMany = prisma.organization.updateMany as unknown as ReturnType<typeof vi.fn>;
+const updateMany = prisma.company.updateMany as unknown as ReturnType<typeof vi.fn>;
 
 describe('applySignatureVerification', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('verifies the organization when iBS reports success', async () => {
+  it('verifies the company when iBS reports success', async () => {
     getSignature.mockResolvedValueOnce({ id: SIG, status: 'success' });
 
     await expect(applySignatureVerification(SIG)).resolves.toBe(true);
@@ -29,7 +29,7 @@ describe('applySignatureVerification', () => {
     });
   });
 
-  it('rejects the organization when iBS reports failed', async () => {
+  it('rejects the company when iBS reports failed', async () => {
     getSignature.mockResolvedValueOnce({ id: SIG, status: 'failed' });
 
     await expect(applySignatureVerification(SIG)).resolves.toBe(true);
@@ -53,7 +53,7 @@ describe('applySignatureVerification', () => {
     expect(updateMany).not.toHaveBeenCalled();
   });
 
-  it('reports no change when the organization already had that status', async () => {
+  it('reports no change when the company already had that status', async () => {
     getSignature.mockResolvedValueOnce({ id: SIG, status: 'success' });
     updateMany.mockResolvedValueOnce({ count: 0 });
 

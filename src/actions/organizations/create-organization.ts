@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { isSuperAdmin } from "@/lib/auth/tenant";
 import { sendInvitationEmail } from "./helpers";
-import { icommunityService } from "@/infrastructure/icommunity/ICommunityServiceImpl";
+import { startCompanySignature } from "@/lib/kyc/create-company-signature";
 import crypto from "crypto";
 
 export interface CreateOrganizationInput {
@@ -112,31 +112,16 @@ export async function createOrganizationWithAdmin(
     // Generar token de activación
     const activationToken = crypto.randomBytes(32).toString("hex");
     const activationExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días
-    
-    // Crear firma en iCommunity para la organización con webhooks configurados
-    let signatureID: string | null = null;
-    let kycURL: string | null = null;
-    try {
-      // Obtener la URL base de la aplicación para los webhooks
-      const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.VERCEL_URL 
-        ? `https://${process.env.VERCEL_URL}` 
-        : process.env.APP_URL || 'http://localhost:3000';
-      
-      const okUrl = `${baseUrl}/api/hooks/signature/ok`;
-      const koUrl = `${baseUrl}/api/hooks/signature/ko`;
-      
-      const signatureResult = await icommunityService.createSignature(input.name, okUrl, koUrl);
-      signatureID = signatureResult.signature_id;
-      kycURL = signatureResult.url || null;
-    } catch (error) {
-      console.error("Error creating signature for organization:", error);
-      // Continuar sin firma - se puede crear después
-    }
-    
+
+    // La firma es de la empresa, no de la organización (#23): quien certifica
+    // es la empresa por defecto que se crea a continuación.
+    const signature = await startCompanySignature(input.name);
+    const kycURL = signature.kycURL;
+
     // Crear organización y admin en una transacción
     // Si falla el email después, se eliminará todo
     const result = await prisma.$transaction(async (tx) => {
-      // Crear organización con KYC
+      // Crear organización, sin KYC propio
       const now = new Date();
       const organization = await tx.organization.create({
         data: {
@@ -144,17 +129,20 @@ export async function createOrganizationWithAdmin(
           name: input.name,
           slug: slug,
           active: true,
-          signatureID: signatureID,
-          kycURL: kycURL,
-          verificationStatus: signatureID ? 'WAITING' : 'NOT_VERIFIED',
           updatedAt: now,
         },
       });
-      
+
       // Toda organización tiene su empresa por defecto (#20): a ella pertenece
-      // lo que registre su primera cuenta.
+      // lo que registre su primera cuenta, y es ella la que certifica.
       const company = await tx.company.create({
-        data: { organizationId: organization.id, name: organization.name },
+        data: {
+          organizationId: organization.id,
+          name: organization.name,
+          signatureID: signature.signatureID,
+          kycURL: signature.kycURL,
+          verificationStatus: signature.verificationStatus,
+        },
       });
 
       // Crear primer admin (PENDING, sin password aún). Opera la organización,

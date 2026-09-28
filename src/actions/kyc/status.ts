@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { requireOrganizationId } from "@/lib/auth/tenant";
+import { requireScope } from "@/lib/auth/tenant";
 
 export interface KycStatusResult {
   success: boolean;
@@ -11,34 +11,34 @@ export interface KycStatusResult {
 }
 
 /**
- * Estado del KYC de la organización de la sesión. Se llama durante el
- * onboarding, cuando la activación ya ha abierto sesión; antes aceptaba
- * cualquier organizationId sin sesión y devolvía su kycURL.
+ * Estado del KYC de la empresa de la sesión (#23). Se llama durante el
+ * onboarding, cuando la activación ya ha abierto sesión; antes leía el de la
+ * organización entera, con una sola firma para todas sus empresas.
  */
 export async function checkKycStatus(): Promise<KycStatusResult> {
   try {
-    const organizationIdToCheck = await requireOrganizationId();
+    const scope = await requireScope();
 
-    // Obtener estado de la organización
-    const organization = await prisma.organization.findUnique({
-      where: { id: organizationIdToCheck },
+    const company = await prisma.company.findUnique({
+      // requireScope ya garantiza que hay empresa: sin ella habría lanzado.
+      where: { id: scope.companyId! },
       select: {
         verificationStatus: true,
         kycURL: true,
       },
     });
 
-    if (!organization) {
+    if (!company) {
       return {
         success: false,
-        error: "Organización no encontrada",
+        error: "Empresa no encontrada",
       };
     }
 
     return {
       success: true,
-      verificationStatus: organization.verificationStatus,
-      kycURL: organization.kycURL,
+      verificationStatus: company.verificationStatus,
+      kycURL: company.kycURL,
     };
   } catch (error) {
     console.error("Error checking KYC status:", error);

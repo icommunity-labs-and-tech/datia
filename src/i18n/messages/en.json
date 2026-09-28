@@ -662,6 +662,7 @@
       "title": "Identity Verification (KYC)",
       "orgVerificationStatus": "Organization Verification Status",
       "organization": "Organization:",
+      "company": "Company:",
       "status": "Status:",
       "verified": "Verified",
       "waiting": "In progress",
@@ -675,7 +676,7 @@
       "retry": "Retry KYC",
       "retrying": "Creating new signature...",
       "noUrlError": "Could not obtain a verification URL. Please try again later.",
-      "verifiedMessage": "Your organisation is verified. You can now certify on blockchain.",
+      "verifiedMessage": "Your company is verified. You can now certify on blockchain.",
       "needKycNote": "You will need to complete KYC before you can certify on blockchain."
     },
     "password": {
