@@ -5,12 +5,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * (#20): a company account cannot create its own siblings.
  */
 
-const { mockPrisma, mockVerify, mockInvite } = vi.hoisted(() => ({
+const { mockPrisma, mockVerify, mockInvite, mockSignature } = vi.hoisted(() => ({
   mockPrisma: {
     company: { findFirst: vi.fn(), create: vi.fn(), findMany: vi.fn() },
   },
   mockVerify: vi.fn(),
   mockInvite: vi.fn(),
+  mockSignature: vi.fn(),
 }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
@@ -21,6 +22,7 @@ vi.mock('next/headers', () => ({
 }));
 vi.mock('@/lib/auth/organization/jwt', () => ({ verifyOrganizationJWT: mockVerify }));
 vi.mock('@/actions/organizations/invite-account', () => ({ inviteAccount: mockInvite }));
+vi.mock('@/lib/kyc/create-company-signature', () => ({ startCompanySignature: mockSignature }));
 
 import { createCompany } from '@/actions/companies/create';
 import { listCompanies } from '@/actions/companies/list';
@@ -35,14 +37,22 @@ beforeEach(() => {
   // Like the real client with `select: { id, name }`.
   mockPrisma.company.create.mockImplementation(async ({ data }: any) => ({ id: 'co-new', name: data.name }));
   mockInvite.mockResolvedValue({ success: true });
+  mockSignature.mockResolvedValue({ signatureID: 'sig-new', kycURL: 'https://kyc.test/new', verificationStatus: 'WAITING' });
 });
 
 describe('createCompany', () => {
-  it('creates the company inside the organization of the account', async () => {
+  it('creates the company inside the organization of the account, with its own signature', async () => {
     const result = await createCompany({ name: '  Filial Norte ' });
 
     expect(result).toEqual({ success: true, company: { id: 'co-new', name: 'Filial Norte' } });
-    expect(mockPrisma.company.create.mock.calls[0][0].data).toEqual({ organizationId: 'org-1', name: 'Filial Norte' });
+    expect(mockSignature).toHaveBeenCalledWith('Filial Norte');
+    expect(mockPrisma.company.create.mock.calls[0][0].data).toEqual({
+      organizationId: 'org-1',
+      name: 'Filial Norte',
+      signatureID: 'sig-new',
+      kycURL: 'https://kyc.test/new',
+      verificationStatus: 'WAITING',
+    });
     expect(mockInvite).not.toHaveBeenCalled();
   });
 

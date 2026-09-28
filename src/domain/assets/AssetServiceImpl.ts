@@ -1,5 +1,5 @@
 import { AssetService, type CreateAssetRequest, type AssetResponse } from './AssetService';
-import { AssetCreationRollbackError, AssetInputError, AssetAlreadyExistsError, OrganizationNotVerifiedError } from './errors';
+import { AssetCreationRollbackError, AssetInputError, AssetAlreadyExistsError, CompanyNotVerifiedError } from './errors';
 import type { AssetRepository } from './AssetRepository';
 import type { UserRepository } from '../users/UserRepository';
 import type { EvidenceService } from '../evidence/EvidenceService';
@@ -69,7 +69,7 @@ export function createAssetServiceImpl(deps: {
       } catch (error) {
         if (error instanceof AssetInputError || 
             error instanceof AssetAlreadyExistsError || 
-            error instanceof OrganizationNotVerifiedError || 
+            error instanceof CompanyNotVerifiedError ||
             error instanceof AssetCreationRollbackError) {
           throw error;
         }

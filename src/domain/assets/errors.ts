@@ -22,11 +22,11 @@ export class UserNotVerifiedError extends Error {
   }
 }
 
-export class OrganizationNotVerifiedError extends Error {
-  readonly _tag = 'OrganizationNotVerifiedError';
-  constructor(public readonly organizationId: string, public readonly reason: 'no_signature' | 'not_verified', message: string) {
+export class CompanyNotVerifiedError extends Error {
+  readonly _tag = 'CompanyNotVerifiedError';
+  constructor(public readonly companyId: string, public readonly reason: 'no_signature' | 'not_verified', message: string) {
     super(message);
-    this.name = 'OrganizationNotVerifiedError';
+    this.name = 'CompanyNotVerifiedError';
   }
 }
 

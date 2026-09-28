@@ -10,7 +10,7 @@ import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepos
 import { userRepository } from '@/infrastructure/prisma/repositories/UserRepositoryPrisma';
 import { createEvidenceServiceImpl } from '@/domain/evidence/EvidenceServiceImpl';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
-import { OrganizationNotVerifiedError } from '@/domain/assets/errors';
+import { CompanyNotVerifiedError } from '@/domain/assets/errors';
 import { revalidatePath } from 'next/cache';
 import { MAX_CSV_FILE_SIZE, MAX_CSV_ROWS, formatFileSize, formatMaxFileSize } from './csvImportLimits';
 
@@ -157,8 +157,8 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
         const errorMessage = error instanceof Error ? error.message : String(error);
         errors.push(`Línea ${row.line}: Error al crear asset "${row.id}": ${errorMessage}`);
         
-        // Si es un error crítico (organización no verificada), detener la importación
-        if (error instanceof OrganizationNotVerifiedError) {
+        // Si es un error crítico (empresa sin KYC), detener la importación
+        if (error instanceof CompanyNotVerifiedError) {
           throw error;
         }
       }

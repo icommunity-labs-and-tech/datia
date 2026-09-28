@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { prisma } from '@/lib/prisma';
 import { requireOrganizationAccount } from './access';
 import { inviteAccount } from '@/actions/organizations/invite-account';
+import { startCompanySignature } from '@/lib/kyc/create-company-signature';
 
 export interface CreateCompanyInput {
   name: string;
@@ -44,11 +45,21 @@ export async function createCompany(input: CreateCompanyInput): Promise<CreateCo
     const taken = await prisma.company.findFirst({ where: { organizationId, name }, select: { id: true } });
     if (taken) return { success: false, error: 'name_taken' };
 
+    // La empresa certifica con su propia firma (#23): se arranca ahora, para
+    // que esté lista cuando active su primera cuenta.
+    const signature = await startCompanySignature(name);
+
     const company = await prisma.company.create({
-      data: { organizationId, name },
+      data: {
+        organizationId,
+        name,
+        signatureID: signature.signatureID,
+        kycURL: signature.kycURL,
+        verificationStatus: signature.verificationStatus,
+      },
       select: { id: true, name: true },
     });
-    revalidatePath('/dashboard/companies');
+    revalidatePath('/superadmin/companies');
 
     if (admin) {
       const invited = await inviteAccount(actor, {

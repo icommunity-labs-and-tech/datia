@@ -61,6 +61,8 @@ export default function OrganizationSettings({ user }: { user: any }) {
   const t = useTranslations('settings');
   const tProfile = useTranslations('profile');
   const org = user?.Organization ?? null;
+  // El KYC es de la empresa, no de la organización (#23).
+  const company = user?.Company ?? null;
   const [logoUrl, setLogoUrl] = useState<string | null>(org?.logoUrl ?? null);
 
   const isAdmin = isDashboardRole(user?.role);
@@ -91,16 +93,16 @@ export default function OrganizationSettings({ user }: { user: any }) {
                     value={
                       <Badge
                         variant="light"
-                        color={org?.verificationStatus === 'VERIFIED' ? 'green' : 'yellow'}
+                        color={company?.verificationStatus === 'VERIFIED' ? 'green' : 'yellow'}
                       >
-                        {org?.verificationStatus === 'VERIFIED'
+                        {company?.verificationStatus === 'VERIFIED'
                           ? tProfile('kyc.verified')
                           : tProfile('kyc.notVerified')}
                       </Badge>
                     }
                   />
-                  {org?.signatureID && (
-                    <Field label={t('signatureId')} value={<Text size="xs" ff="monospace">{org.signatureID}</Text>} />
+                  {company?.signatureID && (
+                    <Field label={t('signatureId')} value={<Text size="xs" ff="monospace">{company.signatureID}</Text>} />
                   )}
                 </Stack>
               </Card>
@@ -143,11 +145,11 @@ export default function OrganizationSettings({ user }: { user: any }) {
               </Card>
             </Section>
 
-            {/* Verified organisations already show their status above — the KYC
+            {/* A verified company already shows its status above — the KYC
                 panel only earns its space while something is pending. */}
-            {org && org.verificationStatus !== 'VERIFIED' && (
+            {company && company.verificationStatus !== 'VERIFIED' && (
               <Section icon={IconShieldCheck} title={tProfile('kyc.title')}>
-                <OrgKycCard organization={org} />
+                <OrgKycCard company={company} />
               </Section>
             )}
 

@@ -37,18 +37,6 @@ export async function activateAccount(
             id: true,
             name: true,
             active: true,
-            verificationStatus: true,
-            User: {
-              where: {
-                role: { in: ['ADMIN', 'ORG_ADMIN'] },
-              },
-              orderBy: {
-                createdAt: "asc",
-              },
-              select: {
-                id: true,
-              },
-            },
           },
         },
       },

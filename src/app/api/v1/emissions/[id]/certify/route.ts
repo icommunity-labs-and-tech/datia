@@ -3,6 +3,7 @@ import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { prisma } from '@/lib/prisma';
 import { anchorEmissionById } from '@/lib/energy/anchor-service';
 import { certificationSummary } from '@/lib/certification';
+import { companyKycStatus } from '@/lib/kyc/company-status';
 import { authScope, scopeWhere } from '@/lib/scope';
 
 /**
@@ -27,7 +28,11 @@ export async function POST(
       id,
       EnergyConsumption: { EnergySource: { Asset: scopeWhere(authScope(auth)) } },
     },
-    select: { id: true, Certification: true },
+    select: {
+      id: true,
+      Certification: true,
+      EnergyConsumption: { select: { EnergySource: { select: { Asset: { select: { companyId: true } } } } } },
+    },
   });
 
   if (!emission) {
@@ -41,20 +46,20 @@ export async function POST(
     );
   }
 
-  const org = await prisma.organization.findUnique({
-    where: { id: auth.organizationId },
-    select: { signatureID: true, verificationStatus: true },
-  });
+  // The company that owns the asset is the one that signs — not the token's,
+  // which for an organisation-level token covers every company (#23).
+  const companyId = emission.EnergyConsumption.EnergySource.Asset.companyId;
+  const signature = companyId ? await companyKycStatus(companyId) : { signatureID: null, verified: false };
 
-  if (!org?.signatureID) {
+  if (!signature.signatureID) {
     return NextResponse.json(
-      { error: 'Organization has no signature ID. Complete KYC before certifying emissions.' },
+      { error: 'Company has no signature ID. Complete its KYC before certifying emissions.' },
       { status: 422 }
     );
   }
 
-  if (org.verificationStatus !== 'VERIFIED') {
-    return NextResponse.json({ error: 'Organization verification is not complete.' }, { status: 422 });
+  if (!signature.verified) {
+    return NextResponse.json({ error: 'Company verification is not complete.' }, { status: 422 });
   }
 
   const anchored = await anchorEmissionById(authScope(auth), id);

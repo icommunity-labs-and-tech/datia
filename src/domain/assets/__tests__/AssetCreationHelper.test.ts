@@ -2,16 +2,14 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { createAssetWithEvidence } from '../AssetCreationHelper';
 import { getCurrentUserWithDetails } from '@/lib/auth/shared/session';
 
-vi.mock('@/lib/prisma', () => ({
-  prisma: {
-    organization: {
-      findUnique: vi.fn(async ({ where }: { where: { id: string } }) => ({
-        id: where.id,
-        signatureID: `sig_${where.id}`,
-        verificationStatus: 'VERIFIED',
-      })),
-    },
-  },
+// The company the write will land in — a pass-through here, since the tests
+// below always give a scope that already carries one.
+vi.mock('@/lib/company', () => ({
+  companyFor: vi.fn(async (scope: { companyId: string }) => scope.companyId),
+}));
+
+vi.mock('@/lib/kyc/company-status', () => ({
+  companyKycStatus: vi.fn(async (companyId: string) => ({ signatureID: `sig_${companyId}`, verified: true })),
 }));
 
 vi.mock('@/lib/auth/shared/session', () => ({ getCurrentUserWithDetails: vi.fn() }));
@@ -54,7 +52,7 @@ const input = (organizationId: string, id: string, extra: Record<string, unknown
 describe('createAssetWithEvidence', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('keeps two concurrent creations in their own organizations', async () => {
+  it('keeps two concurrent creations in their own companies', async () => {
     const deps = makeDeps();
 
     await Promise.all([
@@ -72,7 +70,7 @@ describe('createAssetWithEvidence', () => {
     const signedWith = deps.evidenceService.createItemEvidence.mock.calls
       .map(([args]: any[]) => args.signatureID)
       .sort();
-    expect(signedWith).toEqual(['sig_org-a', 'sig_org-b']);
+    expect(signedWith).toEqual(['sig_co-org-a', 'sig_co-org-b']);
   });
 
   it('records no creator for API calls without looking at the session', async () => {
@@ -95,5 +93,29 @@ describe('createAssetWithEvidence', () => {
     expect(deps.assetRepository.create).toHaveBeenCalledWith(
       expect.objectContaining({ scope: scopeOf('org-a'), createdByUserId: 'user-1' })
     );
+  });
+
+  it('refuses a company with no signature yet, without writing anything', async () => {
+    const { companyKycStatus } = await import('@/lib/kyc/company-status');
+    (companyKycStatus as any).mockResolvedValueOnce({ signatureID: null, verified: false });
+    const deps = makeDeps();
+
+    await expect(createAssetWithEvidence(deps, input('org-a', 'item-a'))).rejects.toMatchObject({
+      name: 'CompanyNotVerifiedError',
+      reason: 'no_signature',
+    });
+    expect(deps.assetRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('refuses a company whose signature is not yet verified', async () => {
+    const { companyKycStatus } = await import('@/lib/kyc/company-status');
+    (companyKycStatus as any).mockResolvedValueOnce({ signatureID: 'sig_pending', verified: false });
+    const deps = makeDeps();
+
+    await expect(createAssetWithEvidence(deps, input('org-a', 'item-a'))).rejects.toMatchObject({
+      name: 'CompanyNotVerifiedError',
+      reason: 'not_verified',
+    });
+    expect(deps.assetRepository.create).not.toHaveBeenCalled();
   });
 });

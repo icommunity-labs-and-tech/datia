@@ -12,6 +12,7 @@ import {
 } from '@/lib/energy/bmsProfiles';
 import { prisma } from '@/lib/prisma';
 import { issueCertification } from '@/lib/certification';
+import { companyKycStatus } from '@/lib/kyc/company-status';
 import { scopeWhere } from '@/lib/scope';
 
 /**
@@ -198,26 +199,27 @@ export async function certifyBmsMonth(
 ): Promise<BmsMonthCertification> {
   const scope = await requireScope();
 
-  const org = await prisma.organization.findUnique({
-    where: { id: scope.organizationId },
-    select: { signatureID: true, verificationStatus: true },
+  const source = await prisma.energySource.findFirst({
+    where: { id: sourceId, Asset: scopeWhere(scope) },
+    select: { id: true, name: true, Asset: { select: { id: true, name: true, companyId: true } } },
   });
-  if (!org?.signatureID || org.verificationStatus !== 'VERIFIED') {
+  if (!source) {
+    return { ok: false, monthIndex, reason: 'ERROR', message: 'Fuente de energía no encontrada.' };
+  }
+
+  // La empresa del activo es quien firma, no la del scope (#23): un token de
+  // organización abarca varias empresas.
+  const signature = source.Asset.companyId
+    ? await companyKycStatus(source.Asset.companyId)
+    : { signatureID: null, verified: false };
+  if (!signature.signatureID || !signature.verified) {
     return {
       ok: false,
       monthIndex,
       reason: 'NOT_VERIFIED',
       message:
-        'La organización no ha completado el KYC — sin ello no se puede anclar evidencia real en blockchain.',
+        'La empresa no ha completado el KYC — sin ello no se puede anclar evidencia real en blockchain.',
     };
-  }
-
-  const source = await prisma.energySource.findFirst({
-    where: { id: sourceId, Asset: scopeWhere(scope) },
-    select: { id: true, name: true, Asset: { select: { id: true, name: true } } },
-  });
-  if (!source) {
-    return { ok: false, monthIndex, reason: 'ERROR', message: 'Fuente de energía no encontrada.' };
   }
 
   const period = `${BMS_MONTH_NAMES[monthIndex]} ${year}`;
@@ -288,7 +290,7 @@ export async function certifyBmsMonth(
   try {
     const certification = await issueCertification({
       scope,
-      signatureID: org.signatureID,
+      signatureID: signature.signatureID,
       assetId: source.Asset.id,
       title: `Emisión certificada — ${period} · ${totalCo2eKg} kg CO₂e`,
       description:

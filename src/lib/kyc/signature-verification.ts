@@ -2,13 +2,13 @@ import { prisma } from '@/lib/prisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 
 /**
- * Applies the outcome of a KYC flow to the organization that owns the signature.
+ * Applies the outcome of a KYC flow to the company that owns the signature (#23).
  *
  * Anyone can POST to the signature webhooks, so the body is only a hint: the
  * status is always read back from iBS before anything is written. It is the same
  * rule `applyCertification` follows for evidences.
  *
- * Returns whether an organization changed state.
+ * Returns whether a company changed state.
  */
 export async function applySignatureVerification(signatureID: string): Promise<boolean> {
   const signature = await icommunityService.getSignature(signatureID);
@@ -21,7 +21,7 @@ export async function applySignatureVerification(signatureID: string): Promise<b
     signature.status === 'success' ? 'VERIFIED' : signature.status === 'failed' ? 'REJECTED' : null;
   if (!verificationStatus) return false;
 
-  const { count } = await prisma.organization.updateMany({
+  const { count } = await prisma.company.updateMany({
     where: { signatureID, verificationStatus: { not: verificationStatus } },
     data: { verificationStatus },
   });

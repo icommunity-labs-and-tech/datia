@@ -1,9 +1,10 @@
 import { AssetRepository } from './AssetRepository';
 import { UserRepository } from '../users/UserRepository';
 import { EvidenceService } from '../evidence/EvidenceService';
-import { AssetCreationRollbackError, AssetInputError, OrganizationNotVerifiedError } from './errors';
+import { AssetCreationRollbackError, AssetInputError, CompanyNotVerifiedError } from './errors';
 import { getCurrentUserWithDetails } from '@/lib/auth/shared/session';
-import { prisma } from '@/lib/prisma';
+import { companyFor } from '@/lib/company';
+import { companyKycStatus } from '@/lib/kyc/company-status';
 import type { Scope } from '@/lib/scope';
 
 export interface CreateItemWithEvidenceInput {
@@ -55,37 +56,29 @@ export async function createAssetWithEvidence(
     userId = user.id;
   }
 
-  // Get organization and validate signature
-  const organization = await prisma.organization.findUnique({
-    where: { id: scope.organizationId },
-    select: {
-      id: true,
-      signatureID: true,
-      verificationStatus: true,
-    },
-  });
+  // Validate the signature of the company the asset will land in — the same
+  // one the write below resolves via companyFor, so what is checked here is
+  // what actually signs it (#23).
+  const companyId = await companyFor(scope);
+  const signature = await companyKycStatus(companyId);
 
-  if (!organization) {
-    throw new AssetInputError('name', 'Organización no encontrada');
-  }
-
-  if (!organization.signatureID) {
-    throw new OrganizationNotVerifiedError(
-      organization.id,
+  if (!signature.signatureID) {
+    throw new CompanyNotVerifiedError(
+      companyId,
       'no_signature',
-      'No se pudo certificar la evidencia: tu organización no tiene una firma verificada. Completa el KYC de la organización.'
+      'No se pudo certificar la evidencia: tu empresa no tiene una firma verificada. Completa su KYC.'
     );
   }
 
-  if (organization.verificationStatus !== 'VERIFIED') {
-    throw new OrganizationNotVerifiedError(
-      organization.id,
+  if (!signature.verified) {
+    throw new CompanyNotVerifiedError(
+      companyId,
       'not_verified',
-      'La firma de tu organización no está verificada. Completa el proceso KYC de la organización antes de crear activos.'
+      'La firma de tu empresa no está verificada. Completa el proceso KYC antes de crear activos.'
     );
   }
 
-  const signatureID = organization.signatureID;
+  const signatureID = signature.signatureID;
 
   // Create asset in DB
   let created;

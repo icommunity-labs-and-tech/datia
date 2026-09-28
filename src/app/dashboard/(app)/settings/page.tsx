@@ -19,13 +19,16 @@ export default async function SettingsPage() {
         select: {
           id: true, name: true, email: true, role: true,
           phone: true, signsWithCertificate: true, notes: true,
-          createdAt: true, updatedAt: true, organizationId: true,
+          createdAt: true, updatedAt: true, organizationId: true, companyId: true,
           Organization: {
             select: {
-              id: true, name: true, slug: true, signatureID: true,
-              kycURL: true, verificationStatus: true,
+              id: true, name: true, slug: true,
               logoUrl: true, brandColorPrimary: true, brandColorSecondary: true,
             },
+          },
+          // El KYC es de la empresa, no de la organización (#23).
+          Company: {
+            select: { id: true, name: true, signatureID: true, kycURL: true, verificationStatus: true },
           },
         },
       });

@@ -16,7 +16,7 @@ vi.mock('@/domain/assets/AssetServiceImpl', () => ({
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
 import { createAsset } from '@/actions/assets/createAsset';
-import { AssetAlreadyExistsError, OrganizationNotVerifiedError } from '@/domain/assets/errors';
+import { AssetAlreadyExistsError, CompanyNotVerifiedError } from '@/domain/assets/errors';
 
 const input = { id: ' A-1 ', name: ' Turbina ', description: ' de prueba ', latitude: 41.31, longitude: -1.55 };
 
@@ -58,7 +58,7 @@ describe('createAsset', () => {
     mockCreateAsset.mockRejectedValue(new AssetAlreadyExistsError('A-1', 'El ID "A-1" ya existe.'));
     expect(await createAsset(input)).toEqual({ success: false, error: 'El ID "A-1" ya existe.' });
 
-    mockCreateAsset.mockRejectedValue(new OrganizationNotVerifiedError('org-a', 'no_signature', 'Completa el KYC.'));
+    mockCreateAsset.mockRejectedValue(new CompanyNotVerifiedError('co-a', 'no_signature', 'Completa el KYC.'));
     expect(await createAsset(input)).toEqual({ success: false, error: 'Completa el KYC.' });
   });
 });

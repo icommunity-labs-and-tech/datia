@@ -1,9 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { requireOrganizationId, TenantContextNotFoundError } from '@/lib/auth/tenant';
+import { requireOrganizationId, requireScope, TenantContextNotFoundError } from '@/lib/auth/tenant';
 
 vi.mock('@/lib/auth/tenant', async () => {
   const actual = await vi.importActual<typeof import('@/lib/auth/tenant')>('@/lib/auth/tenant');
-  return { ...actual, requireOrganizationId: vi.fn() };
+  return { ...actual, requireOrganizationId: vi.fn(), requireScope: vi.fn() };
 });
 
 const saveImage = vi.fn(async () => ({ url: 'https://storage.example/x.png', bytes: 3, contentType: 'image/png' }));
@@ -19,14 +19,15 @@ vi.mock('@/infrastructure/prisma/repositories/UserRepositoryPrisma', () => ({
 
 const findUnique = vi.fn();
 vi.mock('@/lib/prisma', () => ({
-  prisma: { organization: { findUnique: (...args: unknown[]) => findUnique(...args) } },
+  prisma: { company: { findUnique: (...args: unknown[]) => findUnique(...args) } },
 }));
 
 import { uploadImage } from '@/actions/upload/uploadImage';
 import { checkEmailExists } from '@/actions/users/check-email';
-import { checkKycStatus } from '@/actions/organizations/check-kyc-status';
+import { checkKycStatus } from '@/actions/kyc/status';
 
 const tenant = requireOrganizationId as unknown as ReturnType<typeof vi.fn>;
+const scope = requireScope as unknown as ReturnType<typeof vi.fn>;
 
 function imageForm() {
   const form = new FormData();
@@ -40,6 +41,7 @@ describe('acciones del dashboard sin sesión', () => {
     vi.clearAllMocks();
     vi.spyOn(console, 'error').mockImplementation(() => {});
     tenant.mockRejectedValue(new TenantContextNotFoundError('sin sesión'));
+    scope.mockRejectedValue(new TenantContextNotFoundError('sin sesión'));
   });
 
   it('uploadImage no sube nada', async () => {
@@ -64,6 +66,7 @@ describe('acciones del dashboard con sesión', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tenant.mockResolvedValue('org-a');
+    scope.mockResolvedValue({ organizationId: 'org-a', companyId: 'co-a' });
   });
 
   it('uploadImage sube la imagen', async () => {
@@ -77,9 +80,9 @@ describe('acciones del dashboard con sesión', () => {
     expect(saveImage).not.toHaveBeenCalled();
   });
 
-  it('checkKycStatus consulta la organización de la sesión', async () => {
+  it('checkKycStatus consulta la empresa de la sesión', async () => {
     findUnique.mockResolvedValue({ verificationStatus: 'WAITING', kycURL: 'https://kyc.example/abc' });
     await expect(checkKycStatus()).resolves.toEqual({ success: true, verificationStatus: 'WAITING', kycURL: 'https://kyc.example/abc' });
-    expect(findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'org-a' } }));
+    expect(findUnique).toHaveBeenCalledWith(expect.objectContaining({ where: { id: 'co-a' } }));
   });
 });

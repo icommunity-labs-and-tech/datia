@@ -12,7 +12,7 @@ const { mockValidateApiToken, mockPrisma, mockAnchor } = vi.hoisted(() => ({
   mockValidateApiToken: vi.fn(),
   mockPrisma: {
     emissionRecord: { findFirst: vi.fn() },
-    organization: { findUnique: vi.fn() },
+    company: { findUnique: vi.fn() },
     certification: { findUnique: vi.fn() },
   },
   mockAnchor: vi.fn(),
@@ -49,8 +49,12 @@ describe('POST /api/v1/emissions/[id]/certify', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, companyId: COMPANY_ID, tokenId: 't', isSandbox: false });
-    mockPrisma.emissionRecord.findFirst.mockResolvedValue({ id: EMISSION_ID, Certification: null });
-    mockPrisma.organization.findUnique.mockResolvedValue({ signatureID: 'sig', verificationStatus: 'VERIFIED' });
+    mockPrisma.emissionRecord.findFirst.mockResolvedValue({
+      id: EMISSION_ID,
+      Certification: null,
+      EnergyConsumption: { EnergySource: { Asset: { companyId: COMPANY_ID } } },
+    });
+    mockPrisma.company.findUnique.mockResolvedValue({ signatureID: 'sig', verificationStatus: 'VERIFIED' });
     mockPrisma.certification.findUnique.mockResolvedValue(issued);
     mockAnchor.mockResolvedValue({ emissionId: EMISSION_ID, certificationId: CERT_ID, evidenceId: EVIDENCE_ID });
   });
@@ -74,12 +78,22 @@ describe('POST /api/v1/emissions/[id]/certify', () => {
     expect(mockAnchor).not.toHaveBeenCalled();
   });
 
-  it('returns 422 when the organisation cannot sign', async () => {
-    mockPrisma.organization.findUnique.mockResolvedValue({ signatureID: 'sig', verificationStatus: 'WAITING' });
+  it('returns 422 when the company cannot sign', async () => {
+    mockPrisma.company.findUnique.mockResolvedValue({ signatureID: 'sig', verificationStatus: 'WAITING' });
     expect((await certify()).status).toBe(422);
-    mockPrisma.organization.findUnique.mockResolvedValue({ signatureID: null, verificationStatus: 'VERIFIED' });
+    mockPrisma.company.findUnique.mockResolvedValue({ signatureID: null, verificationStatus: 'VERIFIED' });
     expect((await certify()).status).toBe(422);
     expect(mockAnchor).not.toHaveBeenCalled();
+  });
+
+  it('returns 422 for an asset with no company', async () => {
+    mockPrisma.emissionRecord.findFirst.mockResolvedValue({
+      id: EMISSION_ID,
+      Certification: null,
+      EnergyConsumption: { EnergySource: { Asset: { companyId: null } } },
+    });
+    expect((await certify()).status).toBe(422);
+    expect(mockPrisma.company.findUnique).not.toHaveBeenCalled();
   });
 
   it('issues the proof through the same anchoring as ingestion', async () => {

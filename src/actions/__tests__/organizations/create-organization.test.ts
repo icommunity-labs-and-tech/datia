@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * the organization rather than one company (#20).
  */
 
-const { tx, mockPrisma, mockSuper, mockSend } = vi.hoisted(() => {
+const { tx, mockPrisma, mockSuper, mockSend, mockCreateSignature } = vi.hoisted(() => {
   const tx = {
     organization: { create: vi.fn(async ({ data }: any) => ({ ...data })), delete: vi.fn() },
     company: { create: vi.fn(async ({ data }: any) => ({ id: 'co-new', ...data })) },
@@ -20,6 +20,7 @@ const { tx, mockPrisma, mockSuper, mockSend } = vi.hoisted(() => {
     },
     mockSuper: vi.fn(),
     mockSend: vi.fn(),
+    mockCreateSignature: vi.fn(async () => ({ signature_id: 'sig-1', url: 'https://kyc.test' })),
   };
 });
 
@@ -27,7 +28,7 @@ vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/auth/tenant', () => ({ isSuperAdmin: mockSuper }));
 vi.mock('../../organizations/helpers', () => ({ sendInvitationEmail: mockSend }));
 vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
-  icommunityService: { createSignature: vi.fn(async () => ({ signature_id: 'sig-1', url: 'https://kyc.test' })) },
+  icommunityService: { createSignature: mockCreateSignature },
 }));
 
 import { createOrganizationWithAdmin } from '../../organizations/create-organization';
@@ -41,13 +42,20 @@ describe('createOrganizationWithAdmin', () => {
     mockSend.mockResolvedValue(undefined);
   });
 
-  it('creates the default company and an organization account without a company', async () => {
+  it('creates the default company with its own signature, and an organization account without a company', async () => {
     const result = await createOrganizationWithAdmin(input);
 
     expect(result.success).toBe(true);
     expect(tx.company.create).toHaveBeenCalledWith({
-      data: { organizationId: expect.any(String), name: 'Acme' },
+      data: {
+        organizationId: expect.any(String),
+        name: 'Acme',
+        signatureID: 'sig-1',
+        kycURL: 'https://kyc.test',
+        verificationStatus: 'WAITING',
+      },
     });
+    expect(tx.organization.create.mock.calls[0][0].data).not.toHaveProperty('signatureID');
     expect(tx.user.create.mock.calls[0][0].data).toMatchObject({
       email: 'ana@acme.test',
       role: 'ORG_ADMIN',
@@ -62,5 +70,21 @@ describe('createOrganizationWithAdmin', () => {
 
     expect(result.success).toBe(false);
     expect(tx.company.create).not.toHaveBeenCalled();
+  });
+
+  it('still creates the organization when iBS cannot issue a signature', async () => {
+    mockCreateSignature.mockRejectedValueOnce(new Error('iBS caído'));
+    const result = await createOrganizationWithAdmin(input);
+
+    expect(result.success).toBe(true);
+    expect(tx.company.create).toHaveBeenCalledWith({
+      data: {
+        organizationId: expect.any(String),
+        name: 'Acme',
+        signatureID: null,
+        kycURL: null,
+        verificationStatus: 'NOT_VERIFIED',
+      },
+    });
   });
 });
