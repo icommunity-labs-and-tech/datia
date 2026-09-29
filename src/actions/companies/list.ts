@@ -12,10 +12,8 @@ export interface CompanySummary {
   accounts: number;
 }
 
-/** The companies of the organization, with what each one holds. */
-export async function listCompanies(): Promise<CompanySummary[]> {
-  const { organizationId } = await requireOrganizationAccount();
-
+/** The companies of one organization, with what each one holds. No permission check: callers decide who may ask for which organization. */
+export async function companiesOfOrganization(organizationId: string): Promise<CompanySummary[]> {
   const companies = await prisma.company.findMany({
     where: { organizationId },
     orderBy: { createdAt: 'asc' },
@@ -36,4 +34,10 @@ export async function listCompanies(): Promise<CompanySummary[]> {
     assets: c._count.Asset,
     accounts: c._count.User,
   }));
+}
+
+/** The companies of the organization, with what each one holds. */
+export async function listCompanies(): Promise<CompanySummary[]> {
+  const { organizationId } = await requireOrganizationAccount();
+  return companiesOfOrganization(organizationId);
 }

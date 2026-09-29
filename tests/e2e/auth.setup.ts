@@ -1,7 +1,14 @@
 import { test as setup } from '@playwright/test';
 import fs from 'node:fs';
 import path from 'node:path';
-import { loginAdmin, loginOrganization, ADMIN_STORAGE_STATE, ORGANIZATION_STORAGE_STATE } from './utils/auth';
+import {
+  loginAdmin,
+  loginOrganization,
+  loginSuperadmin,
+  ADMIN_STORAGE_STATE,
+  ORGANIZATION_STORAGE_STATE,
+  SUPERADMIN_STORAGE_STATE,
+} from './utils/auth';
 
 /**
  * Logs in once per run and stores the session, so specs can start authenticated
@@ -26,4 +33,11 @@ setup('authenticate as organization account', async ({ page }) => {
 
   await loginOrganization(page, 'orgadmin@datia.icommunitylabs.com', 'orgadmin123');
   await page.context().storageState({ path: ORGANIZATION_STORAGE_STATE });
+});
+
+setup('authenticate as superadmin', async ({ page }) => {
+  fs.mkdirSync(path.dirname(SUPERADMIN_STORAGE_STATE), { recursive: true });
+
+  await loginSuperadmin(page, 'superadmin@datia.icommunitylabs.com', 'superadmin123');
+  await page.context().storageState({ path: SUPERADMIN_STORAGE_STATE });
 });

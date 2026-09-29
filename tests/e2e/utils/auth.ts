@@ -24,6 +24,19 @@ export async function loginOrganization(page: Page, email: string, password: str
   await page.waitForURL(/\/superadmin\/companies/, { timeout: 20000 });
 }
 
+/** Session of the platform account (SUPER_ADMIN), the same login as the organization's. */
+export const SUPERADMIN_STORAGE_STATE = path.join('playwright', '.auth', 'superadmin.json');
+
+/** The platform account signs in to the superadmin panel, and lands on its own home. */
+export async function loginSuperadmin(page: Page, email: string, password: string) {
+  await page.goto('/auth/superadmin/login', { waitUntil: 'networkidle' });
+  await page.waitForSelector('input[type="email"]', { timeout: 10000 });
+  await page.fill('input[type="email"]', email);
+  await page.fill('input[type="password"]', password);
+  await page.click('form button[type="submit"]');
+  await page.waitForURL(/\/superadmin$/, { timeout: 20000 });
+}
+
 export async function loginAdmin(page: Page, email: string, password: string) {
   // Use UI login for reliability with retry logic
   await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });

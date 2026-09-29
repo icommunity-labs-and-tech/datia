@@ -1,8 +1,10 @@
 'use client';
 
+import { useState } from 'react';
 import {
   Anchor,
   Badge,
+  Button,
   Group,
   Paper,
   ScrollArea,
@@ -10,24 +12,44 @@ import {
   Tabs,
   Text,
 } from '@mantine/core';
-import { IconArrowLeft } from '@tabler/icons-react';
+import { IconArrowLeft, IconPlayerPlay, IconPlayerStop } from '@tabler/icons-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import PageHeader from '@/components/layout/PageHeader';
-import type { CompanyOverview } from '@/actions/companies/overview-core';
+import { setCompanyActive, type SuperadminCompanyOverview } from '@/actions/companies/superadmin';
 
 const STATUS_COLOR: Record<string, string> = { CERTIFIED: 'green', ISSUED: 'yellow' };
 
-export default function CompanyDetail({ overview }: { overview: CompanyOverview }) {
-  const t = useTranslations('companiesPage.detail');
+interface Props {
+  organizationId: string;
+  overview: SuperadminCompanyOverview;
+}
+
+export default function SuperadminCompanyDetail({ organizationId, overview }: Props) {
+  const t = useTranslations('superadminCompany');
   const locale = useLocale();
-  const { company, assets, certifications, accounts } = overview;
+  const router = useRouter();
+  const { company, assets, certifications, accounts, energy } = overview;
+  const [active, setActive] = useState(company.active);
+  const [toggling, setToggling] = useState(false);
+
   const date = (value: Date | null) => (value ? new Date(value).toLocaleDateString(locale) : '—');
   const empty = (label: string) => <Text size="sm" c="dimmed" py="md">{label}</Text>;
 
+  const toggleActive = async () => {
+    setToggling(true);
+    const result = await setCompanyActive(company.id, !active);
+    if (result.success) {
+      setActive(!active);
+      router.refresh();
+    }
+    setToggling(false);
+  };
+
   return (
     <>
-      <Anchor component={Link} href="/superadmin/companies" size="sm" mb="xs" display="inline-flex">
+      <Anchor component={Link} href={`/superadmin/organizations/${organizationId}`} size="sm" mb="xs" display="inline-flex">
         <IconArrowLeft size={14} style={{ marginRight: 4, alignSelf: 'center' }} />
         {t('back')}
       </Anchor>
@@ -35,7 +57,23 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
       <PageHeader
         title={company.name}
         description={t('description')}
-        actions={<Badge variant="light" color="gray">{t('readOnly')}</Badge>}
+        actions={
+          <Group gap="xs">
+            <Badge variant="light" color={active ? 'green' : 'gray'}>
+              {active ? t('active') : t('inactive')}
+            </Badge>
+            <Button
+              size="xs"
+              variant="default"
+              color={active ? 'red' : 'green'}
+              loading={toggling}
+              leftSection={active ? <IconPlayerStop size={14} /> : <IconPlayerPlay size={14} />}
+              onClick={toggleActive}
+            >
+              {active ? t('deactivate') : t('activate')}
+            </Button>
+          </Group>
+        }
       >
         <Group gap="lg" mt="xs">
           <Text size="sm" c="dimmed">{t('assetsCount', { count: assets.length })}</Text>
@@ -49,6 +87,7 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
           <Tabs.List mb="sm">
             <Tabs.Tab value="assets">{t('tabs.assets')}</Tabs.Tab>
             <Tabs.Tab value="certifications">{t('tabs.certifications')}</Tabs.Tab>
+            <Tabs.Tab value="energy">{t('tabs.energy')}</Tabs.Tab>
             <Tabs.Tab value="accounts">{t('tabs.accounts')}</Tabs.Tab>
           </Tabs.List>
 
@@ -118,6 +157,29 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
                 </Table>
               </ScrollArea>
             )}
+          </Tabs.Panel>
+
+          <Tabs.Panel value="energy">
+            <Group gap="xl" py="md">
+              <div>
+                <Text size="xs" c="dimmed" tt="uppercase">{t('energy.sources')}</Text>
+                <Text size="xl" fw={700}>{energy.sources}</Text>
+              </div>
+              <div>
+                <Text size="xs" c="dimmed" tt="uppercase">{t('energy.consumptionRecords')}</Text>
+                <Text size="xl" fw={700}>{energy.consumption.records}</Text>
+                <Text size="xs" c="dimmed">{t('energy.totalKwh', { value: energy.consumption.totalKwh.toLocaleString(locale) })}</Text>
+              </div>
+              <div>
+                <Text size="xs" c="dimmed" tt="uppercase">{t('energy.emissionRecords')}</Text>
+                <Text size="xl" fw={700}>{energy.emissions.records}</Text>
+                <Text size="xs" c="dimmed">
+                  {t('energy.totalCo2e', { value: energy.emissions.totalCo2eKg.toLocaleString(locale) })}
+                  {' · '}
+                  {t('energy.verified', { count: energy.emissions.verified })}
+                </Text>
+              </div>
+            </Group>
           </Tabs.Panel>
 
           <Tabs.Panel value="accounts">
