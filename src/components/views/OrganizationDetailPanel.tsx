@@ -2,9 +2,13 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Button, Card, Row, Col, Badge, Spinner, Alert, Table, Modal } from '@/components/legacy/bootstrap-compat';
+import Link from 'next/link';
 import { getOrganizationById, deleteOrganization, type OrganizationDetail } from '@/actions/organizations';
 import { updateOrgModules } from '@/actions/organizations/update-modules';
+import { listCompaniesForOrganization } from '@/actions/companies/superadmin';
+import type { CompanySummary } from '@/actions/companies/list';
 import Box from '@/components/Box';
 
 interface OrganizationDetailPanelProps {
@@ -12,10 +16,12 @@ interface OrganizationDetailPanelProps {
 }
 
 export default function OrganizationDetailPanel({ organizationId }: OrganizationDetailPanelProps) {
+  const t = useTranslations('superadminOrganization.companies');
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [organization, setOrganization] = useState<OrganizationDetail | null>(null);
+  const [companies, setCompanies] = useState<CompanySummary[]>([]);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -30,9 +36,13 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
     setLoading(true);
     setError(null);
     try {
-      const result = await getOrganizationById(organizationId);
+      const [result, companyList] = await Promise.all([
+        getOrganizationById(organizationId),
+        listCompaniesForOrganization(organizationId),
+      ]);
       if (result.success && result.organization) {
         setOrganization(result.organization);
+        setCompanies(companyList);
       } else {
         setError(result.error || 'Error al cargar la organización');
       }
@@ -268,6 +278,51 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
           </Card>
         </Col>
       </Row>
+
+      {/* Empresas */}
+      <Card className="mt-3">
+        <Card.Header>
+          <h5 className="mb-0"><i className="bi bi-buildings me-2" />{t('title')}</h5>
+        </Card.Header>
+        <Card.Body className="p-0">
+          {companies.length === 0 ? (
+            <p className="text-muted p-3 mb-0">{t('empty')}</p>
+          ) : (
+            <Table className="mb-0" hover responsive>
+              <thead>
+                <tr>
+                  <th>{t('name')}</th>
+                  <th className="text-end">{t('assets')}</th>
+                  <th className="text-end">{t('accounts')}</th>
+                  <th>{t('created')}</th>
+                  <th>{t('status')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {companies.map((company) => (
+                  <tr key={company.id}>
+                    <td>
+                      <Link href={`/superadmin/organizations/${organizationId}/companies/${company.id}`}>
+                        {company.name}
+                      </Link>
+                    </td>
+                    <td className="text-end">{company.assets}</td>
+                    <td className="text-end">{company.accounts}</td>
+                    <td>{new Date(company.createdAt).toLocaleDateString('es-ES')}</td>
+                    <td>
+                      {company.active ? (
+                        <Badge bg="success">{t('active')}</Badge>
+                      ) : (
+                        <Badge bg="secondary">{t('inactive')}</Badge>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          )}
+        </Card.Body>
+      </Card>
 
       {/* Módulos */}
       <Card className="mt-3">

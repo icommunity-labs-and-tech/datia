@@ -5,7 +5,6 @@ import {
   Stack,
   Text,
   Divider,
-  Badge,
   ScrollArea,
   Box,
 } from '@mantine/core';
@@ -16,14 +15,12 @@ import {
   IconCloudFog,
   IconSettings,
   IconCode,
-  IconBuilding,
   IconExternalLink,
   IconUserCircle,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import Logo from '@/components/Logo';
 import type { OrgModules } from '@/app/dashboard/(app)/layout';
 
@@ -37,7 +34,6 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
   const pathname = usePathname();
   const t = useTranslations('sidebar');
   const tEnergy = useTranslations('energyHub');
-  const { user, loading } = useAuthSeparated();
 
   const showPassport = modules?.passport !== false;
   const showEnergy = modules?.energy === true;
@@ -96,28 +92,6 @@ export default function DatiaNavbar({ logoUrl, modules, onNavClick }: DatiaNavba
             />
           ))}
         </Stack>
-
-        {/* Management — SUPER_ADMIN only */}
-        {!loading && user?.role === 'SUPER_ADMIN' && (
-          <>
-            <Divider my="xs" />
-            <Text size="xs" fw={700} c="dimmed" px="sm" mb={4} tt="uppercase">
-              {t('management')}
-            </Text>
-            <NavLink
-              component={Link}
-              href="/dashboard/organizations"
-              label={t('organizations')}
-              leftSection={<IconBuilding size={18} stroke={1.6} />}
-              active={isActive('/dashboard/organizations')}
-              onClick={onNavClick}
-              rightSection={
-                <Badge size="xs" color="red" variant="filled">SUPER</Badge>
-              }
-              styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
-            />
-          </>
-        )}
 
         {/* Applications */}
         <Divider my="xs" />

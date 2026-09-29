@@ -53,8 +53,6 @@
   },
   "sidebar": {
     "home": "Home",
-    "organizations": "Organizations",
-    "management": "MANAGEMENT",
     "developer": "DEVELOPER",
     "applications": "APPLICATIONS",
     "appCustomer": "Customer App",
@@ -1210,6 +1208,71 @@
         "email": "Email",
         "created": "Joined"
       }
+    }
+  },
+  "superadminCompany": {
+    "back": "Organization",
+    "description": "What this company holds. The superadmin sees every organization and company; it can only activate or deactivate it.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "activate": "Activate",
+    "deactivate": "Deactivate",
+    "assetsCount": "{count} assets",
+    "certificationsCount": "{count} certifications",
+    "accountsCount": "{count} accounts",
+    "tabs": {
+      "assets": "Assets",
+      "certifications": "Certifications",
+      "energy": "Energy",
+      "accounts": "Accounts"
+    },
+    "emptyAssets": "This company has no assets.",
+    "emptyCertifications": "This company has no certifications.",
+    "emptyAccounts": "This company has no accounts.",
+    "assets": {
+      "id": "ID",
+      "name": "Name",
+      "site": "Installation",
+      "created": "Created",
+      "status": "Status",
+      "certified": "Certified",
+      "pending": "Not certified"
+    },
+    "certifications": {
+      "period": "Period",
+      "co2e": "kg CO₂e",
+      "readings": "Readings",
+      "network": "Network",
+      "created": "Created",
+      "status": "Status",
+      "certified": "Certified",
+      "issued": "Issued"
+    },
+    "energy": {
+      "sources": "Energy sources",
+      "consumptionRecords": "Consumption readings",
+      "totalKwh": "{value} kWh total",
+      "emissionRecords": "Emission records",
+      "totalCo2e": "{value} kg CO₂e total",
+      "verified": "{count} verified"
+    },
+    "accounts": {
+      "name": "Name",
+      "email": "Email",
+      "created": "Joined"
+    }
+  },
+  "superadminOrganization": {
+    "companies": {
+      "title": "Companies",
+      "empty": "This organization has no companies yet.",
+      "name": "Name",
+      "assets": "Assets",
+      "accounts": "Accounts",
+      "created": "Created",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive"
     }
   }
 }

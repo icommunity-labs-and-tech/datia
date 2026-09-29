@@ -53,8 +53,6 @@
   },
   "sidebar": {
     "home": "Inicio",
-    "organizations": "Organizaciones",
-    "management": "GESTIÓN",
     "developer": "DESARROLLADOR",
     "applications": "APLICACIONES",
     "appCustomer": "App Cliente",
@@ -1210,6 +1208,71 @@
         "email": "Correo",
         "created": "Alta"
       }
+    }
+  },
+  "superadminCompany": {
+    "back": "Organización",
+    "description": "Lo que tiene esta empresa. El superadmin ve todas las organizaciones y empresas; solo puede activarla o desactivarla.",
+    "active": "Activa",
+    "inactive": "Inactiva",
+    "activate": "Activar",
+    "deactivate": "Desactivar",
+    "assetsCount": "{count} activos",
+    "certificationsCount": "{count} certificaciones",
+    "accountsCount": "{count} cuentas",
+    "tabs": {
+      "assets": "Activos",
+      "certifications": "Certificaciones",
+      "energy": "Energía",
+      "accounts": "Cuentas"
+    },
+    "emptyAssets": "Esta empresa no tiene activos.",
+    "emptyCertifications": "Esta empresa no tiene certificaciones.",
+    "emptyAccounts": "Esta empresa no tiene cuentas.",
+    "assets": {
+      "id": "ID",
+      "name": "Nombre",
+      "site": "Instalación",
+      "created": "Creado",
+      "status": "Estado",
+      "certified": "Certificado",
+      "pending": "Sin certificar"
+    },
+    "certifications": {
+      "period": "Periodo",
+      "co2e": "kg CO₂e",
+      "readings": "Lecturas",
+      "network": "Red",
+      "created": "Creada",
+      "status": "Estado",
+      "certified": "Certificada",
+      "issued": "Emitida"
+    },
+    "energy": {
+      "sources": "Fuentes de energía",
+      "consumptionRecords": "Lecturas de consumo",
+      "totalKwh": "{value} kWh en total",
+      "emissionRecords": "Registros de emisión",
+      "totalCo2e": "{value} kg CO₂e en total",
+      "verified": "{count} verificados"
+    },
+    "accounts": {
+      "name": "Nombre",
+      "email": "Correo",
+      "created": "Alta"
+    }
+  },
+  "superadminOrganization": {
+    "companies": {
+      "title": "Empresas",
+      "empty": "Esta organización todavía no tiene empresas.",
+      "name": "Nombre",
+      "assets": "Activos",
+      "accounts": "Cuentas",
+      "created": "Creada",
+      "status": "Estado",
+      "active": "Activa",
+      "inactive": "Inactiva"
     }
   }
 }
