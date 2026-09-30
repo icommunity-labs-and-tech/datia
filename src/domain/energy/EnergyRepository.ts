@@ -9,6 +9,7 @@ import type {
   CreateEmissionRecordInput,
   EnergyConsumptionTotals,
   EmissionTotals,
+  SourceMonthlySeries,
 } from './EnergyTypes';
 
 export interface EnergyRepository {
@@ -22,6 +23,8 @@ export interface EnergyRepository {
   findConsumptionByOrganization(scope: Scope, limit?: number, pagination?: CursorPaginationParams): Promise<CursorPaginationResult<EnergyConsumptionRecord>>;
   getConsumptionTotals(scope: Scope): Promise<EnergyConsumptionTotals>;
   getEmissionTotals(scope: Scope): Promise<EmissionTotals>;
+  /** Per-source monthly consumption and current emission factor, for #21's projections. */
+  getSourceMonthlySeries(scope: Scope): Promise<SourceMonthlySeries[]>;
   findConsumptionById(scope: Scope, id: string): Promise<EnergyConsumptionRecord | null>;
 
   // Emission Records — filtered by org via energyConsumptionId → … → Item

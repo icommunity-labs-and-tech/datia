@@ -252,4 +252,53 @@ export const energyRepository: EnergyRepository = {
       ),
     };
   },
+
+  async getSourceMonthlySeries(scope) {
+    const [sources, consumptionRows, emissionRows] = await Promise.all([
+      prisma.energySource.findMany({ where: orgViaItem(scope), select: { id: true, name: true } }),
+      prisma.energyConsumption.findMany({
+        where: orgViaSource(scope),
+        select: { energySourceId: true, periodStart: true, consumptionKwh: true },
+      }),
+      // The factor "vigente" for a source is the one on its most recent
+      // consumption's emission record — the data volumes here are small enough
+      // that picking the max in JS beats a second grouped query per source.
+      prisma.emissionRecord.findMany({
+        where: orgViaConsumption(scope),
+        select: {
+          emissionFactor: true,
+          EnergyConsumption: { select: { energySourceId: true, periodStart: true } },
+        },
+      }),
+    ]);
+
+    const consumptionBySource = new Map<string, typeof consumptionRows>();
+    for (const row of consumptionRows) {
+      const list = consumptionBySource.get(row.energySourceId) ?? [];
+      list.push(row);
+      consumptionBySource.set(row.energySourceId, list);
+    }
+
+    const latestFactorBySource = new Map<string, { periodStart: Date; factor: number | null }>();
+    for (const row of emissionRows) {
+      const sourceId = row.EnergyConsumption?.energySourceId;
+      const periodStart = row.EnergyConsumption?.periodStart;
+      if (!sourceId || !periodStart) continue;
+      const current = latestFactorBySource.get(sourceId);
+      if (!current || periodStart > current.periodStart) {
+        latestFactorBySource.set(sourceId, { periodStart, factor: row.emissionFactor ?? null });
+      }
+    }
+
+    return sources.map((source) => ({
+      sourceId: source.id,
+      sourceName: source.name,
+      monthly: toMonthlySeries(
+        consumptionBySource.get(source.id) ?? [],
+        (r) => r.periodStart,
+        (r) => r.consumptionKwh
+      ),
+      currentEmissionFactor: latestFactorBySource.get(source.id)?.factor ?? null,
+    }));
+  },
 };

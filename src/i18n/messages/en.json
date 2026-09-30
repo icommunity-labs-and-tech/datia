@@ -1021,6 +1021,14 @@
     "mapPopup": {
       "renewable": "{share}% renewable"
     },
+    "forecast": {
+      "title": "Forecast",
+      "horizonOption": "{count} months",
+      "historicalLabel": "Measured",
+      "projectedLabel": "Projected",
+      "noHistory": "Not enough history to project.",
+      "excludedSources": "{count} of {total} sources excluded from the forecast for too little history."
+    },
     "bmsSimulator": {
       "trigger": "Simulate BMS data",
       "title": "BMS Data Simulator",
