@@ -5,14 +5,22 @@ import { createSupportMessage } from '../create';
 import { listSupportMessages } from '../list';
 import { updateSupportMessageStatus } from '../updateStatus';
 import { deleteSupportMessage } from '../delete';
+import { notifyUser } from '@/lib/notifications/notify';
+
+const MESSAGE = { id: 'msg-1', status: 'pending', subject: 'No certifica', userId: 'author-1', organizationId: 'org-1' };
 
 vi.mock('@/infrastructure/prisma/repositories/SupportMessageRepositoryPrisma', () => ({
   supportMessageRepository: {
     create: vi.fn(async (input: any) => ({ id: 'msg-1', ...input })),
+    findById: vi.fn(async (id: string) => ({ ...MESSAGE, id })),
     findAll: vi.fn(async () => [{ id: 'msg-1' }]),
-    updateStatus: vi.fn(async (id: string, status: string) => ({ id, status })),
+    updateStatus: vi.fn(async (id: string, status: string) => ({ ...MESSAGE, id, status })),
     delete: vi.fn(async () => {}),
   },
+}));
+
+vi.mock('@/lib/notifications/notify', () => ({
+  notifyUser: vi.fn(async () => undefined),
 }));
 
 vi.mock('@/lib/auth/tenant', async () => {
@@ -54,6 +62,26 @@ describe('support message panel actions', () => {
     (isSuperAdmin as any).mockResolvedValueOnce(true);
     await expect(updateSupportMessageStatus('msg-1', 'archived' as any)).rejects.toThrow(/no válido/);
     expect(repo.updateStatus).not.toHaveBeenCalled();
+  });
+
+  it('notifies the author when the status actually changes', async () => {
+    (isSuperAdmin as any).mockResolvedValueOnce(true);
+    await updateSupportMessageStatus('msg-1', 'resolved');
+
+    expect(notifyUser).toHaveBeenCalledWith(
+      'author-1',
+      'org-1',
+      expect.objectContaining({ type: 'SUCCESS', data: { supportMessageId: 'msg-1' } })
+    );
+  });
+
+  it('does not notify when the status does not change', async () => {
+    (isSuperAdmin as any).mockResolvedValueOnce(true);
+    repo.findById.mockResolvedValueOnce({ ...MESSAGE, status: 'resolved' });
+
+    await updateSupportMessageStatus('msg-1', 'resolved');
+
+    expect(notifyUser).not.toHaveBeenCalled();
   });
 });
 

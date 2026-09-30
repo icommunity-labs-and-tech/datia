@@ -32,6 +32,7 @@ import {
 } from '@tabler/icons-react';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import DatiaNavbar from './DatiaNavbar';
+import NotificationBell from './NotificationBell';
 import SupportMessageModal from '@/components/support/SupportMessageModal';
 import Logo from '@/components/Logo';
 import type { OrgModules } from '@/app/dashboard/(app)/layout';
@@ -185,6 +186,8 @@ export default function DatiaAppShell({
 
             {/* Right actions */}
             <Group gap={6} ml="auto" style={{ flexShrink: 0 }}>
+              <NotificationBell />
+
               <Menu shadow="lg" width={168} position="bottom-end">
                 <Menu.Target>
                   <ActionIcon

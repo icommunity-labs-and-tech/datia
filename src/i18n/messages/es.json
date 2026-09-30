@@ -1125,6 +1125,12 @@
       "unexpected": "No se pudo enviar el mensaje. Inténtalo de nuevo."
     }
   },
+  "notifications": {
+    "bell": "Notificaciones",
+    "title": "Notificaciones",
+    "markAllRead": "Marcar todas como leídas",
+    "empty": "No tienes notificaciones"
+  },
   "companiesPage": {
     "title": "Empresas",
     "description": "Las empresas de tu organización y sus cuentas. Cada cuenta de empresa solo ve los datos de su empresa; tú los ves todos.",

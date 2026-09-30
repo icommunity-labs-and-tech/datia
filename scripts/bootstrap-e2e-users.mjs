@@ -166,6 +166,46 @@ async function bootstrapE2EUsers() {
       console.log('✅ energy certification ready for e2e-item-0');
     }
 
+    // Notifications for the dashboard's bell (#28): two unread and one already
+    // read, so the e2e can check the badge count, marking one as read by
+    // clicking it, and marking the rest as read all at once.
+    const admin = await prisma.user.findUnique({ where: { email: 'admin@datia.icommunitylabs.com' } });
+    if (admin && !(await prisma.notification.findUnique({ where: { id: 'e2e-notification-unread-1' } }))) {
+      await prisma.notification.create({
+        data: {
+          id: 'e2e-notification-unread-1',
+          userId: admin.id,
+          organizationId: org.id,
+          type: 'SUCCESS',
+          title: 'Verificación KYC completada',
+          message: 'Tu empresa ya puede certificar activos.',
+        },
+      });
+      await prisma.notification.create({
+        data: {
+          id: 'e2e-notification-unread-2',
+          userId: admin.id,
+          organizationId: org.id,
+          type: 'WARNING',
+          title: 'Un webhook ha dejado de responder',
+          message: '«ERP» está fallando. La entrega se sigue reintentando.',
+        },
+      });
+      await prisma.notification.create({
+        data: {
+          id: 'e2e-notification-read',
+          userId: admin.id,
+          organizationId: org.id,
+          type: 'INFO',
+          title: 'Tu mensaje de soporte ha sido leído',
+          message: '«Duda sobre facturación»',
+          read: true,
+          readAt: now,
+        },
+      });
+      console.log('✅ 3 notifications ready for admin@datia.icommunitylabs.com');
+    }
+
     console.log('\n🔑 E2E credentials:');
     for (const { email, password } of USERS) {
       console.log(`   ${email} / ${password}`);

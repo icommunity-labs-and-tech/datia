@@ -1,5 +1,19 @@
 import { prisma } from '@/lib/prisma';
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
+import { notifyCompany } from '@/lib/notifications/notify';
+
+const NOTIFICATION_CONTENT = {
+  VERIFIED: {
+    type: 'SUCCESS' as const,
+    title: 'Verificación KYC completada',
+    message: 'Tu empresa ya puede certificar activos.',
+  },
+  REJECTED: {
+    type: 'ERROR' as const,
+    title: 'Verificación KYC rechazada',
+    message: 'La verificación de identidad de tu empresa no se ha superado. Vuelve a intentarlo desde ajustes.',
+  },
+};
 
 /**
  * Applies the outcome of a KYC flow to the company that owns the signature (#23).
@@ -21,9 +35,27 @@ export async function applySignatureVerification(signatureID: string): Promise<b
     signature.status === 'success' ? 'VERIFIED' : signature.status === 'failed' ? 'REJECTED' : null;
   if (!verificationStatus) return false;
 
-  const { count } = await prisma.company.updateMany({
+  // Fetched before the write, so the notification below knows exactly which
+  // companies changed — `updateMany` alone would not say (#28).
+  const companies = await prisma.company.findMany({
+    where: { signatureID, verificationStatus: { not: verificationStatus } },
+    select: { id: true, organizationId: true },
+  });
+  if (companies.length === 0) return false;
+
+  await prisma.company.updateMany({
     where: { signatureID, verificationStatus: { not: verificationStatus } },
     data: { verificationStatus },
   });
-  return count > 0;
+
+  await Promise.all(
+    companies.map((company) =>
+      notifyCompany(company.organizationId, company.id, {
+        ...NOTIFICATION_CONTENT[verificationStatus],
+        data: { companyId: company.id },
+      })
+    )
+  );
+
+  return true;
 }
