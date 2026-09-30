@@ -176,7 +176,7 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
                 {companies.map((company) => (
                   <Table.Tr key={company.id}>
                     <Table.Td>
-                      <Anchor component={Link} href={`/superadmin/companies/${company.id}`} size="sm" fw={550}>
+                      <Anchor component={Link} href={`/organization/companies/${company.id}`} size="sm" fw={550}>
                         {company.name}
                       </Anchor>
                     </Table.Td>

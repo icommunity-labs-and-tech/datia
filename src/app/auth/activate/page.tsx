@@ -191,7 +191,7 @@ function ActivateAccountForm() {
           // Si ya está activado, limpiar estado guardado y redirigir. La cuenta
           // de organización (sin empresa) tiene su propio panel.
           clearOnboardingState();
-          const loginPath = info.role === 'ORG_ADMIN' ? '/auth/superadmin/login' : '/auth/admin/login';
+          const loginPath = info.role === 'ORG_ADMIN' ? '/auth/organization/login' : '/auth/admin/login';
           router.push(`${loginPath}?message=account-activated`);
           return;
         }
@@ -320,7 +320,7 @@ function ActivateAccountForm() {
         // Si no es primer admin, redirigir al login: la cuenta de organización
         // (ORG_ADMIN, sin empresa) tiene su propio panel, no el dashboard.
         if (!onboardingInfo?.isFirstAdmin) {
-          const loginPath = onboardingInfo?.role === 'ORG_ADMIN' ? '/auth/superadmin/login' : '/auth/admin/login';
+          const loginPath = onboardingInfo?.role === 'ORG_ADMIN' ? '/auth/organization/login' : '/auth/admin/login';
           router.push(`${loginPath}?message=account-activated`);
         }
         // Para primer admin, handleKycVerified maneja la activación y avance al paso 4

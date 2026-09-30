@@ -262,6 +262,19 @@
           "tooManyAttempts": "Too many attempts. Please try again later."
         }
       },
+      "organization": {
+        "subtitle": "Your organisation's panel",
+        "emailPlaceholder": "you@organisation.com",
+        "passwordPlaceholder": "••••••••",
+        "accessing": "Accessing...",
+        "access": "Access",
+        "errors": {
+          "loginError": "Error logging in",
+          "connectionError": "Connection error",
+          "invalidCredentials": "Invalid credentials",
+          "tooManyAttempts": "Too many attempts. Please try again later."
+        }
+      },
       "loading": "Loading...",
       "org": {
         "admin": {
@@ -1138,6 +1151,14 @@
     "title": "Notifications",
     "markAllRead": "Mark all as read",
     "empty": "You have no notifications"
+  },
+  "organizationPanel": {
+    "loading": "Checking access...",
+    "nav": {
+      "companies": "Companies"
+    },
+    "logout": "Log out",
+    "footer": "Organisation panel - Datia"
   },
   "companiesPage": {
     "title": "Companies",

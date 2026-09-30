@@ -110,10 +110,10 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
     const token = request.cookies.get('admin-auth-token')?.value;
 
     if (!token) {
-      // The organization's own account has no dashboard: its panel is the
-      // superadmin one, so send it there instead of to a login it cannot use.
+      // The organization's own account has no dashboard: its own panel, so
+      // send it there instead of to a login it cannot use.
       if (request.cookies.get('organization-auth-token')?.value) {
-        return NextResponse.redirect(new URL('/superadmin/companies', request.url));
+        return NextResponse.redirect(new URL('/organization/companies', request.url));
       }
       return NextResponse.redirect(new URL('/auth/admin/login?error=Unauthorized', request.url));
     }

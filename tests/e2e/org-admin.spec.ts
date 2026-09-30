@@ -2,34 +2,41 @@ import { test, expect } from '@playwright/test';
 import { ORGANIZATION_STORAGE_STATE } from './utils/auth';
 
 /**
- * The organization's own account operates from the superadmin panel, limited to
- * its organization, and has no dashboard: that one is the companies' (#20).
- * Seeded by scripts/bootstrap-e2e-users.mjs.
+ * The organization's own account operates from its own panel (#20), separate
+ * from the platform superadmin one — a real customer, not platform staff, so
+ * it gets its own URLs, login and branding, even though the access control
+ * underneath was already this strict. Has no dashboard: that one is the
+ * companies'. Seeded by scripts/bootstrap-e2e-users.mjs.
  */
 
 test.use({ storageState: ORGANIZATION_STORAGE_STATE });
 
 test.describe('Organization account', () => {
-  test('signs in to the panel and lands on its companies, without the platform half', async ({ page }) => {
+  test('a valid session on the wrong panel is sent back to its own', async ({ page }) => {
     await page.goto('/superadmin', { waitUntil: 'networkidle' });
+    await expect(page).toHaveURL(/\/organization\/companies$/);
 
-    await expect(page).toHaveURL(/\/superadmin\/companies$/);
+    await page.goto('/superadmin/organizations', { waitUntil: 'networkidle' });
+    await expect(page).toHaveURL(/\/organization\/companies$/);
+  });
+
+  test('signs in to its own panel and lands on its companies, without the platform half', async ({ page }) => {
+    await page.goto('/organization/companies', { waitUntil: 'networkidle' });
+
     await expect(page.getByRole('heading', { name: /empresas|companies/i, level: 2 })).toBeVisible();
     // The company the seeded assets belong to, with them counted.
     await expect(page.getByRole('row', { name: /Datia E2E/ })).toContainText('4');
 
-    // Organizations and support messages are the platform's.
+    // Organizations and support messages are the platform's — no such links here.
     await expect(page.getByRole('link', { name: /^organizaciones$/i })).toHaveCount(0);
     await expect(page.getByRole('link', { name: /^soporte$/i })).toHaveCount(0);
-    await page.goto('/superadmin/organizations');
-    await expect(page).toHaveURL(/\/superadmin\/companies$/);
   });
 
   test('reads what a company holds, without acting on it', async ({ page }) => {
-    await page.goto('/superadmin/companies', { waitUntil: 'networkidle' });
+    await page.goto('/organization/companies', { waitUntil: 'networkidle' });
     await page.getByRole('link', { name: 'Datia E2E' }).click();
 
-    await expect(page).toHaveURL(/\/superadmin\/companies\/[^/]+$/);
+    await expect(page).toHaveURL(/\/organization\/companies\/[^/]+$/);
     await expect(page.getByRole('heading', { name: 'Datia E2E', level: 2 })).toBeVisible();
     await expect(page.getByText(/solo lectura|read-only/i).first()).toBeVisible();
     await expect(page.getByRole('row', { name: /Turbina eólica T-100/ })).toBeVisible();
@@ -41,17 +48,17 @@ test.describe('Organization account', () => {
     await expect(page.getByRole('button', { name: /nuevo|new|crear|create|eliminar|delete/i })).toHaveCount(0);
 
     // A company that is not one of its own shows nothing.
-    await page.goto('/superadmin/companies/no-es-de-esta-organizacion', { waitUntil: 'networkidle' });
+    await page.goto('/organization/companies/no-es-de-esta-organizacion', { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { level: 2 })).toHaveCount(0);
   });
 
-  test('has no dashboard: its address leads back to the panel', async ({ page }) => {
+  test('has no dashboard: its address leads back to its own panel', async ({ page }) => {
     await page.goto('/dashboard/assets');
-    await expect(page).toHaveURL(/\/superadmin\/companies$/);
+    await expect(page).toHaveURL(/\/organization\/companies$/);
   });
 
   test('creates a company and sees it listed; the same name is refused', async ({ page }) => {
-    await page.goto('/superadmin/companies', { waitUntil: 'networkidle' });
+    await page.goto('/organization/companies', { waitUntil: 'networkidle' });
 
     const name = `Filial ${Date.now()}`;
     await page.getByRole('button', { name: /nueva empresa|new company/i }).click();
