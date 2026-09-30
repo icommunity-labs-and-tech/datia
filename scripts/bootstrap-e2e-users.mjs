@@ -15,6 +15,9 @@ const ISOLATED_ORG_TOKEN = 'e2e-isolated-org-token-do-not-use-in-prod';
 const RESET_EMAIL = 'reset-e2e@datia.icommunitylabs.com';
 const RESET_TOKEN = 'e2e-reset-token-known-value';
 
+const INVITED_EMAIL = 'invited-e2e@datia.icommunitylabs.com';
+const INVITATION_TOKEN = 'e2e-activation-token-known-value';
+
 const USERS = [
   { email: 'admin@datia.icommunitylabs.com', password: 'admin123', name: 'Admin E2E', role: 'ADMIN' },
   // The account that operates the organization: no company, sees all of them (#20).
@@ -97,6 +100,31 @@ async function bootstrapE2EUsers() {
         },
       });
       console.log(`✅ Created ${RESET_EMAIL} with a recovery link`);
+    }
+
+    // A pending invitation already issued, so the e2e can walk the activation
+    // flow (#38) without sending a real email — Mailgun isn't configured here,
+    // and inviteAccount rolls back the whole invitation if the send fails.
+    // Not the first admin of the company (admin@datia already is), so this
+    // one gets the plain password-only activation form, not the KYC wizard.
+    const invitedUser = await prisma.user.findUnique({ where: { email: INVITED_EMAIL } });
+    if (!invitedUser) {
+      await prisma.user.create({
+        data: {
+          id: randomUUID(),
+          email: INVITED_EMAIL,
+          password: null,
+          name: 'Invited E2E',
+          role: 'ADMIN',
+          status: 'PENDING',
+          organizationId: org.id,
+          companyId,
+          activationToken: INVITATION_TOKEN,
+          activationExpiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
+          updatedAt: now,
+        },
+      });
+      console.log(`✅ Created ${INVITED_EMAIL} with a pending activation link`);
     }
 
     for (const [index, name] of ITEMS.entries()) {
