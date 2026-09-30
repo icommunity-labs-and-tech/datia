@@ -1125,6 +1125,12 @@
       "unexpected": "The message could not be sent. Please try again."
     }
   },
+  "notifications": {
+    "bell": "Notifications",
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "empty": "You have no notifications"
+  },
   "companiesPage": {
     "title": "Companies",
     "description": "Your organisation's companies and their accounts. A company account only sees its own company's data; you see all of it.",

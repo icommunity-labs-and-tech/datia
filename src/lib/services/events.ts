@@ -3,6 +3,7 @@ import { webhookRepository } from '@/infrastructure/prisma/repositories/WebhookR
 import type { CreateEventLogInput, EventLogRecord } from '@/domain/events/EventRepository';
 import type { Scope } from '@/lib/scope';
 import { webhookTriggerService, type WebhookPayload } from './webhook';
+import { notifyCompany } from '@/lib/notifications/notify';
 
 const MAX_CONCURRENT_DELIVERIES = 5;
 
@@ -71,6 +72,18 @@ export async function deliverEvent(event: EventLogRecord): Promise<void> {
           await webhookRepository
             .updateTriggered(webhook.id, success)
             .catch((error) => console.error(`[webhooks] could not record result for ${webhook.id}:`, error));
+
+          // Notified once, when it starts failing — not on every retry of an
+          // already-broken webhook (#28). `webhook.failureCount` is the count
+          // from before this attempt, so 0 means it was healthy until now.
+          if (!success && webhook.failureCount === 0) {
+            await notifyCompany(event.organizationId, event.companyId, {
+              type: 'WARNING',
+              title: 'Un webhook ha dejado de responder',
+              message: `«${webhook.name}» está fallando. La entrega se sigue reintentando.`,
+              data: { webhookId: webhook.id },
+            }).catch((error) => console.error(`[webhooks] could not notify about ${webhook.id}:`, error));
+          }
         })
       );
     }

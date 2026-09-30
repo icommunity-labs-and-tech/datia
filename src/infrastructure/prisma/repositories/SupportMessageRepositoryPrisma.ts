@@ -33,6 +33,11 @@ export const supportMessageRepository: SupportMessageRepository = {
     return toDomain(row);
   },
 
+  async findById(id: string): Promise<SupportMessageRecord | null> {
+    const row = await prisma.supportMessage.findUnique({ where: { id } });
+    return row ? toDomain(row) : null;
+  },
+
   async findAll(): Promise<SupportMessageListItem[]> {
     const rows = await prisma.supportMessage.findMany({
       orderBy: { createdAt: 'desc' },

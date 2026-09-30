@@ -27,12 +27,26 @@ vi.mock('../webhook', () => ({
   webhookTriggerService: { triggerWebhook: vi.fn(async () => ({ success: true, attempts: 1 })) },
 }));
 
+vi.mock('@/lib/notifications/notify', () => ({
+  notifyCompany: vi.fn(async () => undefined),
+}));
+
+import { notifyCompany } from '@/lib/notifications/notify';
+
 const findByEvent = webhookRepository.findByEvent as ReturnType<typeof vi.fn>;
 const updateTriggered = webhookRepository.updateTriggered as ReturnType<typeof vi.fn>;
 const triggerWebhook = webhookTriggerService.triggerWebhook as ReturnType<typeof vi.fn>;
+const notifyCompanyMock = notifyCompany as ReturnType<typeof vi.fn>;
 
 const input = { eventType: 'asset.created', entityType: 'asset', entityId: 'i-1', data: { id: 'i-1' } };
-const webhook = (id: string) => ({ id, url: `https://${id}.test`, secret: 's3cret', headers: null });
+const webhook = (id: string, failureCount = 0) => ({
+  id,
+  name: id,
+  url: `https://${id}.test`,
+  secret: 's3cret',
+  headers: null,
+  failureCount,
+});
 const scope = { organizationId: 'org-1', companyId: 'co-1' };
 const event = {
   id: 'evt-1',
@@ -118,5 +132,36 @@ describe('deliverEvent', () => {
   it('does nothing without subscribed webhooks', async () => {
     await deliverEvent(event);
     expect(triggerWebhook).not.toHaveBeenCalled();
+  });
+
+  it('notifies the company when a webhook that was healthy starts failing', async () => {
+    findByEvent.mockResolvedValueOnce([webhook('wh-1', 0)]);
+    triggerWebhook.mockResolvedValueOnce({ success: false, attempts: 3, error: 'HTTP 500' });
+
+    await deliverEvent(event);
+
+    expect(notifyCompanyMock).toHaveBeenCalledWith(
+      'org-1',
+      'co-1',
+      expect.objectContaining({ type: 'WARNING', data: { webhookId: 'wh-1' } })
+    );
+  });
+
+  it('does not notify again while an already-failing webhook keeps failing', async () => {
+    findByEvent.mockResolvedValueOnce([webhook('wh-1', 3)]);
+    triggerWebhook.mockResolvedValueOnce({ success: false, attempts: 3, error: 'HTTP 500' });
+
+    await deliverEvent(event);
+
+    expect(notifyCompanyMock).not.toHaveBeenCalled();
+  });
+
+  it('does not notify on a successful delivery', async () => {
+    findByEvent.mockResolvedValueOnce([webhook('wh-1', 0)]);
+    triggerWebhook.mockResolvedValueOnce({ success: true, attempts: 1 });
+
+    await deliverEvent(event);
+
+    expect(notifyCompanyMock).not.toHaveBeenCalled();
   });
 });
