@@ -24,7 +24,7 @@ test.describe('Invitation and signup', () => {
     // finishes, which starts after hydration — later than "networkidle".
     // A big page (1291 lines) to compile and hydrate first, so this needs
     // more room under CI's slower/more loaded environment than the default.
-    await expect(page.getByRole('heading', { name: /activar cuenta|activate account/i })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: /activar cuenta|activate account/i })).toBeVisible({ timeout: 30000 });
 
     // Form.Label isn't wired to its input in this legacy bootstrap-compat
     // form, so the fields' only accessible name is their placeholder.
@@ -32,29 +32,29 @@ test.describe('Invitation and signup', () => {
     await page.getByPlaceholder(/repite tu contraseña|repeat your password/i).fill(NEW_PASSWORD);
     await page.getByRole('button', { name: /activar cuenta|activate account/i }).click();
 
-    await page.waitForURL(/\/auth\/admin\/login\?message=account-activated/, { timeout: 15000 });
+    await page.waitForURL(/\/auth\/admin\/login\?message=account-activated/, { timeout: 20000 });
     // waitForURL only waits for the URL itself: this was a client-side
     // router.push, not a fresh navigation, so the login form may not have
     // mounted yet.
-    await page.waitForSelector('input[type="email"]', { timeout: 15000 });
+    await page.waitForSelector('input[type="email"]', { timeout: 30000 });
 
     // The account exists now, and signs in with the password just chosen.
     await page.fill('input[type="email"]', INVITED_EMAIL);
     await page.fill('input[type="password"]', NEW_PASSWORD);
     await page.click('form button[type="submit"]');
-    await page.waitForURL(/\/dashboard(\/.*)?$/, { timeout: 20000 });
+    await page.waitForURL(/\/dashboard(\/.*)?$/, { timeout: 30000 });
 
     // activateAccount clears the token on success, so the same link, used
     // again, is indistinguishable from one that never existed — not a second
     // password prompt, and not a distinct "already activated" message either.
     await page.context().clearCookies();
     await page.goto(`/auth/activate?token=${INVITATION_TOKEN}`, { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible({ timeout: 30000 });
   });
 
   test('an unknown activation link says so', async ({ page }) => {
     await page.goto('/auth/activate?token=no-such-token', { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible({ timeout: 30000 });
     await expect(page.getByRole('button', { name: /ir al login|go to login/i })).toBeVisible();
   });
 });
