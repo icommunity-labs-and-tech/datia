@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { withApiTracking } from '@/lib/auth/api-tokens/withApiTracking';
-import { getAsset } from '@/actions/assets';
+import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { decodeUrlParam } from '@/lib/api/decode-param';
 import { assetRepositoryFilesystem } from '@/infrastructure/filesystem/repositories/AssetRepositoryFilesystem';
 import { isSandboxRequest } from '@/lib/sandbox/context';
@@ -92,7 +92,11 @@ export const GET = withApiTracking(async (
     }
 
     // ── Production ─────────────────────────────────────────────────────
-    const item = await getAsset(id);
+    // Scoped by the token that authenticated this request, not by whatever
+    // dashboard cookie the caller's browser happens to also be carrying —
+    // `getAsset` read the latter via `requireScope()`, the same bug #78
+    // already fixed for /api/v1/events.
+    const item = await assetRepository.getById(id, authScope(auth));
     if (!item) {
       return NextResponse.json({ error: 'Item no encontrado' }, { status: 404 });
     }

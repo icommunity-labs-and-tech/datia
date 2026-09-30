@@ -206,14 +206,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json(result);
     }
 
-    // ── Production: delegate to server actions (Prisma) ─────────────────
+    // ── Production ────────────────────────────────────────────────────
+    // Scoped by the token that authenticated this request, not by whatever
+    // dashboard cookie the caller's browser happens to also be carrying — the
+    // server actions this used to delegate to read the latter via
+    // `requireScope()`, the same bug #78 already fixed for /api/v1/events.
     let result;
     if (q) {
-      const { searchAssetsPaginated } = await import('@/actions/assets/searchPaginated');
-      result = await searchAssetsPaginated(q, paginationParams);
+      result = await assetRepository.searchPaginated(q, authScope(auth), paginationParams);
     } else {
-      const { getAssetsPaginated } = await import('@/actions/assets/listPaginated');
-      result = await getAssetsPaginated(paginationParams);
+      result = await assetRepository.listPaginated(authScope(auth), paginationParams);
     }
 
     return NextResponse.json(result);
