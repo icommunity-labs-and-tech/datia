@@ -178,3 +178,16 @@ export interface EmissionTotals {
   totalCo2eKg: number;
   monthly: MonthlyPoint[];
 }
+
+/**
+ * One source's own monthly consumption, plus its current emission factor —
+ * everything a projection (#21) needs to extrapolate that source and turn its
+ * projected consumption into projected emissions.
+ */
+export interface SourceMonthlySeries {
+  sourceId: string;
+  sourceName: string;
+  monthly: MonthlyPoint[];
+  /** The most recent emission factor recorded for this source, if any. */
+  currentEmissionFactor: number | null;
+}

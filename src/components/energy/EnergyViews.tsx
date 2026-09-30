@@ -34,9 +34,12 @@ import type {
   EmissionTotals,
 } from '@/domain/energy/EnergyTypes';
 import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
+import type { EnergyForecast } from '@/lib/projections/energy-forecast';
+import { useEnergyForecast } from './useEnergyForecast';
+import { ForecastSection } from './ForecastSection';
 
 /** Renders a YYYY-MM key in the reader's locale. */
-function monthLabel(month: string, locale: string) {
+export function monthLabel(month: string, locale: string) {
   const [year, m] = month.split('-').map(Number);
   return new Date(year, m - 1, 1).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
 }
@@ -170,14 +173,17 @@ export function EnergyConsumption({
   consumption,
   sources,
   totals,
+  forecast: initialForecast,
 }: {
   consumption: EnergyConsumptionRecord[];
   sources: EnergySourceRecord[];
   totals: EnergyConsumptionTotals;
+  forecast: EnergyForecast;
 }) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
   const sourceMap = Object.fromEntries(sources.map((s) => [s.id, s]));
+  const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast);
 
   // Summary and chart come from the totals, which cover every record; the table
   // below shows the most recent page.
@@ -216,6 +222,17 @@ export function EnergyConsumption({
           </ResponsiveContainer>
         </Paper>
       )}
+
+      <ForecastSection
+        forecast={forecast}
+        horizon={horizon}
+        onHorizonChange={setHorizon}
+        loading={isPending}
+        historicalMonthly={totals.monthly}
+        metric="consumption"
+        color={DATIA_AMBER}
+        unit="kWh"
+      />
 
       <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
         {consumption.length < totals.records && (
@@ -263,12 +280,15 @@ export function EnergyConsumption({
 export function EnergyEmissions({
   emissions,
   totals,
+  forecast: initialForecast,
 }: {
   emissions: EmissionRecord[];
   totals: EmissionTotals;
+  forecast: EnergyForecast;
 }) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
+  const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast);
 
   const chartData = totals.monthly.map(({ month, value }) => ({
     label: monthLabel(month, locale),
@@ -303,6 +323,17 @@ export function EnergyEmissions({
           </ResponsiveContainer>
         </Paper>
       )}
+
+      <ForecastSection
+        forecast={forecast}
+        horizon={horizon}
+        onHorizonChange={setHorizon}
+        loading={isPending}
+        historicalMonthly={totals.monthly}
+        metric="emissions"
+        color="#0D3585"
+        unit="kg CO₂e"
+      />
 
       <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
         {emissions.length < totals.records && (
