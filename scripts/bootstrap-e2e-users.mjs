@@ -7,6 +7,11 @@ const prisma = new PrismaClient();
 
 const ORG_SLUG = 'datia-e2e';
 
+const ISOLATED_ORG_SLUG = 'aislada-e2e';
+const ISOLATED_ASSET_ID = 'e2e-isolated-item';
+const DATIA_ORG_TOKEN = 'e2e-datia-org-token-do-not-use-in-prod';
+const ISOLATED_ORG_TOKEN = 'e2e-isolated-org-token-do-not-use-in-prod';
+
 const RESET_EMAIL = 'reset-e2e@datia.icommunitylabs.com';
 const RESET_TOKEN = 'e2e-reset-token-known-value';
 
@@ -205,6 +210,56 @@ async function bootstrapE2EUsers() {
       });
       console.log('✅ 3 notifications ready for admin@datia.icommunitylabs.com');
     }
+
+    // A second, unrelated organisation with its own asset and API token, so
+    // the e2e can prove isolation between organisations (#38) — not just that
+    // each one's own dashboard/API works, which every other spec already
+    // covers.
+    const isolatedOrg =
+      (await prisma.organization.findUnique({ where: { slug: ISOLATED_ORG_SLUG } })) ??
+      (await prisma.organization.create({
+        data: {
+          id: randomUUID(),
+          name: 'Aislada E2E',
+          slug: ISOLATED_ORG_SLUG,
+          verificationStatus: 'VERIFIED',
+          updatedAt: now,
+        },
+      }));
+    const isolatedCompanyId = await companyIdFor(prisma, isolatedOrg.id);
+
+    if (!(await prisma.asset.findUnique({ where: { id: ISOLATED_ASSET_ID } }))) {
+      await prisma.asset.create({
+        data: {
+          id: ISOLATED_ASSET_ID,
+          name: 'Activo de otra organización',
+          description: 'No debería ser visible desde Datia E2E, ni por API ni por dashboard.',
+          organizationId: isolatedOrg.id,
+          companyId: isolatedCompanyId,
+          updatedAt: now,
+        },
+      });
+    }
+
+    const datiaTokenHash = createHash('sha256').update(DATIA_ORG_TOKEN).digest('hex');
+    if (!(await prisma.apiToken.findUnique({ where: { tokenHash: datiaTokenHash } }))) {
+      await prisma.apiToken.create({
+        data: { id: randomUUID(), name: 'E2E token', tokenHash: datiaTokenHash, organizationId: org.id, companyId },
+      });
+    }
+    const isolatedTokenHash = createHash('sha256').update(ISOLATED_ORG_TOKEN).digest('hex');
+    if (!(await prisma.apiToken.findUnique({ where: { tokenHash: isolatedTokenHash } }))) {
+      await prisma.apiToken.create({
+        data: {
+          id: randomUUID(),
+          name: 'Isolated E2E token',
+          tokenHash: isolatedTokenHash,
+          organizationId: isolatedOrg.id,
+          companyId: isolatedCompanyId,
+        },
+      });
+    }
+    console.log(`✅ Isolated organization: ${isolatedOrg.name} (${isolatedOrg.slug}), with its own asset and token`);
 
     console.log('\n🔑 E2E credentials:');
     for (const { email, password } of USERS) {
