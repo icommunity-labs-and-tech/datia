@@ -4,19 +4,17 @@ import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Button, Center, Group, Loader, Stack, Text } from '@mantine/core';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
-// The platform account's own panel. The organization account used to share
-// this same layout, filtered to its own half by role — moved out to
-// /organization, with its own login and branding: an ORG_ADMIN is a real
-// customer, not platform staff, and "Panel de Super Administrador" /
-// "Acceso restringido" said otherwise on every screen it saw.
-const PLATFORM_LINKS = [
-  { href: '/superadmin', icon: 'bi-house', label: 'Inicio' },
-  { href: '/superadmin/organizations', icon: 'bi-building', label: 'Organizaciones' },
-  { href: '/superadmin/support-messages', icon: 'bi-chat-dots', label: 'Soporte' },
-];
+// The organization account's own panel (#20) — split out of /superadmin,
+// which it used to share filtered to its own half by role. An ORG_ADMIN is a
+// real customer managing its own companies, not platform staff, and sharing
+// that panel's branding ("Panel de Super Administrador", "Acceso
+// restringido") told it otherwise on every screen.
+const NAV_HOME = '/organization/companies';
 
-export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('organizationPanel');
   const router = useRouter();
   const pathname = usePathname();
   const [user, setUser] = useState<any>(null);
@@ -32,28 +30,24 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       const response = await fetch('/api/auth/superadmin/session');
       const data = await response.json();
 
-      if (!data.user) {
-        router.push('/auth/superadmin/login');
-      } else if (data.user.role === 'ORG_ADMIN') {
-        // A valid session, just the wrong panel — send it to its own.
-        router.replace('/organization/companies');
+      if (!data.user || data.user.role !== 'ORG_ADMIN') {
+        // No session, or a platform one: this panel is the organization's.
+        router.push('/auth/organization/login');
       } else {
         setUser(data.user);
       }
     } catch (error) {
       console.error('Auth check error:', error);
-      router.push('/auth/superadmin/login');
+      router.push('/auth/organization/login');
     } finally {
       setLoading(false);
     }
   };
 
-  const navLinks = PLATFORM_LINKS;
-
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/superadmin/logout', { method: 'POST' });
-      router.push('/auth/superadmin/login');
+      router.push('/auth/organization/login');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -63,8 +57,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     return (
       <Center style={{ minHeight: '100vh' }}>
         <Stack align="center" gap="xs">
-          <Loader color="red" />
-          <Text size="sm" c="dimmed">Verificando acceso...</Text>
+          <Loader color="datiaBlue" />
+          <Text size="sm" c="dimmed">{t('loading')}</Text>
         </Stack>
       </Center>
     );
@@ -81,43 +75,40 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
                 width: 36,
                 height: 36,
                 borderRadius: 8,
-                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
+                background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <i className="bi bi-shield-lock-fill" style={{ fontSize: '1.25rem', color: '#dc2626' }} />
+              <i className="bi bi-buildings-fill" style={{ fontSize: '1.25rem', color: '#1752CC' }} />
             </div>
             <Text fw={600} fz="lg" c="#1f2937">Datia</Text>
+            {user?.organizationName && (
+              <Text size="sm" c="dimmed">{user.organizationName}</Text>
+            )}
           </Group>
 
           <Group gap={4}>
-            {navLinks.map(({ href, icon, label }) => {
-              const active = pathname === href || (href !== '/superadmin' && pathname.startsWith(href + '/'));
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 12px',
-                    borderRadius: 6,
-                    textDecoration: 'none',
-                    fontSize: 14,
-                    fontWeight: active ? 600 : 400,
-                    color: active ? '#dc2626' : 'var(--mantine-color-dimmed)',
-                    background: active ? '#fef2f2' : 'transparent',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <i className={`bi ${icon}`} />
-                  {label}
-                </Link>
-              );
-            })}
+            <Link
+              href={NAV_HOME}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                padding: '6px 12px',
+                borderRadius: 6,
+                textDecoration: 'none',
+                fontSize: 14,
+                fontWeight: pathname.startsWith(NAV_HOME) ? 600 : 400,
+                color: pathname.startsWith(NAV_HOME) ? '#1752CC' : 'var(--mantine-color-dimmed)',
+                background: pathname.startsWith(NAV_HOME) ? '#eff6ff' : 'transparent',
+                transition: 'all 0.2s',
+              }}
+            >
+              <i className="bi bi-buildings" />
+              {t('nav.companies')}
+            </Link>
 
             <div style={{ width: 1, height: 24, background: 'rgba(0,0,0,0.15)', margin: '0 12px' }} />
 
@@ -132,7 +123,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
               onClick={handleLogout}
               leftSection={<i className="bi bi-box-arrow-right" />}
             >
-              Salir
+              {t('logout')}
             </Button>
           </Group>
         </Group>
@@ -153,11 +144,10 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
           textAlign: 'center',
         }}
       >
-        <Group justify="center" gap={8} mb={6}>
-          <i className="bi bi-shield-check" style={{ color: '#dc2626' }} />
-          <Text size="sm" c="dimmed" fw={500}>Panel de Super Administrador - Datia</Text>
+        <Group justify="center" gap={8}>
+          <i className="bi bi-buildings" style={{ color: '#1752CC' }} />
+          <Text size="sm" c="dimmed" fw={500}>{t('footer')}</Text>
         </Group>
-        <Text size="xs" c="dimmed">Acceso Restringido • Solo personal autorizado</Text>
       </footer>
     </div>
   );

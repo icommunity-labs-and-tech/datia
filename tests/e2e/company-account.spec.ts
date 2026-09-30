@@ -10,8 +10,8 @@ test.describe('Company account', () => {
     await page.goto('/dashboard', { waitUntil: 'networkidle' });
     await expect(page).toHaveURL(/\/dashboard$/);
 
-    // Its session is not one of the panel's: it is sent to that panel's login.
-    await page.goto('/superadmin/companies');
-    await expect(page).toHaveURL(/\/auth\/superadmin\/login/);
+    // Its session is not one of the panel's: it is sent to that panel's own login.
+    await page.goto('/organization/companies');
+    await expect(page).toHaveURL(/\/auth\/organization\/login/);
   });
 });

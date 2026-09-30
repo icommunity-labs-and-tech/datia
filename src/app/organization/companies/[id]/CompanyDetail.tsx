@@ -27,7 +27,7 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
 
   return (
     <>
-      <Anchor component={Link} href="/superadmin/companies" size="sm" mb="xs" display="inline-flex">
+      <Anchor component={Link} href="/organization/companies" size="sm" mb="xs" display="inline-flex">
         <IconArrowLeft size={14} style={{ marginRight: 4, alignSelf: 'center' }} />
         {t('back')}
       </Anchor>

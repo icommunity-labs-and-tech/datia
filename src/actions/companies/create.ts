@@ -59,7 +59,7 @@ export async function createCompany(input: CreateCompanyInput): Promise<CreateCo
       },
       select: { id: true, name: true },
     });
-    revalidatePath('/superadmin/companies');
+    revalidatePath('/organization/companies');
 
     if (admin) {
       const invited = await inviteAccount(actor, {

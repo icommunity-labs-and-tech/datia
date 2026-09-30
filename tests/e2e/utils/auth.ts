@@ -14,14 +14,14 @@ export const ADMIN_STORAGE_STATE = path.join('playwright', '.auth', 'admin.json'
  */
 export const ORGANIZATION_STORAGE_STATE = path.join('playwright', '.auth', 'organization.json');
 
-/** The organization account signs in to the superadmin panel, and lands on its companies. */
+/** The organization account signs in to its own panel, and lands on its companies. */
 export async function loginOrganization(page: Page, email: string, password: string) {
-  await page.goto('/auth/superadmin/login', { waitUntil: 'networkidle' });
+  await page.goto('/auth/organization/login', { waitUntil: 'networkidle' });
   await page.waitForSelector('input[type="email"]', { timeout: 10000 });
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', password);
   await page.click('form button[type="submit"]');
-  await page.waitForURL(/\/superadmin\/companies/, { timeout: 20000 });
+  await page.waitForURL(/\/organization\/companies/, { timeout: 20000 });
 }
 
 /** Session of the platform account (SUPER_ADMIN), the same login as the organization's. */
