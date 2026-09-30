@@ -29,6 +29,10 @@ test.describe('Invitation and signup', () => {
     await page.getByRole('button', { name: /activar cuenta|activate account/i }).click();
 
     await page.waitForURL(/\/auth\/admin\/login\?message=account-activated/, { timeout: 15000 });
+    // waitForURL only waits for the URL itself: this was a client-side
+    // router.push, not a fresh navigation, so the login form may not have
+    // mounted yet.
+    await page.waitForSelector('input[type="email"]', { timeout: 15000 });
 
     // The account exists now, and signs in with the password just chosen.
     await page.fill('input[type="email"]', INVITED_EMAIL);
