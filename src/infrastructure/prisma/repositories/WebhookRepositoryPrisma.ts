@@ -197,15 +197,17 @@ export const webhookRepository: WebhookRepository = {
           'Prisma Client no tiene el modelo webhook. Por favor, reinicia el servidor de desarrollo.'
         );
       }
+      // Filtered in JS, not with Prisma's `has` on the events array: SQLite has
+      // no native array type, so the e2e schema can't satisfy that filter —
+      // it threw there, and deliverEvent's own catch swallowed it silently, so
+      // no webhook ever actually fired against the SQLite/e2e client (#38). A
+      // company's own webhooks number in the single digits, so this costs
+      // nothing extra to filter this way on Postgres either.
       const webhooks = await prisma.webhook.findMany({
-        where: {
-          ...scopeWhere(scope),
-          active: true,
-          events: { has: eventType },
-        },
+        where: { ...scopeWhere(scope), active: true },
         orderBy: { createdAt: 'desc' },
       });
-      return webhooks.map(toDomain);
+      return webhooks.filter((w) => w.events.includes(eventType)).map(toDomain);
     } catch (e) {
       throw new DbError(e);
     }

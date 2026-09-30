@@ -7,7 +7,7 @@ import { userRepository } from '@/infrastructure/prisma/repositories/UserReposit
 import { icommunityService } from '@/infrastructure/icommunity/ICommunityServiceImpl';
 import { validateApiToken } from '@/lib/auth/api-tokens/middleware';
 import { authScope } from '@/lib/scope';
-import { AssetInputError, AssetAlreadyExistsError, UserNotVerifiedError, AssetCreationRollbackError } from '@/domain/assets/errors';
+import { AssetInputError, AssetAlreadyExistsError, UserNotVerifiedError, CompanyNotVerifiedError, AssetCreationRollbackError } from '@/domain/assets/errors';
 import { parseCursorPaginationParams } from '@/lib/api/cursor-pagination';
 
 /**
@@ -344,6 +344,14 @@ export async function POST(request: NextRequest) {
     if (error instanceof UserNotVerifiedError) {
       return NextResponse.json(
         { error: 'User verification required', code: 'USER_NOT_VERIFIED' },
+        { status: 403 }
+      );
+    }
+    // The company's KYC (#23) replaced this, and the route was never updated to
+    // catch it — it fell through to the generic 500 below (#38).
+    if (error instanceof CompanyNotVerifiedError) {
+      return NextResponse.json(
+        { error: error.message, code: 'COMPANY_NOT_VERIFIED' },
         { status: 403 }
       );
     }
