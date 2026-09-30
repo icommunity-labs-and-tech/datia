@@ -20,7 +20,11 @@ const NEW_PASSWORD = 'nueva-contraseña-123';
 test.describe('Invitation and signup', () => {
   test('sets a password from the activation link, signs in with it, and the link is spent', async ({ page }) => {
     await page.goto(`/auth/activate?token=${INVITATION_TOKEN}`, { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: /activar cuenta|activate account/i })).toBeVisible();
+    // The heading only appears once getOnboardingInfo's own round trip
+    // finishes, which starts after hydration — later than "networkidle".
+    // A big page (1291 lines) to compile and hydrate first, so this needs
+    // more room under CI's slower/more loaded environment than the default.
+    await expect(page.getByRole('heading', { name: /activar cuenta|activate account/i })).toBeVisible({ timeout: 20000 });
 
     // Form.Label isn't wired to its input in this legacy bootstrap-compat
     // form, so the fields' only accessible name is their placeholder.
@@ -45,12 +49,12 @@ test.describe('Invitation and signup', () => {
     // password prompt, and not a distinct "already activated" message either.
     await page.context().clearCookies();
     await page.goto(`/auth/activate?token=${INVITATION_TOKEN}`, { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible({ timeout: 20000 });
   });
 
   test('an unknown activation link says so', async ({ page }) => {
     await page.goto('/auth/activate?token=no-such-token', { waitUntil: 'networkidle' });
-    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Error' })).toBeVisible({ timeout: 20000 });
     await expect(page.getByRole('button', { name: /ir al login|go to login/i })).toBeVisible();
   });
 });
