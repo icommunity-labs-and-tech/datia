@@ -33,7 +33,7 @@ jobs:
       - run: npx prisma generate
 
 
-      - run: npx vitest run
+      - run: npx vitest run --coverage
 
   e2e:
     name: E2E (chromium, SQLite)

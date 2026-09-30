@@ -51,7 +51,7 @@ jobs:
 
       # Gate the rollout on the test suite. Production should never receive an
       # image whose tests were not run against this exact commit.
-      - run: npx vitest run
+      - run: npx vitest run --coverage
 
       - id: auth
         uses: google-github-actions/auth@v2
