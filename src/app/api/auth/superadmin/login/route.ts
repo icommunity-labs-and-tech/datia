@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { authenticatePanel } from '@/lib/auth/panel-login';
 import { createRateLimiter, getClientIp } from '@/lib/auth/rate-limit';
+import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
+import { organizationAuthConfig } from '@/lib/auth/organization/config';
 
 // 5 intentos por IP cada 15 minutos
 const checkRateLimit = createRateLimiter({ windowMs: 15 * 60 * 1000, maxAttempts: 5 });
@@ -43,6 +45,15 @@ export async function POST(request: NextRequest) {
       maxAge: result.cookie!.maxAge,
       path: '/',
     });
+
+    // This login shares the endpoint with the other kind, but not a browser:
+    // a leftover cookie from the other one — from testing both, say — would
+    // outlive this login and get picked first by /session, which checks the
+    // platform one before ever looking at the organization's. Silent to the
+    // account that just signed in: a valid session, just not this one's.
+    const otherCookieName =
+      result.kind === 'superadmin' ? organizationAuthConfig.cookieName : superadminAuthConfig.cookieName;
+    response.cookies.delete(otherCookieName);
 
     return response;
   } catch (error) {
