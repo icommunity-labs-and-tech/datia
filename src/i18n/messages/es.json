@@ -1162,6 +1162,23 @@
     "nav": {
       "organizations": "Organizaciones",
       "support": "Soporte"
+    },
+    "home": {
+      "organizations": {
+        "title": "Organizaciones",
+        "description": "Crea y gestiona organizaciones con sus administradores",
+        "cta": "Gestionar organizaciones"
+      },
+      "support": {
+        "title": "Mensajes de soporte",
+        "description": "Revisa y gestiona los mensajes de soporte de las organizaciones",
+        "cta": "Ver mensajes"
+      },
+      "settings": {
+        "title": "Configuración",
+        "description": "Ajustes globales del sistema",
+        "cta": "Próximamente"
+      }
     }
   },
   "companiesPage": {

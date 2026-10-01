@@ -1,185 +1,59 @@
 'use client';
 
-import { Card, Row, Col, Button } from '@/components/legacy/bootstrap-compat';
+import { Button, Card, SimpleGrid, Text, ThemeIcon, Title } from '@mantine/core';
+import { IconBuildingSkyscraper, IconHeadset, IconSettings } from '@tabler/icons-react';
+import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
 export default function SuperAdminDashboard() {
+  const t = useTranslations('superadminPanel.home');
+
   return (
-    <div>
-      <Row className="g-4 mb-5">
-        <Col md={6} lg={4}>
-          <Card 
-            className="h-100 shadow-sm border-0"
-            style={{
-              transition: 'all 0.3s ease',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 25px rgba(220, 38, 38, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <Card.Body className="text-center p-4">
-              <div 
-                className="mb-4"
-                style={{
-                  width: '80px',
-                  height: '80px',
-                  margin: '0 auto',
-                  borderRadius: '20px',
-                  background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <i className="bi bi-building text-danger" style={{ fontSize: '2.5rem' }}></i>
-              </div>
-              <Card.Title style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem', color: '#1f2937' }}>
-                Organizaciones
-              </Card.Title>
-              <Card.Text className="text-muted mb-4" style={{ minHeight: '48px' }}>
-                Crea y gestiona organizaciones con sus administradores
-              </Card.Text>
-              <Link href="/superadmin/organizations" className="text-decoration-none">
-                <Button 
-                  variant="danger" 
-                  className="w-100"
-                  style={{
-                    borderRadius: '10px',
-                    padding: '10px',
-                    fontWeight: 600,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-                    boxShadow: '0 4px 6px rgba(220, 38, 38, 0.2)'
-                  }}
-                >
-                  <i className="bi bi-building-add me-2"></i>
-                  Gestionar Organizaciones
-                </Button>
-              </Link>
-            </Card.Body>
-          </Card>
-        </Col>
+    <SimpleGrid cols={{ base: 1, sm: 2, lg: 3 }} spacing="lg">
+      <Card withBorder radius="lg" padding="xl" style={{ textAlign: 'center' }}>
+        <ThemeIcon size={80} radius="md" variant="light" color="datiaBlue" mx="auto" mb="lg">
+          <IconBuildingSkyscraper size={40} stroke={1.5} />
+        </ThemeIcon>
+        <Title order={3} mb="xs">{t('organizations.title')}</Title>
+        <Text c="dimmed" mb="lg" mih={48}>{t('organizations.description')}</Text>
+        <Button
+          component={Link}
+          href="/superadmin/organizations"
+          fullWidth
+          radius="md"
+          leftSection={<IconBuildingSkyscraper size={18} stroke={1.6} />}
+        >
+          {t('organizations.cta')}
+        </Button>
+      </Card>
 
-        <Col md={6} lg={4}>
-          <Card
-            className="h-100 shadow-sm border-0"
-            style={{
-              transition: 'all 0.3s ease',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-4px)';
-              e.currentTarget.style.boxShadow = '0 10px 25px rgba(59, 130, 246, 0.15)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <Card.Body className="text-center p-4">
-              <div
-                className="mb-4"
-                style={{
-                  width: '80px',
-                  height: '80px',
-                  margin: '0 auto',
-                  borderRadius: '20px',
-                  background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <i className="bi bi-chat-dots text-primary" style={{ fontSize: '2.5rem' }}></i>
-              </div>
-              <Card.Title style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem', color: '#1f2937' }}>
-                Mensajes de Soporte
-              </Card.Title>
-              <Card.Text className="text-muted mb-4" style={{ minHeight: '48px' }}>
-                Revisa y gestiona los mensajes de soporte de las organizaciones
-              </Card.Text>
-              <Link href="/superadmin/support-messages" className="text-decoration-none">
-                <Button
-                  variant="primary"
-                  className="w-100"
-                  style={{
-                    borderRadius: '10px',
-                    padding: '10px',
-                    fontWeight: 600,
-                    border: 'none',
-                    background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                    boxShadow: '0 4px 6px rgba(59, 130, 246, 0.2)'
-                  }}
-                >
-                  <i className="bi bi-chat-dots me-2"></i>
-                  Ver Mensajes
-                </Button>
-              </Link>
-            </Card.Body>
-          </Card>
-        </Col>
+      <Card withBorder radius="lg" padding="xl" style={{ textAlign: 'center' }}>
+        <ThemeIcon size={80} radius="md" variant="light" color="datiaBlue" mx="auto" mb="lg">
+          <IconHeadset size={40} stroke={1.5} />
+        </ThemeIcon>
+        <Title order={3} mb="xs">{t('support.title')}</Title>
+        <Text c="dimmed" mb="lg" mih={48}>{t('support.description')}</Text>
+        <Button
+          component={Link}
+          href="/superadmin/support-messages"
+          fullWidth
+          radius="md"
+          leftSection={<IconHeadset size={18} stroke={1.6} />}
+        >
+          {t('support.cta')}
+        </Button>
+      </Card>
 
-        <Col md={6} lg={4}>
-          <Card 
-            className="h-100 shadow-sm border-0"
-            style={{
-              transition: 'all 0.3s ease',
-              borderRadius: '16px',
-              border: '1px solid #e5e7eb',
-              opacity: 0.7
-            }}
-          >
-            <Card.Body className="text-center p-4">
-              <div 
-                className="mb-4"
-                style={{
-                  width: '80px',
-                  height: '80px',
-                  margin: '0 auto',
-                  borderRadius: '20px',
-                  background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                <i className="bi bi-gear text-secondary" style={{ fontSize: '2.5rem' }}></i>
-              </div>
-              <Card.Title style={{ fontSize: '1.5rem', fontWeight: 600, marginBottom: '1rem', color: '#1f2937' }}>
-                Configuración
-              </Card.Title>
-              <Card.Text className="text-muted mb-4" style={{ minHeight: '48px' }}>
-                Ajustes globales del sistema
-              </Card.Text>
-              <Button 
-                variant="outline-secondary" 
-                className="w-100" 
-                disabled
-                style={{
-                  borderRadius: '10px',
-                  padding: '10px',
-                  fontWeight: 500
-                }}
-              >
-                <i className="bi bi-gear me-2"></i>
-                Próximamente
-              </Button>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-    </div>
+      <Card withBorder radius="lg" padding="xl" style={{ textAlign: 'center', opacity: 0.7 }}>
+        <ThemeIcon size={80} radius="md" variant="light" color="gray" mx="auto" mb="lg">
+          <IconSettings size={40} stroke={1.5} />
+        </ThemeIcon>
+        <Title order={3} mb="xs">{t('settings.title')}</Title>
+        <Text c="dimmed" mb="lg" mih={48}>{t('settings.description')}</Text>
+        <Button fullWidth radius="md" variant="default" disabled leftSection={<IconSettings size={18} stroke={1.6} />}>
+          {t('settings.cta')}
+        </Button>
+      </Card>
+    </SimpleGrid>
   );
 }
-
-
-
-
