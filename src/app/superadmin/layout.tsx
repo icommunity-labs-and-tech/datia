@@ -1,25 +1,36 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { Button, Center, Group, Loader, Stack, Text } from '@mantine/core';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { Center, Loader, Stack, Text } from '@mantine/core';
+import { useTranslations } from 'next-intl';
+import { IconHome2, IconBuildingSkyscraper, IconHeadset } from '@tabler/icons-react';
+import PanelShell from '@/components/layout/PanelShell';
 
 // The platform account's own panel. The organization account used to share
 // this same layout, filtered to its own half by role — moved out to
 // /organization, with its own login and branding: an ORG_ADMIN is a real
 // customer, not platform staff, and "Panel de Super Administrador" /
 // "Acceso restringido" said otherwise on every screen it saw.
-const PLATFORM_LINKS = [
-  { href: '/superadmin', icon: 'bi-house', label: 'Inicio' },
-  { href: '/superadmin/organizations', icon: 'bi-building', label: 'Organizaciones' },
-  { href: '/superadmin/support-messages', icon: 'bi-chat-dots', label: 'Soporte' },
-];
+//
+// Chrome (topbar, account menu, language switcher, mobile drawer) comes from
+// PanelShell, the same shell the dashboard an organization's companies see
+// uses — before this, the three panels were three different hand-rolled
+// headers, so a customer moving between its dashboard and this one saw three
+// different products.
+
+interface SessionUser {
+  id: string;
+  name?: string;
+  email: string;
+  role: string;
+}
 
 export default function SuperAdminLayout({ children }: { children: React.ReactNode }) {
+  const t = useTranslations('superadminPanel');
+  const tSidebar = useTranslations('sidebar');
   const router = useRouter();
-  const pathname = usePathname();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -48,8 +59,6 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     }
   };
 
-  const navLinks = PLATFORM_LINKS;
-
   const handleLogout = async () => {
     try {
       await fetch('/api/auth/superadmin/logout', { method: 'POST' });
@@ -63,102 +72,22 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     return (
       <Center style={{ minHeight: '100vh' }}>
         <Stack align="center" gap="xs">
-          <Loader color="red" />
-          <Text size="sm" c="dimmed">Verificando acceso...</Text>
+          <Loader />
+          <Text size="sm" c="dimmed">{tSidebar('checkingAccess')}</Text>
         </Stack>
       </Center>
     );
   }
 
+  const navLinks = [
+    { href: '/superadmin', icon: IconHome2, label: tSidebar('home'), exact: true },
+    { href: '/superadmin/organizations', icon: IconBuildingSkyscraper, label: t('nav.organizations') },
+    { href: '/superadmin/support-messages', icon: IconHeadset, label: t('nav.support') },
+  ];
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', background: '#f8f9fa' }}>
-      {/* Top nav */}
-      <header style={{ padding: '12px 24px' }}>
-        <Group justify="space-between" wrap="wrap">
-          <Group gap={12}>
-            <div
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 8,
-                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <i className="bi bi-shield-lock-fill" style={{ fontSize: '1.25rem', color: '#dc2626' }} />
-            </div>
-            <Text fw={600} fz="lg" c="#1f2937">Datia</Text>
-          </Group>
-
-          <Group gap={4}>
-            {navLinks.map(({ href, icon, label }) => {
-              const active = pathname === href || (href !== '/superadmin' && pathname.startsWith(href + '/'));
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    padding: '6px 12px',
-                    borderRadius: 6,
-                    textDecoration: 'none',
-                    fontSize: 14,
-                    fontWeight: active ? 600 : 400,
-                    color: active ? '#dc2626' : 'var(--mantine-color-dimmed)',
-                    background: active ? '#fef2f2' : 'transparent',
-                    transition: 'all 0.2s',
-                  }}
-                >
-                  <i className={`bi ${icon}`} />
-                  {label}
-                </Link>
-              );
-            })}
-
-            <div style={{ width: 1, height: 24, background: 'rgba(0,0,0,0.15)', margin: '0 12px' }} />
-
-            <Group gap={8} style={{ padding: '6px 12px' }}>
-              <i className="bi bi-person-circle" style={{ fontSize: '1.25rem', color: 'var(--mantine-color-dimmed)' }} />
-              <Text size="sm" c="dimmed">{user?.name || user?.email}</Text>
-            </Group>
-
-            <Button
-              variant="default"
-              size="xs"
-              onClick={handleLogout}
-              leftSection={<i className="bi bi-box-arrow-right" />}
-            >
-              Salir
-            </Button>
-          </Group>
-        </Group>
-      </header>
-
-      {/* Main content */}
-      <main style={{ flexGrow: 1, padding: '48px 24px' }}>
-        {user ? children : null}
-      </main>
-
-      {/* Footer */}
-      <footer
-        style={{
-          marginTop: 'auto',
-          background: 'white',
-          borderTop: '1px solid var(--mantine-color-default-border)',
-          padding: '1.5rem 0',
-          textAlign: 'center',
-        }}
-      >
-        <Group justify="center" gap={8} mb={6}>
-          <i className="bi bi-shield-check" style={{ color: '#dc2626' }} />
-          <Text size="sm" c="dimmed" fw={500}>Panel de Super Administrador - Datia</Text>
-        </Group>
-        <Text size="xs" c="dimmed">Acceso Restringido • Solo personal autorizado</Text>
-      </footer>
-    </div>
+    <PanelShell homeHref="/superadmin" navLinks={navLinks} user={user} onLogout={handleLogout}>
+      {user ? children : null}
+    </PanelShell>
   );
 }

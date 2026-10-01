@@ -70,7 +70,8 @@
     "language": "Language",
     "account": "Account",
     "logout": "Log out",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "checkingAccess": "Checking access..."
   },
   "settings": {
     "title": "Settings",
@@ -1153,12 +1154,15 @@
     "empty": "You have no notifications"
   },
   "organizationPanel": {
-    "loading": "Checking access...",
     "nav": {
       "companies": "Companies"
-    },
-    "logout": "Log out",
-    "footer": "Organisation panel - Datia"
+    }
+  },
+  "superadminPanel": {
+    "nav": {
+      "organizations": "Organizations",
+      "support": "Support"
+    }
   },
   "companiesPage": {
     "title": "Companies",
