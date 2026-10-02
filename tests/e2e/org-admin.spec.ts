@@ -52,6 +52,23 @@ test.describe('Organization account', () => {
     await expect(page.getByRole('heading', { level: 2 })).toHaveCount(0);
   });
 
+  test('drills into one asset and sees the energy chain behind it', async ({ page }) => {
+    await page.goto('/organization/companies', { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: 'Datia E2E' }).click();
+    await page.getByRole('link', { name: 'Turbina eólica T-100' }).click();
+
+    await expect(page).toHaveURL(/\/organization\/companies\/[^/]+\/assets\/e2e-item-0$/);
+    await expect(page.getByRole('heading', { name: 'Turbina eólica T-100', level: 2 })).toBeVisible();
+    await expect(page.getByText(/solo lectura|read-only/i).first()).toBeVisible();
+
+    // Seeded with emissions but no Certification row: the timeline stays empty.
+    await expect(page.getByText(/todavía no tiene certificaciones|has no certifications yet/i)).toBeVisible();
+
+    await page.getByRole('tab', { name: /^energía$|^energy$/i }).click();
+    await expect(page.getByText('Planta solar Ariza')).toBeVisible();
+    await expect(page.getByRole('row', { name: /verificad[oa]|verified/i })).toHaveCount(6);
+  });
+
   test('has no dashboard: its address leads back to its own panel', async ({ page }) => {
     await page.goto('/dashboard/assets');
     await expect(page).toHaveURL(/\/organization\/companies$/);

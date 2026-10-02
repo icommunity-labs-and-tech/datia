@@ -1181,6 +1181,21 @@
       }
     }
   },
+  "organizationAssetDetail": {
+    "sourcesCount": "{count} fuentes",
+    "totalKwh": "{value} kWh consumidos",
+    "totalCo2e": "{value} kg CO₂e",
+    "emptySources": "Este activo no tiene fuentes de energía.",
+    "noEmission": "Sin calcular",
+    "renewableBadge": "{share}% renovable",
+    "lifecycle": {
+      "MANUFACTURING": "Fabricación",
+      "TRANSPORT": "Transporte",
+      "USE": "Uso",
+      "MAINTENANCE": "Mantenimiento",
+      "END_OF_LIFE": "Fin de vida"
+    }
+  },
   "companiesPage": {
     "title": "Empresas",
     "description": "Las empresas de tu organización y sus cuentas. Cada cuenta de empresa solo ve los datos de su empresa; tú los ves todos.",
