@@ -1181,6 +1181,21 @@
       }
     }
   },
+  "organizationAssetDetail": {
+    "sourcesCount": "{count} sources",
+    "totalKwh": "{value} kWh consumed",
+    "totalCo2e": "{value} kg CO₂e",
+    "emptySources": "This asset has no energy sources.",
+    "noEmission": "Not yet calculated",
+    "renewableBadge": "{share}% renewable",
+    "lifecycle": {
+      "MANUFACTURING": "Manufacturing",
+      "TRANSPORT": "Transport",
+      "USE": "Use",
+      "MAINTENANCE": "Maintenance",
+      "END_OF_LIFE": "End of life"
+    }
+  },
   "companiesPage": {
     "title": "Companies",
     "description": "Your organisation's companies and their accounts. A company account only sees its own company's data; you see all of it.",
