@@ -1234,11 +1234,9 @@
       "accountsCount": "{count} accounts",
       "tabs": {
         "assets": "Assets",
-        "certifications": "Certifications",
         "accounts": "Accounts"
       },
       "emptyAssets": "This company has no assets.",
-      "emptyCertifications": "This company has no certifications.",
       "emptyAccounts": "This company has no accounts.",
       "assets": {
         "id": "ID",
@@ -1248,16 +1246,6 @@
         "status": "Status",
         "certified": "Certified",
         "pending": "Not certified"
-      },
-      "certifications": {
-        "period": "Period",
-        "co2e": "kg CO₂e",
-        "readings": "Readings",
-        "network": "Network",
-        "created": "Created",
-        "status": "Status",
-        "certified": "Certified",
-        "issued": "Issued"
       },
       "accounts": {
         "name": "Name",
@@ -1278,12 +1266,10 @@
     "accountsCount": "{count} accounts",
     "tabs": {
       "assets": "Assets",
-      "certifications": "Certifications",
       "energy": "Energy",
       "accounts": "Accounts"
     },
     "emptyAssets": "This company has no assets.",
-    "emptyCertifications": "This company has no certifications.",
     "emptyAccounts": "This company has no accounts.",
     "assets": {
       "id": "ID",
@@ -1293,16 +1279,6 @@
       "status": "Status",
       "certified": "Certified",
       "pending": "Not certified"
-    },
-    "certifications": {
-      "period": "Period",
-      "co2e": "kg CO₂e",
-      "readings": "Readings",
-      "network": "Network",
-      "created": "Created",
-      "status": "Status",
-      "certified": "Certified",
-      "issued": "Issued"
     },
     "energy": {
       "sources": "Energy sources",

@@ -22,7 +22,6 @@ interface SessionUser {
   name?: string;
   email: string;
   role: string;
-  organizationName?: string;
 }
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
@@ -79,13 +78,7 @@ export default function OrganizationLayout({ children }: { children: React.React
   const navLinks = [{ href: NAV_HOME, icon: IconBuilding, label: t('nav.companies') }];
 
   return (
-    <PanelShell
-      homeHref={NAV_HOME}
-      navLinks={navLinks}
-      user={user}
-      onLogout={handleLogout}
-      subtitle={user?.organizationName ? <Text size="sm" c="dimmed">{user.organizationName}</Text> : undefined}
-    >
+    <PanelShell homeHref={NAV_HOME} navLinks={navLinks} user={user} onLogout={handleLogout}>
       {user ? children : null}
     </PanelShell>
   );
