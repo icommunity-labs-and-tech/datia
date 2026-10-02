@@ -50,8 +50,6 @@ interface PanelShellProps {
   logoAlt?: string;
   navLinks: PanelNavLink[];
   user: { name?: string | null; email?: string | null } | null;
-  /** Rendered next to the logo — e.g. the organization's name. */
-  subtitle?: React.ReactNode;
   /** Extra Menu.Item(s) in the account dropdown, above the logout divider. */
   accountMenuItems?: React.ReactNode;
   onLogout: () => void | Promise<void>;
@@ -77,7 +75,6 @@ export default function PanelShell({
   logoAlt = 'datia',
   navLinks,
   user,
-  subtitle,
   accountMenuItems,
   onLogout,
   showNotificationBell = true,
@@ -116,12 +113,6 @@ export default function PanelShell({
           <Box pr="lg" style={{ display: 'flex', alignItems: 'center', height: '100%', flexShrink: 0 }}>
             <Logo href={homeHref} width={104} height={28} priority src={logoSrc ?? '/logo-datia.svg'} alt={logoAlt} />
           </Box>
-
-          {subtitle && (
-            <Box pr="lg" style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-              {subtitle}
-            </Box>
-          )}
 
           {/* Desktop nav links */}
           <Group gap={4} visibleFrom="sm" style={{ flex: 1, height: '100%' }}>

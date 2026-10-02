@@ -1234,11 +1234,9 @@
       "accountsCount": "{count} cuentas",
       "tabs": {
         "assets": "Activos",
-        "certifications": "Certificaciones",
         "accounts": "Cuentas"
       },
       "emptyAssets": "Esta empresa no tiene activos.",
-      "emptyCertifications": "Esta empresa no tiene certificaciones.",
       "emptyAccounts": "Esta empresa no tiene cuentas.",
       "assets": {
         "id": "ID",
@@ -1248,16 +1246,6 @@
         "status": "Estado",
         "certified": "Certificado",
         "pending": "Sin certificar"
-      },
-      "certifications": {
-        "period": "Periodo",
-        "co2e": "kg CO₂e",
-        "readings": "Lecturas",
-        "network": "Red",
-        "created": "Creada",
-        "status": "Estado",
-        "certified": "Certificada",
-        "issued": "Emitida"
       },
       "accounts": {
         "name": "Nombre",
@@ -1278,12 +1266,10 @@
     "accountsCount": "{count} cuentas",
     "tabs": {
       "assets": "Activos",
-      "certifications": "Certificaciones",
       "energy": "Energía",
       "accounts": "Cuentas"
     },
     "emptyAssets": "Esta empresa no tiene activos.",
-    "emptyCertifications": "Esta empresa no tiene certificaciones.",
     "emptyAccounts": "Esta empresa no tiene cuentas.",
     "assets": {
       "id": "ID",
@@ -1293,16 +1279,6 @@
       "status": "Estado",
       "certified": "Certificado",
       "pending": "Sin certificar"
-    },
-    "certifications": {
-      "period": "Periodo",
-      "co2e": "kg CO₂e",
-      "readings": "Lecturas",
-      "network": "Red",
-      "created": "Creada",
-      "status": "Estado",
-      "certified": "Certificada",
-      "issued": "Emitida"
     },
     "energy": {
       "sources": "Fuentes de energía",

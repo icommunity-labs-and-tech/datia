@@ -16,8 +16,6 @@ import { useLocale, useTranslations } from 'next-intl';
 import PageHeader from '@/components/layout/PageHeader';
 import type { CompanyOverview } from '@/actions/companies/overview-core';
 
-const STATUS_COLOR: Record<string, string> = { CERTIFIED: 'green', ISSUED: 'yellow' };
-
 export default function CompanyDetail({ overview }: { overview: CompanyOverview }) {
   const t = useTranslations('companiesPage.detail');
   const locale = useLocale();
@@ -48,7 +46,6 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
         <Tabs defaultValue="assets">
           <Tabs.List mb="sm">
             <Tabs.Tab value="assets">{t('tabs.assets')}</Tabs.Tab>
-            <Tabs.Tab value="certifications">{t('tabs.certifications')}</Tabs.Tab>
             <Tabs.Tab value="accounts">{t('tabs.accounts')}</Tabs.Tab>
           </Tabs.List>
 
@@ -75,41 +72,6 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
                         <Table.Td>
                           <Badge size="sm" variant="light" color={asset.certified ? 'green' : 'gray'}>
                             {asset.certified ? t('assets.certified') : t('assets.pending')}
-                          </Badge>
-                        </Table.Td>
-                      </Table.Tr>
-                    ))}
-                  </Table.Tbody>
-                </Table>
-              </ScrollArea>
-            )}
-          </Tabs.Panel>
-
-          <Tabs.Panel value="certifications">
-            {certifications.length === 0 ? empty(t('emptyCertifications')) : (
-              <ScrollArea>
-                <Table striped verticalSpacing="xs" miw={640}>
-                  <Table.Thead>
-                    <Table.Tr>
-                      <Table.Th>{t('certifications.period')}</Table.Th>
-                      <Table.Th ta="right">{t('certifications.co2e')}</Table.Th>
-                      <Table.Th ta="right">{t('certifications.readings')}</Table.Th>
-                      <Table.Th>{t('certifications.network')}</Table.Th>
-                      <Table.Th>{t('certifications.created')}</Table.Th>
-                      <Table.Th>{t('certifications.status')}</Table.Th>
-                    </Table.Tr>
-                  </Table.Thead>
-                  <Table.Tbody>
-                    {certifications.map((c) => (
-                      <Table.Tr key={c.id}>
-                        <Table.Td><Text size="sm">{c.period ?? '—'}</Text></Table.Td>
-                        <Table.Td ta="right"><Text size="sm">{c.co2eKg ?? '—'}</Text></Table.Td>
-                        <Table.Td ta="right"><Text size="sm">{c.readings ?? '—'}</Text></Table.Td>
-                        <Table.Td><Text size="sm" c="dimmed">{c.network ?? '—'}</Text></Table.Td>
-                        <Table.Td><Text size="sm" c="dimmed">{date(c.createdAt)}</Text></Table.Td>
-                        <Table.Td>
-                          <Badge size="sm" variant="light" color={STATUS_COLOR[c.status] ?? 'gray'}>
-                            {c.status === 'CERTIFIED' ? t('certifications.certified') : t('certifications.issued')}
                           </Badge>
                         </Table.Td>
                       </Table.Tr>
