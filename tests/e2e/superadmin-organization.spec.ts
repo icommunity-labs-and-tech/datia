@@ -44,4 +44,21 @@ test.describe('Superadmin exploring an organization', () => {
     await page.getByRole('button', { name: /activar|activate/i }).click();
     await expect(page.getByText(/^activa$|^active$/i).first()).toBeVisible();
   });
+
+  test('drills from a company into one asset and sees the energy chain behind it', async ({ page }) => {
+    await page.goto('/superadmin/organizations', { waitUntil: 'networkidle' });
+    await page.getByRole('row', { name: /Datia E2E/ }).dblclick();
+    await page.getByRole('row', { name: /Datia E2E/ }).filter({ has: page.getByRole('link') })
+      .getByRole('link', { name: 'Datia E2E' }).click();
+    await page.getByRole('link', { name: 'Turbina eólica T-100' }).click();
+
+    await expect(page).toHaveURL(/\/superadmin\/organizations\/[^/]+\/companies\/[^/]+\/assets\/e2e-item-0$/);
+    await expect(page.getByRole('heading', { name: 'Turbina eólica T-100', level: 2 })).toBeVisible();
+    await expect(page.getByText(/solo lectura|read-only/i).first()).toBeVisible();
+    await expect(page.getByText(/todavía no tiene certificaciones|has no certifications yet/i)).toBeVisible();
+
+    await page.getByRole('tab', { name: /^energ[íi]a$|^energy$/i }).click();
+    await expect(page.getByText('Planta solar Ariza')).toBeVisible();
+    await expect(page.getByRole('row', { name: /verificad[oa]|verified/i })).toHaveCount(6);
+  });
 });

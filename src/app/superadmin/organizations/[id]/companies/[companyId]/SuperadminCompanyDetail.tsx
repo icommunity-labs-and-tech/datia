@@ -105,7 +105,16 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
                     {assets.map((asset) => (
                       <Table.Tr key={asset.id}>
                         <Table.Td><Text size="sm" ff="monospace">{asset.id}</Text></Table.Td>
-                        <Table.Td><Text size="sm" fw={550}>{asset.name}</Text></Table.Td>
+                        <Table.Td>
+                          <Anchor
+                            component={Link}
+                            href={`/superadmin/organizations/${organizationId}/companies/${company.id}/assets/${asset.id}`}
+                            size="sm"
+                            fw={550}
+                          >
+                            {asset.name}
+                          </Anchor>
+                        </Table.Td>
                         <Table.Td><Text size="sm" c="dimmed">{asset.siteName ?? '—'}</Text></Table.Td>
                         <Table.Td><Text size="sm" c="dimmed">{date(asset.createdAt)}</Text></Table.Td>
                         <Table.Td>
