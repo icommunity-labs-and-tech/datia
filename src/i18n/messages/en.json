@@ -1390,6 +1390,41 @@
       "example": "If you create the organization “Acme Corp”, its management account only sees its companies, and each company only sees its own assets, with no access to other organizations’ data."
     }
   },
+  "superadminSupport": {
+    "title": "Support messages",
+    "pendingCount": "{count, plural, one {# pending} other {# pending}}",
+    "loading": "Loading messages...",
+    "empty": "There are no support messages.",
+    "table": {
+      "organization": "Organization",
+      "subject": "Subject",
+      "page": "Page",
+      "status": "Status",
+      "date": "Date",
+      "actions": "Actions"
+    },
+    "status": {
+      "pending": "Pending",
+      "read": "Read",
+      "resolved": "Resolved"
+    },
+    "menu": {
+      "changeStatus": "Change status",
+      "delete": "Delete"
+    },
+    "detail": {
+      "organization": "Organization",
+      "page": "Page",
+      "date": "Date",
+      "markResolved": "Mark as resolved",
+      "close": "Close"
+    },
+    "deleteModal": {
+      "title": "Confirm deletion",
+      "body": "Are you sure you want to delete this message? This cannot be undone.",
+      "cancel": "Cancel"
+    }
+  },
   "superadminOrganizationDetail": {
     "back": "Organizations",
     "loading": "Loading organization details...",
