@@ -1,7 +1,10 @@
 'use client';
 
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Badge } from '@mantine/core';
+import { Anchor, Badge, Code, Group, Paper, SimpleGrid, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { IconArrowLeft, IconArrowRight, IconBolt, IconCloudFog, IconGauge, IconPackage } from '@tabler/icons-react';
+import PageHeader from '@/components/layout/PageHeader';
 
 const STATUS_COLOR: Record<string, string> = {
   PENDING: 'yellow',
@@ -14,208 +17,139 @@ interface Props {
 }
 
 export default function EmissionDetailClient({ emission }: Props) {
+  const t = useTranslations('emissionDetail');
+  const tEnergy = useTranslations('energyHub');
+  const tLifecycle = useTranslations('organizationAssetDetail');
+  const locale = useLocale();
+
   const consumption = emission.EnergyConsumption;
   const source = consumption.EnergySource;
   const item = source.Asset;
 
+  const dateTime = (value: Date | string) => new Date(value).toLocaleString(locale);
+  const dateOnly = (value: Date | string) => new Date(value).toLocaleDateString(locale);
+  const humanize = (value: string | null | undefined) => (value ? value.replace(/_/g, ' ').toLowerCase() : '—');
+
+  const chain = [
+    { icon: IconPackage, label: t('chain.asset'), value: item.name, href: `/dashboard/assets/${item.id}` },
+    { icon: IconBolt, label: t('chain.source'), value: source.name, sub: tEnergy(`carriers.${source.energyCarrier}`) },
+    { icon: IconGauge, label: t('chain.consumption'), value: `${consumption.consumptionKwh} kWh`, sub: tLifecycle(`lifecycle.${consumption.lifecycleStage}`) },
+    { icon: IconCloudFog, label: t('chain.emission'), value: `${emission.co2eKg} kg CO₂e`, sub: humanize(emission.scope) },
+  ];
+
   return (
-    <div>
-      <div className="d-flex align-items-center gap-2 mb-4">
-        <Link href="/dashboard/energy/emissions" className="btn btn-sm btn-outline-secondary">
-          <i className="bi bi-arrow-left me-1" /> Volver
-        </Link>
-        <h2 className="h4 mb-0">
-          <i className="bi bi-cloud me-2 text-success" />
-          Registro de Emisión
-        </h2>
-        <Badge color={STATUS_COLOR[emission.verificationStatus] ?? 'gray'}>
-          {emission.verificationStatus}
-        </Badge>
-      </div>
+    <>
+      <Anchor
+        component={Link}
+        href="/dashboard/energy/emissions"
+        size="sm"
+        mb="xs"
+        display="inline-flex"
+        style={{ alignItems: 'center', gap: 6 }}
+      >
+        <IconArrowLeft size={14} />
+        {tEnergy('navEmissions')}
+      </Anchor>
 
-      {/* Chain visualisation */}
-      <div className="d-flex align-items-stretch gap-2 mb-4 flex-wrap">
-        {[
-          { icon: 'bi-box', label: 'Hardware', value: item.name, href: `/dashboard/assets/${item.id}` },
-          { icon: 'bi-lightning-charge', label: 'Fuente', value: source.name, sub: source.energyCarrier },
-          { icon: 'bi-speedometer2', label: 'Consumo', value: `${consumption.consumptionKwh} kWh`, sub: consumption.lifecycleStage },
-          { icon: 'bi-cloud', label: 'Emisión', value: `${emission.co2eKg} kg CO₂e`, sub: emission.scope?.replace('_', ' ') },
-        ].map((node, i, arr) => (
-          <div key={i} className="d-flex align-items-center gap-2">
-            <div className="card border-0 shadow-sm px-3 py-2 text-center" style={{ minWidth: 130 }}>
-              <i className={`bi ${node.icon} text-primary mb-1`} />
-              <div className="small text-muted">{node.label}</div>
+      <PageHeader
+        title={t('title')}
+        actions={
+          <Badge variant="light" color={STATUS_COLOR[emission.verificationStatus] ?? 'gray'}>
+            {tEnergy(`status.${emission.verificationStatus}`)}
+          </Badge>
+        }
+      />
+
+      <Group gap="sm" mb="lg" align="stretch" wrap="wrap">
+        {chain.map((node, i) => (
+          <Group key={node.label} gap="sm" wrap="nowrap">
+            <Paper withBorder radius="md" p="sm" miw={150} ta="center">
+              <ThemeIcon color="datiaBlue" variant="light" size={28} radius="md" mx="auto" mb={6}>
+                <node.icon size={15} />
+              </ThemeIcon>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={600}>{node.label}</Text>
               {node.href ? (
-                <Link href={node.href} className="fw-semibold small text-decoration-none">{node.value}</Link>
+                <Anchor component={Link} href={node.href} size="sm" fw={600}>{node.value}</Anchor>
               ) : (
-                <div className="fw-semibold small">{node.value}</div>
+                <Text size="sm" fw={600}>{node.value}</Text>
               )}
-              {node.sub && <div className="text-muted" style={{ fontSize: '0.7rem' }}>{node.sub}</div>}
-            </div>
-            {i < arr.length - 1 && <i className="bi bi-arrow-right text-muted" />}
-          </div>
+              {node.sub && <Text size="xs" c="dimmed">{node.sub}</Text>}
+            </Paper>
+            {i < chain.length - 1 && <IconArrowRight size={16} color="var(--mantine-color-gray-5)" />}
+          </Group>
         ))}
-      </div>
+      </Group>
 
-      <div className="row g-3">
-        {/* Emission details */}
-        <div className="col-12 col-lg-6">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-header bg-transparent fw-semibold">
-              <i className="bi bi-cloud me-2 text-success" />Datos de emisión
-            </div>
-            <div className="card-body">
-              <dl className="row mb-0 small">
-                <dt className="col-5 text-muted">CO₂e</dt>
-                <dd className="col-7 fw-semibold">{emission.co2eKg} kg</dd>
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
+        <Section title={t('emission.title')}>
+          <Row label={t('emission.co2e')} value={<Text size="sm" fw={600}>{emission.co2eKg} kg</Text>} />
+          <Row label={t('emission.scope')} value={humanize(emission.scope)} />
+          <Row label={t('emission.boundary')} value={humanize(emission.systemBoundary)} />
+          <Row label={t('emission.factor')} value={emission.emissionFactor ?? '—'} />
+          <Row label={t('emission.factorSource')} value={emission.emissionFactorSource ?? '—'} />
+          <Row label={t('emission.methodology')} value={emission.calculationMethodology ?? '—'} />
+          <Row label={t('emission.gwp')} value={emission.gwpCharacterizationFactors ?? 'IPCC AR6'} />
+          <Row label={t('emission.functionalUnit')} value={emission.functionalUnit ?? '—'} />
+          <Row label={t('emission.registered')} value={dateTime(emission.createdAt)} />
+        </Section>
 
-                <dt className="col-5 text-muted">Scope GHG</dt>
-                <dd className="col-7">{emission.scope?.replace('_', ' ')}</dd>
+        <Section title={t('verification.title')}>
+          <Row
+            label={t('verification.status')}
+            value={
+              <Badge variant="light" color={STATUS_COLOR[emission.verificationStatus] ?? 'gray'}>
+                {tEnergy(`status.${emission.verificationStatus}`)}
+              </Badge>
+            }
+          />
+          <Row label={t('verification.verifier')} value={emission.verifierBody ?? '—'} />
+          <Row label={t('verification.standard')} value={emission.verificationStandard ?? '—'} />
+          {emission.verificationStatus === 'PENDING' && (
+            <Text size="sm" c="dimmed" mt="xs">
+              {t('verification.pendingHint')}{' '}
+              <Code>POST /api/v1/emissions/{emission.id}/certify</Code>
+            </Text>
+          )}
+        </Section>
 
-                <dt className="col-5 text-muted">Frontera</dt>
-                <dd className="col-7">{emission.systemBoundary?.replace(/_/g, '-').toLowerCase()}</dd>
+        <Section title={t('consumption.title')}>
+          <Row label={t('consumption.period')} value={`${dateOnly(consumption.periodStart)} → ${dateOnly(consumption.periodEnd)}`} />
+          <Row label={t('consumption.amount')} value={<Text size="sm" fw={600}>{consumption.consumptionKwh} kWh / {consumption.consumptionMj ?? (consumption.consumptionKwh * 3.6).toFixed(2)} MJ</Text>} />
+          <Row label={t('consumption.stage')} value={tLifecycle(`lifecycle.${consumption.lifecycleStage}`)} />
+          <Row label={t('consumption.measurementStandard')} value={consumption.measurementStandard ?? '—'} />
+          {consumption.costAmount != null && (
+            <Row label={t('consumption.cost')} value={`${consumption.costAmount} ${consumption.currency ?? ''}`.trim()} />
+          )}
+        </Section>
 
-                <dt className="col-5 text-muted">Factor emisión</dt>
-                <dd className="col-7">{emission.emissionFactor ?? '—'}</dd>
+        <Section title={t('source.title')}>
+          <Row label={t('source.name')} value={<Text size="sm" fw={600}>{source.name}</Text>} />
+          <Row label={t('source.carrier')} value={tEnergy(`carriers.${source.energyCarrier}`)} />
+          {source.generationTechnology && <Row label={t('source.technology')} value={source.generationTechnology} />}
+          {source.renewableShare != null && <Row label={t('source.renewable')} value={`${source.renewableShare}%`} />}
+          {source.gridEmissionFactor != null && <Row label={t('source.gridFactor')} value={`${source.gridEmissionFactor} gCO₂/kWh`} />}
+          {source.countryOfOrigin && <Row label={t('source.country')} value={source.countryOfOrigin} />}
+          {source.guaranteeOfOriginId && <Row label={t('source.guarantee')} value={<Code>{source.guaranteeOfOriginId}</Code>} />}
+        </Section>
+      </SimpleGrid>
+    </>
+  );
+}
 
-                <dt className="col-5 text-muted">Fuente factor</dt>
-                <dd className="col-7">{emission.emissionFactorSource ?? '—'}</dd>
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <Paper withBorder radius="md" p="md">
+      <Title order={5} mb="sm">{title}</Title>
+      <Stack gap={6}>{children}</Stack>
+    </Paper>
+  );
+}
 
-                <dt className="col-5 text-muted">Metodología</dt>
-                <dd className="col-7">{emission.calculationMethodology ?? '—'}</dd>
-
-                <dt className="col-5 text-muted">GWP</dt>
-                <dd className="col-7">{emission.gwpCharacterizationFactors ?? 'IPCC AR6'}</dd>
-
-                <dt className="col-5 text-muted">Unidad funcional</dt>
-                <dd className="col-7">{emission.functionalUnit ?? '—'}</dd>
-
-                <dt className="col-5 text-muted">Registrado</dt>
-                <dd className="col-7">{new Date(emission.createdAt).toLocaleString()}</dd>
-              </dl>
-            </div>
-          </div>
-        </div>
-
-        {/* Verification */}
-        <div className="col-12 col-lg-6">
-          <div className="card border-0 shadow-sm h-100">
-            <div className="card-header bg-transparent fw-semibold">
-              <i className="bi bi-patch-check me-2 text-primary" />Verificación
-            </div>
-            <div className="card-body">
-              <dl className="row mb-0 small">
-                <dt className="col-5 text-muted">Estado</dt>
-                <dd className="col-7">
-                  <Badge color={STATUS_COLOR[emission.verificationStatus] ?? 'gray'}>
-                    {emission.verificationStatus}
-                  </Badge>
-                </dd>
-
-                <dt className="col-5 text-muted">Organismo</dt>
-                <dd className="col-7">{emission.verifierBody ?? '—'}</dd>
-
-                <dt className="col-5 text-muted">Estándar</dt>
-                <dd className="col-7">{emission.verificationStandard ?? '—'}</dd>
-              </dl>
-
-              {emission.verificationStatus === 'PENDING' && (
-                <div className="alert alert-warning small mt-3 mb-0 py-2">
-                  <i className="bi bi-info-circle me-1" />
-                  Pendiente de certificar. Usa <code>POST /api/v1/emissions/{emission.id}/certify</code>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Consumption */}
-        <div className="col-12 col-lg-6">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-transparent fw-semibold">
-              <i className="bi bi-speedometer2 me-2 text-primary" />Consumo asociado
-            </div>
-            <div className="card-body">
-              <dl className="row mb-0 small">
-                <dt className="col-5 text-muted">Período</dt>
-                <dd className="col-7">
-                  {new Date(consumption.periodStart).toLocaleDateString()} →{' '}
-                  {new Date(consumption.periodEnd).toLocaleDateString()}
-                </dd>
-
-                <dt className="col-5 text-muted">Consumo</dt>
-                <dd className="col-7 fw-semibold">{consumption.consumptionKwh} kWh / {consumption.consumptionMj ?? (consumption.consumptionKwh * 3.6).toFixed(2)} MJ</dd>
-
-                <dt className="col-5 text-muted">Etapa ciclo de vida</dt>
-                <dd className="col-7">{consumption.lifecycleStage?.replace(/_/g, ' ')}</dd>
-
-                <dt className="col-5 text-muted">Estándar medición</dt>
-                <dd className="col-7">{consumption.measurementStandard ?? '—'}</dd>
-
-                {consumption.costAmount && (
-                  <>
-                    <dt className="col-5 text-muted">Coste</dt>
-                    <dd className="col-7">{consumption.costAmount} {consumption.currency}</dd>
-                  </>
-                )}
-              </dl>
-            </div>
-          </div>
-        </div>
-
-        {/* Energy source */}
-        <div className="col-12 col-lg-6">
-          <div className="card border-0 shadow-sm">
-            <div className="card-header bg-transparent fw-semibold">
-              <i className="bi bi-lightning-charge me-2 text-warning" />Fuente de energía
-            </div>
-            <div className="card-body">
-              <dl className="row mb-0 small">
-                <dt className="col-5 text-muted">Nombre</dt>
-                <dd className="col-7 fw-semibold">{source.name}</dd>
-
-                <dt className="col-5 text-muted">Carrier</dt>
-                <dd className="col-7">{source.energyCarrier}</dd>
-
-                {source.generationTechnology && (
-                  <>
-                    <dt className="col-5 text-muted">Tecnología</dt>
-                    <dd className="col-7">{source.generationTechnology}</dd>
-                  </>
-                )}
-
-                {source.renewableShare != null && (
-                  <>
-                    <dt className="col-5 text-muted">% Renovable</dt>
-                    <dd className="col-7">{source.renewableShare}%</dd>
-                  </>
-                )}
-
-                {source.gridEmissionFactor && (
-                  <>
-                    <dt className="col-5 text-muted">Factor red</dt>
-                    <dd className="col-7">{source.gridEmissionFactor} gCO₂/kWh</dd>
-                  </>
-                )}
-
-                {source.countryOfOrigin && (
-                  <>
-                    <dt className="col-5 text-muted">País</dt>
-                    <dd className="col-7">{source.countryOfOrigin}</dd>
-                  </>
-                )}
-
-                {source.guaranteeOfOriginId && (
-                  <>
-                    <dt className="col-5 text-muted">GO/RECs</dt>
-                    <dd className="col-7"><code className="small">{source.guaranteeOfOriginId}</code></dd>
-                  </>
-                )}
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+function Row({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <Group justify="space-between" wrap="nowrap" gap="md" align="flex-start">
+      <Text size="sm" c="dimmed">{label}</Text>
+      {typeof value === 'string' || typeof value === 'number' ? <Text size="sm" ta="right">{value}</Text> : value}
+    </Group>
   );
 }

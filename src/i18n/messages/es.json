@@ -1390,6 +1390,52 @@
       "example": "Si creas la organización «Acme Corp», su cuenta de gestión solo verá sus empresas, y cada empresa solo verá sus propios activos, sin acceder a datos de otras organizaciones."
     }
   },
+  "emissionDetail": {
+    "title": "Registro de emisión",
+    "chain": {
+      "asset": "Activo",
+      "source": "Fuente",
+      "consumption": "Consumo",
+      "emission": "Emisión"
+    },
+    "emission": {
+      "title": "Datos de emisión",
+      "co2e": "CO₂e",
+      "scope": "Scope GHG",
+      "boundary": "Frontera",
+      "factor": "Factor de emisión",
+      "factorSource": "Fuente del factor",
+      "methodology": "Metodología",
+      "gwp": "GWP",
+      "functionalUnit": "Unidad funcional",
+      "registered": "Registrado"
+    },
+    "verification": {
+      "title": "Verificación",
+      "status": "Estado",
+      "verifier": "Organismo",
+      "standard": "Estándar",
+      "pendingHint": "Pendiente de certificar. Usa:"
+    },
+    "consumption": {
+      "title": "Consumo asociado",
+      "period": "Periodo",
+      "amount": "Consumo",
+      "stage": "Etapa del ciclo de vida",
+      "measurementStandard": "Estándar de medición",
+      "cost": "Coste"
+    },
+    "source": {
+      "title": "Fuente de energía",
+      "name": "Nombre",
+      "carrier": "Portador",
+      "technology": "Tecnología",
+      "renewable": "% Renovable",
+      "gridFactor": "Factor de red",
+      "country": "País",
+      "guarantee": "GO / RECs"
+    }
+  },
   "superadminSupport": {
     "title": "Mensajes de soporte",
     "pendingCount": "{count, plural, one {# pendiente} other {# pendientes}}",

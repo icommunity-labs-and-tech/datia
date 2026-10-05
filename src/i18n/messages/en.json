@@ -1390,6 +1390,52 @@
       "example": "If you create the organization “Acme Corp”, its management account only sees its companies, and each company only sees its own assets, with no access to other organizations’ data."
     }
   },
+  "emissionDetail": {
+    "title": "Emission record",
+    "chain": {
+      "asset": "Asset",
+      "source": "Source",
+      "consumption": "Consumption",
+      "emission": "Emission"
+    },
+    "emission": {
+      "title": "Emission data",
+      "co2e": "CO₂e",
+      "scope": "GHG scope",
+      "boundary": "Boundary",
+      "factor": "Emission factor",
+      "factorSource": "Factor source",
+      "methodology": "Methodology",
+      "gwp": "GWP",
+      "functionalUnit": "Functional unit",
+      "registered": "Recorded"
+    },
+    "verification": {
+      "title": "Verification",
+      "status": "Status",
+      "verifier": "Verifier",
+      "standard": "Standard",
+      "pendingHint": "Pending certification. Use:"
+    },
+    "consumption": {
+      "title": "Associated consumption",
+      "period": "Period",
+      "amount": "Consumption",
+      "stage": "Lifecycle stage",
+      "measurementStandard": "Measurement standard",
+      "cost": "Cost"
+    },
+    "source": {
+      "title": "Energy source",
+      "name": "Name",
+      "carrier": "Carrier",
+      "technology": "Technology",
+      "renewable": "% Renewable",
+      "gridFactor": "Grid factor",
+      "country": "Country",
+      "guarantee": "GO / RECs"
+    }
+  },
   "superadminSupport": {
     "title": "Support messages",
     "pendingCount": "{count, plural, one {# pending} other {# pending}}",
