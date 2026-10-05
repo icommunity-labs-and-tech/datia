@@ -1309,6 +1309,87 @@
       "created": "Alta"
     }
   },
+  "superadminOrganizationsList": {
+    "title": "Organizaciones",
+    "errors": {
+      "load": "No se pudieron cargar las organizaciones.",
+      "create": "No se pudo crear la organización.",
+      "unknown": "Error desconocido"
+    },
+    "help": {
+      "button": "¿Cómo funciona?",
+      "title": "Guía: crear una organización",
+      "intro": "Una organización es una empresa o cliente independiente. Al crearla se crea también su cuenta de gestión y una empresa por defecto.",
+      "stepLabel": "Paso {number}",
+      "step1": {
+        "title": "Nombre",
+        "body": "Es el nombre que verán sus responsables. El identificador único se genera automáticamente."
+      },
+      "step2": {
+        "title": "Cuenta de la organización",
+        "body": "Esa persona gestiona el panel de la organización: crea sus empresas y las invita a su dashboard."
+      },
+      "step3": {
+        "title": "Activación",
+        "body": "Recibirá un email con un enlace para establecer su contraseña."
+      },
+      "autoEmailTitle": "Email automático",
+      "autoEmail": "El sistema envía el email de invitación al administrador en cuanto creas la organización. No hace falta nada más.",
+      "close": "Cerrar",
+      "understood": "Entendido, crear organización"
+    },
+    "create": {
+      "button": "Nueva organización",
+      "title": "Nueva organización",
+      "tip": "Se crean la organización, su cuenta de gestión y una empresa por defecto.",
+      "orgSection": "1. Organización",
+      "nameLabel": "Nombre de la organización",
+      "namePlaceholder": "Ej: Acme Corporation",
+      "nameHelp": "Nombre completo de la empresa o cliente.",
+      "adminSection": "2. Cuenta de la organización",
+      "adminHelp": "Gestionará el panel de la organización.",
+      "adminNameLabel": "Nombre completo",
+      "adminEmailLabel": "Email",
+      "adminEmailHelp": "Se enviará automáticamente el email de activación.",
+      "languageLabel": "Idioma del email",
+      "languageEs": "Español",
+      "languageEn": "English",
+      "cancel": "Cancelar",
+      "submit": "Crear organización",
+      "submitting": "Creando organización..."
+    },
+    "success": {
+      "title": "Organización creada",
+      "body": "«{name}» creada. Email de activación enviado a {email}."
+    },
+    "list": {
+      "loading": "Cargando organizaciones...",
+      "empty": "No hay organizaciones registradas.",
+      "createFirst": "Crear la primera organización"
+    },
+    "table": {
+      "name": "Nombre",
+      "slug": "Slug",
+      "accounts": "Cuentas",
+      "assets": "Activos",
+      "certifications": "Certificaciones",
+      "adminActivated": "Admin activado",
+      "activeAccounts": "Cuentas activas",
+      "created": "Creada",
+      "pending": "{count, plural, one {# pendiente} other {# pendientes}}",
+      "yes": "Sí",
+      "pendingAdmin": "Pendiente",
+      "doubleClickHint": "Doble clic para ver detalles"
+    },
+    "info": {
+      "title": "Sistema multi-tenancy",
+      "subtitle": "Cada organización tiene sus propios datos aislados",
+      "questionLabel": "¿Qué es una organización?",
+      "answer": "Una organización representa una empresa, cliente o grupo independiente que usa Datia. Tiene sus propias cuentas, empresas, activos y datos, completamente aislados.",
+      "exampleLabel": "Ejemplo:",
+      "example": "Si creas la organización «Acme Corp», su cuenta de gestión solo verá sus empresas, y cada empresa solo verá sus propios activos, sin acceder a datos de otras organizaciones."
+    }
+  },
   "superadminOrganizationDetail": {
     "back": "Organizaciones",
     "loading": "Cargando detalles de la organización...",
