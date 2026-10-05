@@ -83,3 +83,22 @@ describe('inviteUser: company of the invited account', () => {
     expect(tx.user.create).not.toHaveBeenCalled();
   });
 });
+
+describe('inviteUser: an email that already has an account', () => {
+  it('says so when the account is in the same organization', async () => {
+    mockPrisma.user.findUnique.mockResolvedValueOnce({ organizationId: 'org-1' });
+    const result = await inviteAccount(orgAccount, base);
+
+    expect(result).toMatchObject({ success: false, error: 'El email "ana@norte.test" ya está registrado' });
+    expect(tx.user.create).not.toHaveBeenCalled();
+  });
+
+  it('answers as if the invitation went out when the account is in another organization', async () => {
+    mockPrisma.user.findUnique.mockResolvedValueOnce({ organizationId: 'org-2' });
+    const result = await inviteAccount(orgAccount, base);
+
+    expect(result).toEqual({ success: true });
+    expect(tx.user.create).not.toHaveBeenCalled();
+    expect(mockSend).not.toHaveBeenCalled();
+  });
+});
