@@ -1309,6 +1309,65 @@
       "created": "Alta"
     }
   },
+  "superadminOrganizationDetail": {
+    "back": "Organizaciones",
+    "loading": "Cargando detalles de la organización...",
+    "delete": "Eliminar organización",
+    "errors": {
+      "title": "Error",
+      "load": "No se pudo cargar la organización.",
+      "delete": "No se pudo eliminar la organización.",
+      "unknown": "Error desconocido"
+    },
+    "notFound": {
+      "title": "Organización no encontrada",
+      "description": "No existe o no tienes acceso a ella."
+    },
+    "stats": {
+      "accounts": "Cuentas",
+      "accountsDetail": "{active} activas · {pending} pendientes",
+      "assets": "Activos",
+      "certifications": "Certificaciones"
+    },
+    "info": {
+      "title": "Información general",
+      "name": "Nombre",
+      "slug": "Slug",
+      "status": "Estado",
+      "active": "Activa",
+      "inactive": "Inactiva",
+      "domain": "Dominio",
+      "created": "Creada",
+      "updated": "Actualizada"
+    },
+    "admin": {
+      "title": "Administrador principal",
+      "name": "Nombre",
+      "email": "Correo",
+      "activation": "Activación",
+      "activated": "Activado",
+      "pending": "Pendiente de activación",
+      "none": "No hay administrador principal."
+    },
+    "modules": {
+      "title": "Módulos",
+      "passport": "Pasaporte digital (DPP)",
+      "energy": "Certificación energética (ESPR)"
+    },
+    "deleteModal": {
+      "title": "Confirmar eliminación",
+      "question": "¿Seguro que quieres eliminar la organización «{name}»?",
+      "warningTitle": "Acción irreversible",
+      "warningBody": "Se eliminará permanentemente:",
+      "items": {
+        "companies": "Sus empresas y sus cuentas",
+        "assets": "Sus activos y su historial de certificaciones",
+        "energy": "Sus datos de energía: fuentes, consumos y emisiones"
+      },
+      "cancel": "Cancelar",
+      "confirm": "Sí, eliminar"
+    }
+  },
   "superadminOrganization": {
     "companies": {
       "title": "Empresas",

@@ -1309,6 +1309,65 @@
       "created": "Joined"
     }
   },
+  "superadminOrganizationDetail": {
+    "back": "Organizations",
+    "loading": "Loading organization details...",
+    "delete": "Delete organization",
+    "errors": {
+      "title": "Error",
+      "load": "The organization could not be loaded.",
+      "delete": "The organization could not be deleted.",
+      "unknown": "Unknown error"
+    },
+    "notFound": {
+      "title": "Organization not found",
+      "description": "It does not exist or you do not have access to it."
+    },
+    "stats": {
+      "accounts": "Accounts",
+      "accountsDetail": "{active} active · {pending} pending",
+      "assets": "Assets",
+      "certifications": "Certifications"
+    },
+    "info": {
+      "title": "General information",
+      "name": "Name",
+      "slug": "Slug",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "domain": "Domain",
+      "created": "Created",
+      "updated": "Updated"
+    },
+    "admin": {
+      "title": "Main administrator",
+      "name": "Name",
+      "email": "Email",
+      "activation": "Activation",
+      "activated": "Activated",
+      "pending": "Pending activation",
+      "none": "There is no main administrator."
+    },
+    "modules": {
+      "title": "Modules",
+      "passport": "Digital passport (DPP)",
+      "energy": "Energy certification (ESPR)"
+    },
+    "deleteModal": {
+      "title": "Confirm deletion",
+      "question": "Are you sure you want to delete the organization “{name}”?",
+      "warningTitle": "Irreversible action",
+      "warningBody": "This will permanently delete:",
+      "items": {
+        "companies": "Its companies and their accounts",
+        "assets": "Its assets and certification history",
+        "energy": "Its energy data: sources, consumption and emissions"
+      },
+      "cancel": "Cancel",
+      "confirm": "Yes, delete"
+    }
+  },
   "superadminOrganization": {
     "companies": {
       "title": "Companies",
