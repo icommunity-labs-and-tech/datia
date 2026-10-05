@@ -48,7 +48,6 @@
     "required": "Required",
     "completeRequiredFields": "Please complete all required fields before continuing",
     "completeRequiredFieldsError": "Please complete all required fields",
-    "geolocationRequired": "This field is required. Please select a location on the map or use your current location.",
     "passwordMinLength": "Password must be at least 6 characters"
   },
   "sidebar": {
