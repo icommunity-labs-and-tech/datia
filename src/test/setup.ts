@@ -25,8 +25,6 @@ if (typeof window !== 'undefined') {
   });
 }
 
-// Mock CSS imports
-vi.mock('../components/Box.css', () => ({}));
 vi.mock('../components/charts/KpiGroup.css', () => ({}));
 
 // Stub for Next.js server-only module to avoid resolution errors in vitest
