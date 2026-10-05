@@ -1,38 +1,54 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Button, Modal, Form, Alert, Spinner, Card, Row, Col, Badge, Table } from '@/components/legacy/bootstrap-compat';
+import { useLocale, useTranslations } from 'next-intl';
+import {
+  Alert,
+  Badge,
+  Button,
+  Center,
+  Group,
+  Loader,
+  Modal,
+  Paper,
+  ScrollArea,
+  Select,
+  SimpleGrid,
+  Stack,
+  Table,
+  Text,
+  TextInput,
+  ThemeIcon,
+} from '@mantine/core';
+import {
+  IconAlertTriangleFilled,
+  IconBuilding,
+  IconBuildingPlus,
+  IconCircleCheck,
+  IconInbox,
+  IconInfoCircle,
+  IconQuestionMark,
+} from '@tabler/icons-react';
+import PageHeader from '@/components/layout/PageHeader';
 import { createOrganizationWithAdmin, listOrganizations, type OrganizationListItem } from '@/actions/organizations';
-import Box from '@/components/Box';
 
-interface OrganizationsPanelProps {
-  title?: string;
-  showBox?: boolean;
-}
-
-export default function OrganizationsPanel({ 
-  title = "Gestión de Organizaciones", 
-  showBox = true 
-}: OrganizationsPanelProps) {
+export default function OrganizationsPanel() {
+  const t = useTranslations('superadminOrganizationsList');
+  const locale = useLocale();
   const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [loadingList, setLoadingList] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState<OrganizationListItem[]>([]);
-
-  const [formData, setFormData] = useState({
-    organizationName: '',
-    adminName: '',
-    adminEmail: '',
-    language: 'es' as 'es' | 'en',
-  });
+  const [form, setForm] = useState({ organizationName: '', adminName: '', adminEmail: '', language: 'es' as 'es' | 'en' });
 
   useEffect(() => {
     loadOrganizations();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadOrganizations = async () => {
@@ -42,440 +58,241 @@ export default function OrganizationsPanel({
       if (result.success && result.organizations) {
         setOrganizations(result.organizations);
       } else {
-        setError(result.error || 'Error al cargar organizaciones');
+        setError(result.error || t('errors.load'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setLoadingList(false);
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
+  const handleCreate = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setSaving(true);
     setError(null);
     setSuccess(null);
-
     try {
       const result = await createOrganizationWithAdmin({
-        name: formData.organizationName,
-        adminName: formData.adminName,
-        adminEmail: formData.adminEmail,
-        language: formData.language,
+        name: form.organizationName,
+        adminName: form.adminName,
+        adminEmail: form.adminEmail,
+        language: form.language,
       });
-
       if (result.success) {
-        const successMessage = `¡Organización "${result.organization?.name}" creada exitosamente!\n` +
-          `Administrador: ${result.admin?.email}\n` +
-          `Se ha enviado automáticamente un email de invitación al administrador.`;
-        
-        setSuccess(successMessage);
-        setFormData({
-          organizationName: '',
-          adminName: '',
-          adminEmail: '',
-          language: 'es',
-        });
-        setShowCreateModal(false); // Cerrar modal tras éxito
-        await loadOrganizations(); // Recargar lista
+        setSuccess(t('success.body', { name: result.organization?.name ?? '', email: result.admin?.email ?? '' }));
+        setForm({ organizationName: '', adminName: '', adminEmail: '', language: 'es' });
+        setShowCreateModal(false);
+        await loadOrganizations();
       } else {
-        setError(result.error || 'Error al crear la organización');
-        // No cerrar el modal para que el usuario vea el error
+        setError(result.error || t('errors.create'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
-      // No cerrar el modal para que el usuario vea el error
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  const dateOnly = (value: Date) =>
+    new Date(value).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' });
 
-  const content = (
+  return (
     <>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2>{title}</h2>
-        <div>
-          <Button 
-            variant="outline-info" 
-            onClick={() => setShowHelpModal(true)}
-            className="me-2"
-          >
-            <i className="bi bi-question-circle me-2"></i>
-            ¿Cómo funciona?
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={() => setShowCreateModal(true)}
-          >
-            <i className="bi bi-building-add me-2"></i>
-            Nueva Organización
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title={t('title')}
+        actions={
+          <Group gap="xs">
+            <Button variant="light" color="gray" leftSection={<IconQuestionMark size={16} />} onClick={() => setShowHelpModal(true)}>
+              {t('help.button')}
+            </Button>
+            <Button leftSection={<IconBuildingPlus size={16} />} onClick={() => setShowCreateModal(true)}>
+              {t('create.button')}
+            </Button>
+          </Group>
+        }
+      />
 
       {success && (
-        <Alert variant="success" dismissible onClose={() => setSuccess(null)}>
-          <div className="d-flex align-items-start">
-            <i className="bi bi-check-circle-fill fs-4 me-3 text-success"></i>
-            <div className="flex-grow-1">
-              <strong>¡Organización creada exitosamente!</strong>
-              <pre className="mb-0 mt-2" style={{ whiteSpace: 'pre-wrap' }}>{success}</pre>
-              <Alert variant="success" className="mt-3 mb-0">
-                <i className="bi bi-envelope-check me-2"></i>
-                <strong>Email enviado:</strong> Se ha enviado automáticamente un email de activación al administrador.
-              </Alert>
-            </div>
-          </div>
+        <Alert color="teal" variant="light" mb="md" withCloseButton onClose={() => setSuccess(null)} icon={<IconCircleCheck size={18} />} title={t('success.title')}>
+          <Text size="sm" style={{ whiteSpace: 'pre-line' }}>{success}</Text>
         </Alert>
       )}
 
-      {/* Lista de Organizaciones */}
-      <Card className="mb-4">
-        <Card.Header className="d-flex justify-content-between align-items-center">
-          <h5 className="mb-0">
-            <i className="bi bi-building me-2"></i>
-            Organizaciones Registradas
-          </h5>
-          {loadingList && <Spinner size="sm" />}
-        </Card.Header>
-        <Card.Body>
-          {loadingList ? (
-            <div className="text-center py-4">
-              <Spinner />
-              <p className="mt-2 text-muted">Cargando organizaciones...</p>
-            </div>
-          ) : organizations.length === 0 ? (
-            <div className="text-center py-4">
-              <i className="bi bi-inbox fs-1 text-muted"></i>
-              <p className="mt-3 text-muted">No hay organizaciones registradas</p>
-              <Button 
-                variant="primary" 
-                onClick={() => setShowCreateModal(true)}
-                className="mt-2"
-              >
-                <i className="bi bi-building-add me-2"></i>
-                Crear Primera Organización
-              </Button>
-            </div>
-          ) : (
-            <Table hover responsive>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Slug</th>
-                  <th className="text-center">Usuarios</th>
-                  <th className="text-center">Items</th>
-                  <th className="text-center">Certificaciones</th>
-                  <th className="text-center">Admin Activado</th>
-                  <th className="text-center">Usuarios Activos</th>
-                  <th>Fecha Creación</th>
-                </tr>
-              </thead>
-              <tbody>
+      {error && !showCreateModal && (
+        <Alert color="red" variant="light" mb="md" withCloseButton onClose={() => setError(null)} icon={<IconAlertTriangleFilled size={16} />}>
+          {error}
+        </Alert>
+      )}
+
+      <Paper withBorder radius="md" p="md" mb="md">
+        {loadingList ? (
+          <Center py="xl">
+            <Stack align="center" gap="xs">
+              <Loader />
+              <Text size="sm" c="dimmed">{t('list.loading')}</Text>
+            </Stack>
+          </Center>
+        ) : organizations.length === 0 ? (
+          <Center py="xl">
+            <Stack align="center" gap="sm">
+              <ThemeIcon color="gray" variant="light" size={48} radius="xl">
+                <IconInbox size={24} stroke={1.5} />
+              </ThemeIcon>
+              <Text size="sm" c="dimmed">{t('list.empty')}</Text>
+              <Button variant="light" onClick={() => setShowCreateModal(true)}>{t('list.createFirst')}</Button>
+            </Stack>
+          </Center>
+        ) : (
+          <ScrollArea>
+            <Table striped highlightOnHover verticalSpacing="xs" miw={960}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>{t('table.name')}</Table.Th>
+                  <Table.Th>{t('table.slug')}</Table.Th>
+                  <Table.Th ta="center">{t('table.accounts')}</Table.Th>
+                  <Table.Th ta="center">{t('table.assets')}</Table.Th>
+                  <Table.Th ta="center">{t('table.certifications')}</Table.Th>
+                  <Table.Th ta="center">{t('table.adminActivated')}</Table.Th>
+                  <Table.Th ta="center">{t('table.activeAccounts')}</Table.Th>
+                  <Table.Th>{t('table.created')}</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
                 {organizations.map((org) => (
-                  <tr 
+                  <Table.Tr
                     key={org.id}
                     style={{ cursor: 'pointer' }}
+                    title={t('table.doubleClickHint')}
                     onDoubleClick={() => router.push(`/superadmin/organizations/${org.id}`)}
-                    title="Doble clic para ver detalles"
                   >
-                    <td>
-                      <strong>{org.name}</strong>
-                    </td>
-                    <td>
-                      <code className="text-muted">{org.slug}</code>
-                    </td>
-                    <td className="text-center">
-                      <Badge bg="info">{org.userCount}</Badge>
+                    <Table.Td>
+                      <Text size="sm" fw={600}>{org.name}</Text>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text component="code" size="xs" c="dimmed">{org.slug}</Text>
+                    </Table.Td>
+                    <Table.Td ta="center">
+                      <Badge variant="light" color="datiaBlue">{org.userCount}</Badge>
                       {org.pendingUsersCount > 0 && (
-                        <small className="d-block text-muted" style={{ fontSize: '0.75rem' }}>
-                          {org.pendingUsersCount} pendiente{org.pendingUsersCount !== 1 ? 's' : ''}
-                        </small>
+                        <Text size="xs" c="dimmed">{t('table.pending', { count: org.pendingUsersCount })}</Text>
                       )}
-                    </td>
-                    <td className="text-center">
-                      <Badge bg="primary">{org.itemCount}</Badge>
-                    </td>
-                    <td className="text-center">
-                      <Badge bg="warning" text="dark">{org.certificationCount}</Badge>
-                    </td>
-                    <td className="text-center">
-                      {org.adminActivated ? (
-                        <Badge bg="success">
-                          <i className="bi bi-check-circle me-1"></i>
-                          Sí
-                        </Badge>
-                      ) : (
-                        <Badge bg="warning" text="dark">
-                          <i className="bi bi-clock me-1"></i>
-                          Pendiente
-                        </Badge>
-                      )}
-                    </td>
-                    <td className="text-center">
-                      <Badge bg="success">{org.activeUsersCount}</Badge>
-                    </td>
-                    <td>
-                      <small className="text-muted">
-                        {new Date(org.createdAt).toLocaleDateString('es-ES', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </small>
-                    </td>
-                  </tr>
+                    </Table.Td>
+                    <Table.Td ta="center">
+                      <Badge variant="light" color="datiaBlue">{org.itemCount}</Badge>
+                    </Table.Td>
+                    <Table.Td ta="center">
+                      <Badge variant="light" color="yellow">{org.certificationCount}</Badge>
+                    </Table.Td>
+                    <Table.Td ta="center">
+                      <Badge variant="light" color={org.adminActivated ? 'green' : 'yellow'}>
+                        {org.adminActivated ? t('table.yes') : t('table.pendingAdmin')}
+                      </Badge>
+                    </Table.Td>
+                    <Table.Td ta="center">
+                      <Badge variant="light" color="green">{org.activeUsersCount}</Badge>
+                    </Table.Td>
+                    <Table.Td>
+                      <Text size="sm" c="dimmed">{dateOnly(org.createdAt)}</Text>
+                    </Table.Td>
+                  </Table.Tr>
                 ))}
-              </tbody>
+              </Table.Tbody>
             </Table>
-          )}
-        </Card.Body>
-      </Card>
+          </ScrollArea>
+        )}
+      </Paper>
 
-      <Row className="g-3">
-        <Col md={12}>
-          <Card className="border-primary">
-            <Card.Body>
-              <div className="d-flex align-items-center mb-3">
-                <i className="bi bi-info-circle-fill fs-4 text-primary me-3"></i>
-                <div>
-                  <h5 className="mb-1">Sistema Multi-Tenancy</h5>
-                  <p className="text-muted mb-0">Cada organización tiene sus propios datos aislados</p>
-                </div>
-              </div>
-              <p className="mb-2">
-                <strong>¿Qué es una organización?</strong> Una organización representa una empresa, cliente o grupo independiente 
-                que usa Datia. Cada organización tiene sus propios usuarios, categorías, items y datos completamente aislados.
-              </p>
-              <p className="mb-0">
-                <strong>Ejemplo:</strong> Si creas la organización &quot;Acme Corp&quot;, todos sus usuarios solo verán y gestionarán 
-                los items de Acme Corp, sin poder acceder a datos de otras organizaciones.
-              </p>
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
+      <Paper withBorder radius="md" p="md" style={{ borderColor: 'var(--mantine-color-datiaBlue-3)' }}>
+        <Group gap="sm" mb="xs" wrap="nowrap">
+          <ThemeIcon color="datiaBlue" variant="light" size={32} radius="md">
+            <IconInfoCircle size={18} />
+          </ThemeIcon>
+          <div>
+            <Text fw={600}>{t('info.title')}</Text>
+            <Text size="sm" c="dimmed">{t('info.subtitle')}</Text>
+          </div>
+        </Group>
+        <Text size="sm" mb="xs">
+          <Text component="span" fw={600}>{t('info.questionLabel')}</Text> {t('info.answer')}
+        </Text>
+        <Text size="sm">
+          <Text component="span" fw={600}>{t('info.exampleLabel')}</Text> {t('info.example')}
+        </Text>
+      </Paper>
 
-      {/* Modal de Ayuda */}
-      <Modal show={showHelpModal} onHide={() => setShowHelpModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="bi bi-question-circle me-2"></i>
-            Guía: Crear una Organización
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Alert variant="info">
-            <strong>¿Qué vas a hacer?</strong> Crear una nueva organización (empresa/cliente) con su primer administrador.
-          </Alert>
-
-          <h5 className="mt-4 mb-3">📝 Paso a Paso</h5>
-
-          <Card className="mb-3">
-            <Card.Body>
-              <Badge bg="primary" className="mb-2">Paso 1</Badge>
-              <h6>Ingresa el nombre de la organización</h6>
-              <p className="text-muted mb-2">
-                <strong>Ejemplo:</strong> &quot;Acme Corporation&quot;, &quot;Hospital San José&quot;, &quot;Tienda El Punto&quot;
-              </p>
-              <p className="mb-0">
-                Este es el nombre que verán los usuarios. El identificador único se generará automáticamente.
-              </p>
-            </Card.Body>
-          </Card>
-
-          <Card className="mb-3">
-            <Card.Body>
-              <Badge bg="primary" className="mb-2">Paso 2</Badge>
-              <h6>Asigna el primer administrador</h6>
-              <p className="text-muted mb-2">
-                <strong>Ejemplo:</strong> Juan Pérez (juan.perez@acme.com)
-              </p>
-              <p className="mb-0">
-                Esta persona será el administrador inicial y podrá invitar más usuarios.
-              </p>
-            </Card.Body>
-          </Card>
-
-          <Card className="mb-3">
-            <Card.Body>
-              <Badge bg="success" className="mb-2">Paso 3</Badge>
-              <h6>Envía el link de activación</h6>
-              <p className="text-muted mb-2">
-                Después de crear la organización, se genera un <strong>link único de activación</strong>.
-              </p>
-              <p className="mb-0">
-                <strong>Email automático:</strong> El sistema enviará automáticamente un email de invitación al administrador
-                con un link de activación. Con ese link podrá establecer su contraseña y acceder al sistema.
-              </p>
-            </Card.Body>
-          </Card>
-
-          <Alert variant="success" className="mt-4">
-            <strong>✅ Email automático:</strong> El sistema enviará automáticamente un email de invitación 
-            al administrador con el link de activación. No necesitas hacer nada más.
-          </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowHelpModal(false)}>
-            Cerrar
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={() => {
-              setShowHelpModal(false);
-              setShowCreateModal(true);
-            }}
-          >
-            Entendido, crear organización
-          </Button>
-        </Modal.Footer>
+      <Modal opened={showHelpModal} onClose={() => setShowHelpModal(false)} title={t('help.title')} size="lg">
+        <Stack gap="md">
+          <Alert color="datiaBlue" variant="light">{t('help.intro')}</Alert>
+          <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md">
+            {(['step1', 'step2', 'step3'] as const).map((step, i) => (
+              <Paper key={step} withBorder radius="md" p="md">
+                <Text size="xs" c="datiaBlue" fw={700} tt="uppercase" mb={4}>{t('help.stepLabel', { number: i + 1 })}</Text>
+                <Text fw={600} size="sm" mb={4}>{t(`help.${step}.title`)}</Text>
+                <Text size="sm" c="dimmed">{t(`help.${step}.body`)}</Text>
+              </Paper>
+            ))}
+          </SimpleGrid>
+          <Alert color="green" variant="light" title={t('help.autoEmailTitle')}>{t('help.autoEmail')}</Alert>
+          <Group justify="flex-end">
+            <Button variant="default" onClick={() => setShowHelpModal(false)}>{t('help.close')}</Button>
+            <Button onClick={() => { setShowHelpModal(false); setShowCreateModal(true); }}>{t('help.understood')}</Button>
+          </Group>
+        </Stack>
       </Modal>
 
-      {/* Modal de Creación */}
-      <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="bi bi-building-add me-2"></i>
-            Crear Nueva Organización
-          </Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleCreate}>
-          <Modal.Body>
-            <Alert variant="info" className="mb-4">
-              <strong>💡 Tip:</strong> Completa todos los campos. El sistema creará la organización 
-              y un usuario administrador simultáneamente.
-            </Alert>
+      <Modal opened={showCreateModal} onClose={() => setShowCreateModal(false)} title={t('create.title')} size="lg">
+        <form onSubmit={handleCreate}>
+          <Stack gap="md">
+            <Alert color="datiaBlue" variant="light" icon={<IconInfoCircle size={16} />}>{t('create.tip')}</Alert>
 
-            <Card className="mb-4">
-              <Card.Header className="bg-primary text-white">
-                <strong>1. Datos de la Organización</strong>
-              </Card.Header>
-              <Card.Body>
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Nombre de la Organización *
-                    <i className="bi bi-info-circle ms-2 text-muted" title="Nombre completo de la empresa o cliente"></i>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Ej: Acme Corporation"
-                    value={formData.organizationName}
-                    onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
-                    required
-                  />
-                  <Form.Text className="text-muted">
-                    Nombre completo de la empresa o cliente. El identificador único se generará automáticamente.
-                  </Form.Text>
-                </Form.Group>
-              </Card.Body>
-            </Card>
+            <Text fw={600} size="sm">{t('create.orgSection')}</Text>
+            <TextInput
+              label={t('create.nameLabel')}
+              placeholder={t('create.namePlaceholder')}
+              description={t('create.nameHelp')}
+              value={form.organizationName}
+              onChange={(e) => setForm({ ...form, organizationName: e.currentTarget.value })}
+              required
+            />
 
-            <Card>
-              <Card.Header className="bg-success text-white">
-                <strong>2. Primer Administrador</strong>
-              </Card.Header>
-              <Card.Body>
-                <Alert variant="warning" className="mb-3">
-                  <small>
-                    <strong>Importante:</strong> Este usuario será <Badge bg="warning" text="dark">ADMIN</Badge> de la organización 
-                    y podrá invitar más usuarios.
-                  </small>
-                </Alert>
+            <Text fw={600} size="sm" mt="xs">{t('create.adminSection')}</Text>
+            <Text size="xs" c="dimmed" mt={-8}>{t('create.adminHelp')}</Text>
+            <TextInput
+              label={t('create.adminNameLabel')}
+              value={form.adminName}
+              onChange={(e) => setForm({ ...form, adminName: e.currentTarget.value })}
+              required
+            />
+            <TextInput
+              label={t('create.adminEmailLabel')}
+              type="email"
+              description={t('create.adminEmailHelp')}
+              value={form.adminEmail}
+              onChange={(e) => setForm({ ...form, adminEmail: e.currentTarget.value })}
+              required
+            />
+            <Select
+              label={t('create.languageLabel')}
+              data={[{ value: 'es', label: t('create.languageEs') }, { value: 'en', label: t('create.languageEn') }]}
+              value={form.language}
+              onChange={(value) => setForm({ ...form, language: (value as 'es' | 'en') ?? 'es' })}
+              allowDeselect={false}
+            />
 
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Nombre Completo *
-                    <i className="bi bi-info-circle ms-2 text-muted" title="Nombre del administrador"></i>
-                  </Form.Label>
-                  <Form.Control
-                    type="text"
-                    placeholder="Ej: Juan Pérez"
-                    value={formData.adminName}
-                    onChange={(e) => setFormData({ ...formData, adminName: e.target.value })}
-                    required
-                  />
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Email del Administrador *
-                    <i className="bi bi-info-circle ms-2 text-muted" title="Email válido para activación"></i>
-                  </Form.Label>
-                  <div className="input-group">
-                    <span className="input-group-text bg-light">
-                      <i className="bi bi-envelope"></i>
-                    </span>
-                    <Form.Control
-                      type="email"
-                      placeholder="Ej: juan.perez@acme.com"
-                      value={formData.adminEmail}
-                      onChange={(e) => setFormData({ ...formData, adminEmail: e.target.value })}
-                      required
-                    />
-                  </div>
-                  <Form.Text className="text-muted">
-                    Se enviará automáticamente un email de invitación con el link de activación.
-                  </Form.Text>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>
-                    Idioma del Email
-                    <i className="bi bi-info-circle ms-2 text-muted" title="Idioma en que se enviará el email de invitación"></i>
-                  </Form.Label>
-                  <Form.Select
-                    value={formData.language}
-                    onChange={(e) => setFormData({ ...formData, language: e.target.value as 'es' | 'en' })}
-                  >
-                    <option value="es">🇪🇸 Español</option>
-                    <option value="en">🇬🇧 English</option>
-                  </Form.Select>
-                  <Form.Text className="text-muted">
-                    El email de invitación se enviará en este idioma.
-                  </Form.Text>
-                </Form.Group>
-              </Card.Body>
-            </Card>
-
-            {error && (
-              <Alert variant="danger" dismissible onClose={() => setError(null)} className="mt-4 mb-0">
-                <i className="bi bi-exclamation-triangle me-2"></i>
-                <strong>Error:</strong> {error}
-              </Alert>
+            {error && showCreateModal && (
+              <Alert color="red" variant="light" icon={<IconAlertTriangleFilled size={16} />}>{error}</Alert>
             )}
-          </Modal.Body>
-          <Modal.Footer className="bg-light">
-            <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
-              <i className="bi bi-x-circle me-2"></i>
-              Cancelar
-            </Button>
-            <Button variant="primary" type="submit" disabled={loading}>
-              {loading ? (
-                <>
-                  <Spinner size="sm" className="me-2" />
-                  Creando organización...
-                </>
-              ) : (
-                <>
-                  <i className="bi bi-check-circle me-2"></i>
-                  Crear Organización y Administrador
-                </>
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
+
+            <Group justify="flex-end" gap="xs">
+              <Button variant="default" onClick={() => setShowCreateModal(false)} disabled={saving}>{t('create.cancel')}</Button>
+              <Button type="submit" loading={saving} leftSection={<IconBuilding size={16} />}>
+                {saving ? t('create.submitting') : t('create.submit')}
+              </Button>
+            </Group>
+          </Stack>
+        </form>
       </Modal>
     </>
   );
-
-  if (!showBox) {
-    return content;
-  }
-
-  return <Box>{content}</Box>;
 }
-
-

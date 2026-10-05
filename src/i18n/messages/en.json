@@ -1309,6 +1309,87 @@
       "created": "Joined"
     }
   },
+  "superadminOrganizationsList": {
+    "title": "Organizations",
+    "errors": {
+      "load": "The organizations could not be loaded.",
+      "create": "The organization could not be created.",
+      "unknown": "Unknown error"
+    },
+    "help": {
+      "button": "How does it work?",
+      "title": "Guide: creating an organization",
+      "intro": "An organization is an independent company or customer. Creating it also creates its management account and a default company.",
+      "stepLabel": "Step {number}",
+      "step1": {
+        "title": "Name",
+        "body": "This is the name its managers will see. The unique identifier is generated automatically."
+      },
+      "step2": {
+        "title": "Organization account",
+        "body": "That person manages the organization panel: they create its companies and invite people into their dashboards."
+      },
+      "step3": {
+        "title": "Activation",
+        "body": "They will receive an email with a link to set their password."
+      },
+      "autoEmailTitle": "Automatic email",
+      "autoEmail": "The system sends the invitation email to the administrator as soon as you create the organization. Nothing else is needed.",
+      "close": "Close",
+      "understood": "Got it, create organization"
+    },
+    "create": {
+      "button": "New organization",
+      "title": "New organization",
+      "tip": "This creates the organization, its management account and a default company.",
+      "orgSection": "1. Organization",
+      "nameLabel": "Organization name",
+      "namePlaceholder": "E.g. Acme Corporation",
+      "nameHelp": "Full name of the company or customer.",
+      "adminSection": "2. Organization account",
+      "adminHelp": "Will manage the organization panel.",
+      "adminNameLabel": "Full name",
+      "adminEmailLabel": "Email",
+      "adminEmailHelp": "The activation email is sent automatically.",
+      "languageLabel": "Email language",
+      "languageEs": "Español",
+      "languageEn": "English",
+      "cancel": "Cancel",
+      "submit": "Create organization",
+      "submitting": "Creating organization..."
+    },
+    "success": {
+      "title": "Organization created",
+      "body": "“{name}” created. Activation email sent to {email}."
+    },
+    "list": {
+      "loading": "Loading organizations...",
+      "empty": "No organizations registered yet.",
+      "createFirst": "Create the first organization"
+    },
+    "table": {
+      "name": "Name",
+      "slug": "Slug",
+      "accounts": "Accounts",
+      "assets": "Assets",
+      "certifications": "Certifications",
+      "adminActivated": "Admin activated",
+      "activeAccounts": "Active accounts",
+      "created": "Created",
+      "pending": "{count, plural, one {# pending} other {# pending}}",
+      "yes": "Yes",
+      "pendingAdmin": "Pending",
+      "doubleClickHint": "Double-click to see details"
+    },
+    "info": {
+      "title": "Multi-tenancy system",
+      "subtitle": "Each organization has its own isolated data",
+      "questionLabel": "What is an organization?",
+      "answer": "An organization is an independent company, customer or group that uses Datia. It has its own accounts, companies, assets and data, fully isolated.",
+      "exampleLabel": "Example:",
+      "example": "If you create the organization “Acme Corp”, its management account only sees its companies, and each company only sees its own assets, with no access to other organizations’ data."
+    }
+  },
   "superadminOrganizationDetail": {
     "back": "Organizations",
     "loading": "Loading organization details...",
