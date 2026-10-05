@@ -1,27 +1,10 @@
-import { UserService, type CreateUserRequest, type UpdateUserRequest, type ChangePasswordRequest, type UserResponse } from './UserService';
-import { UserInputError, UserAlreadyExistsError, UserNotFoundError, AuthorizationError, InvalidCredentialsError, PasswordValidationError } from './errors';
+import { UserService, type ChangePasswordRequest } from './UserService';
+import { UserNotFoundError, AuthorizationError, InvalidCredentialsError, PasswordValidationError } from './errors';
 import type { UserRepository } from './UserRepository';
 import { DbError } from './UserRepository';
 import { requireScope } from '@/lib/auth/tenant';
-import { verifyAdminAuth, verifyUserAuth, generateTemporaryPassword } from '@/actions/users/helpers';
+import { verifyAdminAuth, verifyUserAuth } from '@/actions/users/helpers';
 import bcrypt from 'bcryptjs';
-
-const toUserResponse = (u: any): UserResponse => ({
-  id: u.id,
-  email: u.email,
-  name: u.name,
-  role: u.role,
-  phone: u.phone ?? null,
-  notes: u.notes ?? null,
-});
-
-// Desde una organización solo se asigna ADMIN. El rol llega de un FormData sin
-// validar, y SUPER_ADMIN da acceso al panel de superadmin.
-function assertAssignableRole(role: unknown): void {
-  if (role !== 'ADMIN') {
-    throw new UserInputError('role', 'Rol no válido');
-  }
-}
 
 export function createUserServiceImpl(deps: {
   userRepository: UserRepository;
@@ -29,93 +12,6 @@ export function createUserServiceImpl(deps: {
   const { userRepository: userRepo } = deps;
 
   return {
-    async createUser(data: CreateUserRequest): Promise<{ user: UserResponse; temporaryPassword: string }> {
-      try {
-        const scope = await requireScope();
-        
-        // auth
-        await verifyAdminAuth();
-
-        assertAssignableRole(data.role);
-
-        if (!data.email || !data.name) {
-          throw new UserInputError(!data.email ? 'email' : 'name', 'Email y nombre son obligatorios');
-        }
-
-        // Check if email exists
-        try {
-          await userRepo.getByEmail(data.email);
-          throw new UserAlreadyExistsError(data.email, 'Ya existe un usuario con este email');
-        } catch (e) {
-          if (e instanceof UserAlreadyExistsError) throw e;
-          // User doesn't exist, continue
-        }
-
-        const temporaryPassword = generateTemporaryPassword();
-        const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
-
-        const created = await userRepo.create({
-          organizationId: scope.organizationId,
-          companyId: scope.companyId,
-          email: data.email,
-          name: data.name,
-          role: data.role,
-          phone: data.phone ?? null,
-          notes: data.notes ?? null,
-          passwordHash: hashedPassword,
-        });
-
-        return { user: toUserResponse(created), temporaryPassword };
-      } catch (e) {
-        if (e instanceof UserInputError || e instanceof UserAlreadyExistsError || e instanceof AuthorizationError) throw e;
-        if (e instanceof DbError) throw new UserInputError('email', 'Error creando usuario');
-        throw e;
-      }
-    },
-
-    async updateUser(data: UpdateUserRequest): Promise<{ user: UserResponse }> {
-      try {
-        const scope = await requireScope();
-        
-        await verifyAdminAuth();
-
-        if (!data.id) {
-          throw new UserInputError('email', 'ID requerido');
-        }
-
-        if (data.role != null) {
-          assertAssignableRole(data.role);
-        }
-
-        if (data.email) {
-          // Best-effort: check if another user has the same email
-          try {
-            const existing = await userRepo.getByEmail(data.email);
-            if (existing.id !== data.id) {
-              throw new UserAlreadyExistsError(data.email, 'Ya existe otro usuario con este email');
-            }
-          } catch (e) {
-            if (e instanceof UserAlreadyExistsError) throw e;
-            // User doesn't exist or other error, continue
-          }
-        }
-
-        const updated = await userRepo.update(data.id, scope, {
-          name: data.name ?? null,
-          email: data.email ?? null,
-          role: data.role ?? null,
-          phone: data.phone ?? null,
-          notes: data.notes ?? null,
-        });
-
-        return { user: toUserResponse(updated) };
-      } catch (e) {
-        if (e instanceof UserInputError || e instanceof UserAlreadyExistsError || e instanceof UserNotFoundError || e instanceof AuthorizationError) throw e;
-        if (e instanceof DbError) throw new UserNotFoundError(data.id, 'Usuario no encontrado');
-        throw e;
-      }
-    },
-
     async deleteUser(id: string): Promise<void> {
       try {
         const scope = await requireScope();

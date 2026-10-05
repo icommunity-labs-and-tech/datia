@@ -12,18 +12,12 @@ vi.mock('@/lib/storage', async () => {
   return { ...actual, getStorage: () => ({ saveImage }) };
 });
 
-const getByEmail = vi.fn();
-vi.mock('@/infrastructure/prisma/repositories/UserRepositoryPrisma', () => ({
-  userRepository: { getByEmail: (...args: unknown[]) => getByEmail(...args) },
-}));
-
 const findUnique = vi.fn();
 vi.mock('@/lib/prisma', () => ({
   prisma: { company: { findUnique: (...args: unknown[]) => findUnique(...args) } },
 }));
 
 import { uploadImage } from '@/actions/upload/uploadImage';
-import { checkEmailExists } from '@/actions/users/check-email';
 import { checkKycStatus } from '@/actions/kyc/status';
 
 const tenant = requireOrganizationId as unknown as ReturnType<typeof vi.fn>;
@@ -47,11 +41,6 @@ describe('acciones del dashboard sin sesión', () => {
   it('uploadImage no sube nada', async () => {
     await expect(uploadImage(imageForm())).rejects.toThrow();
     expect(saveImage).not.toHaveBeenCalled();
-  });
-
-  it('checkEmailExists no consulta usuarios', async () => {
-    await expect(checkEmailExists('alguien@example.com')).rejects.toThrow();
-    expect(getByEmail).not.toHaveBeenCalled();
   });
 
   it('checkKycStatus no revela el estado ni la URL de KYC', async () => {

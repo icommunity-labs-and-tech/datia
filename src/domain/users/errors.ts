@@ -1,19 +1,3 @@
-export class UserInputError extends Error {
-  readonly _tag = 'UserInputError';
-  constructor(public readonly field: 'email' | 'name' | 'role' | 'password' | 'currentPassword' | 'newPassword' | 'confirmPassword', message: string) {
-    super(message);
-    this.name = 'UserInputError';
-  }
-}
-
-export class UserAlreadyExistsError extends Error {
-  readonly _tag = 'UserAlreadyExistsError';
-  constructor(public readonly email: string, message: string) {
-    super(message);
-    this.name = 'UserAlreadyExistsError';
-  }
-}
-
 export class UserNotFoundError extends Error {
   readonly _tag = 'UserNotFoundError';
   constructor(public readonly userId: string, message: string) {
