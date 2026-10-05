@@ -1390,6 +1390,41 @@
       "example": "Si creas la organización «Acme Corp», su cuenta de gestión solo verá sus empresas, y cada empresa solo verá sus propios activos, sin acceder a datos de otras organizaciones."
     }
   },
+  "superadminSupport": {
+    "title": "Mensajes de soporte",
+    "pendingCount": "{count, plural, one {# pendiente} other {# pendientes}}",
+    "loading": "Cargando mensajes...",
+    "empty": "No hay mensajes de soporte.",
+    "table": {
+      "organization": "Organización",
+      "subject": "Asunto",
+      "page": "Página",
+      "status": "Estado",
+      "date": "Fecha",
+      "actions": "Acciones"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "read": "Leído",
+      "resolved": "Resuelto"
+    },
+    "menu": {
+      "changeStatus": "Cambiar estado",
+      "delete": "Eliminar"
+    },
+    "detail": {
+      "organization": "Organización",
+      "page": "Página",
+      "date": "Fecha",
+      "markResolved": "Marcar como resuelto",
+      "close": "Cerrar"
+    },
+    "deleteModal": {
+      "title": "Confirmar eliminación",
+      "body": "¿Seguro que quieres eliminar este mensaje? Esta acción no se puede deshacer.",
+      "cancel": "Cancelar"
+    }
+  },
   "superadminOrganizationDetail": {
     "back": "Organizaciones",
     "loading": "Cargando detalles de la organización...",
