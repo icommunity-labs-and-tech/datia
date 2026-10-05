@@ -1,5 +1,5 @@
 import { getOrganizationAssetOverview } from '@/actions/companies/asset-overview';
-import AssetOverview from './AssetOverview';
+import AssetOverviewPanel from '@/components/views/AssetOverviewPanel';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,5 +15,11 @@ export default async function OrganizationAssetPage({
   // Not an organization session, or not one of its assets: nothing to show.
   if (!overview) return null;
 
-  return <AssetOverview overview={overview} />;
+  return (
+    <AssetOverviewPanel
+      overview={overview}
+      backHref={`/organization/companies/${overview.company.id}`}
+      backLabel={overview.company.name}
+    />
+  );
 }

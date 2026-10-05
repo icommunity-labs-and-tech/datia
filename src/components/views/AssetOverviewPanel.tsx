@@ -17,18 +17,32 @@ import { IconArrowLeft, IconShieldCheck, IconClock, IconExternalLink } from '@ta
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import PageHeader from '@/components/layout/PageHeader';
-import type { OrganizationAssetOverview } from '@/actions/companies/asset-overview';
+import type { AssetOverview } from '@/actions/companies/asset-overview-core';
 
 const EMISSION_STATUS_COLOR: Record<string, string> = { PENDING: 'yellow', VERIFIED: 'green', REJECTED: 'red' };
 
-export default function AssetOverview({ overview }: { overview: OrganizationAssetOverview }) {
+interface Props {
+  overview: AssetOverview;
+  /** Where the back link leads — the company this asset belongs to. */
+  backHref: string;
+  /** What it's labelled — the company's name. */
+  backLabel: string;
+}
+
+/**
+ * One asset, read-only: the energy chain behind it (sources → consumption →
+ * emissions), not just whether it's certified. Shared by the organization's
+ * own panel and the superadmin's — same reason `CompanyOverview` reads are
+ * shared: one implementation, two callers with their own auth and scope.
+ */
+export default function AssetOverviewPanel({ overview, backHref, backLabel }: Props) {
   const t = useTranslations('organizationAssetDetail');
   const tDetail = useTranslations('companiesPage.detail');
   const tItem = useTranslations('itemDetail');
   const tEnergy = useTranslations('energyHub');
   const tSidebar = useTranslations('sidebar');
   const locale = useLocale();
-  const { asset, company, certifications, sources } = overview;
+  const { asset, certifications, sources } = overview;
 
   const date = (value: Date) => new Date(value).toLocaleDateString(locale);
   const dateTime = (value: Date) => new Date(value).toLocaleString(locale);
@@ -43,14 +57,14 @@ export default function AssetOverview({ overview }: { overview: OrganizationAsse
     <>
       <Anchor
         component={Link}
-        href={`/organization/companies/${company.id}`}
+        href={backHref}
         size="sm"
         mb="xs"
         display="inline-flex"
         style={{ alignItems: 'center', gap: 6 }}
       >
         <IconArrowLeft size={14} />
-        {company.name}
+        {backLabel}
       </Anchor>
 
       <PageHeader
