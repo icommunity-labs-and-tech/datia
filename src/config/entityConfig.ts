@@ -1,7 +1,6 @@
 export interface EntityConfig {
   name: string;
   displayName: string;
-  icon: string;
   listPath: string;
   detailPath: (id: string) => string;
   editPath?: (id: string) => string; // Opcional para entidades que no permiten edición
@@ -14,7 +13,6 @@ export const entityConfigs: Record<string, EntityConfig> = {
   categories: {
     name: 'categories',
     displayName: 'Categoría',
-    icon: 'bi-tags',
     listPath: '/dashboard/categories',
     detailPath: (id: string) => `/dashboard/categories/${id}`,
     editPath: (id: string) => `/dashboard/categories/${id}/edit`,
@@ -25,7 +23,6 @@ export const entityConfigs: Record<string, EntityConfig> = {
   items: {
     name: 'items',
     displayName: 'Item',
-    icon: 'bi-list-columns',
     listPath: '/dashboard/assets',
     detailPath: (id: string) => `/dashboard/assets/${id}`,
     // Nothing of the asset is shown as cascade any more: its state history is
@@ -36,7 +33,6 @@ export const entityConfigs: Record<string, EntityConfig> = {
   users: {
     name: 'users',
     displayName: 'Usuario',
-    icon: 'bi-people-fill',
     listPath: '/dashboard/users',
     detailPath: (id: string) => `/dashboard/users/${id}`,
     editPath: (id: string) => `/dashboard/users/${id}/edit`,

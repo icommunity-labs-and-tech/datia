@@ -606,7 +606,8 @@
     "readingsCovered": "{count} readings covered",
     "viewProof": "View the proof",
     "totalCertifications": "Certifications",
-    "certifiedCertifications": "On chain"
+    "certifiedCertifications": "On chain",
+    "noImage": "No image"
   },
   "userDetail": {
     "title": "User: {name}",
