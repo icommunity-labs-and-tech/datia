@@ -1,4 +1,3 @@
-import { randomInt } from 'node:crypto';
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
@@ -32,9 +31,4 @@ export async function verifyUserAuth() {
   }
 
   throw new Error('No autorizado');
-}
-
-export function generateTemporaryPassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-  return Array.from({ length: 12 }, () => chars[randomInt(chars.length)]).join('');
 }

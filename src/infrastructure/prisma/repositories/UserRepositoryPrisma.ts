@@ -1,9 +1,7 @@
-import { UserRepository, type UserRecord, type CreateUserInput, type UpdateUserInput, DbError } from '@/domain/users/UserRepository';
+import { UserRepository, type UserRecord, type UpdateUserInput, DbError } from '@/domain/users/UserRepository';
 import { prisma } from '@/lib/prisma';
-import { defaultCompanyId } from '@/lib/company';
 import { scopeWhere, type Scope } from '@/lib/scope';
-import { UserAlreadyExistsError, UserInputError, UserNotFoundError } from '@/domain/users/errors';
-import crypto from 'crypto';
+import { UserNotFoundError } from '@/domain/users/errors';
 
 const toDomain = (u: any): UserRecord => ({
   id: u.id,
@@ -25,19 +23,6 @@ export const userRepository: UserRepository = {
       const user = await prisma.user.findUnique({ where: { id } });
       if (!user) {
         throw new UserNotFoundError(id, 'Usuario no encontrado');
-      }
-      return toDomain(user);
-    } catch (e) {
-      if (e instanceof UserNotFoundError) throw e;
-      throw new DbError(e);
-    }
-  },
-
-  async getByEmail(email: string): Promise<UserRecord> {
-    try {
-      const user = await prisma.user.findUnique({ where: { email } });
-      if (!user) {
-        throw new UserNotFoundError(email, 'Usuario no encontrado');
       }
       return toDomain(user);
     } catch (e) {
@@ -71,41 +56,6 @@ export const userRepository: UserRepository = {
     }
   },
 
-  async create(input: CreateUserInput & { passwordHash?: string }): Promise<UserRecord> {
-    try {
-      if (!input.email || !input.name || !input.role) {
-        throw new UserInputError(!input.email ? 'email' : !input.name ? 'name' : 'role', 'Campos obligatorios');
-      }
-      
-      const existing = await prisma.user.findUnique({ where: { email: input.email } });
-      if (existing) {
-        throw new UserAlreadyExistsError(input.email, 'Ya existe un usuario con este email');
-      }
-
-      const now = new Date();
-      const created = await prisma.user.create({
-        data: {
-          id: crypto.randomUUID(),
-          organizationId: input.organizationId,
-          companyId: input.companyId ?? (input.organizationId ? await defaultCompanyId(input.organizationId) : null),
-          email: input.email,
-          password: input.passwordHash ?? '',
-          name: input.name,
-          role: input.role,
-          status: 'ACTIVE', // Si se crea con password, está activo
-          phone: input.phone ?? null,
-          notes: input.notes ?? null,
-          signsWithCertificate: false,
-          updatedAt: now,
-        },
-      });
-      return toDomain(created);
-    } catch (e) {
-      if (e instanceof UserInputError || e instanceof UserAlreadyExistsError) throw e;
-      throw new UserInputError('email', e instanceof Error ? e.message : String(e));
-    }
-  },
-
   async update(id: string, scope: Scope | null, changes: UpdateUserInput): Promise<UserRecord> {
     try {
       // Verificar que el usuario está dentro del alcance. Un SUPER_ADMIN no
@@ -135,7 +85,7 @@ export const userRepository: UserRepository = {
       const updated = await prisma.user.update({ where: { id }, data });
       return toDomain(updated);
     } catch (e) {
-      if (e instanceof UserNotFoundError || e instanceof UserInputError) throw e;
+      if (e instanceof UserNotFoundError) throw e;
       throw new UserNotFoundError(id, e instanceof Error ? e.message : String(e));
     }
   },

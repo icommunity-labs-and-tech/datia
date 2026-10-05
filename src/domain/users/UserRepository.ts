@@ -1,16 +1,4 @@
 import type { Scope } from '@/lib/scope';
-import { UserInputError, UserNotFoundError, UserAlreadyExistsError } from './errors';
-
-export interface CreateUserInput {
-  organizationId?: string | null; // NULL para SUPER_ADMIN
-  /** Empresa de la cuenta; la de la organización por defecto si se omite. */
-  companyId?: string | null;
-  email: string;
-  name: string;
-  role: 'ADMIN' | 'ORG_ADMIN' | 'SUPER_ADMIN';
-  phone?: string | null;
-  notes?: string | null;
-}
 
 export interface UpdateUserInput {
   name?: string | null;
@@ -44,10 +32,8 @@ export class DbError extends Error {
 
 export interface UserRepository {
   getById(id: string): Promise<UserRecord>;
-  getByEmail(email: string): Promise<UserRecord>;
   getPasswordHash(id: string): Promise<string>;
   findByOrganization(scope: Scope): Promise<UserRecord[]>;
-  create(input: CreateUserInput & { passwordHash?: string }): Promise<UserRecord>;
   update(id: string, scope: Scope | null, changes: UpdateUserInput): Promise<UserRecord>;
   delete(id: string, scope: Scope): Promise<void>;
   // Dashboard-specific queries
