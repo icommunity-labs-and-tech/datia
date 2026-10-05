@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Card, Button, Alert, Spinner } from '@/components/legacy/bootstrap-compat';
-import { useLocale } from 'next-intl';
+import { Alert, Anchor, Badge, Button, Group, Paper, Stack, Text, ThemeIcon, Title, Center } from '@mantine/core';
+import { IconAlertTriangle, IconArrowLeft, IconArrowRight, IconCheck, IconCircleX, IconGauge, IconRefresh, IconShieldCheck } from '@tabler/icons-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { checkKycStatus } from '@/actions/kyc/status';
 
 interface KycStepProps {
@@ -27,6 +28,7 @@ export default function KycStep({
   onEmbeddedChange,
 }: KycStepProps) {
   const locale = useLocale();
+  const t = useTranslations('onboardingKyc');
   const [verificationStatus, setVerificationStatus] = useState<
     'NOT_VERIFIED' | 'WAITING' | 'VERIFIED' | 'REJECTED'
   >(initialStatus);
@@ -85,7 +87,7 @@ export default function KycStep({
           }
         } else if (newStatus === 'REJECTED') {
           setIsPolling(false);
-          setError('La verificación fue rechazada. Por favor, contacta con soporte.');
+          setError(t('rejectedError'));
           if (pollingIntervalRef.current) {
             clearInterval(pollingIntervalRef.current);
             pollingIntervalRef.current = null;
@@ -95,7 +97,7 @@ export default function KycStep({
     } catch (err) {
       console.error('Error checking KYC status:', err);
     }
-  }, [companyId, showEmbedded, onVerified]);
+  }, [companyId, showEmbedded, onVerified, t]);
 
   // Verificar estado inicial al montar
   useEffect(() => {
@@ -273,156 +275,92 @@ export default function KycStep({
 
   if (!kycURL) {
     return (
-      <Alert variant="warning">
-        <Alert.Heading>
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          URL de verificación no disponible
-        </Alert.Heading>
-        <p>
-          No se pudo generar la URL de verificación. Por favor, contacta con soporte para completar el proceso de verificación.
-        </p>
+      <Alert color="yellow" variant="light" icon={<IconAlertTriangle size={18} />} title={t('urlMissing.title')}>
+        {t('urlMissing.body')}
       </Alert>
     );
   }
 
-  return (
-    <div>
-      {!showEmbedded && (
-        <>
-          <div className="text-center mb-4">
-            <div style={{
-              width: '80px',
-              height: '80px',
-              margin: '0 auto',
-              borderRadius: '50%',
-              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              marginBottom: '1.5rem'
-            }}>
-              <i className="bi bi-shield-check text-white" style={{ fontSize: '2.5rem' }}></i>
-            </div>
-            <h3 className="mb-2" style={{ color: '#1a1a1a', fontWeight: 600 }}>Verificación de Identidad</h3>
-          </div>
+  const primaryButtonStyle = { height: 44 };
 
-          {error && (
-            <Alert variant="danger" className="mb-4" dismissible onClose={() => setError(null)} style={{ borderRadius: '8px' }}>
-              {error}
-            </Alert>
-          )}
-        </>
+  return (
+    <Stack gap="md">
+      {!showEmbedded && (
+        <Stack align="center" gap="sm">
+          <ThemeIcon size={72} radius="xl" color="datiaBlue" variant="light">
+            <IconShieldCheck size={36} stroke={1.6} />
+          </ThemeIcon>
+          <Title order={3}>{t('title')}</Title>
+        </Stack>
       )}
 
-      {showEmbedded && error && (
-        <Alert variant="danger" className="mb-3" dismissible onClose={() => setError(null)} style={{ borderRadius: '8px' }}>
+      {error && (
+        <Alert
+          color="red"
+          variant="light"
+          withCloseButton
+          onClose={() => setError(null)}
+          icon={<IconCircleX size={18} />}
+        >
           {error}
         </Alert>
       )}
 
       {verificationStatus === 'NOT_VERIFIED' && !showEmbedded && (
-        <div>
-          <div className="text-center mb-3">
-            <Button
-              onClick={handleOpenKyc}
-              className="w-100"
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                padding: '14px',
-                boxShadow: '0 4px 6px rgba(102, 126, 234, 0.3)'
-              }}
-            >
-              <i className="bi bi-shield-check me-2"></i>
-              Empezar
-            </Button>
-            <p className="text-muted small mt-3 mb-0">
-              Completa el proceso de verificación a continuación
-            </p>
-          </div>
+        <Stack gap="sm">
+          <Button onClick={handleOpenKyc} fullWidth style={primaryButtonStyle} leftSection={<IconShieldCheck size={18} />}>
+            {t('start')}
+          </Button>
+          <Text size="sm" c="dimmed" ta="center">{t('waitHint')}</Text>
           {onPrevious && (
-            <Button
-              variant="outline-secondary"
-              onClick={onPrevious}
-              className="w-100"
-              style={{ borderRadius: '8px', fontWeight: 500 }}
-            >
-              <i className="bi bi-arrow-left me-2"></i>
-              Anterior
+            <Button variant="default" onClick={onPrevious} fullWidth leftSection={<IconArrowLeft size={16} />}>
+              {t('previous')}
             </Button>
           )}
-        </div>
+        </Stack>
       )}
 
       {verificationStatus === 'WAITING' && !showEmbedded && (
-        <div>
-          <div className="text-center mb-3">
-            <Button
-              onClick={handleOpenKyc}
-              variant="outline-primary"
-              className="w-100"
-              style={{ borderRadius: '8px', fontWeight: 500 }}
-            >
-              <i className="bi bi-shield-check me-2"></i>
-              Empezar
-            </Button>
-          </div>
+        <Stack gap="sm">
+          <Button variant="light" onClick={handleOpenKyc} fullWidth leftSection={<IconShieldCheck size={18} />}>
+            {t('start')}
+          </Button>
           {onPrevious && (
-            <Button
-              variant="outline-secondary"
-              onClick={onPrevious}
-              className="w-100"
-              style={{ borderRadius: '8px', fontWeight: 500 }}
-            >
-              <i className="bi bi-arrow-left me-2"></i>
-              Anterior
+            <Button variant="default" onClick={onPrevious} fullWidth leftSection={<IconArrowLeft size={16} />}>
+              {t('previous')}
             </Button>
           )}
-        </div>
+        </Stack>
       )}
 
       {showEmbedded && kycURL && (
-        <div style={{ margin: '0 -1rem', position: 'relative', minHeight: '600px', zIndex: 1 }}>
+        <div style={{ position: 'relative', minHeight: 600 }}>
           {iframeError ? (
-            <div style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(255, 255, 255, 0.95)',
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 100,
-              padding: '2rem',
-              borderRadius: '8px'
-            }}>
-              <div className="text-center" style={{ maxWidth: '500px' }}>
-                <div style={{
-                  width: '80px',
-                  height: '80px',
-                  margin: '0 auto 1.5rem',
-                  borderRadius: '50%',
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <i className="bi bi-exclamation-triangle text-white" style={{ fontSize: '2.5rem' }}></i>
-                </div>
-                <h4 className="mb-3" style={{ color: '#1a1a1a', fontWeight: 600 }}>
-                  Error al cargar el proceso de verificación
-                </h4>
-                <p className="mb-4" style={{ color: '#666' }}>
-                  Hubo un problema al cargar la página de verificación. Si ya completaste el proceso de verificación, puedes continuar al dashboard.
-                </p>
-                <div className="d-flex flex-column gap-2">
+            <Paper
+              withBorder
+              radius="md"
+              p="xl"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                zIndex: 100,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(255, 255, 255, 0.95)',
+              }}
+            >
+              <Stack align="center" gap="md" maw={480} ta="center">
+                <ThemeIcon size={72} radius="xl" color="yellow" variant="light">
+                  <IconAlertTriangle size={36} stroke={1.6} />
+                </ThemeIcon>
+                <Title order={4}>{t('iframeError.title')}</Title>
+                <Text size="sm" c="dimmed">{t('iframeError.body')}</Text>
+                <Stack gap="xs" w="100%">
                   <Button
-                    variant="primary"
+                    fullWidth
+                    style={primaryButtonStyle}
+                    leftSection={<IconGauge size={16} />}
                     onClick={async () => {
                       // Verificar el estado antes de redirigir
                       const result = await checkKycStatus();
@@ -442,21 +380,14 @@ export default function KycStep({
                         }, 300);
                       }
                     }}
-                    className="w-100"
-                    size="lg"
-                    style={{
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      fontWeight: 600,
-                      padding: '14px'
-                    }}
                   >
-                    <i className="bi bi-speedometer2 me-2"></i>
-                    Ir al Dashboard
+                    {t('iframeError.goDashboard')}
                   </Button>
                   <Button
-                    variant="outline-secondary"
+                    variant="default"
+                    fullWidth
+                    style={primaryButtonStyle}
+                    leftSection={<IconRefresh size={16} />}
                     onClick={() => {
                       setIframeError(false);
                       // Recargar el iframe
@@ -464,35 +395,28 @@ export default function KycStep({
                         iframeRef.current.src = kycURL;
                       }
                     }}
-                    className="w-100"
-                    size="lg"
-                    style={{ borderRadius: '8px', padding: '14px' }}
                   >
-                    <i className="bi bi-arrow-clockwise me-2"></i>
-                    Reintentar
+                    {t('iframeError.retry')}
                   </Button>
-                </div>
-              </div>
-            </div>
+                </Stack>
+              </Stack>
+            </Paper>
           ) : (
-            <div style={{
-              width: '100%',
-              maxWidth: '100%',
-              overflow: 'hidden',
-              borderRadius: '8px',
-              border: '1px solid #e9ecef',
-              background: '#f8f9fa',
-            }}>
+            <div
+              style={{
+                width: '100%',
+                overflow: 'hidden',
+                borderRadius: 'var(--mantine-radius-md)',
+                border: '1px solid var(--mantine-color-gray-2)',
+                background: 'var(--mantine-color-gray-0)',
+              }}
+            >
               <iframe
                 ref={iframeRef}
                 src={kycURL}
                 key={showEmbedded ? kycURL : undefined}
-                style={{
-                  width: '100%',
-                  height: '600px',
-                  border: 'none'
-                }}
-                title="Proceso de verificación KYC"
+                style={{ width: '100%', height: 600, border: 'none' }}
+                title={t('iframeTitle')}
                 allow="camera; microphone"
                 onError={() => {
                   setIframeError(true);
@@ -513,8 +437,8 @@ export default function KycStep({
                           const bodyHTML = iframeDoc.body?.innerHTML || '';
                           // Detectar el error específico de conexión bloqueada
                           if (
-                            bodyText.includes('bloqueada') || 
-                            bodyText.includes('bloqueado') || 
+                            bodyText.includes('bloqueada') ||
+                            bodyText.includes('bloqueado') ||
                             bodyText.includes('conexión está bloqueada') ||
                             bodyText.includes('connection is blocked') ||
                             bodyText.includes('página pública') ||
@@ -531,7 +455,7 @@ export default function KycStep({
                       }
                       return false;
                     };
-                    
+
                     // Verificar inmediatamente y luego periódicamente
                     setTimeout(() => {
                       if (!checkForErrors()) {
@@ -541,7 +465,7 @@ export default function KycStep({
                             clearInterval(errorCheckInterval);
                           }
                         }, 2000);
-                        
+
                         // Limpiar después de 30 segundos (suficiente tiempo para detectar errores)
                         setTimeout(() => clearInterval(errorCheckInterval), 30000);
                       }
@@ -557,55 +481,26 @@ export default function KycStep({
       )}
 
       {verificationStatus === 'VERIFIED' && (
-        <div>
-          <div className="text-center mb-3">
-            <div className="mb-3">
-              <span className="badge bg-success" style={{ fontSize: '0.9rem', padding: '8px 16px' }}>
-                <i className="bi bi-check-circle me-1"></i>
-                Verificado
-              </span>
-            </div>
-            <Button
-              onClick={handleContinue}
-              className="w-100"
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: 600,
-                padding: '14px',
-                boxShadow: '0 4px 6px rgba(16, 185, 129, 0.3)'
-              }}
-            >
-              Continuar
-              <i className="bi bi-arrow-right ms-2"></i>
-            </Button>
-          </div>
+        <Stack align="center" gap="sm">
+          <Badge color="green" variant="light" size="lg" leftSection={<IconCheck size={14} />}>
+            {t('verified')}
+          </Badge>
+          <Button color="green" onClick={handleContinue} fullWidth style={primaryButtonStyle} rightSection={<IconArrowRight size={16} />}>
+            {t('continue')}
+          </Button>
           {onPrevious && (
-            <Button
-              variant="outline-secondary"
-              onClick={onPrevious}
-              className="w-100"
-              style={{ borderRadius: '8px', fontWeight: 500 }}
-            >
-              <i className="bi bi-arrow-left me-2"></i>
-              Anterior
+            <Button variant="default" onClick={onPrevious} fullWidth leftSection={<IconArrowLeft size={16} />}>
+              {t('previous')}
             </Button>
           )}
-        </div>
+        </Stack>
       )}
 
       {verificationStatus === 'REJECTED' && (
-        <Alert variant="danger" style={{ borderRadius: '8px' }}>
-          <Alert.Heading className="h6">
-            <i className="bi bi-x-circle me-2"></i>
-            Verificación rechazada
-          </Alert.Heading>
-          <p className="mb-0 small">
-            Por favor, contacta con soporte para más información.
-          </p>
+        <Alert color="red" variant="light" icon={<IconCircleX size={18} />} title={t('rejected.title')}>
+          {t('rejected.body')}
         </Alert>
       )}
-    </div>
+    </Stack>
   );
 }

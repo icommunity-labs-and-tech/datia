@@ -308,7 +308,7 @@
         "goToLogin": "Go to Login"
       },
       "steps": {
-        "step": "Step {current} of 5",
+        "step": "Step {current} of 4",
         "welcome": "Welcome",
         "password": "Password",
         "verification": "Verification",
@@ -1388,6 +1388,48 @@
       "exampleLabel": "Example:",
       "example": "If you create the organization “Acme Corp”, its management account only sees its companies, and each company only sees its own assets, with no access to other organizations’ data."
     }
+  },
+  "onboardingWelcome": {
+    "title": "Welcome to Datia!",
+    "greeting": "Hi <strong>{name}</strong>, we’re glad to have you here.",
+    "organization": "Organization",
+    "intro": "You are about to finish setting up your account as administrator.",
+    "whatNext": "What comes next",
+    "steps": {
+      "password": {
+        "title": "Set a password",
+        "body": "Create a strong password to protect your account"
+      },
+      "kyc": {
+        "title": "Identity verification (KYC)",
+        "body": "Complete the verification process for your organization"
+      }
+    },
+    "start": "Get started"
+  },
+  "onboardingKyc": {
+    "title": "Identity verification",
+    "start": "Start",
+    "waitHint": "Complete the verification process below",
+    "previous": "Back",
+    "continue": "Continue",
+    "verified": "Verified",
+    "urlMissing": {
+      "title": "Verification URL unavailable",
+      "body": "The verification URL could not be generated. Please contact support to complete the verification process."
+    },
+    "iframeTitle": "KYC verification process",
+    "iframeError": {
+      "title": "Error loading the verification process",
+      "body": "There was a problem loading the verification page. If you already completed the verification, you can continue to the dashboard.",
+      "goDashboard": "Go to dashboard",
+      "retry": "Retry"
+    },
+    "rejected": {
+      "title": "Verification rejected",
+      "body": "Please contact support for more information."
+    },
+    "rejectedError": "The verification was rejected. Please contact support."
   },
   "emissionDetail": {
     "title": "Emission record",

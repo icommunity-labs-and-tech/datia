@@ -308,7 +308,7 @@
         "goToLogin": "Ir al Login"
       },
       "steps": {
-        "step": "Paso {current} de 5",
+        "step": "Paso {current} de 4",
         "welcome": "Bienvenida",
         "password": "Contraseña",
         "verification": "Verificación",
@@ -1388,6 +1388,48 @@
       "exampleLabel": "Ejemplo:",
       "example": "Si creas la organización «Acme Corp», su cuenta de gestión solo verá sus empresas, y cada empresa solo verá sus propios activos, sin acceder a datos de otras organizaciones."
     }
+  },
+  "onboardingWelcome": {
+    "title": "¡Bienvenido a Datia!",
+    "greeting": "Hola <strong>{name}</strong>, estamos encantados de tenerte aquí.",
+    "organization": "Organización",
+    "intro": "Estás a punto de completar la configuración inicial de tu cuenta como administrador.",
+    "whatNext": "¿Qué sigue?",
+    "steps": {
+      "password": {
+        "title": "Establecer contraseña",
+        "body": "Crea una contraseña segura para proteger tu cuenta"
+      },
+      "kyc": {
+        "title": "Verificación de identidad (KYC)",
+        "body": "Completa el proceso de verificación para tu organización"
+      }
+    },
+    "start": "Comenzar"
+  },
+  "onboardingKyc": {
+    "title": "Verificación de identidad",
+    "start": "Empezar",
+    "waitHint": "Completa el proceso de verificación a continuación",
+    "previous": "Anterior",
+    "continue": "Continuar",
+    "verified": "Verificado",
+    "urlMissing": {
+      "title": "URL de verificación no disponible",
+      "body": "No se pudo generar la URL de verificación. Por favor, contacta con soporte para completar el proceso de verificación."
+    },
+    "iframeTitle": "Proceso de verificación KYC",
+    "iframeError": {
+      "title": "Error al cargar el proceso de verificación",
+      "body": "Hubo un problema al cargar la página de verificación. Si ya completaste el proceso de verificación, puedes continuar al dashboard.",
+      "goDashboard": "Ir al dashboard",
+      "retry": "Reintentar"
+    },
+    "rejected": {
+      "title": "Verificación rechazada",
+      "body": "Por favor, contacta con soporte para más información."
+    },
+    "rejectedError": "La verificación fue rechazada. Por favor, contacta con soporte."
   },
   "emissionDetail": {
     "title": "Registro de emisión",
