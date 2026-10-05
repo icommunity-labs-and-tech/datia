@@ -1,22 +1,52 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { Button, Card, Row, Col, Badge, Spinner, Alert, Table, Modal } from '@/components/legacy/bootstrap-compat';
+import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
+import {
+  Alert,
+  Anchor,
+  Badge,
+  Button,
+  Group,
+  Loader,
+  Modal,
+  Paper,
+  ScrollArea,
+  SimpleGrid,
+  Stack,
+  Switch,
+  Table,
+  Text,
+  ThemeIcon,
+  Title,
+  Grid,
+  Center,
+} from '@mantine/core';
+import {
+  IconAlertTriangleFilled,
+  IconArrowLeft,
+  IconBuilding,
+  IconCertificate,
+  IconPackage,
+  IconTrash,
+  IconUsers,
+} from '@tabler/icons-react';
+import PageHeader from '@/components/layout/PageHeader';
 import { getOrganizationById, deleteOrganization, type OrganizationDetail } from '@/actions/organizations';
 import { updateOrgModules } from '@/actions/organizations/update-modules';
 import { listCompaniesForOrganization } from '@/actions/companies/superadmin';
 import type { CompanySummary } from '@/actions/companies/list';
-import Box from '@/components/Box';
 
 interface OrganizationDetailPanelProps {
   organizationId: string;
 }
 
 export default function OrganizationDetailPanel({ organizationId }: OrganizationDetailPanelProps) {
-  const t = useTranslations('superadminOrganization.companies');
+  const t = useTranslations('superadminOrganizationDetail');
+  const tCompanies = useTranslations('superadminOrganization.companies');
+  const locale = useLocale();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,10 +74,10 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
         setOrganization(result.organization);
         setCompanies(companyList);
       } else {
-        setError(result.error || 'Error al cargar la organización');
+        setError(result.error || t('errors.load'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setLoading(false);
     }
@@ -55,365 +85,272 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
 
   const handleDelete = async () => {
     if (!organization) return;
-    
     setDeleting(true);
     setDeleteError(null);
-    
     try {
       const result = await deleteOrganization(organization.id);
       if (result.success) {
-        // Redirigir a la lista de organizaciones después de eliminar
         router.push('/superadmin/organizations');
       } else {
-        setDeleteError(result.error || 'Error al eliminar la organización');
+        setDeleteError(result.error || t('errors.delete'));
       }
     } catch (err) {
-      setDeleteError(err instanceof Error ? err.message : 'Error desconocido');
+      setDeleteError(err instanceof Error ? err.message : t('errors.unknown'));
     } finally {
       setDeleting(false);
     }
   };
 
+  const toggleModule = async (mod: 'passport' | 'energy', enabled: boolean) => {
+    if (!organization) return;
+    setSavingModules(true);
+    await updateOrgModules(organization.id, { [mod]: enabled });
+    await loadOrganization();
+    setSavingModules(false);
+  };
+
+  const dateTime = (value: Date) =>
+    new Date(value).toLocaleString(locale, { dateStyle: 'long', timeStyle: 'short' });
+
+  const backLink = (
+    <Anchor
+      component={Link}
+      href="/superadmin/organizations"
+      size="sm"
+      mb="xs"
+      display="inline-flex"
+      style={{ alignItems: 'center', gap: 6 }}
+    >
+      <IconArrowLeft size={14} />
+      {t('back')}
+    </Anchor>
+  );
+
   if (loading) {
     return (
-      <Box>
-        <div className="text-center py-5">
-          <Spinner />
-          <p className="mt-3 text-muted">Cargando detalles de la organización...</p>
-        </div>
-      </Box>
+      <Center py="xl">
+        <Stack align="center" gap="xs">
+          <Loader />
+          <Text size="sm" c="dimmed">{t('loading')}</Text>
+        </Stack>
+      </Center>
     );
   }
 
-  if (error) {
+  if (error || !organization) {
     return (
-      <Box>
-        <Alert variant="danger">
-          <Alert.Heading>Error</Alert.Heading>
-          <p>{error}</p>
-          <Button variant="outline-danger" onClick={() => router.push('/superadmin/organizations')}>
-            Volver a organizaciones
-          </Button>
+      <>
+        {backLink}
+        <Alert color={error ? 'red' : 'yellow'} variant="light" title={error ? t('errors.title') : t('notFound.title')}>
+          <Stack gap="sm">
+            {error ?? t('notFound.description')}
+            <Group>
+              <Button variant="default" size="xs" onClick={() => router.push('/superadmin/organizations')}>
+                {t('back')}
+              </Button>
+            </Group>
+          </Stack>
         </Alert>
-      </Box>
+      </>
     );
   }
 
-  if (!organization) {
-    return (
-      <Box>
-        <Alert variant="warning">
-          <Alert.Heading>Organización no encontrada</Alert.Heading>
-          <Button variant="outline-warning" onClick={() => router.push('/superadmin/organizations')}>
-            Volver a organizaciones
-          </Button>
-        </Alert>
-      </Box>
-    );
-  }
+  const modules = organization.settings?.modules ?? {};
+  const moduleEnabled = (mod: 'passport' | 'energy') =>
+    modules[mod] !== undefined ? modules[mod] : mod === 'passport';
+
+  const stats = [
+    { icon: IconUsers, label: t('stats.accounts'), value: organization.userCount, detail: t('stats.accountsDetail', { active: organization.activeUsersCount, pending: organization.pendingUsersCount }) },
+    { icon: IconPackage, label: t('stats.assets'), value: organization.itemCount },
+    { icon: IconCertificate, label: t('stats.certifications'), value: organization.certificationCount },
+  ];
 
   return (
-    <Box>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="mb-0">
-          <i className="bi bi-building me-2"></i>
-          {organization.name}
-        </h2>
-        <div className="d-flex gap-2">
-          <Button 
-            variant="danger" 
+    <>
+      {backLink}
+
+      <PageHeader
+        title={organization.name}
+        actions={
+          <Button
+            color="red"
+            variant="light"
+            size="xs"
+            leftSection={<IconTrash size={15} />}
             onClick={() => setShowDeleteModal(true)}
           >
-            <i className="bi bi-trash me-2"></i>
-            Eliminar Organización
+            {t('delete')}
           </Button>
-          <Button 
-            variant="outline-secondary" 
-            onClick={() => router.push('/superadmin/organizations')}
-          >
-            <i className="bi bi-arrow-left me-2"></i>
-            Volver
-          </Button>
-        </div>
-      </div>
+        }
+      />
 
-      <Row className="g-4 mb-4">
-        <Col md={6} lg={3}>
-          <Card className="border-primary h-100">
-            <Card.Body className="text-center">
-              <i className="bi bi-people text-primary" style={{ fontSize: '2rem' }}></i>
-              <h3 className="mt-2 mb-0">{organization.userCount}</h3>
-              <p className="text-muted mb-0">Usuarios</p>
-              <small className="text-muted">
-                {organization.activeUsersCount} activos, {organization.pendingUsersCount} pendientes
-              </small>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col md={6} lg={3}>
-          <Card className="border-success h-100">
-            <Card.Body className="text-center">
-              <i className="bi bi-box-seam text-success" style={{ fontSize: '2rem' }}></i>
-              <h3 className="mt-2 mb-0">{organization.itemCount}</h3>
-              <p className="text-muted mb-0">Items</p>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col md={6} lg={3}>
-          <Card className="border-warning h-100">
-            <Card.Body className="text-center">
-              <i className="bi bi-list-check text-warning" style={{ fontSize: '2rem' }}></i>
-              <h3 className="mt-2 mb-0">{organization.certificationCount}</h3>
-              <p className="text-muted mb-0">Certificaciones</p>
-            </Card.Body>
-          </Card>
-        </Col>
-
-      </Row>
-
-      <Row className="g-4">
-        <Col md={6}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="bi bi-info-circle me-2"></i>
-                Información General
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              <Table borderless className="mb-0">
-                <tbody>
-                  <tr>
-                    <td><strong>Nombre:</strong></td>
-                    <td>{organization.name}</td>
-                  </tr>
-                  <tr>
-                    <td><strong>Slug:</strong></td>
-                    <td><code>{organization.slug}</code></td>
-                  </tr>
-                  <tr>
-                    <td><strong>Estado:</strong></td>
-                    <td>
-                      {organization.active ? (
-                        <Badge bg="success">Activa</Badge>
-                      ) : (
-                        <Badge bg="secondary">Inactiva</Badge>
-                      )}
-                    </td>
-                  </tr>
-                  {organization.domain && (
-                    <tr>
-                      <td><strong>Dominio:</strong></td>
-                      <td><code>{organization.domain}</code></td>
-                    </tr>
-                  )}
-                  <tr>
-                    <td><strong>Creada:</strong></td>
-                    <td>
-                      {new Date(organization.createdAt).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>Actualizada:</strong></td>
-                    <td>
-                      {new Date(organization.updatedAt).toLocaleDateString('es-ES', {
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </td>
-                  </tr>
-                </tbody>
-              </Table>
-            </Card.Body>
-          </Card>
-        </Col>
-
-        <Col md={6}>
-          <Card>
-            <Card.Header>
-              <h5 className="mb-0">
-                <i className="bi bi-person-gear me-2"></i>
-                Administrador Principal
-              </h5>
-            </Card.Header>
-            <Card.Body>
-              {organization.adminName ? (
-                <>
-                  <p className="mb-2">
-                    <strong>Nombre:</strong> {organization.adminName}
-                  </p>
-                  <p className="mb-2">
-                    <strong>Email:</strong> {organization.adminEmail}
-                  </p>
-                  <p className="mb-0">
-                    <strong>Estado de activación:</strong>{' '}
-                    {organization.adminActivated ? (
-                      <Badge bg="success">
-                        <i className="bi bi-check-circle me-1"></i>
-                        Activado
-                      </Badge>
-                    ) : (
-                      <Badge bg="warning" text="dark">
-                        <i className="bi bi-clock me-1"></i>
-                        Pendiente de activación
-                      </Badge>
-                    )}
-                  </p>
-                </>
-              ) : (
-                <p className="text-muted mb-0">No se encontró un administrador principal</p>
-              )}
-            </Card.Body>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Empresas */}
-      <Card className="mt-3">
-        <Card.Header>
-          <h5 className="mb-0"><i className="bi bi-buildings me-2" />{t('title')}</h5>
-        </Card.Header>
-        <Card.Body className="p-0">
-          {companies.length === 0 ? (
-            <p className="text-muted p-3 mb-0">{t('empty')}</p>
-          ) : (
-            <Table className="mb-0" hover responsive>
-              <thead>
-                <tr>
-                  <th>{t('name')}</th>
-                  <th className="text-end">{t('assets')}</th>
-                  <th className="text-end">{t('accounts')}</th>
-                  <th>{t('created')}</th>
-                  <th>{t('status')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {companies.map((company) => (
-                  <tr key={company.id}>
-                    <td>
-                      <Link href={`/superadmin/organizations/${organizationId}/companies/${company.id}`}>
-                        {company.name}
-                      </Link>
-                    </td>
-                    <td className="text-end">{company.assets}</td>
-                    <td className="text-end">{company.accounts}</td>
-                    <td>{new Date(company.createdAt).toLocaleDateString('es-ES')}</td>
-                    <td>
-                      {company.active ? (
-                        <Badge bg="success">{t('active')}</Badge>
-                      ) : (
-                        <Badge bg="secondary">{t('inactive')}</Badge>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-          )}
-        </Card.Body>
-      </Card>
-
-      {/* Módulos */}
-      <Card className="mt-3">
-        <Card.Header>
-          <h5 className="mb-0"><i className="bi bi-puzzle me-2" />Módulos</h5>
-        </Card.Header>
-        <Card.Body>
-          {(['passport', 'energy'] as const).map((mod) => {
-            const modules = organization.settings?.modules ?? {};
-            const defaultOn = mod === 'passport';
-            const enabled = modules[mod] !== undefined ? modules[mod] : defaultOn;
-            return (
-              <div key={mod} className="form-check form-switch mb-2">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id={`module-${mod}`}
-                  checked={enabled}
-                  disabled={savingModules}
-                  onChange={async (e) => {
-                    setSavingModules(true);
-                    await updateOrgModules(organization.id, { [mod]: e.target.checked });
-                    await loadOrganization();
-                    setSavingModules(false);
-                  }}
-                />
-                <label className="form-check-label" htmlFor={`module-${mod}`}>
-                  {mod === 'passport' ? '📄 Pasaporte Digital (DPP)' : '⚡ Certificación Energética (ESPR)'}
-                </label>
+      <SimpleGrid cols={{ base: 1, sm: 3 }} spacing="md" mb="md">
+        {stats.map(({ icon: Icon, label, value, detail }) => (
+          <Paper key={label} withBorder radius="md" p="md">
+            <Group gap="sm" wrap="nowrap" align="flex-start">
+              <ThemeIcon color="datiaBlue" variant="light" size={36} radius="md">
+                <Icon size={18} stroke={1.6} />
+              </ThemeIcon>
+              <div>
+                <Text size="xs" c="dimmed" tt="uppercase" fw={600}>{label}</Text>
+                <Title order={3}>{value}</Title>
+                {detail && <Text size="xs" c="dimmed">{detail}</Text>}
               </div>
-            );
-          })}
-        </Card.Body>
-      </Card>
+            </Group>
+          </Paper>
+        ))}
+      </SimpleGrid>
 
-      {/* Modal de confirmación de eliminación */}
-      <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="bi bi-exclamation-triangle text-danger me-2"></i>
-            Confirmar Eliminación
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
+      <Grid gutter="md" mb="md">
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Paper withBorder radius="md" p="md" h="100%">
+            <Title order={5} mb="sm">{t('info.title')}</Title>
+            <Stack gap={6}>
+              <InfoRow label={t('info.name')} value={organization.name} />
+              <InfoRow label={t('info.slug')} value={<Text component="code" size="sm">{organization.slug}</Text>} />
+              <InfoRow
+                label={t('info.status')}
+                value={
+                  <Badge variant="light" color={organization.active ? 'green' : 'gray'}>
+                    {organization.active ? t('info.active') : t('info.inactive')}
+                  </Badge>
+                }
+              />
+              {organization.domain && (
+                <InfoRow label={t('info.domain')} value={<Text component="code" size="sm">{organization.domain}</Text>} />
+              )}
+              <InfoRow label={t('info.created')} value={dateTime(organization.createdAt)} />
+              <InfoRow label={t('info.updated')} value={dateTime(organization.updatedAt)} />
+            </Stack>
+          </Paper>
+        </Grid.Col>
+
+        <Grid.Col span={{ base: 12, md: 6 }}>
+          <Paper withBorder radius="md" p="md" h="100%">
+            <Title order={5} mb="sm">{t('admin.title')}</Title>
+            {organization.adminName ? (
+              <Stack gap={6}>
+                <InfoRow label={t('admin.name')} value={organization.adminName} />
+                <InfoRow label={t('admin.email')} value={organization.adminEmail} />
+                <InfoRow
+                  label={t('admin.activation')}
+                  value={
+                    <Badge variant="light" color={organization.adminActivated ? 'green' : 'yellow'}>
+                      {organization.adminActivated ? t('admin.activated') : t('admin.pending')}
+                    </Badge>
+                  }
+                />
+              </Stack>
+            ) : (
+              <Text size="sm" c="dimmed">{t('admin.none')}</Text>
+            )}
+          </Paper>
+        </Grid.Col>
+      </Grid>
+
+      <Paper withBorder radius="md" p="md" mb="md">
+        <Group gap="xs" mb="sm">
+          <ThemeIcon color="datiaBlue" variant="light" size={24} radius="sm">
+            <IconBuilding size={14} />
+          </ThemeIcon>
+          <Title order={5}>{tCompanies('title')}</Title>
+        </Group>
+        {companies.length === 0 ? (
+          <Text size="sm" c="dimmed" py="md">{tCompanies('empty')}</Text>
+        ) : (
+          <ScrollArea>
+            <Table striped verticalSpacing="xs" miw={640}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>{tCompanies('name')}</Table.Th>
+                  <Table.Th ta="right">{tCompanies('assets')}</Table.Th>
+                  <Table.Th ta="right">{tCompanies('accounts')}</Table.Th>
+                  <Table.Th>{tCompanies('created')}</Table.Th>
+                  <Table.Th>{tCompanies('status')}</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {companies.map((company) => (
+                  <Table.Tr key={company.id}>
+                    <Table.Td>
+                      <Anchor component={Link} href={`/superadmin/organizations/${organizationId}/companies/${company.id}`} size="sm" fw={550}>
+                        {company.name}
+                      </Anchor>
+                    </Table.Td>
+                    <Table.Td ta="right"><Text size="sm">{company.assets}</Text></Table.Td>
+                    <Table.Td ta="right"><Text size="sm">{company.accounts}</Text></Table.Td>
+                    <Table.Td><Text size="sm" c="dimmed">{new Date(company.createdAt).toLocaleDateString(locale)}</Text></Table.Td>
+                    <Table.Td>
+                      <Badge size="sm" variant="light" color={company.active ? 'green' : 'gray'}>
+                        {company.active ? tCompanies('active') : tCompanies('inactive')}
+                      </Badge>
+                    </Table.Td>
+                  </Table.Tr>
+                ))}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
+        )}
+      </Paper>
+
+      <Paper withBorder radius="md" p="md">
+        <Title order={5} mb="sm">{t('modules.title')}</Title>
+        <Stack gap="sm">
+          <Switch
+            label={t('modules.passport')}
+            checked={moduleEnabled('passport')}
+            disabled={savingModules}
+            onChange={(e) => toggleModule('passport', e.currentTarget.checked)}
+          />
+          <Switch
+            label={t('modules.energy')}
+            checked={moduleEnabled('energy')}
+            disabled={savingModules}
+            onChange={(e) => toggleModule('energy', e.currentTarget.checked)}
+          />
+        </Stack>
+      </Paper>
+
+      <Modal
+        opened={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        title={t('deleteModal.title')}
+        centered
+      >
+        <Stack gap="md">
           {deleteError && (
-            <Alert variant="danger" dismissible onClose={() => setDeleteError(null)}>
+            <Alert color="red" variant="light" withCloseButton onClose={() => setDeleteError(null)}>
               {deleteError}
             </Alert>
           )}
-          <p>
-            ¿Estás seguro de que deseas eliminar la organización <strong>&quot;{organization.name}&quot;</strong>?
-          </p>
-          <Alert variant="warning" className="mb-0">
-            <strong>⚠️ Advertencia:</strong> Esta acción es irreversible y eliminará permanentemente:
-            <ul className="mb-0 mt-2">
-              <li>Todos los usuarios de la organización</li>
-              <li>Todos los items y estados</li>
-              <li>Todas las categorías</li>
-              <li>Todos los datos asociados</li>
+          <Text size="sm">{t('deleteModal.question', { name: organization.name })}</Text>
+          <Alert color="red" variant="light" icon={<IconAlertTriangleFilled size={16} />} title={t('deleteModal.warningTitle')}>
+            <Text size="sm" mb="xs">{t('deleteModal.warningBody')}</Text>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              <li><Text size="sm">{t('deleteModal.items.companies')}</Text></li>
+              <li><Text size="sm">{t('deleteModal.items.assets')}</Text></li>
+              <li><Text size="sm">{t('deleteModal.items.energy')}</Text></li>
             </ul>
           </Alert>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button 
-            variant="secondary" 
-            onClick={() => setShowDeleteModal(false)}
-            disabled={deleting}
-          >
-            Cancelar
-          </Button>
-          <Button 
-            variant="danger" 
-            onClick={handleDelete}
-            disabled={deleting}
-          >
-            {deleting ? (
-              <>
-                <Spinner size="sm" className="me-2" />
-                Eliminando...
-              </>
-            ) : (
-              <>
-                <i className="bi bi-trash me-2"></i>
-                Sí, Eliminar
-              </>
-            )}
-          </Button>
-        </Modal.Footer>
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={() => setShowDeleteModal(false)} disabled={deleting}>
+              {t('deleteModal.cancel')}
+            </Button>
+            <Button color="red" onClick={handleDelete} loading={deleting}>
+              {t('deleteModal.confirm')}
+            </Button>
+          </Group>
+        </Stack>
       </Modal>
-    </Box>
+    </>
   );
 }
 
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <Group justify="space-between" wrap="nowrap" gap="md">
+      <Text size="sm" c="dimmed">{label}</Text>
+      {typeof value === 'string' ? <Text size="sm" ta="right">{value}</Text> : value}
+    </Group>
+  );
+}
