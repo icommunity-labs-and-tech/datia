@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { Center, Text } from '@mantine/core';
 import ImageModal from './ImageModal';
 
 interface ImageDisplayProps {
@@ -21,6 +23,7 @@ export default function ImageDisplay({
   modalTitle
 }: ImageDisplayProps) {
   const [showModal, setShowModal] = useState(false);
+  const t = useTranslations('itemDetail');
 
   const handleImageClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,12 +34,12 @@ export default function ImageDisplay({
   };
   if (!imageUrl) {
     return (
-      <div 
-        className={`d-flex align-items-center justify-content-center bg-light border rounded ${className}`}
-        style={{ width: '60px', height: '60px', ...style }}
+      <Center
+        className={className}
+        style={{ width: 60, height: 60, borderRadius: 'var(--mantine-radius-sm)', border: '1px solid var(--mantine-color-gray-2)', background: 'var(--mantine-color-gray-0)', ...style }}
       >
-        <small className="text-muted">Sin imagen</small>
-      </div>
+        <Text size="xs" c="dimmed">{t('noImage')}</Text>
+      </Center>
     );
   }
 

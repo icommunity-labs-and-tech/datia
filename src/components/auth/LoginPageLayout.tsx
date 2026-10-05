@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Loader } from '@mantine/core';
 import {
+  IconShieldCheck,
   IconMail,
   IconLock,
   IconEye,
@@ -81,7 +82,6 @@ export default function LoginPageLayout({
 }: LoginPageLayoutProps) {
   const [pwVisible, setPwVisible] = useState(false);
   const t = useTranslations('auth.login.admin');
-  const roleIcon = 'bi-shield-check';
   const secondary = brandColorSecondary ?? brandColor;
   const panelBg = brandColorSecondary
     ? `linear-gradient(135deg, ${brandColor} 0%, ${secondary} 100%)`
@@ -182,7 +182,7 @@ export default function LoginPageLayout({
               textTransform: 'uppercase', padding: '0.35rem 0.75rem',
               borderRadius: 999, border: `1px solid ${brandColor}22`,
             }}>
-              <i className={`bi ${roleIcon}`} style={{ fontSize: '0.8rem' }} />
+              <IconShieldCheck size={13} stroke={1.8} />
               {subtitle}
             </span>
           </div>

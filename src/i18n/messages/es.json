@@ -606,7 +606,8 @@
     "readingsCovered": "{count} lecturas cubiertas",
     "viewProof": "Ver la prueba",
     "totalCertifications": "Certificaciones",
-    "certifiedCertifications": "En cadena"
+    "certifiedCertifications": "En cadena",
+    "noImage": "Sin imagen"
   },
   "userDetail": {
     "title": "Usuario: {name}",

@@ -4,8 +4,6 @@ import '@mantine/core/styles.css';
 import '@mantine/charts/styles.css';
 import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.css';
-import 'bootstrap-icons/font/bootstrap-icons.css';
-import '@/styles/legacy-utilities.css';
 import '@/app/globals.css';
 import Providers from '@/components/Providers';
 import RootContainer from '@/components/RootContainer';
