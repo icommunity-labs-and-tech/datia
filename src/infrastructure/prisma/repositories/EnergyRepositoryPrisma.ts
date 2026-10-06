@@ -1,4 +1,5 @@
 import { prisma } from '@/lib/prisma';
+import type { EmissionCertification } from '@/domain/energy/EnergyTypes';
 import { scopeWhere, type Scope } from '@/lib/scope';
 import type { EnergyRepository } from '@/domain/energy/EnergyRepository';
 import { createPaginationResponse, type CursorPaginationParams } from '@/lib/api/cursor-pagination';
@@ -45,6 +46,21 @@ const toConsumption = (r: any): EnergyConsumptionRecord => ({
   createdAt: r.createdAt,
 });
 
+const certificationSelect = {
+  select: { status: true, hash: true, checkerUrl: true, blockExplorerUrl: true, certifiedAt: true },
+} as const;
+
+const toCertification = (c: any): EmissionCertification | null =>
+  c
+    ? {
+        status: c.status,
+        hash: c.hash ?? null,
+        checkerUrl: c.checkerUrl ?? null,
+        blockExplorerUrl: c.blockExplorerUrl ?? null,
+        certifiedAt: c.certifiedAt ?? null,
+      }
+    : null;
+
 const toEmission = (r: any): EmissionRecord => ({
   id: r.id,
   energyConsumptionId: r.energyConsumptionId,
@@ -59,6 +75,7 @@ const toEmission = (r: any): EmissionRecord => ({
   verificationStatus: r.verificationStatus,
   verifierBody: r.verifierBody ?? null,
   verificationStandard: r.verificationStandard ?? null,
+  certification: toCertification(r.Certification),
   createdAt: r.createdAt,
 });
 
@@ -186,6 +203,7 @@ export const energyRepository: EnergyRepository = {
     const take = (pagination?.limit ?? limit) + 1;
     const rows = await prisma.emissionRecord.findMany({
       where: orgViaConsumption(scope),
+      include: { Certification: certificationSelect },
       orderBy: { createdAt: 'desc' },
       ...(pagination?.cursor ? { cursor: { id: pagination.cursor }, skip: 1 } : {}),
       take,
@@ -196,6 +214,7 @@ export const energyRepository: EnergyRepository = {
   async findEmissionById(scope, id) {
     const r = await prisma.emissionRecord.findFirst({
       where: { id, ...orgViaConsumption(scope) },
+      include: { Certification: certificationSelect },
     });
     return r ? toEmission(r) : null;
   },
