@@ -59,7 +59,7 @@ function buildQuickStartDescription(
   tokenNames: string[],
   docsTokenProvisioned: boolean,
 ): string {
-  const exampleItemId = recentItems[0]?.id ?? '{product-id}';
+  const exampleItemId = recentItems[0]?.id ?? '{asset-id}';
 
   const tokenSection = docsTokenProvisioned
     ? `A temporary token (\`${DOCS_PREVIEW_TOKEN_NAME}\`) has been **pre-filled** for you — valid for 1 hour.\n\nIt is already set in the **Authorize** panel (🔑). You can start sending requests immediately.`
@@ -69,8 +69,8 @@ function buildQuickStartDescription(
 
   const itemSection =
     recentItems.length > 0
-      ? `Your most recent products:\n${recentItems.map((i) => `- \`${i.id}\` — ${i.name}`).join('\n')}`
-      : `No products yet. Create products in the dashboard first.`;
+      ? `Your most recent assets:\n${recentItems.map((i) => `- \`${i.id}\` — ${i.name}`).join('\n')}`
+      : `No assets yet. Create one with **POST /assets** or in the dashboard first.`;
 
   return `## Quick Start
 
@@ -80,15 +80,15 @@ Everything you need to make your first API call.
 
 ${tokenSection}
 
-### 2. Browse your products
+### 2. Browse your assets
 
 ${itemSection}
 
-The product ID \`${exampleItemId}\` is pre-filled as the example in path parameters below.
+The asset ID \`${exampleItemId}\` is pre-filled as the example in path parameters below.
 
-### 3. Create a state
+### 3. Record energy data
 
-Use **POST /products/{id}/states**. Select a status type from the **Examples** dropdown in the request body — it pre-fills the exact fields your organization has configured.
+Register an energy source for an asset with **POST /energy/source**, then record its consumption with **POST /energy/consumption**. Every endpoint in the reference below shows its request body with an example.
 
 ---
 

@@ -1,23 +1,9 @@
 import { NextResponse } from 'next/server';
-import { getSwaggerSpec } from '@/lib/swagger/config';
 
 export async function GET() {
-  try {
-    // Try to generate spec from JSDoc comments
-    const openApiSpec = getSwaggerSpec() as { paths?: Record<string, unknown> };
-    // Log paths found for debugging
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Swagger spec paths found:', Object.keys(openApiSpec.paths || {}));
-    }
-    return NextResponse.json(openApiSpec);
-  } catch (error) {
-    console.error('Error generating Swagger spec from JSDoc:', error);
-    // Fallback to manual spec if JSDoc parsing fails
-    return NextResponse.json(manualOpenApiSpec);
-  }
+  return NextResponse.json(manualOpenApiSpec);
 }
 
-// Manual spec as fallback - can be removed once all endpoints are documented with JSDoc
 const manualOpenApiSpec = {
   openapi: '3.0.0',
   info: {
@@ -27,7 +13,7 @@ const manualOpenApiSpec = {
   },
   servers: [
     {
-      url: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1',
+      url: process.env.NEXT_PUBLIC_API_URL || '/api/v1',
       description: 'Development server',
     },
   ],
@@ -549,7 +535,7 @@ const manualOpenApiSpec = {
       },
       post: {
         summary: 'Register an energy source',
-        description: 'Links a physical energy source (solar panel, grid connection, etc.) to a hardware Item.',
+        description: 'Links a physical energy source (solar panel, grid connection, etc.) to an asset.',
         tags: ['Energy'],
         security: [{ BearerAuth: [] }],
         requestBody: {
@@ -570,7 +556,7 @@ const manualOpenApiSpec = {
                   guaranteeOfOriginId: { type: 'string', example: 'GO-ES-2024-001' },
                   countryOfOrigin: { type: 'string', example: 'ES', description: 'ISO 3166-1 alpha-2' },
                   gridEmissionFactor: { type: 'number', example: 207, description: 'gCO2eq/kWh' },
-                  assetId: { type: 'string', description: 'ID of the hardware Item this source belongs to' },
+                  assetId: { type: 'string', description: 'ID of the asset this source belongs to' },
                 },
               },
             },
@@ -580,7 +566,7 @@ const manualOpenApiSpec = {
           '201': { description: 'Energy source created' },
           '400': { description: 'Invalid input' },
           '401': { description: 'Unauthorized' },
-          '404': { description: 'Item not found or not owned by your organization' },
+          '404': { description: 'Asset not found or not owned by your organization' },
           '422': { description: 'Validation error or sandbox mode' },
         },
       },
@@ -720,7 +706,7 @@ const manualOpenApiSpec = {
     '/emissions/{id}/certify': {
       post: {
         summary: 'Anchor an emission that has no proof yet',
-        description: 'Emissions are anchored as they are written, so this is only needed for one left without proof — because iBS was unreachable, or the organization had not finished KYC. It issues the proof; the emission becomes VERIFIED once iBS confirms it on chain (`evidence.certified`). Requires a valid signatureID.',
+        description: 'Emissions are anchored as they are written, so this is only needed for one left without proof — because iBS was unreachable, or the account had not finished identity verification (KYC). It issues the proof; the emission becomes VERIFIED once iBS confirms it on chain (`evidence.certified`). Requires a completed identity verification (KYC).',
         tags: ['Emissions'],
         security: [{ BearerAuth: [] }],
         parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
@@ -729,7 +715,7 @@ const manualOpenApiSpec = {
           '401': { description: 'Unauthorized' },
           '404': { description: 'Emission record not found' },
           '409': { description: 'The emission already has a certification' },
-          '422': { description: 'Organization KYC incomplete' },
+          '422': { description: 'Identity verification (KYC) is not complete' },
           '502': { description: 'iBS rejected the evidence. The emission stays without proof.' },
         },
       },

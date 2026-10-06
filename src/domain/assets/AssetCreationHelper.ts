@@ -66,7 +66,7 @@ export async function createAssetWithEvidence(
     throw new CompanyNotVerifiedError(
       companyId,
       'no_signature',
-      'No se pudo certificar la evidencia: tu empresa no tiene una firma verificada. Completa su KYC.'
+      'No se pudo certificar la evidencia: tu cuenta no tiene una firma verificada. Completa la verificación KYC.'
     );
   }
 
@@ -74,7 +74,7 @@ export async function createAssetWithEvidence(
     throw new CompanyNotVerifiedError(
       companyId,
       'not_verified',
-      'La firma de tu empresa no está verificada. Completa el proceso KYC antes de crear activos.'
+      'La firma de tu cuenta no está verificada. Completa el proceso KYC antes de crear activos.'
     );
   }
 
