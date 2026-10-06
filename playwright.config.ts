@@ -47,18 +47,31 @@ export default defineConfig({
       dependencies: ['setup'],
     },
   ],
-  webServer: {
-    command: 'npm run dev',
-    // Inherited from the shell when set, so a run can point at its own database.
-    env: {
-      E2E_SQLITE: process.env.E2E_SQLITE ?? '1',
-      DATABASE_URL: process.env.DATABASE_URL ?? 'file:./playwright-e2e.db',
-      E2E_SQLITE_URL: process.env.E2E_SQLITE_URL ?? 'file:./playwright-e2e.db',
+  webServer: [
+    {
+      // iBS double: the KYC and certification flows call it instead of the real API.
+      command: 'node tests/e2e/support/ibs-stub.mjs',
+      url: 'http://127.0.0.1:4010/health',
+      reuseExistingServer: !process.env.CI,
+      timeout: 30 * 1000,
+      stdout: 'ignore',
+      stderr: 'pipe',
     },
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120 * 1000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+    {
+      command: 'npm run dev',
+      // Inherited from the shell when set, so a run can point at its own database.
+      env: {
+        E2E_SQLITE: process.env.E2E_SQLITE ?? '1',
+        DATABASE_URL: process.env.DATABASE_URL ?? 'file:./playwright-e2e.db',
+        E2E_SQLITE_URL: process.env.E2E_SQLITE_URL ?? 'file:./playwright-e2e.db',
+        IBS_BASE_URL: 'http://127.0.0.1:4010/v2',
+        IBS_TOKEN: 'e2e-ibs-token-do-not-use-in-prod',
+      },
+      url: 'http://localhost:3000',
+      reuseExistingServer: !process.env.CI,
+      timeout: 120 * 1000,
+      stdout: 'pipe',
+      stderr: 'pipe',
+    },
+  ],
 });
