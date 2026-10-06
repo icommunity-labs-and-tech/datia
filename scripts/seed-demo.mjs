@@ -85,11 +85,17 @@ async function main() {
   const companyId = await companyIdFor(prisma, org.id);
 
   // ── 1. Organisation: both modules on, identity verified ───────────────────
+  const company = await prisma.company.findUnique({ where: { id: companyId }, select: { signatureID: true } });
+  await prisma.company.update({
+    where: { id: companyId },
+    data: {
+      verificationStatus: 'VERIFIED',
+      signatureID: company?.signatureID ?? `sig_${randomUUID().replace(/-/g, '').slice(0, 20)}`,
+    },
+  });
   await prisma.organization.update({
     where: { id: org.id },
     data: {
-      verificationStatus: 'VERIFIED',
-      signatureID: org.signatureID ?? `sig_${randomUUID().replace(/-/g, '').slice(0, 20)}`,
       settings: { modules: { energy: true, passport: true } },
       updatedAt: new Date(),
     },

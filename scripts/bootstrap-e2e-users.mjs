@@ -45,7 +45,6 @@ async function bootstrapE2EUsers() {
           id: randomUUID(),
           name: 'Datia E2E',
           slug: ORG_SLUG,
-          verificationStatus: 'VERIFIED',
           updatedAt: now,
         },
       }));
@@ -250,7 +249,6 @@ async function bootstrapE2EUsers() {
           id: randomUUID(),
           name: 'Aislada E2E',
           slug: ISOLATED_ORG_SLUG,
-          verificationStatus: 'VERIFIED',
           updatedAt: now,
         },
       }));
