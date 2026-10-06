@@ -53,13 +53,13 @@ export async function POST(
 
   if (!signature.signatureID) {
     return NextResponse.json(
-      { error: 'Company has no signature ID. Complete its KYC before certifying emissions.' },
+      { error: 'Identity verification (KYC) is not complete. Complete it before certifying emissions.' },
       { status: 422 }
     );
   }
 
   if (!signature.verified) {
-    return NextResponse.json({ error: 'Company verification is not complete.' }, { status: 422 });
+    return NextResponse.json({ error: 'Identity verification (KYC) is not complete.' }, { status: 422 });
   }
 
   const anchored = await anchorEmissionById(authScope(auth), id);
