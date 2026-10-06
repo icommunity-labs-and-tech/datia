@@ -285,6 +285,63 @@ async function bootstrapE2EUsers() {
         },
       });
     }
+
+    // A second company inside "Datia E2E", with its own asset, account and token,
+    // so the e2e can prove a company never reaches its sibling's data (#38). The
+    // org-wide token has no company and sees both.
+    const COMPANY_B_ID = 'e2e-company-b';
+    const COMPANY_B_ASSET_ID = 'e2e-company-b-asset';
+    const COMPANY_B_EMAIL = 'companyb-e2e@datia.icommunitylabs.com';
+    const COMPANY_B_PASSWORD = 'companyb123';
+    const COMPANY_B_TOKEN = 'e2e-company-b-token-do-not-use-in-prod';
+    const ORG_WIDE_TOKEN = 'e2e-datia-org-wide-token-do-not-use-in-prod';
+
+    if (!(await prisma.company.findUnique({ where: { id: COMPANY_B_ID } }))) {
+      await prisma.company.create({
+        data: { id: COMPANY_B_ID, organizationId: org.id, name: 'Empresa E2E B' },
+      });
+    }
+    if (!(await prisma.asset.findUnique({ where: { id: COMPANY_B_ASSET_ID } }))) {
+      await prisma.asset.create({
+        data: {
+          id: COMPANY_B_ASSET_ID,
+          name: 'Activo de la otra empresa',
+          description: 'Pertenece a Empresa E2E B: la empresa A no debe verlo.',
+          organizationId: org.id,
+          companyId: COMPANY_B_ID,
+          updatedAt: now,
+        },
+      });
+    }
+    if (!(await prisma.user.findUnique({ where: { email: COMPANY_B_EMAIL } }))) {
+      await prisma.user.create({
+        data: {
+          id: randomUUID(),
+          email: COMPANY_B_EMAIL,
+          password: await bcrypt.hash(COMPANY_B_PASSWORD, 10),
+          name: 'Company B E2E',
+          role: 'ADMIN',
+          status: 'ACTIVE',
+          organizationId: org.id,
+          companyId: COMPANY_B_ID,
+          updatedAt: now,
+        },
+      });
+    }
+    const companyBTokenHash = createHash('sha256').update(COMPANY_B_TOKEN).digest('hex');
+    if (!(await prisma.apiToken.findUnique({ where: { tokenHash: companyBTokenHash } }))) {
+      await prisma.apiToken.create({
+        data: { id: randomUUID(), name: 'Company B E2E token', tokenHash: companyBTokenHash, organizationId: org.id, companyId: COMPANY_B_ID },
+      });
+    }
+    const orgWideTokenHash = createHash('sha256').update(ORG_WIDE_TOKEN).digest('hex');
+    if (!(await prisma.apiToken.findUnique({ where: { tokenHash: orgWideTokenHash } }))) {
+      await prisma.apiToken.create({
+        data: { id: randomUUID(), name: 'Org-wide E2E token', tokenHash: orgWideTokenHash, organizationId: org.id, companyId: null },
+      });
+    }
+    console.log('✅ Second company in Datia E2E: asset, account and tokens for company and org-wide isolation');
+
     console.log(`✅ Isolated organization: ${isolatedOrg.name} (${isolatedOrg.slug}), with its own asset and token`);
 
     console.log('\n🔑 E2E credentials:');
