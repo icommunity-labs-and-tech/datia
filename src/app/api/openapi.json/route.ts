@@ -686,7 +686,7 @@ const manualOpenApiSpec = {
           },
         },
         responses: {
-          '201': { description: 'Emission record created' },
+          '201': { description: 'Emission record created. `data.certification` is null until iBS issues the proof (then ISSUED), and CERTIFIED once it is on chain.' },
           '400': { description: 'Invalid input' },
           '401': { description: 'Unauthorized' },
           '404': { description: 'EnergyConsumption not found or not owned by your organization' },

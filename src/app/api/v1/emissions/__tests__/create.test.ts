@@ -13,12 +13,14 @@ const {
   mockValidateConsumptionOwnership,
   mockCreateEmission,
   mockAnchorEmissionById,
+  mockFindEmissionById,
   mockEventCreate,
 } = vi.hoisted(() => ({
   mockValidateApiToken: vi.fn(),
   mockValidateConsumptionOwnership: vi.fn(),
   mockCreateEmission: vi.fn(),
   mockAnchorEmissionById: vi.fn(),
+  mockFindEmissionById: vi.fn(),
   mockEventCreate: vi.fn().mockResolvedValue({}),
 }));
 
@@ -30,7 +32,7 @@ vi.mock('@/domain/energy/EnergyServiceImpl', () => ({
   createEnergyServiceImpl: () => ({ createEmission: mockCreateEmission }),
 }));
 vi.mock('@/infrastructure/prisma/repositories/EnergyRepositoryPrisma', () => ({
-  energyRepository: {},
+  energyRepository: { findEmissionById: mockFindEmissionById },
 }));
 vi.mock('@/infrastructure/prisma/repositories/EventRepositoryPrisma', () => ({
   eventRepository: { create: mockEventCreate },
@@ -63,7 +65,8 @@ const post = (body: unknown = validBody) =>
     } as any)
   );
 
-const record = { id: EMISSION_ID, ...validBody, energyConsumptionId: CONSUMPTION_ID };
+const record = { id: EMISSION_ID, ...validBody, energyConsumptionId: CONSUMPTION_ID, certification: null };
+const ISSUED = { status: 'ISSUED', hash: null, checkerUrl: null, blockExplorerUrl: null, certifiedAt: null };
 
 describe('POST /api/v1/emissions', () => {
   beforeEach(() => {
@@ -71,6 +74,7 @@ describe('POST /api/v1/emissions', () => {
     mockValidateApiToken.mockResolvedValue({ organizationId: ORG_ID, companyId: COMPANY_ID, isSandbox: false });
     mockValidateConsumptionOwnership.mockResolvedValue({ id: CONSUMPTION_ID });
     mockCreateEmission.mockResolvedValue(record);
+    mockFindEmissionById.mockResolvedValue(record);
     mockAnchorEmissionById.mockResolvedValue({
       emissionId: EMISSION_ID,
       period: '2026-03-14',
@@ -107,15 +111,14 @@ describe('POST /api/v1/emissions', () => {
 
   describe('certification', () => {
     it('anchors the record as it is written, without a second request', async () => {
+      mockFindEmissionById.mockResolvedValue({ ...record, certification: ISSUED });
       const res = await post();
       const json = await res.json();
 
       expect(res.status).toBe(201);
       expect(mockAnchorEmissionById).toHaveBeenCalledWith(SCOPE, EMISSION_ID);
-      expect(json.certification).toEqual({
-        status: 'pending_anchor',
-        evidenceId: EVIDENCE_ID,
-      });
+      expect(json.certification).toBeUndefined();
+      expect(json.data.certification).toEqual(ISSUED);
     });
 
     it('anchors after storing, never before', async () => {
@@ -148,7 +151,7 @@ describe('POST /api/v1/emissions', () => {
 
       expect(res.status).toBe(201);
       expect(json.data.id).toBe(EMISSION_ID);
-      expect(json.certification).toEqual({ status: 'pending', reason: 'iBS unreachable' });
+      expect(json.data.certification).toBeNull();
     });
 
     it('stores the reading when the organisation cannot sign yet', async () => {
@@ -160,7 +163,7 @@ describe('POST /api/v1/emissions', () => {
       const json = await res.json();
 
       expect(res.status).toBe(201);
-      expect(json.certification).toEqual({ status: 'pending', reason: 'not_anchored_yet' });
+      expect(json.data.certification).toBeNull();
     });
 
     it('reports the emission as an event whatever the anchoring does', async () => {

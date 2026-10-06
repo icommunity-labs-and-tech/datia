@@ -61,22 +61,10 @@ export async function POST(request: NextRequest) {
     // it cannot, the reading is still stored and a later sweep anchors it.
     // Making a client's meter unable to write because a third party is down
     // would be a worse failure than a proof that arrives late.
-    const anchor = await anchorEmissionById(authScope(auth), record.id);
+    await anchorEmissionById(authScope(auth), record.id);
+    const stored = (await energyRepository.findEmissionById(authScope(auth), record.id)) ?? record;
 
-    return NextResponse.json(
-      {
-        data: record,
-        certification: anchor?.evidenceId
-          ? {
-              // Issued, not yet on chain: iBS confirms seconds later through the
-              // `evidence.certified` webhook.
-              status: 'pending_anchor',
-              evidenceId: anchor.evidenceId,
-            }
-          : { status: 'pending', reason: anchor?.error ?? 'not_anchored_yet' },
-      },
-      { status: 201 }
-    );
+    return NextResponse.json({ data: stored }, { status: 201 });
   } catch (err) {
     if (err instanceof EnergyValidationError) {
       return NextResponse.json({ error: err.message }, { status: 422 });
