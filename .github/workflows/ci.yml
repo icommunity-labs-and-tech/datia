@@ -30,6 +30,9 @@ jobs:
       # recharts@^3, so a plain `npm ci` fails with ERESOLVE.
       - run: npm ci --legacy-peer-deps
 
+      # A critical advisory in what ships (#29) fails the build; highs are reported by npm audit.
+      - run: npm audit --omit=dev --audit-level=critical
+
       - run: npx prisma generate
 
 
