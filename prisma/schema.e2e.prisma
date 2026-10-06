@@ -172,12 +172,9 @@ model Organization {
   domain            String?            @unique
   active            Boolean            @default(true)
   settings          Json?
-  signatureID        String?
-  kycURL            String?
   logoUrl           String?
   brandColorPrimary  String?
   brandColorSecondary String?
-  verificationStatus VerificationStatus @default(NOT_VERIFIED)
   createdAt         DateTime           @default(now())
   updatedAt          DateTime
   ApiCall           ApiCall[]
@@ -195,7 +192,6 @@ model Organization {
 
   @@index([active])
   @@index([slug])
-  @@index([signatureID])
 }
 
 model SupportMessage {
