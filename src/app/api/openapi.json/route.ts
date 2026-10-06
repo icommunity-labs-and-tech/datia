@@ -654,7 +654,7 @@ const manualOpenApiSpec = {
           { in: 'query', name: 'cursor', schema: { type: 'string' } },
           { in: 'query', name: 'limit', schema: { type: 'integer', default: 20, maximum: 100 } },
         ],
-        responses: { '200': { description: 'Paginated list' }, '401': { description: 'Unauthorized' } },
+        responses: { '200': { description: 'Paginated list. Each record includes `certification`: `null` until the emission is anchored, then `{ status: ISSUED | CERTIFIED, hash, checkerUrl, blockExplorerUrl, certifiedAt }`. `status` becomes CERTIFIED when iBS confirms the transaction on chain.' }, '401': { description: 'Unauthorized' } },
       },
       post: {
         summary: 'Register a CO₂ emission record',
@@ -700,7 +700,7 @@ const manualOpenApiSpec = {
         tags: ['Emissions'],
         security: [{ BearerAuth: [] }],
         parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'string' } }],
-        responses: { '200': { description: 'Emission record' }, '401': { description: 'Unauthorized' }, '404': { description: 'Not found' } },
+        responses: { '200': { description: 'Emission record. Each record includes `certification`: `null` until the emission is anchored, then `{ status: ISSUED | CERTIFIED, hash, checkerUrl, blockExplorerUrl, certifiedAt }`. `status` becomes CERTIFIED when iBS confirms the transaction on chain.' }, '401': { description: 'Unauthorized' }, '404': { description: 'Not found' } },
       },
     },
     '/emissions/{id}/certify': {

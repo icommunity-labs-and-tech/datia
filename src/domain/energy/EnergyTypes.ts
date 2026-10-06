@@ -46,6 +46,14 @@ export interface EnergyConsumptionRecord {
   createdAt: Date;
 }
 
+export interface EmissionCertification {
+  status: 'ISSUED' | 'CERTIFIED';
+  hash: string | null;
+  checkerUrl: string | null;
+  blockExplorerUrl: string | null;
+  certifiedAt: Date | null;
+}
+
 export interface EmissionRecord {
   id: string;
   energyConsumptionId: string;
@@ -60,6 +68,7 @@ export interface EmissionRecord {
   verificationStatus: EmissionVerificationStatus;
   verifierBody: string | null;
   verificationStandard: string | null;
+  certification: EmissionCertification | null;
   createdAt: Date;
 }
 
