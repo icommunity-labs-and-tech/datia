@@ -8,7 +8,7 @@ import { isDashboardRole } from '@/lib/auth/roles';
 
 export const metadata: Metadata = {
   title: `Dashboard - ${appConfig.name}`,
-  description: `Panel de administración de ${appConfig.name}`,
+  description: `Panel de empresa de ${appConfig.name}`,
 };
 
 export default async function DashboardRootLayout({

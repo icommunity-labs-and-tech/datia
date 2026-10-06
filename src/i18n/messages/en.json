@@ -82,7 +82,7 @@
   },
   "apps": {
     "title": "Choose how you want to sign in",
-    "admin": "Admin dashboard",
+    "admin": "Company dashboard",
     "adminDescription": "Manage assets, certifications and your organisation settings.",
     "customer": "Asset passport",
     "customerDescription": "Look up an asset’s certified information with its code.",
@@ -232,7 +232,7 @@
     "login": {
       "admin": {
         "title": "Admin Dashboard",
-        "subtitle": "Administrator Panel",
+        "subtitle": "Company panel",
         "emailLabel": "Administrative Email",
         "emailPlaceholder": "admin@company.com",
         "passwordLabel": "Password",
@@ -250,7 +250,7 @@
         "welcome": "Welcome"
       },
       "superadmin": {
-        "subtitle": "Super Administrator Panel",
+        "subtitle": "Platform panel",
         "emailPlaceholder": "superadmin@example.com",
         "passwordPlaceholder": "••••••••",
         "accessing": "Accessing...",
@@ -263,7 +263,7 @@
         }
       },
       "organization": {
-        "subtitle": "Your organisation's panel",
+        "subtitle": "Organisation panel",
         "emailPlaceholder": "you@organisation.com",
         "passwordPlaceholder": "••••••••",
         "accessing": "Accessing...",
@@ -278,7 +278,7 @@
       "loading": "Loading...",
       "org": {
         "admin": {
-          "subtitle": "Admin Panel",
+          "subtitle": "Company panel",
           "emailPlaceholder": "admin@company.com",
           "passwordPlaceholder": "••••••••",
           "accessing": "Accessing...",
@@ -665,7 +665,7 @@
       "colorsReset": "Reset",
       "loginUrls": "Access URLs",
       "loginUrlsDescription": "Share these URLs with your users so they can log in with your organization's branding.",
-      "loginUrlAdmin": "Admin panel",
+      "loginUrlAdmin": "Company panel",
       "loginUrlCopied": "URL copied"
     },
     "changePassword": "Change Password",

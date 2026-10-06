@@ -10,7 +10,7 @@ import PanelShell from '@/components/layout/PanelShell';
 // The platform account's own panel. The organization account used to share
 // this same layout, filtered to its own half by role — moved out to
 // /organization, with its own login and branding: an ORG_ADMIN is a real
-// customer, not platform staff, and "Panel de Super Administrador" /
+// customer, not platform staff, and "Panel de plataforma" /
 // "Acceso restringido" said otherwise on every screen it saw.
 //
 // Chrome (topbar, account menu, language switcher, mobile drawer) comes from

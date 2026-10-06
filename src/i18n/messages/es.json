@@ -82,7 +82,7 @@
   },
   "apps": {
     "title": "Elige cómo quieres entrar",
-    "admin": "Panel de administración",
+    "admin": "Panel de empresa",
     "adminDescription": "Gestiona activos, certificaciones y la configuración de tu organización.",
     "customer": "Pasaporte del activo",
     "customerDescription": "Consulta la información certificada de un activo con su código.",
@@ -232,7 +232,7 @@
     "login": {
       "admin": {
         "title": "Dashboard Admin",
-        "subtitle": "Panel de Administrador",
+        "subtitle": "Panel de empresa",
         "emailLabel": "Email Administrativo",
         "emailPlaceholder": "admin@empresa.com",
         "passwordLabel": "Contraseña",
@@ -250,7 +250,7 @@
         "welcome": "Bienvenido"
       },
       "superadmin": {
-        "subtitle": "Panel de Super Administrador",
+        "subtitle": "Panel de plataforma",
         "emailPlaceholder": "superadmin@ejemplo.com",
         "passwordPlaceholder": "••••••••",
         "accessing": "Accediendo...",
@@ -263,7 +263,7 @@
         }
       },
       "organization": {
-        "subtitle": "Panel de tu organización",
+        "subtitle": "Panel de organización",
         "emailPlaceholder": "tu@organizacion.com",
         "passwordPlaceholder": "••••••••",
         "accessing": "Accediendo...",
@@ -278,7 +278,7 @@
       "loading": "Cargando...",
       "org": {
         "admin": {
-          "subtitle": "Panel de Administrador",
+          "subtitle": "Panel de empresa",
           "emailPlaceholder": "admin@empresa.com",
           "passwordPlaceholder": "••••••••",
           "accessing": "Accediendo...",
@@ -665,7 +665,7 @@
       "colorsReset": "Restablecer",
       "loginUrls": "URLs de acceso",
       "loginUrlsDescription": "Comparte estas URLs con tus usuarios para que accedan con el branding de tu organización.",
-      "loginUrlAdmin": "Panel de administrador",
+      "loginUrlAdmin": "Panel de empresa",
       "loginUrlCopied": "URL copiada"
     },
     "changePassword": "Cambio de contraseña",
