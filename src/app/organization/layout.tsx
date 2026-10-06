@@ -10,7 +10,7 @@ import PanelShell from '@/components/layout/PanelShell';
 // The organization account's own panel (#20) — split out of /superadmin,
 // which it used to share filtered to its own half by role. An ORG_ADMIN is a
 // real customer managing its own companies, not platform staff, and sharing
-// that panel's branding ("Panel de Super Administrador", "Acceso
+// that panel's branding ("Panel de plataforma", "Acceso
 // restringido") told it otherwise on every screen.
 //
 // Chrome (topbar, account menu, language switcher, mobile drawer) comes from

@@ -11,7 +11,7 @@ test.describe('Sistema de Autenticación Separado', () => {
       await page.goto('/apps');
       
       // Hacer clic en Admin card
-      await page.getByRole('heading', { name: /Admin/i }).click();
+      await page.getByRole('heading', { name: /empresa|company dashboard/i }).click();
       
       // Verificar que redirige al login de admin
       await expect(page).toHaveURL(/.*\/auth\/admin\/login/);
