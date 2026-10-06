@@ -1,7 +1,7 @@
 import { ICommunityService, type EvidenceFile, type EvidenceData, type SignatureData } from './ICommunityService';
 import { ICommunityConfigError, ICommunityHTTPError } from './errors';
 
-const BASE_URL = 'https://api.icommunitylabs.com/v2';
+const BASE_URL = process.env.IBS_BASE_URL ?? 'https://api.icommunitylabs.com/v2';
 
 function getAuthHeaders(): HeadersInit {
   const token = process.env.IBS_TOKEN;

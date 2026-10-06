@@ -340,6 +340,31 @@ async function bootstrapE2EUsers() {
         data: { id: randomUUID(), name: 'Org-wide E2E token', tokenHash: orgWideTokenHash, organizationId: org.id, companyId: null },
       });
     }
+
+    // A third company, not yet verified: its KYC is confirmed through the iBS double
+    // in kyc-and-certification.spec.ts, then it certifies an emission end to end (#38).
+    const COMPANY_C_ID = 'e2e-company-c';
+    const COMPANY_C_SIGNATURE = 'e2e-signature-company-c';
+    const COMPANY_C_TOKEN = 'e2e-company-c-token-do-not-use-in-prod';
+    if (!(await prisma.company.findUnique({ where: { id: COMPANY_C_ID } }))) {
+      await prisma.company.create({
+        data: {
+          id: COMPANY_C_ID,
+          organizationId: org.id,
+          name: 'Empresa E2E C',
+          signatureID: COMPANY_C_SIGNATURE,
+          kycURL: 'https://kyc.stub/wizard/e2e-signature-company-c',
+          verificationStatus: 'NOT_VERIFIED',
+        },
+      });
+    }
+    const companyCTokenHash = createHash('sha256').update(COMPANY_C_TOKEN).digest('hex');
+    if (!(await prisma.apiToken.findUnique({ where: { tokenHash: companyCTokenHash } }))) {
+      await prisma.apiToken.create({
+        data: { id: randomUUID(), name: 'Company C E2E token', tokenHash: companyCTokenHash, organizationId: org.id, companyId: COMPANY_C_ID },
+      });
+    }
+    console.log('✅ Third company in Datia E2E: unverified KYC and token for the certification flow');
     console.log('✅ Second company in Datia E2E: asset, account and tokens for company and org-wide isolation');
 
     console.log(`✅ Isolated organization: ${isolatedOrg.name} (${isolatedOrg.slug}), with its own asset and token`);
