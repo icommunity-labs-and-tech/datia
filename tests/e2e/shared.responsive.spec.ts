@@ -31,12 +31,12 @@ test.describe('Shared - Responsive checks', () => {
 
     await page.getByRole('link', { name: /panel de empresa|company dashboard/i }).click();
 
-    await expect(page).toHaveURL(/\/auth\/admin\/login/);
+    await expect(page).toHaveURL(/\/auth\/company\/login/);
   });
 
   test('admin login mobile', async ({ page }) => {
     await page.setViewportSize(MOBILE);
-    await page.goto('/auth/admin/login');
+    await page.goto('/auth/company/login');
 
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();

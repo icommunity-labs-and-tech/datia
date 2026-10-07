@@ -55,11 +55,11 @@ export async function middleware(request: NextRequest) {
   const locale = getLocale(request);
 
   const publicRoutes = [
-    '/auth/admin/login',
+    '/auth/company/login',
     '/auth/activate',
     '/auth/forgot-password',
     '/auth/reset-password',
-    '/api/auth/admin',
+    '/api/auth/company',
     '/favicon.ico',
     '/_next',
     '/api/docs',
@@ -107,7 +107,7 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
   }
 
   if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
-    const token = request.cookies.get('admin-auth-token')?.value;
+    const token = request.cookies.get('company-auth-token')?.value;
 
     if (!token) {
       // The organization's own account has no dashboard: its own panel, so
@@ -115,20 +115,20 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
       if (request.cookies.get('organization-auth-token')?.value) {
         return NextResponse.redirect(new URL('/organization/companies', request.url));
       }
-      return NextResponse.redirect(new URL('/auth/admin/login?error=Unauthorized', request.url));
+      return NextResponse.redirect(new URL('/auth/company/login?error=Unauthorized', request.url));
     }
 
     const user = await verifyAdminJWT(token);
 
     if (!user || !isDashboardRole(user.role)) {
-      return NextResponse.redirect(new URL('/auth/admin/login?error=AccessDenied', request.url));
+      return NextResponse.redirect(new URL('/auth/company/login?error=AccessDenied', request.url));
     }
 
     return NextResponse.next();
   }
 
-  if (pathname.startsWith('/auth/admin/')) {
-    const token = request.cookies.get('admin-auth-token')?.value;
+  if (pathname.startsWith('/auth/company/')) {
+    const token = request.cookies.get('company-auth-token')?.value;
 
     if (token) {
       const user = await verifyAdminJWT(token);

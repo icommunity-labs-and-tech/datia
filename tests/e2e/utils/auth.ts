@@ -39,7 +39,7 @@ export async function loginSuperadmin(page: Page, email: string, password: strin
 
 export async function loginAdmin(page: Page, email: string, password: string) {
   // Use UI login for reliability with retry logic
-  await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+  await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
   await page.waitForSelector('input[type="email"]', { timeout: 10000 });
   await page.fill('input[type="email"]', email);
   await page.fill('input[type="password"]', password);
@@ -84,5 +84,5 @@ export async function logoutUser(page: Page) {
   // Logout lives inside the account menu in the top bar.
   await page.getByRole('button', { name: /cuenta|account/i }).click();
   await page.getByRole('menuitem', { name: /cerrar sesi[óo]n|log out/i }).click();
-  await page.waitForURL(/\/auth\/(admin|superadmin)\/login/);
+  await page.waitForURL(/\/auth\/(company|superadmin)\/login/);
 }

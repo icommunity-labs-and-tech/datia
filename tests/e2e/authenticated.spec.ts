@@ -75,7 +75,7 @@ test.describe('Authenticated User Flow (Admin)', () => {
 
     await logoutUser(page);
 
-    await expect(page).toHaveURL(/\/auth\/admin\/login/);
+    await expect(page).toHaveURL(/\/auth\/company\/login/);
   });
 });
 

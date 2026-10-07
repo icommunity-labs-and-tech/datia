@@ -137,7 +137,7 @@ function ActivateAccountForm() {
           // Si ya está activado, limpiar estado guardado y redirigir. La cuenta
           // de organización (sin empresa) tiene su propio panel.
           clearOnboardingState();
-          const loginPath = info.role === 'ORG_ADMIN' ? '/auth/organization/login' : '/auth/admin/login';
+          const loginPath = info.role === 'ORG_ADMIN' ? '/auth/organization/login' : '/auth/company/login';
           router.push(`${loginPath}?message=account-activated`);
           return;
         }
@@ -266,7 +266,7 @@ function ActivateAccountForm() {
         // Si no es primer admin, redirigir al login: la cuenta de organización
         // (ORG_ADMIN, sin empresa) tiene su propio panel, no el dashboard.
         if (!onboardingInfo?.isFirstAdmin) {
-          const loginPath = onboardingInfo?.role === 'ORG_ADMIN' ? '/auth/organization/login' : '/auth/admin/login';
+          const loginPath = onboardingInfo?.role === 'ORG_ADMIN' ? '/auth/organization/login' : '/auth/company/login';
           router.push(`${loginPath}?message=account-activated`);
         }
         // Para primer admin, handleKycVerified maneja la activación y avance al paso 4
@@ -435,7 +435,7 @@ function ActivateAccountForm() {
           <Alert color="red" variant="light" w="100%">
             {error || t('error.invalidTokenMessage')}
           </Alert>
-          <Button fullWidth onClick={() => router.push('/auth/admin/login')}>
+          <Button fullWidth onClick={() => router.push('/auth/company/login')}>
             {t('error.goToLogin')}
           </Button>
         </Stack>
@@ -535,7 +535,7 @@ function ActivateAccountForm() {
               onVerified={handleKycVerifiedAndRedirect}
               onGoToLogin={() => {
                 clearOnboardingState();
-                router.push('/auth/admin/login?message=kyc-completed');
+                router.push('/auth/company/login?message=kyc-completed');
               }}
               onPrevious={handlePrevious}
               onEmbeddedChange={setIsKycEmbedded}
@@ -590,7 +590,7 @@ function ActivateAccountForm() {
 
         <Text size="sm" c="dimmed" ta="center">
           {t('account.alreadyHaveAccount')}{' '}
-          <Anchor href="/auth/admin/login" size="sm">{t('account.login')}</Anchor>
+          <Anchor href="/auth/company/login" size="sm">{t('account.login')}</Anchor>
         </Text>
       </Stack>
     </ActivationShell>

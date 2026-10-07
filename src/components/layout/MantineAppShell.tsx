@@ -47,7 +47,7 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
           .replace(/^ +/, '')
           .replace(/=.*/, '=;expires=' + new Date().toUTCString() + ';path=/');
       });
-      window.location.replace('/auth/admin/login');
+      window.location.replace('/auth/company/login');
     }
   }, [logout]);
 

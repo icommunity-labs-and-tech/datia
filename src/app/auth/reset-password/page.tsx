@@ -56,7 +56,7 @@ function ResetPasswordForm() {
         <IconCircleCheck size={40} stroke={1.5} color="var(--mantine-color-teal-6)" />
         <Title order={3}>{t('done.title')}</Title>
         <Text size="sm" c="dimmed">{t('done.body')}</Text>
-        <Link href="/auth/admin/login">{t('backToLogin')}</Link>
+        <Link href="/auth/company/login">{t('backToLogin')}</Link>
       </Stack>
     );
   }
