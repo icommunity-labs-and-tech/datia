@@ -1,13 +1,15 @@
 import http from 'node:http';
 import { createHash, randomUUID } from 'node:crypto';
 
-// Stand-in for the iBS API, for the e2e only. It answers the endpoints the app
-// calls, with the shapes iBS sends, and exposes control routes so a test can
-// decide how a KYC or a certification ends.
+// Stand-in for iBS and Mailgun, for the e2e only. It answers the endpoints
+// the app calls, with the shapes each real API sends, and exposes control
+// routes so a test can decide how a KYC or a certification ends, or read
+// what was "sent".
 
 const PORT = Number(process.env.IBS_STUB_PORT ?? 4010);
 const signatures = new Map(); // id -> status
 const evidences = new Map(); // id -> { status, files, certification }
+const emails = []; // every call to POST /v3/:domain/messages, most recent last
 
 const send = (res, status, body) => {
   res.writeHead(status, { 'content-type': 'application/json' });
@@ -19,6 +21,20 @@ const readBody = (req) =>
     let data = '';
     req.on('data', (chunk) => (data += chunk));
     req.on('end', () => resolve(data ? JSON.parse(data) : {}));
+  });
+
+// Mailgun's SDK sends multipart form data. The app never reads the response
+// beyond success, so a real multipart parser is not needed — just enough to
+// pull out "to" and "subject" for a test to check who an email went to.
+const readMultipartField = (raw, field) => {
+  const re = new RegExp(`name="${field}"\\r\\n\\r\\n([^\\r\\n]*)`);
+  return raw.match(re)?.[1] ?? null;
+};
+const readMultipartBody = (req) =>
+  new Promise((resolve) => {
+    let data = '';
+    req.on('data', (chunk) => (data += chunk));
+    req.on('end', () => resolve(data));
   });
 
 // iBS publishes, per file, base64(SHA-512(bytes)); the app compares it with its own.
@@ -41,6 +57,14 @@ const server = http.createServer(async (req, res) => {
     const { status } = await readBody(req);
     signatures.set(id, status);
     return send(res, 200, { id, status });
+  }
+
+  if (req.method === 'GET' && pathname === '/__control/emails') {
+    return send(res, 200, { emails });
+  }
+
+  if (req.method === 'GET' && pathname === '/__control/signatures') {
+    return send(res, 200, { signatures: Array.from(signatures.entries()).map(([id, status]) => ({ id, status })) });
   }
 
   if (req.method === 'POST' && pathname === '/__control/certify-waiting') {
@@ -93,9 +117,20 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
+  // Mailgun: POST /v3/{domain}/messages (mailgun.js's postWithFD, multipart body).
+  if (req.method === 'POST' && /^\/v3\/[^/]+\/messages$/.test(pathname)) {
+    const raw = await readMultipartBody(req);
+    emails.push({
+      to: readMultipartField(raw, 'to'),
+      subject: readMultipartField(raw, 'subject'),
+      at: new Date().toISOString(),
+    });
+    return send(res, 200, { id: `<${randomUUID()}@stub.mailgun.org>`, message: 'Queued. Thank you.' });
+  }
+
   send(res, 404, { error: 'unknown route', path: pathname });
 });
 
 server.listen(PORT, '127.0.0.1', () => {
-  console.log(`iBS double on http://127.0.0.1:${PORT}`);
+  console.log(`iBS/Mailgun double on http://127.0.0.1:${PORT}`);
 });

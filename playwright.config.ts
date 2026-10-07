@@ -49,8 +49,9 @@ export default defineConfig({
   ],
   webServer: [
     {
-      // iBS double: the KYC and certification flows call it instead of the real API.
-      command: 'node tests/e2e/support/ibs-stub.mjs',
+      // iBS and Mailgun double: KYC, certification and the organisation-onboarding
+      // email call it instead of the real APIs.
+      command: 'node tests/e2e/support/external-apis-stub.mjs',
       url: 'http://127.0.0.1:4010/health',
       reuseExistingServer: !process.env.CI,
       timeout: 30 * 1000,
@@ -66,6 +67,9 @@ export default defineConfig({
         E2E_SQLITE_URL: process.env.E2E_SQLITE_URL ?? 'file:./playwright-e2e.db',
         IBS_BASE_URL: 'http://127.0.0.1:4010/v2',
         IBS_TOKEN: 'e2e-ibs-token-do-not-use-in-prod',
+        MAILGUN_API_KEY: 'e2e-mailgun-key-do-not-use-in-prod',
+        MAILGUN_DOMAIN: 'e2e.stub',
+        MAILGUN_URL: 'http://127.0.0.1:4010',
       },
       url: 'http://localhost:3000',
       reuseExistingServer: !process.env.CI,
