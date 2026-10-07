@@ -16,11 +16,11 @@ export const GET = withApiTracking(async (
 
     // ── Sandbox: read from filesystem ──────────────────────────────────
     if (isSandboxRequest()) {
-      const item = await assetRepositoryFilesystem.getById(id, authScope(auth));
-      if (!item) {
+      const asset = await assetRepositoryFilesystem.getById(id, authScope(auth));
+      if (!asset) {
         return NextResponse.json({ error: 'Asset not found in sandbox' }, { status: 404 });
       }
-      return NextResponse.json(item);
+      return NextResponse.json(asset);
     }
 
     // ── Production ─────────────────────────────────────────────────────
@@ -28,13 +28,13 @@ export const GET = withApiTracking(async (
     // dashboard cookie the caller's browser happens to also be carrying —
     // `getAsset` read the latter via `requireScope()`, the same bug #78
     // already fixed for /api/v1/events.
-    const item = await assetRepository.getById(id, authScope(auth));
-    if (!item) {
+    const asset = await assetRepository.getById(id, authScope(auth));
+    if (!asset) {
       return NextResponse.json({ error: 'Asset no encontrado' }, { status: 404 });
     }
-    return NextResponse.json(item);
+    return NextResponse.json(asset);
   } catch (error) {
-    console.error('Error fetching item:', error);
+    console.error('Error fetching asset:', error);
     return NextResponse.json({ error: 'Asset no encontrado' }, { status: 404 });
   }
 });

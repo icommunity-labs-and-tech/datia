@@ -7,7 +7,7 @@ export async function GET(
 ) {
   const { assetId } = await params;
 
-  const item = await prisma.asset.findUnique({
+  const asset = await prisma.asset.findUnique({
     where: { id: assetId },
     select: {
       id: true,
@@ -33,12 +33,12 @@ export async function GET(
     },
   });
 
-  if (!item) {
-    return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+  if (!asset) {
+    return NextResponse.json({ error: 'Asset not found' }, { status: 404 });
   }
 
   // Only expose verified emissions publicly
-  const sources = item.EnergySource.map(source => ({
+  const sources = asset.EnergySource.map(source => ({
     id: source.id,
     name: source.name,
     energyCarrier: source.energyCarrier,
@@ -89,15 +89,15 @@ export async function GET(
     : null;
 
   return NextResponse.json({
-    item: {
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      imageUrl: item.imageUrl,
-      latitude: item.latitude,
-      longitude: item.longitude,
-      createdAt: item.createdAt,
-      organization: item.Organization,
+    asset: {
+      id: asset.id,
+      name: asset.name,
+      description: asset.description,
+      imageUrl: asset.imageUrl,
+      latitude: asset.latitude,
+      longitude: asset.longitude,
+      createdAt: asset.createdAt,
+      organization: asset.Organization,
     },
     sources,
     kpis: {

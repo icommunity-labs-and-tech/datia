@@ -59,7 +59,7 @@ function buildQuickStartDescription(
   tokenNames: string[],
   docsTokenProvisioned: boolean,
 ): string {
-  const exampleItemId = recentItems[0]?.id ?? '{asset-id}';
+  const exampleAssetId = recentItems[0]?.id ?? '{asset-id}';
 
   const tokenSection = docsTokenProvisioned
     ? `A temporary token (\`${DOCS_PREVIEW_TOKEN_NAME}\`) has been **pre-filled** for you — valid for 1 hour.\n\nIt is already set in the **Authorize** panel (🔑). You can start sending requests immediately.`
@@ -84,7 +84,7 @@ ${tokenSection}
 
 ${itemSection}
 
-The asset ID \`${exampleItemId}\` is pre-filled as the example in path parameters below.
+The asset ID \`${exampleAssetId}\` is pre-filled as the example in path parameters below.
 
 ### 3. Record energy data
 
@@ -130,7 +130,7 @@ async function provisionDocsToken(scope: Scope): Promise<string | null> {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function injectItemIdExamples(paths: Record<string, any>, exampleItemId: string): void {
+function injectAssetIdExamples(paths: Record<string, any>, exampleAssetId: string): void {
   for (const [path, pathItem] of Object.entries(paths)) {
     if (!path.includes('{id}')) continue;
     for (const operation of Object.values(pathItem as Record<string, unknown>)) {
@@ -140,7 +140,7 @@ function injectItemIdExamples(paths: Record<string, any>, exampleItemId: string)
       if (!Array.isArray(op.parameters)) continue;
       for (const param of op.parameters) {
         if (param.name === 'id' && param.in === 'path') {
-          param.example = exampleItemId;
+          param.example = exampleAssetId;
         }
       }
     }
@@ -167,7 +167,7 @@ async function buildPersonalizedSpec(baseUrl: string, scope: Scope, docsToken: s
   const tokenNames = (tokenResult.success ? tokenResult.data : [])
     .filter((t) => t.name !== DOCS_PREVIEW_TOKEN_NAME)
     .map((t) => t.name);
-  const exampleItemId = recentItems[0]?.id ?? 'PROD_ID';
+  const exampleAssetId = recentItems[0]?.id ?? 'PROD_ID';
 
   // ── Servers ───────────────────────────────────────────────────────────────
   // /api/v1-sandbox is a URL alias (rewritten to /api/v1 by Next.js).
@@ -187,9 +187,9 @@ async function buildPersonalizedSpec(baseUrl: string, scope: Scope, docsToken: s
     description: quickStart + (spec.info?.description ?? ''),
   };
 
-  // ── Inject real item ID into path parameter examples ─────────────────────
+  // ── Inject real asset ID into path parameter examples ────────────────────
   if (spec.paths) {
-    injectItemIdExamples(spec.paths, exampleItemId);
+    injectAssetIdExamples(spec.paths, exampleAssetId);
   }
 
   return spec;

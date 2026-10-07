@@ -13,13 +13,13 @@ export async function GET(
   try {
     const { id: rawId } = await params;
     const id = decodeUrlParam(rawId);
-    const item = await getAsset(id);
+    const asset = await getAsset(id);
     
-    return NextResponse.json(item);
+    return NextResponse.json(asset);
   } catch (error) {
-    console.error('Error fetching item:', error);
+    console.error('Error fetching asset:', error);
     return NextResponse.json(
-      { error: 'Item no encontrado' },
+      { error: 'Activo no encontrado' },
       { status: 404 }
     );
   }

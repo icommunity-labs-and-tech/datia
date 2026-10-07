@@ -18,10 +18,10 @@ export async function GET(
 
     // Decode the code parameter in case it's URL-encoded
     const code = decodeUrlParam(rawCode);
-    console.log('[API] Looking for item with ID:', code);
+    console.log('[API] Looking for asset with ID:', code);
 
-    // Buscar el item por ID (asumiendo que el código es el ID del item)
-    const item = await prisma.asset.findUnique({
+    // Buscar el activo por ID (asumiendo que el código es el ID del activo)
+    const asset = await prisma.asset.findUnique({
       where: {
         id: code,
       },
@@ -57,33 +57,33 @@ export async function GET(
       },
     });
 
-    if (!item) {
+    if (!asset) {
       return NextResponse.json(
-        { error: 'Item no encontrado' },
+        { error: 'Activo no encontrado' },
         { status: 404 }
       );
     }
 
     // Transformar los datos para el frontend
-    const transformedItem = {
-      id: item.id,
-      name: item.name,
-      description: item.description,
-      imageUrl: item.imageUrl,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
-      latitude: item.latitude,
-      longitude: item.longitude,
-      evidenceId: item.evidenceId || null,
-      createdBy: item.User || null,
-      organization: item.Organization
+    const transformedAsset = {
+      id: asset.id,
+      name: asset.name,
+      description: asset.description,
+      imageUrl: asset.imageUrl,
+      createdAt: asset.createdAt,
+      updatedAt: asset.updatedAt,
+      latitude: asset.latitude,
+      longitude: asset.longitude,
+      evidenceId: asset.evidenceId || null,
+      createdBy: asset.User || null,
+      organization: asset.Organization
         ? {
-            name: item.Organization.name,
-            logoUrl: item.Organization.logoUrl,
-            brandColorPrimary: item.Organization.brandColorPrimary,
+            name: asset.Organization.name,
+            logoUrl: asset.Organization.logoUrl,
+            brandColorPrimary: asset.Organization.brandColorPrimary,
           }
         : null,
-      energyCertifications: item.EnergySource.flatMap((src) =>
+      energyCertifications: asset.EnergySource.flatMap((src) =>
         src.EnergyConsumption.flatMap((c) =>
           c.EmissionRecord.map((e) => ({
             id: e.id,
@@ -104,9 +104,9 @@ export async function GET(
       ),
     };
 
-    return NextResponse.json(transformedItem);
+    return NextResponse.json(transformedAsset);
   } catch (error) {
-    console.error('Error fetching item:', error);
+    console.error('Error fetching asset:', error);
     return NextResponse.json(
       { error: 'Error interno del servidor' },
       { status: 500 }

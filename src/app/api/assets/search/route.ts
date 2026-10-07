@@ -13,12 +13,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([]);
     }
 
-    const items = await searchAssets(q);
-    return NextResponse.json(items);
+    const assets = await searchAssets(q);
+    return NextResponse.json(assets);
   } catch (error) {
-    console.error('Error searching items:', error);
+    console.error('Error searching assets:', error);
     return NextResponse.json(
-      { error: 'Error al buscar items' },
+      { error: 'Error al buscar activos' },
       { status: 500 }
     );
   }
