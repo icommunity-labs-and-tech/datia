@@ -6,6 +6,12 @@ Documenta la estructura de evidencia utilizada para certificar registros de emis
 > certifican solas al escribirse. El flujo nuevo, los webhooks y lo que
 > queda pendiente están en [CERTIFICACION_AUTOMATICA.md](./CERTIFICACION_AUTOMATICA.md).
 > La estructura de la evidencia y la verificación de este documento siguen vigentes.
+>
+> **2026-10-07:** corregidos el paso 3 del flujo (`Certification`, no `State`/`Item`,
+> que ya no existen) y el algoritmo de checksum (SHA-512, no SHA-256). El resto
+> del documento —diagrama de secuencia, ejemplos de discrepancia— no se ha
+> verificado línea a línea contra el código; solo se ha renombrado `stateId` a
+> `certificationId` por consistencia.
 
 ---
 
@@ -15,11 +21,11 @@ Cuando un registro de emisiones (`EmissionRecord`) se certifica vía `POST /api/
 
 1. Construye un payload JSON con los datos de la emisión.
 2. Lo envía a **iCommunity iBS** (Immutable Blockchain Storage), que lo ancla en blockchain y devuelve un `evidenceID` (referencia de transacción).
-3. Almacena ese `evidenceID` en el `State` asociado al `Item`.
-4. Marca el `EmissionRecord` como `VERIFIED` en base de datos.
+3. Guarda ese `evidenceID` en un registro `Certification` (estado `ISSUED`), enlazado desde el `EmissionRecord` por `certificationId`.
+4. Cuando iBS confirma la transacción en cadena (webhook `evidence.certified`), el `Certification` pasa a `CERTIFIED` con su hash, red y enlaces de verificación, y el `EmissionRecord` pasa a `VERIFIED`.
 5. Emite un evento `co2_certification_event` en el `EventLog`.
 
-La verificación posterior (`GET /api/v1/emissions/:id/verify`) recupera el JSON almacenado en blockchain, calcula su SHA-256 y compara los campos críticos contra los valores actuales en base de datos, detectando cualquier discrepancia.
+La verificación posterior (`GET /api/v1/emissions/:id/verify`) recupera el JSON publicado por iBS, calcula `base64(SHA-512(bytes))` y lo compara contra el checksum certificado, detectando cualquier discrepancia.
 
 ---
 
@@ -31,7 +37,7 @@ interface EvidenceAuditRecord {
   timestamp: string;                   // ISO 8601 — momento en que iBS ancló la evidencia
   source: string;                      // fuente del factor de emisión (p.ej. "IEA 2023")
   event_type: 'co2_certification_event'; // tipo de evento, siempre este valor
-  hash: string;                        // SHA-256 hex del JSON almacenado en iBS
+  hash: string;                        // base64(SHA-512(bytes)) del JSON almacenado en iBS
 }
 ```
 
@@ -45,30 +51,36 @@ El archivo `issue_data.json` que se ancla en iBS tiene esta estructura:
 
 ```json
 {
-  "description": "Emisión certificada por AENOR según ISO 14064-3",
+  "description": "Turbina eólica T-100 · Planta solar Ariza · 1200 kWh en julio de 2026. Verificada por Bureau Veritas según ISO 14064-3.",
   "imageUrls": [],
-  "id": "state-uuid",
-  "assetId": "item-uuid",
-  "title": "Certificación Energética — 42.5 kg CO₂e",
+  "id": "certification-uuid",
+  "assetId": "asset-uuid",
   "createdAt": "2026-07-15T10:00:00.000Z",
   "templateConfig": {
     "emissionRecordId": "emission-uuid",
+    "energyConsumptionId": "consumption-uuid",
+    "assetName": "Turbina eólica T-100",
+    "sourceName": "Planta solar Ariza",
+    "period": "julio de 2026",
+    "periodStart": "2026-07-01T00:00:00.000Z",
+    "periodEnd": "2026-07-31T23:59:59.000Z",
+    "consumptionKwh": 1200,
     "co2eKg": 42.5,
     "scope": "SCOPE_2",
     "systemBoundary": "CRADLE_TO_GATE",
-    "calculationMethodology": "GHG Protocol",
     "emissionFactor": 0.233,
     "emissionFactorSource": "IEA 2023",
+    "calculationMethodology": "GHG Protocol",
     "gwpCharacterizationFactors": "IPCC AR6",
-    "functionalUnit": "kWh",
-    "verifierBody": "AENOR",
-    "verificationStandard": "ISO 14064-3",
-    "certifiedAt": "2026-07-15T10:00:00.000Z"
+    "verifierBody": "Bureau Veritas",
+    "verificationStandard": "ISO 14064-3"
   }
 }
 ```
 
-El `hash` del `EvidenceAuditRecord` es el SHA-256 de este JSON completo (codificado en UTF-8, tal como lo devuelve iBS en base64).
+Fuente real de este payload: `src/lib/energy/anchor-service.ts` (el objeto `issued`) y `src/lib/certification/index.ts` (`issueCertification`, que lo envuelve en `metadata`).
+
+El checksum que `GET /verify` compara es `base64(SHA-512(bytes))` de este JSON completo, codificado en UTF-8 — no SHA-256. Lo calcula `jsonFileChecksum` en `src/domain/evidence/EvidenceServiceImpl.ts`, y es lo que iBS publica en `payload.integrity`.
 
 ---
 
@@ -80,7 +92,7 @@ Emisión VERIFIED
      ▼
 EventLog (co2_certification_event)
      │  data.evidenceID  →  iBS
-     │  data.stateId
+     │  data.certificationId
      ▼
 GET /api/v1/emissions/:id/verify
      │
@@ -117,7 +129,7 @@ GET /api/v1/emissions/:id/verify
 ```typescript
 interface EmissionVerificationReport {
   emissionRecordId: string;
-  stateId: string;
+  certificationId: string;
   verified: boolean;        // true si todos los campos coinciden con iBS
   evidence: EvidenceAuditRecord;
   originalData: {
@@ -156,7 +168,7 @@ Content-Type: application/json
   "data": {
     "emissionRecordId": "emission-abc123",
     "verificationStatus": "VERIFIED",
-    "stateId": "state-xyz789",
+    "certificationId": "certification-xyz789",
     "evidenceID": "ev_1a2b3c4d5e6f",
     "assetId": "item-def456"
   }
@@ -178,7 +190,7 @@ Authorization: Bearer <api-token>
 {
   "data": {
     "emissionRecordId": "emission-abc123",
-    "stateId": "state-xyz789",
+    "certificationId": "certification-xyz789",
     "verified": true,
     "evidence": {
       "blockchain_tx": "ev_1a2b3c4d5e6f",
@@ -205,7 +217,7 @@ Authorization: Bearer <api-token>
 {
   "data": {
     "emissionRecordId": "emission-abc123",
-    "stateId": "state-xyz789",
+    "certificationId": "certification-xyz789",
     "verified": false,
     "evidence": {
       "blockchain_tx": "ev_1a2b3c4d5e6f",
@@ -253,7 +265,7 @@ Cliente          Datia API          PostgreSQL        iCommunity iBS
    │                 │─findUnique(org)───▶│                   │
    │                 │◀──{signatureID}───│                   │
    │                 │─state.create──────▶│                   │
-   │                 │◀──{stateId}───────│                   │
+   │                 │◀──{certificationId}───────│                   │
    │                 │─createEvidence(templateConfig)────────▶│
    │                 │◀──evidenceID──────────────────────────│
    │                 │─state.update(evidenceID)──▶│           │

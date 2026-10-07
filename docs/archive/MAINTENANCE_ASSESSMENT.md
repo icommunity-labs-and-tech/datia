@@ -1,3 +1,5 @@
+> **Archivado (2026-10-07).** Documento histórico, no actualizado: valoración puntual (fecha sin renderizar en el propio documento), no se ha vuelto a actualizar. No es una fuente fiable del estado actual.
+
 # 📊 Valoración de Mantenibilidad - Datia
 
 **Fecha de evaluación:** $(date)  

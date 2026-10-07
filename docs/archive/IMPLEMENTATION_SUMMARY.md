@@ -1,3 +1,5 @@
+> **Archivado (2026-10-07).** Documento histórico, no actualizado: resumen puntual de la fase "Item" del modelo, superado por los cambios posteriores. No es una fuente fiable del estado actual.
+
 # Resumen de Implementación: Evidencias de Items con KYC
 
 ## ⚠️ ACTUALIZACIÓN IMPORTANTE (Enero 2026)
