@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
       const existing = await assetRepositoryFilesystem.getById(createRequest.customId, scope);
       if (existing) {
         return NextResponse.json(
-          { error: `Asset with ID "${createRequest.customId}" already exists in the sandbox`, code: 'ITEM_EXISTS' },
+          { error: `Asset with ID "${createRequest.customId}" already exists in the sandbox`, code: 'ASSET_EXISTS' },
           { status: 409 }
         );
       }
@@ -167,7 +167,7 @@ export async function POST(request: NextRequest) {
     }
     if (error instanceof AssetAlreadyExistsError) {
       return NextResponse.json(
-        { error: error.message, code: 'ITEM_EXISTS' },
+        { error: error.message, code: 'ASSET_EXISTS' },
         { status: 409 }
       );
     }
@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
     // catch it — it fell through to the generic 500 below (#38).
     if (error instanceof CompanyNotVerifiedError) {
       return NextResponse.json(
-        { error: error.message, code: 'COMPANY_NOT_VERIFIED' },
+        { error: error.message, code: 'ACCOUNT_NOT_VERIFIED' },
         { status: 403 }
       );
     }
