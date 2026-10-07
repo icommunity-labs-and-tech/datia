@@ -253,7 +253,7 @@ const manualOpenApiSpec = {
                 },
                 example: {
                   error: 'El ID "ASSET-001" ya existe. Por favor, elige un ID diferente.',
-                  code: 'ITEM_EXISTS',
+                  code: 'ASSET_EXISTS',
                 },
               },
             },

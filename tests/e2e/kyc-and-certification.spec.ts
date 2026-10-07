@@ -26,7 +26,7 @@ test.describe('KYC and certification of an emission, through the iBS double', ()
       data: { id: 'e2e-c-asset-too-early', name: 'Antes del KYC', description: 'La firma aún no está confirmada.' },
     });
     expect(res.status()).toBe(403);
-    expect((await res.json()).code).toBe('COMPANY_NOT_VERIFIED');
+    expect((await res.json()).code).toBe('ACCOUNT_NOT_VERIFIED');
   });
 
   test('iBS confirms the identity and its webhook verifies the company', async ({ request }) => {

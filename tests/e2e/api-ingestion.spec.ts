@@ -30,7 +30,7 @@ test.describe('API ingestion with a company token', () => {
 
     expect(res.status()).toBe(403);
     const body = await res.json();
-    expect(body.code).toBe('COMPANY_NOT_VERIFIED');
+    expect(body.code).toBe('ACCOUNT_NOT_VERIFIED');
 
     const lookup = await request.get('/api/v1/assets/e2e-should-not-exist', { headers: AUTH });
     expect(lookup.status()).toBe(404);
