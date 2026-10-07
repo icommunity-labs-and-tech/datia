@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     // The organization comes from the token and travels with the call. It used
     // to be parked in module state for the length of the request, where every
     // concurrent request on the instance read it as its own (#30). A token has
-    // no person behind it, so the item has no creator.
+    // no person behind it, so the asset has no creator.
     const result = await itemService.createAsset(scope, { ...createRequest, createdByUserId: null });
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
@@ -192,7 +192,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error('Error creating item via API:', error);
+    console.error('Error creating asset via API:', error);
     return NextResponse.json(
       { error: 'Internal server error', code: 'INTERNAL_ERROR' },
       { status: 500 }

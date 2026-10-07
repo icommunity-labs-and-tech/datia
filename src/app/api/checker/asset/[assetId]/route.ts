@@ -52,19 +52,19 @@ export async function GET(
 
   const assetId = decodeUrlParam(rawAssetId);
 
-  // Buscar el item para obtener el evidenceId
-  const item = await prisma.asset.findUnique({
+  // Buscar el activo para obtener el evidenceId
+  const asset = await prisma.asset.findUnique({
     where: { id: assetId },
     select: { id: true, name: true, evidenceId: true, imageUrl: true },
   });
 
-  if (!item) {
-    return NextResponse.json({ error: 'Item no encontrado' }, { status: 404 });
+  if (!asset) {
+    return NextResponse.json({ error: 'Activo no encontrado' }, { status: 404 });
   }
 
-  const evidenceId = item.evidenceId;
+  const evidenceId = asset.evidenceId;
   if (!evidenceId) {
-    return NextResponse.json({ error: 'El item no tiene evidencia asociada' }, { status: 422 });
+    return NextResponse.json({ error: 'El activo no tiene evidencia asociada' }, { status: 422 });
   }
 
   // Consultar checker público de iCommunity con timeout 30s
@@ -102,13 +102,13 @@ export async function GET(
     // Preparar activos locales para verificación (URLs de imagen y JSON embebido)
     const localAssets: { name: string; url?: string; inline?: string }[] = [];
     
-    // Añadir imagen del item si existe
-    if (item.imageUrl) {
-      const name = item.imageUrl.split('/').pop() || 'item_image';
-      localAssets.push({ name, url: item.imageUrl });
+    // Añadir imagen del activo si existe
+    if (asset.imageUrl) {
+      const name = asset.imageUrl.split('/').pop() || 'asset_image';
+      localAssets.push({ name, url: asset.imageUrl });
     }
 
-    return NextResponse.json({ evidenceId, assetName: item.name, data, localAssets });
+    return NextResponse.json({ evidenceId, assetName: asset.name, data, localAssets });
   } catch (err: any) {
     if (err?.name === 'AbortError') {
       return NextResponse.json({ error: 'Tiempo de espera excedido (30s)' }, { status: 504 });

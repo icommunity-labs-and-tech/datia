@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const item = await validateItemOwnership(parsed.data.assetId, authScope(auth));
-    if (!item) return NextResponse.json({ error: 'Asset not found or does not belong to your organization' }, { status: 404 });
+    const asset = await validateItemOwnership(parsed.data.assetId, authScope(auth));
+    if (!asset) return NextResponse.json({ error: 'Asset not found or does not belong to your organization' }, { status: 404 });
 
     const service = createEnergyServiceImpl({ energyRepository });
     const source = await service.createSource(authScope(auth), {

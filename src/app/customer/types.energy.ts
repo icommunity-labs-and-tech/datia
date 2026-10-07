@@ -44,12 +44,11 @@ export interface ReportSource {
 }
 
 export interface EnergyReport {
-  item: {
+  asset: {
     id: string;
     name: string;
     description: string | null;
     imageUrl: string | null;
-    templateFields: unknown;
     createdAt: string;
     organization: { name: string; logoUrl: string | null; brandColorPrimary: string | null };
   };
