@@ -1,3 +1,5 @@
+> **Archivado (2026-10-07).** Documento histórico, no actualizado: describe el patrón Repository con Effect.ts, retirado del proyecto (ver README, sección de refactorización). No es una fuente fiable del estado actual.
+
 # Repository Pattern Implementation
 
 This document describes the implementation of the Repository Pattern using Effect.ts for clean separation between domain logic and database access.

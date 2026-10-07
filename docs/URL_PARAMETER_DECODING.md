@@ -2,11 +2,11 @@
 
 ## Problem
 
-When accessing items with IDs that contain special characters (spaces, accents, etc.) through URLs, the parameters can be URL-encoded one or multiple times, causing database lookups to fail.
+When accessing assets with IDs that contain special characters (spaces, accents, etc.) through URLs, the parameters can be URL-encoded one or multiple times, causing database lookups to fail.
 
 ### Example
 
-An item with ID `batería - 123456` can appear in URLs as:
+An asset with ID `batería - 123456` can appear in URLs as:
 - Single encoded: `bater%C3%ADa%20-%20123456`
 - Double encoded: `bater%25C3%25ADa%2520-%2520123456`
 
@@ -33,7 +33,7 @@ export async function GET(
   const id = decodeUrlParam(rawId);
   
   // Now use the decoded id for database lookups
-  const item = await prisma.item.findUnique({
+  const asset = await prisma.asset.findUnique({
     where: { id },
   });
   
@@ -45,10 +45,10 @@ export async function GET(
 
 The following API routes have been updated to use `decodeUrlParam`:
 
-1. `/api/customer/asset/[code]/route.ts` - Customer-facing item lookup
-2. `/api/assets/[id]/route.ts` - Internal item API
+1. `/api/customer/asset/[code]/route.ts` - Customer-facing asset lookup
+2. `/api/assets/[id]/route.ts` - Internal asset API
 3. `/api/checker/asset/[assetId]/route.ts` - Checker verification API
-4. `/api/v1/items/[id]/route.ts` - Public API v1 item endpoint
+4. `/api/v1/assets/[id]/route.ts` - Public API v1 asset endpoint
 
 ## When to Use
 
@@ -84,5 +84,5 @@ See `src/lib/api/__tests__/decode-param.test.ts` for test cases.
 
 ## Related Issues
 
-This fix resolves the issue where items with special characters in their IDs couldn't be accessed through the customer-facing URL (`/customer/asset/[id]`), resulting in "Item not found" errors even though the item existed in the database.
+This fix resolves the issue where assets with special characters in their IDs couldn't be accessed through the customer-facing URL (`/customer/asset/[id]`), resulting in "Asset not found" errors even though the asset existed in the database.
 

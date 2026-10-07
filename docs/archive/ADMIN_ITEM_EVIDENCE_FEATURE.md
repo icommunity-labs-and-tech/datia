@@ -1,3 +1,5 @@
+> **Archivado (2026-10-07).** Documento histórico, no actualizado: propuesta de la fase "Item" del modelo (items/states), superada por el modelo de activos y por el KYC a nivel de empresa (#23). No es una fuente fiable del estado actual.
+
 # Feature: Evidencias de Creación de Items por Admins con KYC
 
 ## Resumen Ejecutivo

@@ -1,120 +1,110 @@
 # Variables de Entorno
 
-Este documento describe las variables de entorno disponibles para personalizar la aplicación.
+## Autenticación
 
-## Configuración de la Aplicación
-
-### NEXT_PUBLIC_APP_NAME
-- **Descripción**: Nombre de la aplicación que se mostrará en la interfaz
-- **Valor por defecto**: "Datia"
-- **Ejemplo**: `NEXT_PUBLIC_APP_NAME="Mi Empresa"`
-
-### NEXT_PUBLIC_APP_DESCRIPTION
-- **Descripción**: Descripción de la aplicación
-- **Valor por defecto**: "Sistema de Gestión Digital"
-- **Ejemplo**: `NEXT_PUBLIC_APP_DESCRIPTION="Sistema de Inventario"`
-
-### NEXT_PUBLIC_APP_VERSION
-- **Descripción**: Versión de la aplicación
-- **Valor por defecto**: "1.0.0"
-- **Ejemplo**: `NEXT_PUBLIC_APP_VERSION="2.1.0"`
-
-### NEXT_PUBLIC_SESSION_DURATION
-- **Descripción**: Duración de la sesión en horas
-- **Valor por defecto**: "24"
-- **Ejemplo**: `NEXT_PUBLIC_SESSION_DURATION="8"`
-
-### NEXT_PUBLIC_BASE_URL
-- **Descripción**: URL base de la aplicación
-- **Valor por defecto**: "http://localhost:3000"
-- **Ejemplo**: `NEXT_PUBLIC_BASE_URL="https://miapp.com"`
-
-## Configuración de Autenticación
+Tres paneles, tres cookies, dos secretos (el panel de organización reutiliza
+el del superadmin — ver `src/lib/auth/organization/config.ts`).
 
 ### DASHBOARD_JWT_SECRET
-- **Descripción**: Secreto JWT para el dashboard de administración
-- **Requerido**: Sí
-- **Ejemplo**: `DASHBOARD_JWT_SECRET="mi-secreto-super-seguro-123"`
+- **Firma la sesión del panel de empresa** (`admin-auth-token`, `/auth/admin`).
+- **Requerido en producción.** Fuera de producción cae a `JWT_SECRET` y luego a
+  un valor fijo de desarrollo; en producción con ese valor fijo, la app se
+  niega a arrancar.
 
-### OPERATOR_JWT_SECRET
-- **Descripción**: Secreto JWT para la aplicación de operador
-- **Requerido**: Sí
-- **Ejemplo**: `OPERATOR_JWT_SECRET="otro-secreto-super-seguro-456"`
+### SUPERADMIN_JWT_SECRET
+- **Firma la sesión del panel de plataforma y la del panel de organización**
+  (`superadmin-auth-token`, `organization-auth-token`).
+- **Requerido en producción**, mismo rechazo al arrancar si falta.
 
-## Configuración de Base de Datos
+### JWT_SECRET
+- Alternativa a `DASHBOARD_JWT_SECRET` si no se quiere un secreto por panel.
+  Usado también por los tests (`src/test/setup.ts`).
+
+### DASHBOARD_SESSION_DURATION
+- **Descripción**: Duración de la sesión del panel de empresa, en segundos.
+- **Valor por defecto**: `28800` (8 horas).
+
+### DASHBOARD_RATE_LIMIT_MAX
+- **Descripción**: Límite de intentos de login del panel de empresa.
+
+## Base de datos
 
 ### DATABASE_URL
-- **Descripción**: URL de conexión a la base de datos PostgreSQL
-- **Requerido**: Sí
-- **Ejemplo**: `DATABASE_URL="postgresql://usuario:password@localhost:5432/datia"`
+- **Requerido.** Cadena de conexión a PostgreSQL. En producción viene de
+  Secret Manager (`DATIA_DATABASE_URL`), nunca en texto plano. Ver
+  `docs/MIGRACIONES.md` para cómo se aplican los cambios de esquema.
 
-## Configuración de Mailgun (Emails)
+## iBS (iCommunity, certificación en blockchain)
+
+### IBS_TOKEN
+- **Requerido** para KYC y certificación: crear firmas, evidencias y
+  consultarlas. Sin él, esas llamadas fallan con `ICommunityConfigError`.
+
+### IBS_BASE_URL
+- **Opcional.** Por defecto `https://api.icommunitylabs.com/v2`. Solo se
+  cambia en los e2e, que apuntan a un doble local
+  (`tests/e2e/support/ibs-stub.mjs`) — no tocar en producción.
+
+## Almacenamiento (Google Cloud Storage)
+
+### GCS_BUCKET
+- **Requerido** para subir imágenes (activos, branding). Sin él, esas subidas
+  fallan.
+
+### GOOGLE_CLOUD_PROJECT
+- **Opcional.** Proyecto de GCP; normalmente ya lo da el propio entorno de
+  Cloud Run.
+
+## Mailgun (invitaciones por email)
 
 ### MAILGUN_API_KEY
-- **Descripción**: API key de Mailgun para enviar emails
-- **Requerido**: Sí (para funcionalidad de invitaciones)
-- **Ejemplo**: `MAILGUN_API_KEY="key-1234567890abcdef"`
+- **Requerido** para invitar cuentas. Sin él, `inviteAccount` deshace toda la
+  invitación si el envío falla.
+- **Nunca pongas aquí una clave real.** Una clave de verdad estuvo
+  hardcodeada en un script de certypass desde su primer commit y se filtró a
+  este mismo documento; Mailgun la desactivó el 2026-10-07.
 
 ### MAILGUN_DOMAIN
-- **Descripción**: Dominio verificado en Mailgun
-- **Requerido**: Sí (para funcionalidad de invitaciones)
-- **Ejemplo**: `MAILGUN_DOMAIN="icommunity.io"`
+- **Requerido** junto con `MAILGUN_API_KEY`.
 
 ### MAILGUN_FROM_EMAIL
-- **Descripción**: Email remitente para los correos enviados
-- **Requerido**: No (por defecto: `ibs@icommunity.io`)
-- **Ejemplo**: `MAILGUN_FROM_EMAIL="ibs@icommunity.io"`
+- **Opcional.** Por defecto `ibs@icommunity.io`.
 
 ### MAILGUN_FROM_NAME
-- **Descripción**: Nombre del remitente que aparecerá en los emails
-- **Requerido**: No (por defecto: `Datia`)
-- **Ejemplo**: `MAILGUN_FROM_NAME="Mi Empresa"`
-
-### NEXT_PUBLIC_APP_URL
-- **Descripción**: URL base de la aplicación para construir links de activación
-- **Requerido**: No (por defecto: `http://localhost:3000`)
-- **Ejemplo**: `NEXT_PUBLIC_APP_URL="https://miapp.com"`
+- **Opcional.** Por defecto `Datia`.
 
 ### MAILGUN_URL
-- **Descripción**: URL del endpoint de Mailgun (US o EU)
-- **Requerido**: No (por defecto: `https://api.eu.mailgun.net` para región EU)
-- **Ejemplo**: `MAILGUN_URL="https://api.mailgun.net"` (para región US)
+- **Opcional.** Endpoint de Mailgun; por defecto la región EU
+  (`https://api.eu.mailgun.net`). Cambiar a `https://api.mailgun.net` para US.
 
-## Ejemplo de archivo .env.local
+## Aplicación
+
+### NEXT_PUBLIC_APP_NAME / NEXT_PUBLIC_APP_DESCRIPTION / NEXT_PUBLIC_APP_VERSION
+- **Opcionales.** Nombre, descripción y versión que se muestran en la UI
+  (selector de apps, títulos, metadatos). Por defecto `Datia`.
+
+### NEXT_PUBLIC_APP_URL / NEXT_PUBLIC_BASE_URL
+- **Opcionales.** Base para construir enlaces de activación y, en el caso de
+  `NEXT_PUBLIC_API_URL`, el servidor que se anuncia en la spec de la API
+  pública (`/api/openapi.json`). Sin ellos, cada uno cae al origen de la
+  petición.
+
+### NEXT_PUBLIC_SESSION_DURATION
+- **Opcional.** Horas de sesión que se muestran en la UI; no cambia la
+  duración real, que fija `DASHBOARD_SESSION_DURATION`.
+
+## Ejemplo de `.env.local`
 
 ```bash
-# Configuración de la aplicación
-NEXT_PUBLIC_APP_NAME="Mi Empresa"
-NEXT_PUBLIC_APP_DESCRIPTION="Sistema de Inventario"
-NEXT_PUBLIC_APP_VERSION="2.1.0"
-NEXT_PUBLIC_SESSION_DURATION="8"
-NEXT_PUBLIC_BASE_URL="https://miapp.com"
+DASHBOARD_JWT_SECRET="un-secreto-largo-y-aleatorio"
+SUPERADMIN_JWT_SECRET="otro-secreto-largo-y-aleatorio"
 
-# Configuración de autenticación
-DASHBOARD_JWT_SECRET="mi-secreto-dashboard-123"
-OPERATOR_JWT_SECRET="mi-secreto-operator-456"
+DATABASE_URL="postgresql://usuario:password@localhost:5432/datia"
 
-# Configuración de base de datos
-DATABASE_URL="postgresql://usuario:password@localhost:5432/miapp"
+IBS_TOKEN="el-token-real-de-iBS"
 
-# Configuración de Mailgun (emails)
-MAILGUN_API_KEY="fc97eb228d0246cd94daff9d3cc63759-826eddfb-affbba41"
+GCS_BUCKET="mi-bucket"
+
+MAILGUN_API_KEY="key-1234567890abcdef"
 MAILGUN_DOMAIN="icommunity.io"
-MAILGUN_FROM_EMAIL="ibs@icommunity.io"
-MAILGUN_FROM_NAME="Datia"
-NEXT_PUBLIC_APP_URL="https://miapp.com"
 ```
-
-## Personalización
-
-Para personalizar la aplicación para tu empresa:
-
-1. Crea un archivo `.env.local` en la raíz del proyecto
-2. Copia las variables necesarias del ejemplo anterior
-3. Cambia los valores según tus necesidades
-4. Reinicia la aplicación para que los cambios surtan efecto
-
-El nombre de la aplicación aparecerá en:
-- La página de selector de aplicaciones (/apps)
-- Los títulos de las páginas
-- Los metadatos del sitio
