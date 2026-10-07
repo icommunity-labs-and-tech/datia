@@ -9,10 +9,10 @@ export default function LogoutPage() {
   useEffect(() => {
     async function logout() {
       try {
-        await fetch('/api/auth/admin/logout', { method: 'POST', credentials: 'include' });
-        router.push('/auth/admin/login');
+        await fetch('/api/auth/company/logout', { method: 'POST', credentials: 'include' });
+        router.push('/auth/company/login');
       } catch {
-        router.push('/auth/admin/login');
+        router.push('/auth/company/login');
       }
     }
 

@@ -45,7 +45,7 @@ test.describe('UX journey — sign in', () => {
   test.use({ viewport: DESKTOP, storageState: { cookies: [], origins: [] } });
 
   test('login screen', async ({ page }) => {
-    await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+    await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await shot(page, 'desktop', '01-login');
     await expectNoHorizontalScroll(page);

@@ -32,12 +32,12 @@ test.describe('Invitation and signup', () => {
     await page.getByPlaceholder(/repite tu contraseña|repeat your password/i).fill(NEW_PASSWORD);
     await page.getByRole('button', { name: /activar cuenta|activate account/i }).click();
 
-    await page.waitForURL(/\/auth\/admin\/login\?message=account-activated/, { timeout: 20000 });
+    await page.waitForURL(/\/auth\/company\/login\?message=account-activated/, { timeout: 20000 });
     // Activating signs the account in, and a signed-in visit to the login page
     // goes straight to the dashboard — racing the form this step fills. Drop that
     // session and load the login page fresh, so the password is what signs in.
     await page.context().clearCookies();
-    await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+    await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
     await page.waitForSelector('input[type="email"]', { timeout: 30000 });
 
     // The account exists now, and signs in with the password just chosen.

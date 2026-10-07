@@ -14,7 +14,7 @@ test.describe('Sistema de Autenticación Separado', () => {
       await page.getByRole('heading', { name: /empresa|company dashboard/i }).click();
       
       // Verificar que redirige al login de admin
-      await expect(page).toHaveURL(/.*\/auth\/admin\/login/);
+      await expect(page).toHaveURL(/.*\/auth\/company\/login/);
     });
 
   });
@@ -31,7 +31,7 @@ test.describe('Sistema de Autenticación Separado', () => {
   test.describe('APIs de Autenticación', () => {
     test('debería responder correctamente la API de login de admin', async ({ page }) => {
       // Probar la API de login de admin
-      const response = await page.request.post('/api/auth/admin/login', {
+      const response = await page.request.post('/api/auth/company/login', {
         data: {
           email: 'test@example.com',
           password: 'wrongpassword'
@@ -47,7 +47,7 @@ test.describe('Sistema de Autenticación Separado', () => {
 
     test('debería responder correctamente la API de session de admin', async ({ page }) => {
       // Probar la API de session de admin sin token
-      const response = await page.request.get('/api/auth/admin/session');
+      const response = await page.request.get('/api/auth/company/session');
       
       // Verificar que responde sin usuario
       expect(response.status()).toBe(200);
@@ -63,7 +63,7 @@ test.describe('Sistema de Autenticación Separado', () => {
       await page.goto('/dashboard');
       
       // Verificar que redirige al login de admin
-      await expect(page).toHaveURL(/.*\/auth\/admin\/login.*error=Unauthorized/);
+      await expect(page).toHaveURL(/.*\/auth\/company\/login.*error=Unauthorized/);
     });
 
   });
@@ -71,11 +71,11 @@ test.describe('Sistema de Autenticación Separado', () => {
   test.describe('Cookies y Sesiones', () => {
     test('debería establecer cookies específicas para admin', async ({ page }) => {
       // Simular login exitoso de admin (necesitarías credenciales válidas)
-      await page.goto('/auth/admin/login');
+      await page.goto('/auth/company/login');
       
       // Verificar que no hay cookies de admin inicialmente
       const cookies = await page.context().cookies();
-      const adminCookie = cookies.find(c => c.name === 'admin-auth-token');
+      const adminCookie = cookies.find(c => c.name === 'company-auth-token');
       expect(adminCookie).toBeUndefined();
     });
 

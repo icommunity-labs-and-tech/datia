@@ -21,7 +21,7 @@ export function getAdminJwtSecret(): string {
 export const adminAuthConfig: AuthConfig = {
   get jwtSecret() { return getAdminJwtSecret(); },
   sessionDuration: parseInt(process.env.DASHBOARD_SESSION_DURATION || '28800'), // 8 horas por defecto
-  cookieName: 'admin-auth-token',
+  cookieName: 'company-auth-token',
   cookiePath: '/',
   sameSite: 'strict', // Más restrictivo para admin
   rateLimitMax: parseInt(process.env.DASHBOARD_RATE_LIMIT_MAX || '5'),

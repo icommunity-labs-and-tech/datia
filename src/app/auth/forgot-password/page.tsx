@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
             <Title order={3}>{t('sent.title')}</Title>
             <Text size="sm" c="dimmed">{t('sent.body', { email })}</Text>
             <Text size="xs" c="dimmed">{t('sent.hint')}</Text>
-            <Link href="/auth/admin/login">{t('backToLogin')}</Link>
+            <Link href="/auth/company/login">{t('backToLogin')}</Link>
           </Stack>
         ) : (
           <form onSubmit={submit}>
@@ -62,7 +62,7 @@ export default function ForgotPasswordPage() {
                 data-autofocus
               />
               <Button type="submit" loading={sending}>{t('request.submit')}</Button>
-              <Text size="sm" ta="center"><Link href="/auth/admin/login">{t('backToLogin')}</Link></Text>
+              <Text size="sm" ta="center"><Link href="/auth/company/login">{t('backToLogin')}</Link></Text>
             </Stack>
           </form>
         )}

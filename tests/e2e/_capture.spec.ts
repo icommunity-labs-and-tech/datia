@@ -29,7 +29,7 @@ async function shot(page: Page, name: string) {
 }
 
 async function signIn(page: Page) {
-  await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+  await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
   await page.locator('input[type="email"]').fill(EMAIL);
   await page.locator('input[type="password"]').fill(PASSWORD);
   await page.getByRole('button', { name: /acceder|iniciar sesión|access|sign in/i }).click();
@@ -42,7 +42,7 @@ test.describe.configure({ mode: 'serial' });
 test.use({ viewport: VIEWPORT, storageState: { cookies: [], origins: [] } });
 
 test('acceso', async ({ page }) => {
-  await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+  await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
   await expect(page.locator('input[type="email"]')).toBeVisible();
   await shot(page, '01-acceso');
 });

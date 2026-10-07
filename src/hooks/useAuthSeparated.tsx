@@ -35,7 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkSession = async () => {
     try {
-      const response = await fetch('/api/auth/admin/session');
+      const response = await fetch('/api/auth/company/session');
       const data = await response.json();
       setUser(data.user ?? null);
     } catch {
@@ -47,7 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await fetch('/api/auth/admin/login', {
+      const response = await fetch('/api/auth/company/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -65,11 +65,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = async () => {
     try {
-      await fetch('/api/auth/admin/logout', { method: 'POST', credentials: 'include' });
+      await fetch('/api/auth/company/logout', { method: 'POST', credentials: 'include' });
     } finally {
       setUser(null);
       if (typeof window !== 'undefined') {
-        window.location.href = '/auth/admin/login';
+        window.location.href = '/auth/company/login';
       }
     }
   };

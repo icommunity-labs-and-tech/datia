@@ -20,7 +20,7 @@ test.describe('Unauthenticated', () => {
   test('should redirect to login when not authenticated', async ({ page }) => {
     await page.goto('/dashboard');
 
-    await expect(page).toHaveURL(/\/auth\/admin\/login/);
+    await expect(page).toHaveURL(/\/auth\/company\/login/);
   });
 });
 
@@ -85,6 +85,6 @@ test.describe('Navigation', () => {
   test('account menu logs out', async ({ page }) => {
     await logoutUser(page);
 
-    await expect(page).toHaveURL(/\/auth\/admin\/login/);
+    await expect(page).toHaveURL(/\/auth\/company\/login/);
   });
 });

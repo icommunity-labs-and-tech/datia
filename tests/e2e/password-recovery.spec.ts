@@ -10,7 +10,7 @@ const RESET_TOKEN = 'e2e-reset-token-known-value';
 
 test.describe('Password recovery', () => {
   test('the login points to it, and asking gives the same answer for any address', async ({ page }) => {
-    await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+    await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
     await page.getByRole('link', { name: /olvidado tu contraseña|forgot your password/i }).click();
     await expect(page).toHaveURL(/\/auth\/forgot-password$/);
 
@@ -36,7 +36,7 @@ test.describe('Password recovery', () => {
     await expect(page.getByRole('heading', { name: /contraseña actualizada|password updated/i })).toBeVisible();
 
     // The new password works; the link does not, a second time.
-    await page.goto('/auth/admin/login', { waitUntil: 'networkidle' });
+    await page.goto('/auth/company/login', { waitUntil: 'networkidle' });
     await page.fill('input[type="email"]', RESET_EMAIL);
     await page.fill('input[type="password"]', 'nueva-contraseña-123');
     await page.click('form button[type="submit"]');

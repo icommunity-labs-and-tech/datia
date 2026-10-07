@@ -34,7 +34,7 @@ test.describe('Shared - Basic Accessibility (public pages)', () => {
   });
 
   test('admin login has labeled fields', async ({ page }) => {
-    await page.goto('/auth/admin/login');
+    await page.goto('/auth/company/login');
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
     await assertInputsHaveLabels(page);

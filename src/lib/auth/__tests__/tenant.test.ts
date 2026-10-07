@@ -41,9 +41,9 @@ vi.mock('../organization/jwt', () => ({
     token === 'org-ok' ? { id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1' } : null,
 }));
 vi.mock('../organization/config', () => ({ organizationAuthConfig: { cookieName: 'organization-auth-token' } }));
-vi.mock('../admin/config', () => ({ adminAuthConfig: { cookieName: 'admin-auth-token' } }));
+vi.mock('../admin/config', () => ({ adminAuthConfig: { cookieName: 'company-auth-token' } }));
 vi.mock('../superadmin/config', () => ({
-  superadminAuthConfig: { cookieName: 'superadmin-auth-token' },
+  superadminAuthConfig: { cookieName: 'supercompany-auth-token' },
 }));
 
 const { getCurrentTenant, isSuperAdmin, requireOrganizationId, requireScope } = await import('../tenant');
@@ -55,7 +55,7 @@ beforeEach(() => {
 
 describe('getCurrentTenant', () => {
   it('resolves the organisation from an admin session', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(getCurrentTenant()).resolves.toMatchObject({
       organizationId: 'org-1',
       userRole: 'ADMIN',
@@ -63,7 +63,7 @@ describe('getCurrentTenant', () => {
   });
 
   it('has no organisation for a superadmin session', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
     await expect(getCurrentTenant()).resolves.toMatchObject({
       organizationId: null,
       userRole: 'SUPER_ADMIN',
@@ -73,37 +73,37 @@ describe('getCurrentTenant', () => {
   it('prefers the admin session when both cookies are present', async () => {
     // The bug: a superadmin who also had a dashboard session got no
     // organisation, and every scoped operation failed on a valid admin session.
-    cookieJar.set('superadmin-auth-token', 'super-ok');
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(getCurrentTenant()).resolves.toMatchObject({ organizationId: 'org-1' });
   });
 
   it('falls back to the superadmin session when the admin one carries no organisation', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
-    cookieJar.set('admin-auth-token', 'admin-sin-org');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
+    cookieJar.set('company-auth-token', 'admin-sin-org');
     await expect(getCurrentTenant()).resolves.toMatchObject({ organizationId: null });
   });
 
   it('throws when neither session is valid', async () => {
-    cookieJar.set('admin-auth-token', 'caducado');
+    cookieJar.set('company-auth-token', 'caducado');
     await expect(getCurrentTenant()).rejects.toThrow();
   });
 });
 
 describe('requireOrganizationId', () => {
   it('returns the organisation of an admin session', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(requireOrganizationId()).resolves.toBe('org-1');
   });
 
   it('still refuses a superadmin-only session, which has no organisation', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
     await expect(requireOrganizationId()).rejects.toThrow(/organizationId/);
   });
 
   it('no longer fails when both sessions are open', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(requireOrganizationId()).resolves.toBe('org-1');
   });
 
@@ -118,19 +118,19 @@ describe('requireOrganizationId', () => {
 
 describe('isSuperAdmin', () => {
   it('is true for a superadmin session', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
     await expect(isSuperAdmin()).resolves.toBe(true);
   });
 
   it('stays true when an admin session is open alongside it', async () => {
     // Scoping now prefers the admin session; privileges must not follow it.
-    cookieJar.set('superadmin-auth-token', 'super-ok');
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(isSuperAdmin()).resolves.toBe(true);
   });
 
   it('is false for an admin session alone', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(isSuperAdmin()).resolves.toBe(false);
   });
 
@@ -141,38 +141,38 @@ describe('isSuperAdmin', () => {
 
 describe('company of the session (#20)', () => {
   it('reads the company from the token', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(getCurrentTenant()).resolves.toMatchObject({ organizationId: 'org-1', companyId: 'co-1' });
     expect(findUnique).not.toHaveBeenCalled();
   });
 
   it('reads it from the account for a session issued before the token carried it', async () => {
-    cookieJar.set('admin-auth-token', 'admin-sesion-antigua');
+    cookieJar.set('company-auth-token', 'admin-sesion-antigua');
     findUnique.mockResolvedValue({ companyId: 'co-9' });
     await expect(getCurrentTenant()).resolves.toMatchObject({ companyId: 'co-9' });
     expect(findUnique).toHaveBeenCalledWith({ where: { id: 'u-admin' }, select: { companyId: true } });
   });
 
   it('has no company for a superadmin', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
     await expect(getCurrentTenant()).resolves.toMatchObject({ companyId: null });
   });
 });
 
 describe('requireScope', () => {
   it('scopes an account to its organisation and company', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(requireScope()).resolves.toEqual({ organizationId: 'org-1', companyId: 'co-1' });
   });
 
   it('refuses an account that belongs to an organisation but to no company', async () => {
     // Returning the whole organisation would open data that is not theirs.
-    cookieJar.set('admin-auth-token', 'admin-sin-empresa');
+    cookieJar.set('company-auth-token', 'admin-sin-empresa');
     await expect(requireScope()).rejects.toThrow(/empresa/);
   });
 
   it('refuses a session with no organisation', async () => {
-    cookieJar.set('superadmin-auth-token', 'super-ok');
+    cookieJar.set('supercompany-auth-token', 'super-ok');
     await expect(requireScope()).rejects.toThrow(/organizationId/);
   });
 });
@@ -201,7 +201,7 @@ describe('the organization account (ORG_ADMIN, #20)', () => {
   });
 
   it('does not take a dashboard session for an organization one', async () => {
-    cookieJar.set('admin-auth-token', 'admin-ok');
+    cookieJar.set('company-auth-token', 'admin-ok');
     await expect(getCurrentTenant()).resolves.toMatchObject({ userRole: 'ADMIN', companyId: 'co-1' });
   });
 });

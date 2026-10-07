@@ -60,7 +60,7 @@ function AppsSelectContent() {
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'AccessDenied' || error === 'Unauthorized') {
-      router.push('/auth/admin/login?error=' + error);
+      router.push('/auth/company/login?error=' + error);
     }
   }, [searchParams, router]);
 
@@ -75,7 +75,7 @@ function AppsSelectContent() {
 
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
           <Entry
-            href="/auth/admin/login"
+            href="/auth/company/login"
             icon={IconShieldLock}
             color="datiaBlue"
             title={t('admin')}

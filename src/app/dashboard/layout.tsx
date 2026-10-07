@@ -21,18 +21,18 @@ export default async function DashboardRootLayout({
 
   // Verificar autenticación
   if (!token) {
-    redirect('/auth/admin/login?error=Unauthorized');
+    redirect('/auth/company/login?error=Unauthorized');
   }
 
   const user = await verifyAdminJWT(token);
   
   if (!user) {
-    redirect('/auth/admin/login?error=Unauthorized');
+    redirect('/auth/company/login?error=Unauthorized');
   }
 
   // Verificar que sea admin (solo admins pueden acceder al dashboard)
   if (!isDashboardRole(user.role)) {
-    redirect('/auth/admin/login?error=AccessDenied');
+    redirect('/auth/company/login?error=AccessDenied');
   }
 
   return <>{children}</>;
