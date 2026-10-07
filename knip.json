@@ -1,0 +1,21 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "scripts/*.{mjs,js,ts}",
+    "playwright.capture.config.ts",
+    "tests/e2e/auth.setup.ts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "scripts/**/*.{mjs,js,ts}",
+    "tests/e2e/**/*.ts"
+  ],
+  "ignore": [
+    "src/test/mocks/server-only.ts"
+  ],
+  "ignoreDependencies": [
+    "@prisma/client",
+    "eslint",
+    "eslint-config-next"
+  ]
+}
