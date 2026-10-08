@@ -1203,10 +1203,20 @@
       "companies": "Empresas",
       "companiesDetail": "{active, plural, one {1 activa} other {# activas}}",
       "accounts": "Cuentas",
-      "accountsDetail": "{active, plural, one {1 activa} other {# activas}}, {pending, plural, =0 {ninguna pendiente} one {1 pendiente} other {# pendientes}}",
-      "assets": "Activos",
-      "certifications": "Certificaciones",
-      "certificationsDetail": "{certified, plural, one {1 certificada} other {# certificadas}}"
+      "accountsDetail": "{active, plural, one {1 activa} other {# activas}}, {pending, plural, =0 {ninguna pendiente} one {1 pendiente} other {# pendientes}}"
+    },
+    "comparison": {
+      "title": "Comparativa entre empresas",
+      "subtitle": "Dónde hace falta atención, de un vistazo",
+      "table": {
+        "company": "Empresa",
+        "assets": "Activos",
+        "coverage": "Cobertura",
+        "lastActivity": "Última actividad"
+      },
+      "inactive": "Inactiva",
+      "noCertifications": "Sin certificaciones",
+      "noActivity": "Sin actividad"
     },
     "viewCompanies": "Ver todas las empresas",
     "empty": "Todavía no hay empresas."

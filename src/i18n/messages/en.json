@@ -1203,10 +1203,20 @@
       "companies": "Companies",
       "companiesDetail": "{active, plural, one {1 active} other {# active}}",
       "accounts": "Accounts",
-      "accountsDetail": "{active, plural, one {1 active} other {# active}}, {pending, plural, =0 {none pending} one {1 pending} other {# pending}}",
-      "assets": "Assets",
-      "certifications": "Certifications",
-      "certificationsDetail": "{certified, plural, one {1 certified} other {# certified}}"
+      "accountsDetail": "{active, plural, one {1 active} other {# active}}, {pending, plural, =0 {none pending} one {1 pending} other {# pending}}"
+    },
+    "comparison": {
+      "title": "Company comparison",
+      "subtitle": "Where attention is needed, at a glance",
+      "table": {
+        "company": "Company",
+        "assets": "Assets",
+        "coverage": "Coverage",
+        "lastActivity": "Last activity"
+      },
+      "inactive": "Inactive",
+      "noCertifications": "No certifications",
+      "noActivity": "No activity"
     },
     "viewCompanies": "View all companies",
     "empty": "No companies yet."

@@ -15,7 +15,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
-import type { CertificationTrendPoint } from '@/actions/dashboard/getCertificationTrend';
+import type { CertificationTrendPoint } from '@/lib/dashboard/certificationTrend';
 
 const BLUE = '#1752CC';
 const AMBER = '#F0930A';
