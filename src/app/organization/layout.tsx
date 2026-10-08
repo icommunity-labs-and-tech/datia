@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Center, Loader, Stack, Text } from '@mantine/core';
+import Link from 'next/link';
+import { Center, Loader, Menu, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
-import { IconBuilding, IconHome2 } from '@tabler/icons-react';
+import { IconBuilding, IconHome2, IconSettings } from '@tabler/icons-react';
 import PanelShell from '@/components/layout/PanelShell';
 
 // The organization account's own panel (#20) — split out of /superadmin,
@@ -80,8 +81,20 @@ export default function OrganizationLayout({ children }: { children: React.React
     { href: NAV_HOME, icon: IconBuilding, label: t('nav.companies') },
   ];
 
+  const accountMenuItems = (
+    <Menu.Item component={Link} href="/organization/settings" leftSection={<IconSettings size={16} stroke={1.6} />}>
+      {tSidebar('settings')}
+    </Menu.Item>
+  );
+
   return (
-    <PanelShell homeHref={NAV_HOME} navLinks={navLinks} user={user} onLogout={handleLogout}>
+    <PanelShell
+      homeHref={NAV_HOME}
+      navLinks={navLinks}
+      user={user}
+      onLogout={handleLogout}
+      accountMenuItems={accountMenuItems}
+    >
       {user ? children : null}
     </PanelShell>
   );

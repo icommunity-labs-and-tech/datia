@@ -1,7 +1,9 @@
 import { cookies } from 'next/headers';
 import { verifyAdminJWT } from '@/lib/auth/admin/jwt';
 import { adminAuthConfig } from '@/lib/auth/admin/config';
-import { isDashboardRole } from '@/lib/auth/roles';
+import { verifyOrganizationJWT } from '@/lib/auth/organization/jwt';
+import { organizationAuthConfig } from '@/lib/auth/organization/config';
+import { isDashboardRole, isOrganizationRole } from '@/lib/auth/roles';
 
 export async function verifyAdminAuth() {
   const cookieStore = await cookies();
@@ -19,6 +21,12 @@ export async function verifyAdminAuth() {
   return payload;
 }
 
+/**
+ * Whoever is allowed to change their own password: a company account, a
+ * superadmin, or the account that operates an organization. Checked as two
+ * separate sessions, not one combined tenant: this only ever acts on the
+ * caller's own id, so there is no scope to confuse between them.
+ */
 export async function verifyUserAuth() {
   const cookieStore = await cookies();
 
@@ -26,6 +34,14 @@ export async function verifyUserAuth() {
   if (adminToken) {
     const payload = await verifyAdminJWT(adminToken);
     if (payload && (isDashboardRole(payload.role) || payload.role === 'SUPER_ADMIN')) {
+      return payload;
+    }
+  }
+
+  const organizationToken = cookieStore.get(organizationAuthConfig.cookieName)?.value;
+  if (organizationToken) {
+    const payload = await verifyOrganizationJWT(organizationToken);
+    if (payload && isOrganizationRole(payload.role)) {
       return payload;
     }
   }
