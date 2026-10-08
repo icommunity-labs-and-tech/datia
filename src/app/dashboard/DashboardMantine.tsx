@@ -21,9 +21,9 @@ import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import CertificationChart, { TrendStat } from '@/components/dashboard/CertificationChart';
 import ScopeBreakdown from '@/components/dashboard/ScopeBreakdown';
-import type { CertificationTrend } from '@/actions/dashboard/getCertificationTrend';
+import type { CertificationTrend } from '@/lib/dashboard/certificationTrend';
 import type { DashboardKPIs } from '@/types/dashboard';
-import type { EnergySummary } from '@/actions/dashboard/getEnergySummary';
+import type { EnergySummary } from '@/lib/dashboard/energySummary';
 
 interface DashboardMantineProps {
   kpis: DashboardKPIs;

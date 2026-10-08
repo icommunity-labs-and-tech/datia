@@ -2,7 +2,7 @@
 
 import { Group, Paper, Progress, Stack, Text } from '@mantine/core';
 import { useLocale, useTranslations } from 'next-intl';
-import type { ScopeSlice } from '@/actions/dashboard/getCertificationTrend';
+import type { ScopeSlice } from '@/lib/dashboard/certificationTrend';
 
 /**
  * Where the carbon comes from, under the GHG Protocol.
