@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Center, Loader, Stack, Text } from '@mantine/core';
 import { useTranslations } from 'next-intl';
-import { IconBuilding } from '@tabler/icons-react';
+import { IconBuilding, IconHome2 } from '@tabler/icons-react';
 import PanelShell from '@/components/layout/PanelShell';
 
 // The organization account's own panel (#20) — split out of /superadmin,
@@ -75,7 +75,10 @@ export default function OrganizationLayout({ children }: { children: React.React
     );
   }
 
-  const navLinks = [{ href: NAV_HOME, icon: IconBuilding, label: t('nav.companies') }];
+  const navLinks = [
+    { href: '/organization', icon: IconHome2, label: tSidebar('home'), exact: true },
+    { href: NAV_HOME, icon: IconBuilding, label: t('nav.companies') },
+  ];
 
   return (
     <PanelShell homeHref={NAV_HOME} navLinks={navLinks} user={user} onLogout={handleLogout}>

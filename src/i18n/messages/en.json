@@ -1196,6 +1196,21 @@
       "END_OF_LIFE": "End of life"
     }
   },
+  "organizationOverview": {
+    "title": "Home",
+    "description": "Your companies, together.",
+    "stats": {
+      "companies": "Companies",
+      "companiesDetail": "{active, plural, one {1 active} other {# active}}",
+      "accounts": "Accounts",
+      "accountsDetail": "{active, plural, one {1 active} other {# active}}, {pending, plural, =0 {none pending} one {1 pending} other {# pending}}",
+      "assets": "Assets",
+      "certifications": "Certifications",
+      "certificationsDetail": "{certified, plural, one {1 certified} other {# certified}}"
+    },
+    "viewCompanies": "View all companies",
+    "empty": "No companies yet."
+  },
   "companiesPage": {
     "title": "Companies",
     "description": "Your organisation's companies and their accounts. A company account only sees its own company's data; you see all of it.",

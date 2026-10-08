@@ -1196,6 +1196,21 @@
       "END_OF_LIFE": "Fin de vida"
     }
   },
+  "organizationOverview": {
+    "title": "Inicio",
+    "description": "El conjunto de tus empresas.",
+    "stats": {
+      "companies": "Empresas",
+      "companiesDetail": "{active, plural, one {1 activa} other {# activas}}",
+      "accounts": "Cuentas",
+      "accountsDetail": "{active, plural, one {1 activa} other {# activas}}, {pending, plural, =0 {ninguna pendiente} one {1 pendiente} other {# pendientes}}",
+      "assets": "Activos",
+      "certifications": "Certificaciones",
+      "certificationsDetail": "{certified, plural, one {1 certificada} other {# certificadas}}"
+    },
+    "viewCompanies": "Ver todas las empresas",
+    "empty": "Todavía no hay empresas."
+  },
   "companiesPage": {
     "title": "Empresas",
     "description": "Las empresas de tu organización y sus cuentas. Cada cuenta de empresa solo ve los datos de su empresa; tú los ves todos.",
