@@ -34,9 +34,11 @@ import type {
   EmissionTotals,
 } from '@/domain/energy/EnergyTypes';
 import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
-import type { EnergyForecast } from '@/lib/projections/energy-forecast';
+import type { EnergyForecast, ForecastHorizon } from '@/lib/projections/energy-forecast';
+import type { Heatmap } from '@/lib/energy/heatmap';
 import { useEnergyForecast } from './useEnergyForecast';
 import { ForecastSection } from './ForecastSection';
+import EnergyHeatmap from './EnergyHeatmap';
 
 /** Renders a YYYY-MM key in the reader's locale. */
 export function monthLabel(month: string, locale: string) {
@@ -174,16 +176,21 @@ export function EnergyConsumption({
   sources,
   totals,
   forecast: initialForecast,
+  heatmap,
+  fetchForecast,
 }: {
   consumption: EnergyConsumptionRecord[];
   sources: EnergySourceRecord[];
   totals: EnergyConsumptionTotals;
   forecast: EnergyForecast;
+  /** Consumption by source, month by month — the organization panel's company view only (#20). */
+  heatmap?: Heatmap;
+  fetchForecast?: (horizon: ForecastHorizon) => Promise<EnergyForecast>;
 }) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
   const sourceMap = Object.fromEntries(sources.map((s) => [s.id, s]));
-  const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast);
+  const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast, fetchForecast);
 
   // Summary and chart come from the totals, which cover every record; the table
   // below shows the most recent page.
@@ -207,6 +214,17 @@ export function EnergyConsumption({
           <Text size="xs" c="dimmed">{t('consumptionTab.totalRecorded', { count: totals.records })}</Text>
         </Stack>
       </Group>
+
+      {heatmap && (
+        <EnergyHeatmap
+          data={heatmap}
+          title={t('consumptionTab.heatmapTitle')}
+          subtitle={t('consumptionTab.heatmapSubtitle')}
+          color={DATIA_AMBER}
+          unit="kWh"
+          formatValue={(v) => v.toLocaleString(locale, { maximumFractionDigits: 0 })}
+        />
+      )}
 
       {chartData.length > 0 && (
         <Paper withBorder p="md" radius="md">
@@ -281,14 +299,19 @@ export function EnergyEmissions({
   emissions,
   totals,
   forecast: initialForecast,
+  heatmap,
+  fetchForecast,
 }: {
   emissions: EmissionRecord[];
   totals: EmissionTotals;
   forecast: EnergyForecast;
+  /** Emissions by GHG scope, month by month — the organization panel's company view only (#20). */
+  heatmap?: Heatmap;
+  fetchForecast?: (horizon: ForecastHorizon) => Promise<EnergyForecast>;
 }) {
   const t = useTranslations('energyHub');
   const locale = useLocale();
-  const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast);
+  const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast, fetchForecast);
 
   const chartData = totals.monthly.map(({ month, value }) => ({
     label: monthLabel(month, locale),
@@ -308,6 +331,17 @@ export function EnergyEmissions({
           </Text>
         </Stack>
       </Group>
+
+      {heatmap && (
+        <EnergyHeatmap
+          data={heatmap}
+          title={t('emissionsTab.heatmapTitle')}
+          subtitle={t('emissionsTab.heatmapSubtitle')}
+          color="#0D3585"
+          unit="kg CO₂e"
+          formatValue={(v) => v.toLocaleString(locale, { maximumFractionDigits: 1 })}
+        />
+      )}
 
       {chartData.length > 0 && (
         <Paper withBorder p="md" radius="md">

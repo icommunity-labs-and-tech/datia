@@ -29,6 +29,8 @@ export default function CompanyComparisonTable({ rows }: { rows: CompanyComparis
             <Table.Th>{t('table.company')}</Table.Th>
             <Table.Th ta="right">{t('table.assets')}</Table.Th>
             <Table.Th>{t('table.coverage')}</Table.Th>
+            <Table.Th ta="right">{t('table.consumption')}</Table.Th>
+            <Table.Th ta="right">{t('table.emissions')}</Table.Th>
             <Table.Th>{t('table.lastActivity')}</Table.Th>
           </Table.Tr>
         </Table.Thead>
@@ -59,6 +61,18 @@ export default function CompanyComparisonTable({ rows }: { rows: CompanyComparis
                     </Text>
                   </Group>
                 )}
+              </Table.Td>
+              <Table.Td ta="right">
+                <Text size="sm" c={row.consumptionKwh ? undefined : 'dimmed'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {row.consumptionKwh >= 1000
+                    ? `${(row.consumptionKwh / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} MWh`
+                    : `${row.consumptionKwh.toLocaleString(locale, { maximumFractionDigits: 0 })} kWh`}
+                </Text>
+              </Table.Td>
+              <Table.Td ta="right">
+                <Text size="sm" c={row.co2eKg ? undefined : 'dimmed'} style={{ fontVariantNumeric: 'tabular-nums' }}>
+                  {(row.co2eKg / 1000).toLocaleString(locale, { maximumFractionDigits: 2 })} t
+                </Text>
               </Table.Td>
               <Table.Td>
                 <Text size="xs" c="dimmed">
