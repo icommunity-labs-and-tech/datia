@@ -10,6 +10,8 @@ const { mockPrisma, mockVerify, mockCompanies } = vi.hoisted(() => ({
   mockPrisma: {
     certification: { groupBy: vi.fn() },
     asset: { groupBy: vi.fn() },
+    energyConsumption: { findMany: vi.fn() },
+    emissionRecord: { findMany: vi.fn() },
   },
   mockVerify: vi.fn(),
   mockCompanies: vi.fn(),
@@ -42,6 +44,15 @@ beforeEach(() => {
   );
   mockPrisma.asset.groupBy.mockResolvedValue([
     { companyId: 'co-1', _max: { createdAt: new Date('2026-10-01') } },
+  ]);
+  mockPrisma.energyConsumption.findMany.mockResolvedValue([
+    { consumptionKwh: 300, EnergySource: { Asset: { companyId: 'co-1' } } },
+    { consumptionKwh: 200, EnergySource: { Asset: { companyId: 'co-1' } } },
+    { consumptionKwh: 50, EnergySource: { Asset: { companyId: 'co-2' } } },
+  ]);
+  mockPrisma.emissionRecord.findMany.mockResolvedValue([
+    { co2eKg: 10, EnergyConsumption: { EnergySource: { Asset: { companyId: 'co-1' } } } },
+    { co2eKg: 5, EnergyConsumption: { EnergySource: { Asset: { companyId: 'co-1' } } } },
   ]);
 });
 
@@ -82,5 +93,19 @@ describe('getCompanyComparison', () => {
   it('refuses a session that is not the organization account', async () => {
     mockVerify.mockResolvedValue(null);
     await expect(getCompanyComparison()).rejects.toThrow();
+  });
+
+  it('sums consumption and emissions per company, from the asset their energy source belongs to', async () => {
+    const rows = await getCompanyComparison();
+    const co1 = rows.find((r) => r.id === 'co-1')!;
+    const co2 = rows.find((r) => r.id === 'co-2')!;
+    const co3 = rows.find((r) => r.id === 'co-3')!;
+
+    expect(co1.consumptionKwh).toBe(500);
+    expect(co1.co2eKg).toBe(15);
+    expect(co2.consumptionKwh).toBe(50);
+    expect(co2.co2eKg).toBe(0);
+    expect(co3.consumptionKwh).toBe(0);
+    expect(co3.co2eKg).toBe(0);
   });
 });

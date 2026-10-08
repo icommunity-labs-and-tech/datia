@@ -14,14 +14,41 @@ import { IconArrowLeft } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import PageHeader from '@/components/layout/PageHeader';
+import { EnergyConsumption, EnergyEmissions } from '@/components/energy/EnergyViews';
 import type { CompanyOverview } from '@/actions/companies/overview-core';
+import type { CompanyEnergy } from '@/actions/companies/get-company-energy';
+import { getCompanyEnergyForecast } from '@/actions/companies/get-company-energy';
+import type { Heatmap } from '@/lib/energy/heatmap';
 
-export default function CompanyDetail({ overview }: { overview: CompanyOverview }) {
+export default function CompanyDetail({
+  overview,
+  energy,
+  companyId,
+}: {
+  overview: CompanyOverview;
+  energy: CompanyEnergy | null;
+  companyId: string;
+}) {
   const t = useTranslations('companiesPage.detail');
+  const tEnergy = useTranslations('energyHub');
+  const tScope = useTranslations('dashboard.scope');
   const locale = useLocale();
   const { company, assets, certifications, accounts } = overview;
   const date = (value: Date | null) => (value ? new Date(value).toLocaleDateString(locale) : '—');
   const empty = (label: string) => <Text size="sm" c="dimmed" py="md">{label}</Text>;
+  const fetchForecast = (horizon: 3 | 6 | 12) => getCompanyEnergyForecast(companyId, horizon);
+
+  // The heatmap's rows come back as raw GHG scope keys; this is where they
+  // meet the reader's language, same as the scope breakdown elsewhere.
+  const labeledEmissionsHeatmap: Heatmap | undefined = energy
+    ? {
+        ...energy.emissionsHeatmap,
+        rows: energy.emissionsHeatmap.rows.map((r) => ({
+          ...r,
+          label: tScope(r.label as 'SCOPE_1' | 'SCOPE_2' | 'SCOPE_3'),
+        })),
+      }
+    : undefined;
 
   return (
     <>
@@ -47,6 +74,8 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
           <Tabs.List mb="sm">
             <Tabs.Tab value="assets">{t('tabs.assets')}</Tabs.Tab>
             <Tabs.Tab value="accounts">{t('tabs.accounts')}</Tabs.Tab>
+            <Tabs.Tab value="consumption">{tEnergy('tabs.consumption')}</Tabs.Tab>
+            <Tabs.Tab value="emissions">{tEnergy('tabs.emissions')}</Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="assets">
@@ -108,6 +137,31 @@ export default function CompanyDetail({ overview }: { overview: CompanyOverview 
                   </Table.Tbody>
                 </Table>
               </ScrollArea>
+            )}
+          </Tabs.Panel>
+
+          <Tabs.Panel value="consumption">
+            {!energy || energy.consumptionTotals.records === 0 ? empty(t('emptyEnergy')) : (
+              <EnergyConsumption
+                consumption={energy.consumption}
+                sources={energy.sources}
+                totals={energy.consumptionTotals}
+                forecast={energy.forecast}
+                heatmap={energy.consumptionHeatmap}
+                fetchForecast={fetchForecast}
+              />
+            )}
+          </Tabs.Panel>
+
+          <Tabs.Panel value="emissions">
+            {!energy || energy.emissionTotals.records === 0 ? empty(t('emptyEnergy')) : (
+              <EnergyEmissions
+                emissions={energy.emissions}
+                totals={energy.emissionTotals}
+                forecast={energy.forecast}
+                heatmap={labeledEmissionsHeatmap}
+                fetchForecast={fetchForecast}
+              />
             )}
           </Tabs.Panel>
         </Tabs>

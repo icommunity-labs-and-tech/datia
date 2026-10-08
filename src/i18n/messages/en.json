@@ -1017,6 +1017,8 @@
     "consumptionTab": {
       "totalRecorded": "Total recorded consumption ({count} records)",
       "monthlyChart": "Monthly consumption (kWh)",
+      "heatmapTitle": "Consumption by source and month",
+      "heatmapSubtitle": "Comparison over the last 12 months",
       "source": "Source",
       "period": "Period",
       "consumption": "Consumption",
@@ -1026,6 +1028,8 @@
     "emissionsTab": {
       "verifiedOf": "{verified} of {total} verified",
       "monthlyChart": "Monthly CO₂e emissions (kg)",
+      "heatmapTitle": "Emissions by scope and month",
+      "heatmapSubtitle": "Comparison over the last 12 months",
       "date": "Date",
       "scope": "Scope",
       "state": "Status",
@@ -1212,6 +1216,8 @@
         "company": "Company",
         "assets": "Assets",
         "coverage": "Coverage",
+        "consumption": "Consumption",
+        "emissions": "Emissions",
         "lastActivity": "Last activity"
       },
       "inactive": "Inactive",
@@ -1278,6 +1284,7 @@
       },
       "emptyAssets": "This company has no assets.",
       "emptyAccounts": "This company has no accounts.",
+      "emptyEnergy": "This company has no readings recorded yet.",
       "assets": {
         "id": "ID",
         "name": "Name",
