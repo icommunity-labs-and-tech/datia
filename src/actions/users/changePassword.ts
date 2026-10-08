@@ -19,7 +19,10 @@ export async function changePassword(formData: FormData) {
     });
     await userService.changePassword({ userId: payload.id, currentPassword, newPassword, confirmPassword });
 
+    // Whichever panel the caller signed in from; revalidating the other is a
+    // no-op, not an error.
     revalidatePath('/dashboard/profile');
+    revalidatePath('/organization/settings');
 
     return {
       success: true,
