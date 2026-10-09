@@ -84,6 +84,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
 
 export function EnergyReportSection({ assetId }: { assetId: string }) {
   const t = useTranslations('customer.energyReport');
+  const tScope = useTranslations('dashboard.scope');
   const [report, setReport] = useState<EnergyReport | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -121,12 +122,12 @@ export function EnergyReportSection({ assetId }: { assetId: string }) {
       monthly: Object.values(monthly),
       byScope,
       scopeData: Object.entries(byScope).map(([scope, value]) => ({
-        name: scope.replace('_', ' '),
+        name: tScope(scope as 'SCOPE_1' | 'SCOPE_2' | 'SCOPE_3'),
         value: +value.toFixed(3),
         fill: SCOPE_COLOR[scope] ?? '#8E97A8',
       })),
     };
-  }, [report]);
+  }, [report, tScope]);
 
   if (loading) {
     return (
@@ -258,7 +259,7 @@ export function EnergyReportSection({ assetId }: { assetId: string }) {
                   {Object.entries(derived.byScope).map(([scope, kg]) => (
                     <Stack key={scope} gap={4}>
                       <Group justify="space-between">
-                        <Text size="xs" c="dimmed">{scope.replace('_', ' ')}</Text>
+                        <Text size="xs" c="dimmed">{tScope(scope as 'SCOPE_1' | 'SCOPE_2' | 'SCOPE_3')}</Text>
                         <Text size="xs" fw={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
                           {kg.toFixed(2)} kg
                         </Text>
@@ -374,7 +375,7 @@ export function EnergyReportSection({ assetId }: { assetId: string }) {
                         label={t('emission.scope')}
                         value={
                           <Text size="sm" fw={600} c={SCOPE_COLOR[e.scope] ? undefined : 'dimmed'}>
-                            {e.scope.replace('_', ' ')}
+                            {tScope(e.scope as 'SCOPE_1' | 'SCOPE_2' | 'SCOPE_3')}
                           </Text>
                         }
                       />
