@@ -1,6 +1,5 @@
 import { prisma } from '@/lib/prisma';
 import { scopeWhere, type Scope } from '@/lib/scope';
-import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRepositoryPrisma';
 
 /**
  * A row-by-month grid for comparing categories over time at a glance — which
@@ -32,25 +31,54 @@ function lastMonths(n: number): string[] {
   return out;
 }
 
-/** Consumption by source, month by month: which source is heaviest, and when. */
+/**
+ * Consumption by source, month by month: which source is heaviest, and when.
+ *
+ * Rows are labeled with the source's company too, but only for an
+ * organization-wide scope (`companyId` null): the organization's own
+ * Consumo page spans every company, and "Fuente para consumo" alone does not
+ * say which one it belongs to — on a single company's own page that company
+ * is already the page, so the prefix would only repeat it.
+ */
 export async function computeConsumptionHeatmap(scope: Scope): Promise<Heatmap> {
   const months = lastMonths(MONTHS_SHOWN);
-  const series = await energyRepository.getSourceMonthlySeries(scope);
+  const rows = await prisma.energyConsumption.findMany({
+    where: { EnergySource: { Asset: scopeWhere(scope) } },
+    select: {
+      periodStart: true,
+      consumptionKwh: true,
+      EnergySource: { select: { id: true, name: true, Asset: { select: { Company: { select: { name: true } } } } } },
+    },
+  });
+
+  const bySource = new Map<string, { label: string; total: number; byMonth: Map<string, number> }>();
+  for (const row of rows) {
+    const month = row.periodStart.toISOString().slice(0, 7);
+    if (!months.includes(month)) continue;
+
+    const sourceId = row.EnergySource.id;
+    const companyName = row.EnergySource.Asset?.Company?.name;
+    const label = !scope.companyId && companyName ? `${companyName} · ${row.EnergySource.name}` : row.EnergySource.name;
+
+    const entry = bySource.get(sourceId) ?? { label, total: 0, byMonth: new Map() };
+    entry.total += row.consumptionKwh;
+    entry.byMonth.set(month, (entry.byMonth.get(month) ?? 0) + row.consumptionKwh);
+    bySource.set(sourceId, entry);
+  }
 
   let max = 0;
-  const rows: HeatmapRow[] = series
-    .filter((s) => s.monthly.some((m) => months.includes(m.month)))
-    .map((s) => {
-      const byMonth = new Map(s.monthly.map((m) => [m.month, m.value]));
+  const heatRows: HeatmapRow[] = [...bySource.values()]
+    .sort((a, b) => b.total - a.total)
+    .map(({ label, byMonth }) => {
       const values = months.map((m) => {
         const v = byMonth.get(m) ?? null;
         if (v != null && v > max) max = v;
         return v;
       });
-      return { label: s.sourceName, values };
+      return { label, values };
     });
 
-  return { months, rows, max };
+  return { months, rows: heatRows, max };
 }
 
 const GHG_SCOPES = ['SCOPE_1', 'SCOPE_2', 'SCOPE_3'] as const;
