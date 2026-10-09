@@ -235,20 +235,47 @@ export default function OrganizationOverview({
             </Group>
             <Stack gap={2}>
               {[
-                { icon: IconMap, label: tEnergy('tabs.map'), hint: `${energySummary.sourcesWithCoords}/${energySummary.totalSources}` },
-                { icon: IconBolt, label: tEnergy('tabs.consumption'), hint: kwhDisplay },
-                { icon: IconCloudFog, label: tEnergy('tabs.emissions'), hint: `${co2Tonnes} t` },
-              ].map(({ icon: Icon, label, hint }) => (
-                <Group key={label} justify="space-between" wrap="nowrap" gap="sm" px={8} py={9}>
-                  <Group gap={10} wrap="nowrap">
-                    <Icon size={16} stroke={1.7} color="var(--mantine-color-gray-6)" />
-                    <Text size="sm" fw={550}>{label}</Text>
+                // No organization-wide map exists yet: this row stays a figure, not a link.
+                { href: null, icon: IconMap, label: tEnergy('tabs.map'), hint: `${energySummary.sourcesWithCoords}/${energySummary.totalSources}` },
+                { href: '/organization/consumption', icon: IconBolt, label: tEnergy('tabs.consumption'), hint: kwhDisplay },
+                { href: '/organization/emissions', icon: IconCloudFog, label: tEnergy('tabs.emissions'), hint: `${co2Tonnes} t` },
+              ].map(({ href, icon: Icon, label, hint }) =>
+                href ? (
+                  <Anchor
+                    key={label}
+                    component={Link}
+                    href={href}
+                    underline="never"
+                    c="inherit"
+                    px={8}
+                    py={9}
+                    style={{ borderRadius: 8 }}
+                  >
+                    <Group justify="space-between" wrap="nowrap" gap="sm">
+                      <Group gap={10} wrap="nowrap">
+                        <Icon size={16} stroke={1.7} color="var(--mantine-color-gray-6)" />
+                        <Text size="sm" fw={550}>{label}</Text>
+                      </Group>
+                      <Group gap={6} wrap="nowrap">
+                        <Text size="xs" c="dimmed" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {hint}
+                        </Text>
+                        <IconArrowRight size={14} stroke={1.7} color="var(--mantine-color-gray-5)" />
+                      </Group>
+                    </Group>
+                  </Anchor>
+                ) : (
+                  <Group key={label} justify="space-between" wrap="nowrap" gap="sm" px={8} py={9}>
+                    <Group gap={10} wrap="nowrap">
+                      <Icon size={16} stroke={1.7} color="var(--mantine-color-gray-6)" />
+                      <Text size="sm" fw={550}>{label}</Text>
+                    </Group>
+                    <Text size="xs" c="dimmed" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                      {hint}
+                    </Text>
                   </Group>
-                  <Text size="xs" c="dimmed" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {hint}
-                  </Text>
-                </Group>
-              ))}
+                )
+              )}
             </Stack>
             <Anchor component={Link} href="/organization/companies" size="xs" fw={550} mt="xs">
               {t('viewCompanies')}
