@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { authenticateSuperAdmin } from '@/lib/auth/superadmin/jwt';
-import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
+import { authenticateOrganization } from '@/lib/auth/organization/jwt';
+import { organizationAuthConfig } from '@/lib/auth/organization/config';
 import { createRateLimiter, getClientIp } from '@/lib/auth/rate-limit';
 
-// 5 intentos por IP cada 15 minutos
+// 5 intentos por IP cada 15 minutos — igual que antes, cuando este login
+// vivía junto al de superadmin.
 const checkRateLimit = createRateLimiter({ windowMs: 15 * 60 * 1000, maxAttempts: 5 });
 
 export async function POST(request: NextRequest) {
@@ -11,7 +12,7 @@ export async function POST(request: NextRequest) {
   const rl = checkRateLimit(ip);
 
   if (!rl.allowed) {
-    console.warn(`[superadmin/login] Rate limit hit — ip=${ip} retryAfter=${rl.retryAfter}s`);
+    console.warn(`[organization/login] Rate limit hit — ip=${ip} retryAfter=${rl.retryAfter}s`);
     return NextResponse.json(
       { success: false, error: 'Demasiados intentos. Inténtalo de nuevo más tarde.' },
       { status: 429, headers: { 'Retry-After': String(rl.retryAfter) } }
@@ -28,26 +29,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await authenticateSuperAdmin(email, password);
+    const result = await authenticateOrganization(email, password);
 
     if (!result.success) {
-      console.warn(`[superadmin/login] Failed attempt — ip=${ip} email=${email}`);
+      console.warn(`[organization/login] Failed attempt — ip=${ip} email=${email}`);
       return NextResponse.json(result, { status: 401 });
     }
 
     const response = NextResponse.json({ success: true, user: result.user });
 
-    response.cookies.set(superadminAuthConfig.cookieName, result.token!, {
+    response.cookies.set(organizationAuthConfig.cookieName, result.token!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: superadminAuthConfig.sessionDuration,
+      maxAge: organizationAuthConfig.sessionDuration,
       path: '/',
     });
 
     return response;
   } catch (error) {
-    console.error('[superadmin/login] Internal error:', error);
+    console.error('[organization/login] Internal error:', error);
     return NextResponse.json(
       { success: false, error: 'Error interno del servidor' },
       { status: 500 }

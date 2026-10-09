@@ -42,7 +42,7 @@ export default function OrganizationLayout({ children }: { children: React.React
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/superadmin/session');
+      const response = await fetch('/api/auth/organization/session');
       const data = await response.json();
 
       if (!data.user || data.user.role !== 'ORG_ADMIN') {
@@ -64,7 +64,7 @@ export default function OrganizationLayout({ children }: { children: React.React
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth/superadmin/logout', { method: 'POST' });
+      await fetch('/api/auth/organization/logout', { method: 'POST' });
       router.push('/auth/organization/login');
     } catch (error) {
       console.error('Logout error:', error);
