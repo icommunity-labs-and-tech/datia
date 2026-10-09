@@ -7,6 +7,7 @@ export * from "./get-overview";
 export * from "./get-trend";
 export * from "./get-company-comparison";
 export * from "./get-recent-assets";
+export * from "./get-organization-energy";
 export * from "./delete-organization";
 
 
