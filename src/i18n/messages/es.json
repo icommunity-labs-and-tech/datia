@@ -462,7 +462,7 @@
       },
       "charts": {
         "monthly": "Consumo mensual",
-        "byScope": "CO₂e por scope GHG",
+        "byScope": "CO₂e por alcance GHG",
         "noEmissions": "Sin emisiones certificadas"
       },
       "source": {
@@ -477,7 +477,7 @@
       },
       "emission": {
         "co2": "CO₂e",
-        "scope": "Scope",
+        "scope": "Alcance",
         "methodology": "Metodología",
         "factor": "Factor de emisión",
         "factorSource": "Fuente del factor",
@@ -1031,7 +1031,7 @@
       "heatmapTitle": "Emisiones por alcance y mes",
       "heatmapSubtitle": "Comparativa de los últimos 12 meses",
       "date": "Fecha",
-      "scope": "Scope",
+      "scope": "Alcance",
       "state": "Estado",
       "emissionFactor": "Factor emisión",
       "description": "Emisiones de CO₂e calculadas y su estado de verificación por tercero."
@@ -1475,7 +1475,7 @@
     "emission": {
       "title": "Datos de emisión",
       "co2e": "CO₂e",
-      "scope": "Scope GHG",
+      "scope": "Alcance GHG",
       "boundary": "Frontera",
       "factor": "Factor de emisión",
       "factorSource": "Fuente del factor",

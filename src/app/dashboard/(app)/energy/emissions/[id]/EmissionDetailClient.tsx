@@ -20,6 +20,7 @@ export default function EmissionDetailClient({ emission }: Props) {
   const t = useTranslations('emissionDetail');
   const tEnergy = useTranslations('energyHub');
   const tLifecycle = useTranslations('organizationAssetDetail');
+  const tScope = useTranslations('dashboard.scope');
   const locale = useLocale();
 
   const consumption = emission.EnergyConsumption;
@@ -34,7 +35,7 @@ export default function EmissionDetailClient({ emission }: Props) {
     { icon: IconPackage, label: t('chain.asset'), value: item.name, href: `/dashboard/assets/${item.id}` },
     { icon: IconBolt, label: t('chain.source'), value: source.name, sub: tEnergy(`carriers.${source.energyCarrier}`) },
     { icon: IconGauge, label: t('chain.consumption'), value: `${consumption.consumptionKwh} kWh`, sub: tLifecycle(`lifecycle.${consumption.lifecycleStage}`) },
-    { icon: IconCloudFog, label: t('chain.emission'), value: `${emission.co2eKg} kg CO₂e`, sub: humanize(emission.scope) },
+    { icon: IconCloudFog, label: t('chain.emission'), value: `${emission.co2eKg} kg CO₂e`, sub: tScope(emission.scope) },
   ];
 
   return (
@@ -83,7 +84,7 @@ export default function EmissionDetailClient({ emission }: Props) {
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing="md">
         <Section title={t('emission.title')}>
           <Row label={t('emission.co2e')} value={<Text size="sm" fw={600}>{emission.co2eKg} kg</Text>} />
-          <Row label={t('emission.scope')} value={humanize(emission.scope)} />
+          <Row label={t('emission.scope')} value={tScope(emission.scope)} />
           <Row label={t('emission.boundary')} value={humanize(emission.systemBoundary)} />
           <Row label={t('emission.factor')} value={emission.emissionFactor ?? '—'} />
           <Row label={t('emission.factorSource')} value={emission.emissionFactorSource ?? '—'} />

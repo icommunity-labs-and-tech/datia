@@ -310,6 +310,7 @@ export function EnergyEmissions({
   fetchForecast?: (horizon: ForecastHorizon) => Promise<EnergyForecast>;
 }) {
   const t = useTranslations('energyHub');
+  const tScope = useTranslations('dashboard.scope');
   const locale = useLocale();
   const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast, fetchForecast);
 
@@ -398,7 +399,7 @@ export function EnergyEmissions({
                 </Table.Td>
                 <Table.Td>
                   <Badge size="xs" style={{ background: SCOPE_COLOR[r.scope] ?? '#aaa', color: '#fff' }}>
-                    {r.scope.replace('_', ' ')}
+                    {tScope(r.scope as 'SCOPE_1' | 'SCOPE_2' | 'SCOPE_3')}
                   </Badge>
                 </Table.Td>
                 <Table.Td>
