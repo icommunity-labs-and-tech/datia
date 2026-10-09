@@ -23,9 +23,7 @@ export default function OrganizationLoginPage() {
     setLoading(true);
 
     try {
-      // Same endpoint the superadmin login uses: it already issues whichever
-      // session the account's role calls for.
-      const response = await fetch('/api/auth/superadmin/login', {
+      const response = await fetch('/api/auth/organization/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

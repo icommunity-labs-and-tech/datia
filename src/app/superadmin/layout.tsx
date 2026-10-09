@@ -43,13 +43,21 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       const response = await fetch('/api/auth/superadmin/session');
       const data = await response.json();
 
-      if (!data.user) {
-        router.push('/auth/superadmin/login');
-      } else if (data.user.role === 'ORG_ADMIN') {
-        // A valid session, just the wrong panel — send it to its own.
+      if (data.user) {
+        setUser(data.user);
+        return;
+      }
+
+      // No platform session. Before sending it to this panel's own login,
+      // check whether it is an organization session instead — a valid
+      // session, just the wrong panel, which gets sent to its own rather
+      // than told it is signed out.
+      const orgResponse = await fetch('/api/auth/organization/session');
+      const orgData = await orgResponse.json();
+      if (orgData.user) {
         router.replace('/organization/companies');
       } else {
-        setUser(data.user);
+        router.push('/auth/superadmin/login');
       }
     } catch (error) {
       console.error('Auth check error:', error);
