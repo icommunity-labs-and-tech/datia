@@ -7,6 +7,14 @@ import { createRateLimiter, getClientIp } from '@/lib/auth/rate-limit';
 const checkRateLimit = createRateLimiter({ windowMs: 15 * 60 * 1000, maxAttempts: 5 });
 
 export async function POST(request: NextRequest) {
+  // Production has no password login any more — IAP is the only way in (#20
+  // follow-up). This refusal is defense in depth: the path already sits
+  // behind IAP at the load balancer, so reaching this code in production
+  // would mean that had somehow been bypassed.
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ success: false, error: 'No disponible' }, { status: 404 });
+  }
+
   const ip = getClientIp(request);
   const rl = checkRateLimit(ip);
 
@@ -39,7 +47,10 @@ export async function POST(request: NextRequest) {
 
     response.cookies.set(superadminAuthConfig.cookieName, result.token!, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      // This code path never runs in production any more (see the guard
+      // above) — dev and e2e serve over plain HTTP, so `secure` would only
+      // ever be false here regardless.
+      secure: false,
       sameSite: 'strict',
       maxAge: superadminAuthConfig.sessionDuration,
       path: '/',

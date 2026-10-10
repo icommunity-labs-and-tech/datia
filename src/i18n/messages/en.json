@@ -1167,6 +1167,10 @@
       "organizations": "Organizations",
       "support": "Support"
     },
+    "accessDenied": {
+      "title": "No access",
+      "description": "Your Google account isn't registered as a platform administrator. If you think you should have access, contact whoever manages the team."
+    },
     "home": {
       "organizations": {
         "title": "Organizations",

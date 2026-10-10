@@ -8,6 +8,7 @@ import type { Scope } from '@/lib/scope';
 import type { JWTPayload } from './shared/types';
 import { verifyOrganizationJWT } from './organization/jwt';
 import { organizationAuthConfig } from './organization/config';
+import { currentSuperAdmin } from './superadmin/identity';
 
 /**
  * Contexto del tenant actual
@@ -133,18 +134,16 @@ export async function getCurrentTenant(): Promise<TenantContext> {
 }
 
 /**
- * Verifica si el usuario actual es SUPER_ADMIN
+ * Verifica si el usuario actual es SUPER_ADMIN.
+ *
+ * Mira la identidad del panel de plataforma directamente (IAP en producción,
+ * #20 follow-up) en lugar de deducirlo del tenant: desde que el ámbito de
+ * organización prefiere la sesión de admin, deducirlo de ahí le quitaría los
+ * privilegios a un superadministrador que además tenga sesión de admin.
  */
 export async function isSuperAdmin(): Promise<boolean> {
-  // Mira su propia cookie en lugar de deducirlo del tenant: desde que el ámbito
-  // de organización prefiere la sesión de admin, deducirlo de ahí le quitaría
-  // los privilegios a un superadministrador que además tenga sesión de admin.
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(superadminAuthConfig.cookieName)?.value;
-    if (!token) return false;
-    const payload = await verifySuperAdminJWT(token);
-    return payload?.role === 'SUPER_ADMIN';
+    return (await currentSuperAdmin()) !== null;
   } catch {
     return false;
   }
