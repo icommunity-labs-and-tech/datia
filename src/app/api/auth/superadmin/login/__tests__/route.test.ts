@@ -1,10 +1,11 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { NextRequest } from 'next/server';
 
 /**
  * This login used to also issue organization sessions, sharing the endpoint
  * with that panel (#20); now that each has its own, it only ever sets its
- * own cookie.
+ * own cookie. In production it does not run at all any more — IAP is the
+ * only way in (#20 follow-up).
  */
 
 const { mockAuthenticateSuperAdmin } = vi.hoisted(() => ({ mockAuthenticateSuperAdmin: vi.fn() }));
@@ -27,6 +28,16 @@ const post = (ip: string, body: unknown) =>
 
 describe('POST /api/auth/superadmin/login', () => {
   beforeEach(() => vi.clearAllMocks());
+  afterEach(() => vi.unstubAllEnvs());
+
+  it('refuses to run at all in production, before touching credentials', async () => {
+    vi.stubEnv('NODE_ENV', 'production');
+
+    const res = await post('9.9.9.9', { email: 'a@x.test', password: 'pw' });
+
+    expect(res.status).toBe(404);
+    expect(mockAuthenticateSuperAdmin).not.toHaveBeenCalled();
+  });
 
   it('sets the superadmin cookie on a successful login', async () => {
     mockAuthenticateSuperAdmin.mockResolvedValue({
