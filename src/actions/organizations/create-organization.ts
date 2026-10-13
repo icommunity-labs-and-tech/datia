@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { isSuperAdmin } from "@/lib/auth/tenant";
-import { sendInvitationEmail } from "./helpers";
+import { buildActivationUrl, sendInvitationEmail } from "./helpers";
 import { startCompanySignature } from "@/lib/kyc/create-company-signature";
 import crypto from "crypto";
 
@@ -76,6 +76,10 @@ export interface CreateOrganizationResult {
     activationToken: string;
   };
   kycURL?: string | null;
+  /** False cuando el email de invitación no pudo enviarse: la organización se creó igual. */
+  emailSent?: boolean;
+  /** Presente cuando `emailSent` es false, para compartirla a mano con el administrador. */
+  activationUrl?: string;
   error?: string;
 }
 
@@ -167,8 +171,11 @@ export async function createOrganizationWithAdmin(
       return { organization, admin };
     });
 
-    // Enviar email de activación al admin
-    // Si falla, eliminar la organización y admin creados (rollback manual)
+    // Enviar email de activación al admin. Si Mailgun falla, la organización
+    // se queda creada igual: el fallo es de un proveedor externo, no del alta,
+    // y deshacerla obligaría a repetir todo por un problema que no es suyo.
+    // Se devuelve el enlace de activación para compartirlo a mano.
+    let emailSent = true;
     try {
       await sendInvitationEmail({
         recipientEmail: result.admin.email,
@@ -178,18 +185,10 @@ export async function createOrganizationWithAdmin(
         language: input.language,
       });
     } catch (emailError) {
-      // Si falla el email, eliminar todo lo creado (rollback manual)
-      await prisma.$transaction(async (tx) => {
-        await tx.user.delete({ where: { id: result.admin.id } });
-        await tx.organization.delete({ where: { id: result.organization.id } });
-      });
-      
-      throw new Error(
-        `Error al enviar el email de invitación: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}. ` +
-        `La organización no se ha creado. Por favor, verifica la configuración de Mailgun e intenta nuevamente.`
-      );
+      console.error('[create-organization] invitation email failed, keeping the organization:', emailError);
+      emailSent = false;
     }
-    
+
     return {
       success: true,
       organization: {
@@ -203,6 +202,8 @@ export async function createOrganizationWithAdmin(
         activationToken: result.admin.activationToken!,
       },
       kycURL: kycURL,
+      emailSent,
+      activationUrl: emailSent ? undefined : await buildActivationUrl(activationToken),
     };
   } catch (error) {
     console.error("Error creating organization:", error);

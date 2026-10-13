@@ -17,7 +17,7 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Invites an account into one company of the organization. */
 export async function inviteCompanyAccount(
   input: InviteCompanyAccountInput
-): Promise<{ success: boolean; error?: CompanyError; detail?: string }> {
+): Promise<{ success: boolean; error?: CompanyError; detail?: string; activationUrl?: string }> {
   let actor: Awaited<ReturnType<typeof requireOrganizationAccount>>;
   try {
     actor = await requireOrganizationAccount();
@@ -39,5 +39,6 @@ export async function inviteCompanyAccount(
   if (!result.success) return { success: false, error: 'invite_failed', detail: result.error };
 
   revalidatePath('/dashboard/companies');
+  if (!result.emailSent) return { success: true, activationUrl: result.activationUrl };
   return { success: true };
 }

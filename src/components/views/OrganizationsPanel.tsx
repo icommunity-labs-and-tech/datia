@@ -8,6 +8,8 @@ import {
   Badge,
   Button,
   Center,
+  Code,
+  CopyButton,
   Group,
   Loader,
   Modal,
@@ -25,7 +27,9 @@ import {
   IconAlertTriangleFilled,
   IconBuilding,
   IconBuildingPlus,
+  IconCheck,
   IconCircleCheck,
+  IconCopy,
   IconInbox,
   IconInfoCircle,
   IconQuestionMark,
@@ -35,6 +39,7 @@ import { createOrganizationWithAdmin, listOrganizations, type OrganizationListIt
 
 export default function OrganizationsPanel() {
   const t = useTranslations('superadminOrganizationsList');
+  const tCommon = useTranslations('common.actions');
   const locale = useLocale();
   const router = useRouter();
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -43,6 +48,7 @@ export default function OrganizationsPanel() {
   const [loadingList, setLoadingList] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [activationLink, setActivationLink] = useState<string | null>(null);
   const [organizations, setOrganizations] = useState<OrganizationListItem[]>([]);
   const [form, setForm] = useState({ organizationName: '', adminName: '', adminEmail: '', language: 'es' as 'es' | 'en' });
 
@@ -72,6 +78,7 @@ export default function OrganizationsPanel() {
     setSaving(true);
     setError(null);
     setSuccess(null);
+    setActivationLink(null);
     try {
       const result = await createOrganizationWithAdmin({
         name: form.organizationName,
@@ -80,7 +87,14 @@ export default function OrganizationsPanel() {
         language: form.language,
       });
       if (result.success) {
-        setSuccess(t('success.body', { name: result.organization?.name ?? '', email: result.admin?.email ?? '' }));
+        const name = result.organization?.name ?? '';
+        const email = result.admin?.email ?? '';
+        if (result.emailSent === false) {
+          setSuccess(t('success.bodyNoEmail', { name, email }));
+          setActivationLink(result.activationUrl ?? null);
+        } else {
+          setSuccess(t('success.body', { name, email }));
+        }
         setForm({ organizationName: '', adminName: '', adminEmail: '', language: 'es' });
         setShowCreateModal(false);
         await loadOrganizations();
@@ -114,8 +128,35 @@ export default function OrganizationsPanel() {
       />
 
       {success && (
-        <Alert color="teal" variant="light" mb="md" withCloseButton onClose={() => setSuccess(null)} icon={<IconCircleCheck size={18} />} title={t('success.title')}>
-          <Text size="sm" style={{ whiteSpace: 'pre-line' }}>{success}</Text>
+        <Alert
+          color={activationLink ? 'yellow' : 'teal'}
+          variant="light"
+          mb="md"
+          withCloseButton
+          onClose={() => { setSuccess(null); setActivationLink(null); }}
+          icon={activationLink ? <IconAlertTriangleFilled size={18} /> : <IconCircleCheck size={18} />}
+          title={t('success.title')}
+        >
+          <Text size="sm" style={{ whiteSpace: 'pre-line' }} mb={activationLink ? 'xs' : 0}>{success}</Text>
+          {activationLink && (
+            <Group gap="xs" wrap="nowrap" align="flex-start">
+              <Code block style={{ flex: 1, wordBreak: 'break-all' }}>{activationLink}</Code>
+              <CopyButton value={activationLink} timeout={2000}>
+                {({ copied, copy }) => (
+                  <Button
+                    variant={copied ? 'light' : 'default'}
+                    color={copied ? 'green' : undefined}
+                    size="xs"
+                    onClick={copy}
+                    leftSection={copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {tCommon('copy')}
+                  </Button>
+                )}
+              </CopyButton>
+            </Group>
+          )}
         </Alert>
       )}
 

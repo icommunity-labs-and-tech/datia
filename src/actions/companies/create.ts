@@ -19,6 +19,8 @@ export interface CreateCompanyResult {
   company?: { id: string; name: string };
   /** The company exists but its first account could not be invited: retry from its row. */
   inviteError?: string;
+  /** The company and its first account exist, but the invitation email could not be sent: share this link by hand. */
+  activationUrl?: string;
   error?: CompanyError;
 }
 
@@ -71,6 +73,9 @@ export async function createCompany(input: CreateCompanyInput): Promise<CreateCo
       });
       if (!invited.success) {
         return { success: true, company, inviteError: invited.error };
+      }
+      if (!invited.emailSent) {
+        return { success: true, company, activationUrl: invited.activationUrl };
       }
     }
 

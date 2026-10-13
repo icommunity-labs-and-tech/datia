@@ -8,6 +8,8 @@ import {
   Badge,
   Button,
   Center,
+  Code,
+  CopyButton,
   Group,
   Modal,
   Paper,
@@ -19,7 +21,7 @@ import {
   ThemeIcon,
   Tooltip,
 } from '@mantine/core';
-import { IconAlertTriangleFilled, IconBuilding, IconPlus, IconUserPlus } from '@tabler/icons-react';
+import { IconAlertTriangleFilled, IconBuilding, IconCheck, IconCopy, IconPlus, IconUserPlus } from '@tabler/icons-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
@@ -47,6 +49,7 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [activationLink, setActivationLink] = useState<string | null>(null);
 
   const reload = async () => setCompanies(await listCompanies());
 
@@ -74,6 +77,7 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
     event.preventDefault();
     setSaving(true);
     setError(null);
+    setActivationLink(null);
     try {
       const result = await createCompany({
         name,
@@ -84,13 +88,18 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
         return;
       }
       await reload();
-      setNotice(
-        result.inviteError
-          ? t('notice.createdWithoutInvite', { name: result.company!.name })
-          : accountEmail.trim()
-            ? t('notice.createdAndInvited', { name: result.company!.name, email: accountEmail.trim() })
-            : t('notice.created', { name: result.company!.name })
-      );
+      if (result.activationUrl) {
+        setNotice(t('notice.createdNoEmail', { name: result.company!.name, email: accountEmail.trim() }));
+        setActivationLink(result.activationUrl);
+      } else {
+        setNotice(
+          result.inviteError
+            ? t('notice.createdWithoutInvite', { name: result.company!.name })
+            : accountEmail.trim()
+              ? t('notice.createdAndInvited', { name: result.company!.name, email: accountEmail.trim() })
+              : t('notice.created', { name: result.company!.name })
+        );
+      }
       close();
     } catch {
       setError(t('errors.failed'));
@@ -104,6 +113,7 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
     if (dialog?.kind !== 'invite') return;
     setSaving(true);
     setError(null);
+    setActivationLink(null);
     try {
       const result = await inviteCompanyAccount({
         companyId: dialog.company.id,
@@ -116,7 +126,12 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
         return;
       }
       await reload();
-      setNotice(t('notice.invited', { email: accountEmail.trim(), name: dialog.company.name }));
+      if (result.activationUrl) {
+        setNotice(t('notice.invitedNoEmail', { email: accountEmail.trim(), name: dialog.company.name }));
+        setActivationLink(result.activationUrl);
+      } else {
+        setNotice(t('notice.invited', { email: accountEmail.trim(), name: dialog.company.name }));
+      }
       close();
     } catch {
       setError(t('errors.failed'));
@@ -144,8 +159,33 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
       />
 
       {notice && (
-        <Alert color="teal" variant="light" mb="md" withCloseButton onClose={() => setNotice(null)}>
-          {notice}
+        <Alert
+          color={activationLink ? 'yellow' : 'teal'}
+          variant="light"
+          mb="md"
+          withCloseButton
+          onClose={() => { setNotice(null); setActivationLink(null); }}
+        >
+          <Text size="sm" mb={activationLink ? 'xs' : 0}>{notice}</Text>
+          {activationLink && (
+            <Group gap="xs" wrap="nowrap" align="flex-start">
+              <Code block style={{ flex: 1, wordBreak: 'break-all' }}>{activationLink}</Code>
+              <CopyButton value={activationLink} timeout={2000}>
+                {({ copied, copy }) => (
+                  <Button
+                    variant={copied ? 'light' : 'default'}
+                    color={copied ? 'green' : undefined}
+                    size="xs"
+                    onClick={copy}
+                    leftSection={copied ? <IconCheck size={14} /> : <IconCopy size={14} />}
+                    style={{ flexShrink: 0 }}
+                  >
+                    {tCommon('copy')}
+                  </Button>
+                )}
+              </CopyButton>
+            </Group>
+          )}
         </Alert>
       )}
 

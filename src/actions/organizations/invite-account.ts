@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import type { TenantContext } from "@/lib/auth/tenant";
 import { defaultCompanyId } from "@/lib/company";
-import { sendInvitationEmail } from "./helpers";
+import { buildActivationUrl, sendInvitationEmail } from "./helpers";
 import crypto from "crypto";
 import { isDashboardRole, isOrganizationRole } from '@/lib/auth/roles';
 
@@ -26,6 +26,10 @@ export interface InviteUserResult {
     email: string;
     token: string;
   };
+  /** False cuando el email de invitación no pudo enviarse: la cuenta se creó igual. */
+  emailSent?: boolean;
+  /** Presente cuando `emailSent` es false, para compartirla a mano con la persona invitada. */
+  activationUrl?: string;
   error?: string;
 }
 
@@ -163,8 +167,10 @@ export async function inviteAccount(
       return { user, invitation };
     });
 
-    // Enviar email de invitación
-    // Si falla, eliminar el usuario y la invitación creados (rollback manual)
+    // Enviar email de invitación. Si Mailgun falla, la cuenta y la invitación
+    // se quedan creadas igual (ver create-organization.ts, mismo razonamiento):
+    // se devuelve el enlace de activación para compartirlo a mano.
+    let emailSent = true;
     try {
       await sendInvitationEmail({
         recipientEmail: result.user.email,
@@ -174,18 +180,10 @@ export async function inviteAccount(
         language: input.language,
       });
     } catch (emailError) {
-      // Si falla el email, eliminar todo lo creado (rollback manual)
-      await prisma.$transaction(async (tx) => {
-        await tx.invitation.delete({ where: { id: result.invitation.id } });
-        await tx.user.delete({ where: { id: result.user.id } });
-      });
-      
-      throw new Error(
-        `Error al enviar el email de invitación: ${emailError instanceof Error ? emailError.message : 'Error desconocido'}. ` +
-        `La invitación no se ha creado. Por favor, verifica la configuración de Mailgun e intenta nuevamente.`
-      );
+      console.error('[invite-account] invitation email failed, keeping the account:', emailError);
+      emailSent = false;
     }
-    
+
     return {
       success: true,
       invitation: {
@@ -193,6 +191,8 @@ export async function inviteAccount(
         email: result.invitation.email,
         token: result.invitation.token,
       },
+      emailSent,
+      activationUrl: emailSent ? undefined : await buildActivationUrl(activationToken),
     };
   } catch (error) {
     console.error("Error inviting user:", error);

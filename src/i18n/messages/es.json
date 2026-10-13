@@ -1264,7 +1264,9 @@
       "created": "Empresa «{name}» creada.",
       "createdAndInvited": "Empresa «{name}» creada e invitación enviada a {email}.",
       "createdWithoutInvite": "Empresa «{name}» creada, pero no se pudo enviar la invitación. Inténtalo desde su fila.",
-      "invited": "Invitación enviada a {email} para {name}."
+      "createdNoEmail": "Empresa «{name}» creada, pero no se pudo enviar el email de invitación a {email}. Comparte este enlace a mano:",
+      "invited": "Invitación enviada a {email} para {name}.",
+      "invitedNoEmail": "No se pudo enviar el email de invitación a {email} para {name}. Comparte este enlace a mano:"
     },
     "errors": {
       "nameRequired": "Indica el nombre de la empresa.",
@@ -1396,7 +1398,8 @@
     },
     "success": {
       "title": "Organización creada",
-      "body": "«{name}» creada. Email de activación enviado a {email}."
+      "body": "«{name}» creada. Email de activación enviado a {email}.",
+      "bodyNoEmail": "«{name}» creada, pero no se pudo enviar el email de activación a {email}. Comparte este enlace a mano:"
     },
     "list": {
       "loading": "Cargando organizaciones...",
