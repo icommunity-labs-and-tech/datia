@@ -7,6 +7,7 @@ import { energyRepository } from '@/infrastructure/prisma/repositories/EnergyRep
 import type { Scope } from '@/lib/scope';
 import { readCompanyOverview, type CompanyOverview } from './overview-core';
 import { companiesOfOrganization, type CompanySummary } from './list';
+import { deleteCompanyCore, type DeleteCompanyResult } from './delete-core';
 
 /** The companies of any organization, for the superadmin exploring it (#19). */
 export async function listCompaniesForOrganization(organizationId: string): Promise<CompanySummary[]> {
@@ -77,4 +78,12 @@ export async function setCompanyActive(companyId: string, active: boolean): Prom
   revalidatePath(`/superadmin/organizations/${company.organizationId}`);
   revalidatePath(`/superadmin/organizations/${company.organizationId}/companies/${company.id}`);
   return { success: true };
+}
+
+/** Deletes any company, from any organization — the superadmin's reach, unlike `deleteCompany` (#138). */
+export async function deleteCompanySuperadmin(companyId: string): Promise<DeleteCompanyResult> {
+  if (!(await isSuperAdmin())) {
+    return { success: false, error: 'Solo SUPER_ADMIN puede eliminar empresas' };
+  }
+  return deleteCompanyCore(companyId);
 }

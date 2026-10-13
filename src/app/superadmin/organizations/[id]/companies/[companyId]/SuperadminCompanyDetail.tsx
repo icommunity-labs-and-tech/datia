@@ -2,22 +2,26 @@
 
 import { useState } from 'react';
 import {
+  Alert,
   Anchor,
   Badge,
   Button,
   Group,
+  Modal,
   Paper,
   ScrollArea,
+  Stack,
   Table,
   Tabs,
   Text,
+  TextInput,
 } from '@mantine/core';
-import { IconArrowLeft, IconPlayerPlay, IconPlayerStop } from '@tabler/icons-react';
+import { IconAlertTriangleFilled, IconArrowLeft, IconPlayerPlay, IconPlayerStop, IconTrash } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import PageHeader from '@/components/layout/PageHeader';
-import { setCompanyActive, type SuperadminCompanyOverview } from '@/actions/companies/superadmin';
+import { deleteCompanySuperadmin, setCompanyActive, type SuperadminCompanyOverview } from '@/actions/companies/superadmin';
 
 interface Props {
   organizationId: string;
@@ -26,11 +30,16 @@ interface Props {
 
 export default function SuperadminCompanyDetail({ organizationId, overview }: Props) {
   const t = useTranslations('superadminCompany');
+  const tCommon = useTranslations('common.actions');
   const locale = useLocale();
   const router = useRouter();
   const { company, assets, certifications, accounts, energy } = overview;
   const [active, setActive] = useState(company.active);
   const [toggling, setToggling] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const date = (value: Date | null) => (value ? new Date(value).toLocaleDateString(locale) : '—');
   const empty = (label: string) => <Text size="sm" c="dimmed" py="md">{label}</Text>;
@@ -43,6 +52,29 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
       router.refresh();
     }
     setToggling(false);
+  };
+
+  const closeDelete = () => {
+    setDeleteOpen(false);
+    setDeleteConfirmText('');
+    setDeleteError(null);
+  };
+
+  const confirmDelete = async () => {
+    setDeleting(true);
+    setDeleteError(null);
+    try {
+      const result = await deleteCompanySuperadmin(company.id);
+      if (!result.success) {
+        setDeleteError(result.error ?? t('delete.failed'));
+        return;
+      }
+      router.push(`/superadmin/organizations/${organizationId}`);
+    } catch {
+      setDeleteError(t('delete.failed'));
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -69,6 +101,15 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
               onClick={toggleActive}
             >
               {active ? t('deactivate') : t('activate')}
+            </Button>
+            <Button
+              size="xs"
+              variant="default"
+              color="red"
+              leftSection={<IconTrash size={14} />}
+              onClick={() => setDeleteOpen(true)}
+            >
+              {t('delete.tooltip')}
             </Button>
           </Group>
         }
@@ -179,6 +220,36 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
           </Tabs.Panel>
         </Tabs>
       </Paper>
+
+      <Modal opened={deleteOpen} onClose={closeDelete} title={t('delete.title', { name: company.name })} centered>
+        <Stack gap="md">
+          {deleteError && (
+            <Alert color="red" variant="light" icon={<IconAlertTriangleFilled size={16} />}>
+              {deleteError}
+            </Alert>
+          )}
+          <Alert color="red" variant="light" icon={<IconAlertTriangleFilled size={16} />}>
+            {t('delete.warning')}
+          </Alert>
+          <TextInput
+            label={t('delete.confirmLabel', { name: company.name })}
+            value={deleteConfirmText}
+            onChange={(e) => setDeleteConfirmText(e.currentTarget.value)}
+            data-autofocus
+          />
+          <Group justify="flex-end" gap="xs">
+            <Button variant="default" onClick={closeDelete} disabled={deleting}>{tCommon('cancel')}</Button>
+            <Button
+              color="red"
+              loading={deleting}
+              disabled={deleteConfirmText.trim() !== company.name}
+              onClick={confirmDelete}
+            >
+              {t('delete.submit')}
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </>
   );
 }

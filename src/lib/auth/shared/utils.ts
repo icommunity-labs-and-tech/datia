@@ -20,6 +20,7 @@ export async function authenticateUser(email: string, password: string): Promise
         organizationId: true, // Incluir organizationId
         companyId: true,
         status: true, // Verificar si está activo
+        Company: { select: { active: true } },
       }
     });
 
@@ -29,6 +30,11 @@ export async function authenticateUser(email: string, password: string): Promise
 
     // Verificar que el usuario esté activo
     if (user.status !== 'ACTIVE') {
+      return null;
+    }
+
+    // Una empresa bloqueada corta el acceso de sus cuentas sin tocar sus datos.
+    if (user.Company && !user.Company.active) {
       return null;
     }
 

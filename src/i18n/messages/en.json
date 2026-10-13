@@ -1277,6 +1277,22 @@
       "forbidden": "Only the organisation's own account manages companies.",
       "failed": "The operation could not be completed. Try again."
     },
+    "block": {
+      "blockTooltip": "Block company",
+      "unblockTooltip": "Unblock company",
+      "blockedNotice": "“{name}” blocked. Its accounts will not be able to sign in; no data is touched.",
+      "unblockedNotice": "“{name}” unblocked.",
+      "failed": "Could not change the company's block status."
+    },
+    "delete": {
+      "tooltip": "Delete company",
+      "title": "Delete “{name}”",
+      "warning": "This deletes the company, its accounts, and all its data. This cannot be undone.",
+      "confirmLabel": "Type “{name}” to confirm",
+      "submit": "Delete company",
+      "deletedNotice": "“{name}” deleted.",
+      "failed": "Could not delete the company."
+    },
     "detail": {
       "back": "Companies",
       "description": "What this company holds, read-only. To act on it, sign in with its account.",
@@ -1309,11 +1325,19 @@
   },
   "superadminCompany": {
     "back": "Organization",
-    "description": "What this company holds. The superadmin sees every organization and company; it can only activate or deactivate it.",
+    "description": "What this company holds. The superadmin sees every organization and company; it can block, unblock or delete it.",
     "active": "Active",
     "inactive": "Inactive",
     "activate": "Activate",
     "deactivate": "Deactivate",
+    "delete": {
+      "tooltip": "Delete company",
+      "title": "Delete “{name}”",
+      "warning": "This deletes the company, its accounts, and all its data. This cannot be undone.",
+      "confirmLabel": "Type “{name}” to confirm",
+      "submit": "Delete company",
+      "failed": "Could not delete the company."
+    },
     "assetsCount": "{count} assets",
     "certificationsCount": "{count} certifications",
     "accountsCount": "{count} accounts",
