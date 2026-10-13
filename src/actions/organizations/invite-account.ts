@@ -34,11 +34,12 @@ export interface InviteUserResult {
 }
 
 /**
- * Invita a un nuevo usuario a la organización, en nombre de `tenant`.
+ * Invita la única cuenta de una empresa, en nombre de `tenant`.
  *
- * El actor lo decide quien llama a partir de una sesión ya verificada: la del
- * dashboard (`inviteUser`) o la de la cuenta de la organización (acciones de
- * empresas). Nunca viene del cliente.
+ * El actor lo decide quien llama a partir de una sesión ya verificada: la de
+ * la cuenta de la organización (acciones de empresas). Nunca viene del
+ * cliente. Una empresa ya con cuenta rechaza la invitación (#141): una
+ * empresa, un único acceso.
  */
 export async function inviteAccount(
   tenant: Pick<TenantContext, "organizationId" | "companyId" | "userRole" | "userId">,
@@ -124,6 +125,18 @@ export async function inviteAccount(
     } else {
       // The invited account joins the inviter's company.
       companyId = tenant.companyId ?? (await defaultCompanyId(tenant.organizationId!));
+    }
+
+    // Una empresa, un único acceso (#141): no una segunda cuenta.
+    const companyAlreadyHasAccount = await prisma.user.findFirst({
+      where: { companyId },
+      select: { id: true },
+    });
+    if (companyAlreadyHasAccount) {
+      return {
+        success: false,
+        error: "Esta empresa ya tiene una cuenta. Solo puede tener una.",
+      };
     }
 
     // Crear usuario e invitación en una transacción

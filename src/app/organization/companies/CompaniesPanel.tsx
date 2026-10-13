@@ -289,16 +289,18 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
                     </Table.Td>
                     <Table.Td>
                       <Group gap={4} wrap="nowrap" justify="flex-end">
-                        <Tooltip label={t('inviteAccount')}>
-                          <ActionIcon
-                            variant="subtle"
-                            size="sm"
-                            aria-label={t('inviteAccountFor', { name: company.name })}
-                            onClick={() => setDialog({ kind: 'invite', company })}
-                          >
-                            <IconUserPlus size={16} />
-                          </ActionIcon>
-                        </Tooltip>
+                        {company.accounts === 0 && (
+                          <Tooltip label={t('inviteAccount')}>
+                            <ActionIcon
+                              variant="subtle"
+                              size="sm"
+                              aria-label={t('inviteAccountFor', { name: company.name })}
+                              onClick={() => setDialog({ kind: 'invite', company })}
+                            >
+                              <IconUserPlus size={16} />
+                            </ActionIcon>
+                          </Tooltip>
+                        )}
                         <Tooltip label={company.active ? t('block.blockTooltip') : t('block.unblockTooltip')}>
                           <ActionIcon
                             variant="subtle"
