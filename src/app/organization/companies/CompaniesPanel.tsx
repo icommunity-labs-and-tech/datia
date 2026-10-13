@@ -94,7 +94,7 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
       } else {
         setNotice(
           result.inviteError
-            ? t('notice.createdWithoutInvite', { name: result.company!.name })
+            ? t('notice.createdWithoutInviteDetail', { name: result.company!.name, detail: result.inviteError })
             : accountEmail.trim()
               ? t('notice.createdAndInvited', { name: result.company!.name, email: accountEmail.trim() })
               : t('notice.created', { name: result.company!.name })

@@ -61,24 +61,21 @@ export async function inviteAccount(
       throw new Error("No se puede determinar la organización");
     }
     
-    // El email es único en todo el sistema. Si la cuenta es de otra organización
-    // no se revela: la respuesta es la misma que si la invitación se hubiera enviado.
+    // El email es único en todo el sistema, sea de esta organización, de otra,
+    // o de una cuenta de plataforma (#138: ocultarlo confundía más de lo que
+    // protegía — quien invita ya ve el resultado en el acto).
     const existingUser = await prisma.user.findUnique({
       where: { email: input.email },
       select: { organizationId: true },
     });
 
-    if (existingUser?.organizationId === tenant.organizationId) {
+    if (existingUser) {
       return {
         success: false,
-        error: `El email "${input.email}" ya está registrado`,
+        error: `El email "${input.email}" ya tiene una cuenta en el sistema`,
       };
     }
 
-    if (existingUser) {
-      return { success: true };
-    }
-    
     // Validar que no haya una invitación pendiente
     const existingInvitation = await prisma.invitation.findFirst({
       where: {
