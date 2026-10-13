@@ -39,6 +39,11 @@ export async function activateAccount(
             active: true,
           },
         },
+        Company: {
+          select: {
+            active: true,
+          },
+        },
       },
     });
     
@@ -70,6 +75,14 @@ export async function activateAccount(
       return {
         success: false,
         error: "La organización está desactivada",
+      };
+    }
+
+    // Verificar que la empresa no esté bloqueada
+    if (user.Company && !user.Company.active) {
+      return {
+        success: false,
+        error: "La empresa está bloqueada",
       };
     }
 

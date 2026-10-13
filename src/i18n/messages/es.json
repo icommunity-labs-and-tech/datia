@@ -1277,6 +1277,22 @@
       "forbidden": "Solo la cuenta de la organización gestiona las empresas.",
       "failed": "No se pudo completar la operación. Inténtalo de nuevo."
     },
+    "block": {
+      "blockTooltip": "Bloquear empresa",
+      "unblockTooltip": "Desbloquear empresa",
+      "blockedNotice": "«{name}» bloqueada. Sus cuentas no podrán iniciar sesión; los datos no se tocan.",
+      "unblockedNotice": "«{name}» desbloqueada.",
+      "failed": "No se pudo cambiar el bloqueo de la empresa."
+    },
+    "delete": {
+      "tooltip": "Eliminar empresa",
+      "title": "Eliminar «{name}»",
+      "warning": "Se borrará la empresa, sus cuentas y todos sus datos. Esta acción no se puede deshacer.",
+      "confirmLabel": "Escribe «{name}» para confirmar",
+      "submit": "Eliminar empresa",
+      "deletedNotice": "«{name}» eliminada.",
+      "failed": "No se pudo eliminar la empresa."
+    },
     "detail": {
       "back": "Empresas",
       "description": "Lo que tiene esta empresa, en solo lectura. Para actuar sobre ello, entra con su cuenta.",
@@ -1309,11 +1325,19 @@
   },
   "superadminCompany": {
     "back": "Organización",
-    "description": "Lo que tiene esta empresa. El superadmin ve todas las organizaciones y empresas; solo puede activarla o desactivarla.",
+    "description": "Lo que tiene esta empresa. El superadmin ve todas las organizaciones y empresas; puede bloquearla, desbloquearla o eliminarla.",
     "active": "Activa",
     "inactive": "Inactiva",
     "activate": "Activar",
     "deactivate": "Desactivar",
+    "delete": {
+      "tooltip": "Eliminar empresa",
+      "title": "Eliminar «{name}»",
+      "warning": "Se borrará la empresa, sus cuentas y todos sus datos. Esta acción no se puede deshacer.",
+      "confirmLabel": "Escribe «{name}» para confirmar",
+      "submit": "Eliminar empresa",
+      "failed": "No se pudo eliminar la empresa."
+    },
     "assetsCount": "{count} activos",
     "certificationsCount": "{count} certificaciones",
     "accountsCount": "{count} cuentas",

@@ -8,7 +8,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  * theirs, or at all.
  */
 
-const { mockPrisma, mockIsSuperAdmin, mockAssets, mockUsers, mockCertified, mockCertifications, mockSources, mockConsumptionTotals, mockEmissionTotals } =
+const { mockPrisma, mockIsSuperAdmin, mockAssets, mockUsers, mockCertified, mockCertifications, mockSources, mockConsumptionTotals, mockEmissionTotals, mockDeleteCore } =
   vi.hoisted(() => ({
     mockPrisma: { company: { findMany: vi.fn(), findUnique: vi.fn(), update: vi.fn() } },
     mockIsSuperAdmin: vi.fn(),
@@ -19,6 +19,7 @@ const { mockPrisma, mockIsSuperAdmin, mockAssets, mockUsers, mockCertified, mock
     mockSources: vi.fn(),
     mockConsumptionTotals: vi.fn(),
     mockEmissionTotals: vi.fn(),
+    mockDeleteCore: vi.fn(),
   }));
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
@@ -44,8 +45,14 @@ vi.mock('@/infrastructure/prisma/repositories/EnergyRepositoryPrisma', () => ({
     getEmissionTotals: mockEmissionTotals,
   },
 }));
+vi.mock('@/actions/companies/delete-core', () => ({ deleteCompanyCore: mockDeleteCore }));
 
-import { listCompaniesForOrganization, getSuperadminCompanyOverview, setCompanyActive } from '@/actions/companies/superadmin';
+import {
+  listCompaniesForOrganization,
+  getSuperadminCompanyOverview,
+  setCompanyActive,
+  deleteCompanySuperadmin,
+} from '@/actions/companies/superadmin';
 
 const company = {
   id: 'co-2',
@@ -141,5 +148,20 @@ describe('setCompanyActive', () => {
   it('answers failure for a company that does not exist, instead of throwing', async () => {
     mockPrisma.company.update.mockRejectedValue(new Error('Record to update not found'));
     expect(await setCompanyActive('co-fantasma', true)).toEqual({ success: false });
+  });
+});
+
+describe('deleteCompanySuperadmin', () => {
+  it('deletes any company, unscoped — unlike the organization account\'s own deleteCompany', async () => {
+    mockDeleteCore.mockResolvedValue({ success: true });
+
+    expect(await deleteCompanySuperadmin('co-2')).toEqual({ success: true });
+    expect(mockDeleteCore).toHaveBeenCalledWith('co-2');
+  });
+
+  it('is refused to anyone but the superadmin', async () => {
+    mockIsSuperAdmin.mockResolvedValue(false);
+    expect(await deleteCompanySuperadmin('co-2')).toMatchObject({ success: false });
+    expect(mockDeleteCore).not.toHaveBeenCalled();
   });
 });

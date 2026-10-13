@@ -21,19 +21,31 @@ import {
   ThemeIcon,
   Tooltip,
 } from '@mantine/core';
-import { IconAlertTriangleFilled, IconBuilding, IconCheck, IconCopy, IconPlus, IconUserPlus } from '@tabler/icons-react';
+import {
+  IconAlertTriangleFilled,
+  IconBuilding,
+  IconCheck,
+  IconCopy,
+  IconLock,
+  IconLockOpen,
+  IconPlus,
+  IconTrash,
+  IconUserPlus,
+} from '@tabler/icons-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import PageHeader from '@/components/layout/PageHeader';
 import { listCompanies, type CompanySummary } from '@/actions/companies/list';
 import { createCompany, type CompanyError } from '@/actions/companies/create';
 import { inviteCompanyAccount } from '@/actions/companies/invite';
+import { setCompanyBlocked } from '@/actions/companies/block';
+import { deleteCompany } from '@/actions/companies/delete';
 
 interface CompaniesPanelProps {
   initial: CompanySummary[];
 }
 
-type Dialog = { kind: 'create' } | { kind: 'invite'; company: CompanySummary } | null;
+type Dialog = { kind: 'create' } | { kind: 'invite'; company: CompanySummary } | { kind: 'delete'; company: CompanySummary } | null;
 
 export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
   const t = useTranslations('companiesPage');
@@ -50,6 +62,8 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [activationLink, setActivationLink] = useState<string | null>(null);
+  const [blockingId, setBlockingId] = useState<string | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const reload = async () => setCompanies(await listCompanies());
 
@@ -58,6 +72,7 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
     setName('');
     setAccountName('');
     setAccountEmail('');
+    setDeleteConfirmText('');
     setError(null);
   };
 
@@ -135,6 +150,48 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
       close();
     } catch {
       setError(t('errors.failed'));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const toggleBlocked = async (company: CompanySummary) => {
+    setBlockingId(company.id);
+    setError(null);
+    try {
+      const result = await setCompanyBlocked(company.id, company.active);
+      if (!result.success) {
+        setError(result.error ?? t('block.failed'));
+        return;
+      }
+      await reload();
+      setActivationLink(null);
+      setNotice(company.active ? t('block.blockedNotice', { name: company.name }) : t('block.unblockedNotice', { name: company.name }));
+    } catch {
+      setError(t('block.failed'));
+    } finally {
+      setBlockingId(null);
+    }
+  };
+
+  const submitDelete = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (dialog?.kind !== 'delete') return;
+    setSaving(true);
+    setError(null);
+    try {
+      const result = await deleteCompany(dialog.company.id);
+      if (!result.success) {
+        setError(result.error ?? t('delete.failed'));
+        return;
+      }
+      const name = dialog.company.name;
+      await reload();
+      setActivationLink(null);
+      setNotice(t('delete.deletedNotice', { name }));
+      close();
+    } catch {
+      setError(t('delete.failed'));
     } finally {
       setSaving(false);
     }
@@ -231,16 +288,41 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
                       </Badge>
                     </Table.Td>
                     <Table.Td>
-                      <Tooltip label={t('inviteAccount')}>
-                        <ActionIcon
-                          variant="subtle"
-                          size="sm"
-                          aria-label={t('inviteAccountFor', { name: company.name })}
-                          onClick={() => setDialog({ kind: 'invite', company })}
-                        >
-                          <IconUserPlus size={16} />
-                        </ActionIcon>
-                      </Tooltip>
+                      <Group gap={4} wrap="nowrap" justify="flex-end">
+                        <Tooltip label={t('inviteAccount')}>
+                          <ActionIcon
+                            variant="subtle"
+                            size="sm"
+                            aria-label={t('inviteAccountFor', { name: company.name })}
+                            onClick={() => setDialog({ kind: 'invite', company })}
+                          >
+                            <IconUserPlus size={16} />
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label={company.active ? t('block.blockTooltip') : t('block.unblockTooltip')}>
+                          <ActionIcon
+                            variant="subtle"
+                            color={company.active ? undefined : 'yellow'}
+                            size="sm"
+                            loading={blockingId === company.id}
+                            aria-label={company.active ? t('block.blockTooltip') : t('block.unblockTooltip')}
+                            onClick={() => toggleBlocked(company)}
+                          >
+                            {company.active ? <IconLock size={16} /> : <IconLockOpen size={16} />}
+                          </ActionIcon>
+                        </Tooltip>
+                        <Tooltip label={t('delete.tooltip')}>
+                          <ActionIcon
+                            variant="subtle"
+                            color="red"
+                            size="sm"
+                            aria-label={t('delete.tooltip')}
+                            onClick={() => setDialog({ kind: 'delete', company })}
+                          >
+                            <IconTrash size={16} />
+                          </ActionIcon>
+                        </Tooltip>
+                      </Group>
                     </Table.Td>
                   </Table.Tr>
                 ))}
@@ -305,6 +387,39 @@ export default function CompaniesPanel({ initial }: CompaniesPanelProps) {
             <Group justify="flex-end" gap="xs">
               <Button variant="default" onClick={close} disabled={saving}>{tCommon('cancel')}</Button>
               <Button type="submit" loading={saving}>{t('invite.submit')}</Button>
+            </Group>
+          </Stack>
+        </form>
+      </Modal>
+
+      <Modal
+        opened={dialog?.kind === 'delete'}
+        onClose={close}
+        title={dialog?.kind === 'delete' ? t('delete.title', { name: dialog.company.name }) : ''}
+        centered
+      >
+        <form onSubmit={submitDelete}>
+          <Stack gap="md">
+            {errorAlert}
+            <Alert color="red" variant="light" icon={<IconAlertTriangleFilled size={16} />}>
+              {t('delete.warning')}
+            </Alert>
+            <TextInput
+              label={dialog?.kind === 'delete' ? t('delete.confirmLabel', { name: dialog.company.name }) : ''}
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.currentTarget.value)}
+              data-autofocus
+            />
+            <Group justify="flex-end" gap="xs">
+              <Button variant="default" onClick={close} disabled={saving}>{tCommon('cancel')}</Button>
+              <Button
+                type="submit"
+                color="red"
+                loading={saving}
+                disabled={dialog?.kind === 'delete' && deleteConfirmText.trim() !== dialog.company.name}
+              >
+                {t('delete.submit')}
+              </Button>
             </Group>
           </Stack>
         </form>
