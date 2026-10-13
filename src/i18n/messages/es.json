@@ -1167,6 +1167,10 @@
       "organizations": "Organizaciones",
       "support": "Soporte"
     },
+    "accessDenied": {
+      "title": "Sin acceso",
+      "description": "Tu cuenta de Google no está registrada como administradora de la plataforma. Si crees que deberías tener acceso, contacta con quien gestiona el equipo."
+    },
     "home": {
       "organizations": {
         "title": "Organizaciones",

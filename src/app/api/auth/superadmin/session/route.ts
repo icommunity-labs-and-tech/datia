@@ -1,20 +1,15 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { verifySuperAdminJWT } from '@/lib/auth/superadmin/jwt';
-import { superadminAuthConfig } from '@/lib/auth/superadmin/config';
+import { currentSuperAdmin } from '@/lib/auth/superadmin/identity';
 
-/** Who is signed in to the platform panel. */
+/**
+ * Who is signed in to the platform panel. In production this is entirely
+ * IAP's own verified identity, not a cookie this route reads directly (#20
+ * follow-up) — `currentSuperAdmin` is where that distinction lives.
+ */
 export async function GET() {
   try {
-    const token = (await cookies()).get(superadminAuthConfig.cookieName)?.value;
-    if (!token) return NextResponse.json({ user: null });
-
-    const payload = await verifySuperAdminJWT(token);
-    if (!payload) return NextResponse.json({ user: null });
-
-    return NextResponse.json({
-      user: { id: payload.id, email: payload.email, name: payload.name, role: payload.role },
-    });
+    const user = await currentSuperAdmin();
+    return NextResponse.json({ user });
   } catch (error) {
     console.error('[superadmin/session] error:', error);
     return NextResponse.json({ user: null });

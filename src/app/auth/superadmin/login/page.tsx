@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import LoginPageLayout from '@/components/auth/LoginPageLayout';
@@ -16,6 +16,18 @@ export default function SuperAdminLoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    // Production has no password login any more — IAP is the only way in
+    // (#20 follow-up). Reaching this URL there only happens via a stale
+    // link, since the panel's own nav never points here; `/superadmin`'s own
+    // layout is where the real check (and any "access denied") happens.
+    if (process.env.NODE_ENV === 'production') {
+      router.replace('/superadmin');
+    }
+  }, [router]);
+
+  if (process.env.NODE_ENV === 'production') return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

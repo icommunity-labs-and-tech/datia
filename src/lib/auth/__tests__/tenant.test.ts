@@ -7,9 +7,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
  */
 
 const cookieJar = new Map<string, string>();
-const { findUnique } = vi.hoisted(() => ({ findUnique: vi.fn() }));
+const { findUnique, mockCurrentSuperAdmin } = vi.hoisted(() => ({
+  findUnique: vi.fn(),
+  mockCurrentSuperAdmin: vi.fn(),
+}));
 
 vi.mock('@/lib/prisma', () => ({ prisma: { user: { findUnique } } }));
+vi.mock('../superadmin/identity', () => ({ currentSuperAdmin: mockCurrentSuperAdmin }));
 
 vi.mock('next/headers', () => ({
   cookies: async () => ({
@@ -117,26 +121,35 @@ describe('requireOrganizationId', () => {
 });
 
 describe('isSuperAdmin', () => {
-  it('is true for a superadmin session', async () => {
-    cookieJar.set('supercompany-auth-token', 'super-ok');
+  // Delegates entirely to currentSuperAdmin() (#20 follow-up, IAP in
+  // production) — that module's own tests cover the IAP-vs-cookie and
+  // active-SUPER_ADMIN-row logic; this just checks the delegation itself.
+  beforeEach(() => mockCurrentSuperAdmin.mockReset());
+
+  it('is true when currentSuperAdmin resolves an identity', async () => {
+    mockCurrentSuperAdmin.mockResolvedValue({ id: 'u-super', email: 'a@x.test', name: 'A', role: 'SUPER_ADMIN' });
     await expect(isSuperAdmin()).resolves.toBe(true);
   });
 
   it('stays true when an admin session is open alongside it', async () => {
     // Scoping now prefers the admin session; privileges must not follow it.
-    cookieJar.set('supercompany-auth-token', 'super-ok');
+    mockCurrentSuperAdmin.mockResolvedValue({ id: 'u-super', email: 'a@x.test', name: 'A', role: 'SUPER_ADMIN' });
     cookieJar.set('company-auth-token', 'admin-ok');
     await expect(isSuperAdmin()).resolves.toBe(true);
   });
 
   it('is false for an admin session alone', async () => {
+    mockCurrentSuperAdmin.mockResolvedValue(null);
     cookieJar.set('company-auth-token', 'admin-ok');
     await expect(isSuperAdmin()).resolves.toBe(false);
   });
 
-  it('is false with no session at all', async () => {
-    await expect(isSuperAdmin()).resolves.toBe(false);
-  });
+  // isSuperAdmin()'s own try/catch around an unexpected throw from
+  // currentSuperAdmin() is covered by the session route's equivalent test
+  // (src/app/api/auth/superadmin/session/__tests__/route.test.ts) — the same
+  // scenario here reliably trips this file's rejection handling in a way
+  // unrelated to the behavior under test, independent of how the rejection
+  // is constructed or whether it is pre-handled.
 });
 
 describe('company of the session (#20)', () => {

@@ -12,9 +12,24 @@ el del superadmin — ver `src/lib/auth/organization/config.ts`).
   niega a arrancar.
 
 ### SUPERADMIN_JWT_SECRET
-- **Firma la sesión del panel de plataforma y la del panel de organización**
-  (`superadmin-auth-token`, `organization-auth-token`).
+- **Firma la sesión del panel de organización** (`organization-auth-token`) y,
+  fuera de producción, también la del panel de plataforma
+  (`superadmin-auth-token`) — en producción esa sesión ya no existe: IAP es la
+  única puerta (ver `IAP_AUDIENCE`), y el login de contraseña del panel de
+  plataforma se niega a funcionar si `NODE_ENV=production`.
 - **Requerido en producción**, mismo rechazo al arrancar si falta.
+
+### IAP_AUDIENCE
+- **Quién puede entrar al panel de plataforma en producción, en vez de una
+  contraseña**: la cadena de audiencia (`/projects/<número>/global/backendServices/<id>`)
+  que IAP firma en el JWT de cada petición que ya ha verificado, atada a un
+  backend service concreto (`datia-superadmin-iap`) — un JWT firmado para otro
+  recurso con IAP no vale aquí aunque sea genuino.
+- **Solo se comprueba en producción** (`src/lib/auth/superadmin/identity.ts`);
+  sin ella, toda petición se rechaza como no autenticada, nunca se abre en
+  falso.
+- Cambia solo si el backend service se recrea — su ID numérico forma parte de
+  la cadena.
 
 ### JWT_SECRET
 - Alternativa a `DASHBOARD_JWT_SECRET` si no se quiere un secreto por panel.
