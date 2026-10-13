@@ -26,7 +26,10 @@ const { tx, mockPrisma, mockSuper, mockSend, mockCreateSignature } = vi.hoisted(
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/auth/tenant', () => ({ isSuperAdmin: mockSuper }));
-vi.mock('../../organizations/helpers', () => ({ sendInvitationEmail: mockSend }));
+vi.mock('../../organizations/helpers', () => ({
+  sendInvitationEmail: mockSend,
+  buildActivationUrl: vi.fn(async (token: string) => `https://datia.test/auth/activate?token=${token}`),
+}));
 vi.mock('@/infrastructure/icommunity/ICommunityServiceImpl', () => ({
   icommunityService: { createSignature: mockCreateSignature },
 }));
@@ -86,5 +89,18 @@ describe('createOrganizationWithAdmin', () => {
         verificationStatus: 'NOT_VERIFIED',
       },
     });
+  });
+
+  it('still creates the organization when the invitation email fails, and returns the activation link', async () => {
+    // Mailgun is a third party, not the alta itself: rolling everything back
+    // for its own outage would force repeating work that is not at fault.
+    mockSend.mockRejectedValueOnce(new Error('Mailgun API error 401: Unauthorized'));
+    const result = await createOrganizationWithAdmin(input);
+
+    expect(result.success).toBe(true);
+    expect(result.emailSent).toBe(false);
+    expect(result.activationUrl).toContain(result.admin?.activationToken);
+    expect(tx.organization.delete).not.toHaveBeenCalled();
+    expect(tx.user.delete).not.toHaveBeenCalled();
   });
 });

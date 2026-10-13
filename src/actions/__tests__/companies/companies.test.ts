@@ -79,6 +79,18 @@ describe('createCompany', () => {
     expect(result).toMatchObject({ success: true, inviteError: 'Mailgun caído', company: { id: 'co-new' } });
   });
 
+  it('keeps the company and its account when only the invitation email fails, and passes on the link', async () => {
+    mockInvite.mockResolvedValue({ success: true, emailSent: false, activationUrl: 'https://datia.test/auth/activate?token=abc' });
+    const result = await createCompany({ name: 'Filial', admin: { name: 'Ana', email: 'ana@norte.test' } });
+
+    expect(result).toMatchObject({
+      success: true,
+      company: { id: 'co-new' },
+      activationUrl: 'https://datia.test/auth/activate?token=abc',
+    });
+    expect(result.inviteError).toBeUndefined();
+  });
+
   it('is refused to anyone without an organization session: a company account has none', async () => {
     mockVerify.mockResolvedValue(null);
     const result = await createCompany({ name: 'Hermana' });
@@ -158,5 +170,13 @@ describe('inviteCompanyAccount', () => {
 
   it('checks the email', async () => {
     expect(await inviteCompanyAccount({ ...input, email: 'x' })).toEqual({ success: false, error: 'email_invalid' });
+  });
+
+  it('passes on the activation link when the invitation email could not be sent', async () => {
+    mockInvite.mockResolvedValue({ success: true, emailSent: false, activationUrl: 'https://datia.test/auth/activate?token=xyz' });
+    expect(await inviteCompanyAccount(input)).toEqual({
+      success: true,
+      activationUrl: 'https://datia.test/auth/activate?token=xyz',
+    });
   });
 });

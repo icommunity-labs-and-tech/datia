@@ -14,17 +14,24 @@ export interface SendInvitationEmailParams {
 }
 
 /**
- * Envía un email de invitación usando Mailgun
- * Lanza error si falla - debe ser parte de la transacción lógica
+ * La URL de activación es la misma que lleva el email: quien llama la necesita
+ * también cuando el envío falla, para ofrecerla a mano (ver `sendInvitationEmail`).
+ */
+export async function buildActivationUrl(activationToken: string): Promise<string> {
+  const appUrl = await getDynamicAppUrl();
+  return `${appUrl}/auth/activate?token=${activationToken}`;
+}
+
+/**
+ * Envía un email de invitación usando Mailgun.
+ * Lanza error si falla: quien llama decide si eso bloquea la operación o no.
  */
 export async function sendInvitationEmail(params: SendInvitationEmailParams): Promise<void> {
   const { recipientEmail, recipientName, organizationName, activationToken, language = 'es' } = params;
 
-  // Construir URL de activación desde el host de la request
   const appUrl = await getDynamicAppUrl();
-  const activationUrl = `${appUrl}/auth/activate?token=${activationToken}`;
+  const activationUrl = await buildActivationUrl(activationToken);
 
-  // Si falla el email, lanzar error para que se revierta la transacción
   await mailgunService.sendInvitationEmail({
     recipientEmail,
     recipientName,

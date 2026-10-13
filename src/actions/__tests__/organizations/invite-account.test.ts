@@ -26,7 +26,10 @@ const { tx, mockPrisma, mockSend, mockDefault } = vi.hoisted(() => {
 
 vi.mock('@/lib/prisma', () => ({ prisma: mockPrisma }));
 vi.mock('@/lib/company', () => ({ defaultCompanyId: mockDefault }));
-vi.mock('../../organizations/helpers', () => ({ sendInvitationEmail: mockSend }));
+vi.mock('../../organizations/helpers', () => ({
+  sendInvitationEmail: mockSend,
+  buildActivationUrl: vi.fn(async (token: string) => `https://datia.test/auth/activate?token=${token}`),
+}));
 
 import { inviteAccount } from '../../organizations/invite-account';
 
@@ -100,5 +103,18 @@ describe('inviteUser: an email that already has an account', () => {
     expect(result).toEqual({ success: true });
     expect(tx.user.create).not.toHaveBeenCalled();
     expect(mockSend).not.toHaveBeenCalled();
+  });
+});
+
+describe('inviteUser: Mailgun outage', () => {
+  it('keeps the account and invitation when the email fails, and returns the activation link', async () => {
+    mockSend.mockRejectedValueOnce(new Error('Mailgun API error 401: Unauthorized'));
+    const result = await inviteAccount(orgAccount, base);
+
+    expect(result.success).toBe(true);
+    expect(result.emailSent).toBe(false);
+    expect(result.activationUrl).toContain(result.invitation?.token);
+    expect(tx.user.delete).not.toHaveBeenCalled();
+    expect(tx.invitation.delete).not.toHaveBeenCalled();
   });
 });
