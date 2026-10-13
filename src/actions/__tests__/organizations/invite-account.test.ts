@@ -92,17 +92,25 @@ describe('inviteUser: an email that already has an account', () => {
     mockPrisma.user.findUnique.mockResolvedValueOnce({ organizationId: 'org-1' });
     const result = await inviteAccount(orgAccount, base);
 
-    expect(result).toMatchObject({ success: false, error: 'El email "ana@norte.test" ya está registrado' });
+    expect(result).toMatchObject({ success: false, error: 'El email "ana@norte.test" ya tiene una cuenta en el sistema' });
     expect(tx.user.create).not.toHaveBeenCalled();
   });
 
-  it('answers as if the invitation went out when the account is in another organization', async () => {
+  it('says so too when the account is in another organization (#138: used to hide this, confused more than it protected)', async () => {
     mockPrisma.user.findUnique.mockResolvedValueOnce({ organizationId: 'org-2' });
     const result = await inviteAccount(orgAccount, base);
 
-    expect(result).toEqual({ success: true });
+    expect(result).toMatchObject({ success: false, error: 'El email "ana@norte.test" ya tiene una cuenta en el sistema' });
     expect(tx.user.create).not.toHaveBeenCalled();
     expect(mockSend).not.toHaveBeenCalled();
+  });
+
+  it('says so for a platform account too, which has no organization at all', async () => {
+    mockPrisma.user.findUnique.mockResolvedValueOnce({ organizationId: null });
+    const result = await inviteAccount(orgAccount, base);
+
+    expect(result).toMatchObject({ success: false, error: 'El email "ana@norte.test" ya tiene una cuenta en el sistema' });
+    expect(tx.user.create).not.toHaveBeenCalled();
   });
 });
 

@@ -1263,7 +1263,7 @@
     "notice": {
       "created": "Company “{name}” created.",
       "createdAndInvited": "Company “{name}” created and invitation sent to {email}.",
-      "createdWithoutInvite": "Company “{name}” created, but the invitation could not be sent. Try again from its row.",
+      "createdWithoutInviteDetail": "Company “{name}” created, but the invitation could not be sent: {detail}",
       "createdNoEmail": "Company “{name}” created, but the invitation email could not be sent to {email}. Share this link by hand:",
       "invited": "Invitation sent to {email} for {name}.",
       "invitedNoEmail": "Could not send the invitation email to {email} for {name}. Share this link by hand:"
