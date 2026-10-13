@@ -13,7 +13,7 @@ const { tx, mockPrisma, mockSend, mockDefault } = vi.hoisted(() => {
   return {
     tx,
     mockPrisma: {
-      user: { findUnique: vi.fn(async () => null) },
+      user: { findUnique: vi.fn(async () => null), findFirst: vi.fn(async () => null) },
       invitation: { findFirst: vi.fn(async () => null) },
       organization: { findUnique: vi.fn(async () => ({ name: 'Datia' })) },
       company: { findFirst: vi.fn() },
@@ -111,6 +111,28 @@ describe('inviteUser: an email that already has an account', () => {
 
     expect(result).toMatchObject({ success: false, error: 'El email "ana@norte.test" ya tiene una cuenta en el sistema' });
     expect(tx.user.create).not.toHaveBeenCalled();
+  });
+});
+
+describe('inviteUser: one account per company (#141)', () => {
+  it('refuses a second account when the target company already has one', async () => {
+    mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'u-existing' });
+    const result = await inviteAccount(orgAccount, { ...base, companyId: 'co-2' });
+
+    expect(result).toMatchObject({ success: false, error: 'Esta empresa ya tiene una cuenta. Solo puede tener una.' });
+    expect(tx.user.create).not.toHaveBeenCalled();
+  });
+
+  it('checks the resolved company, not a literal match on the input', async () => {
+    mockPrisma.user.findFirst.mockResolvedValueOnce({ id: 'u-existing' });
+    await inviteAccount(orgAccount, { ...base, companyId: 'co-2' });
+
+    expect(mockPrisma.user.findFirst.mock.calls[0][0].where).toEqual({ companyId: 'co-2' });
+  });
+
+  it('lets the invitation through for a company with none yet', async () => {
+    const result = await inviteAccount(orgAccount, { ...base, companyId: 'co-2' });
+    expect(result.success).toBe(true);
   });
 });
 
