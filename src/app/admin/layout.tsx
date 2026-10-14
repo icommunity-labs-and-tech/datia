@@ -124,7 +124,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   ];
 
   return (
-    <PanelShell homeHref="/admin" navLinks={navLinks} user={user} onLogout={handleLogout}>
+    <PanelShell homeHref="/admin" navLinks={navLinks} user={user} onLogout={handleLogout} accent="datiaRed">
       {user ? children : null}
     </PanelShell>
   );

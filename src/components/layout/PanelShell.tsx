@@ -58,6 +58,13 @@ interface PanelShellProps {
   fullBleed?: boolean;
   /** Extra section appended under the nav list in the mobile drawer. */
   mobileExtra?: React.ReactNode;
+  /**
+   * Which panel this is, as a theme color name — 'datiaGreen' (company),
+   * 'datiaBlue' (organization) or 'datiaRed' (platform). The only thing that
+   * tells the three apart once you're past the login screen (#146): the top
+   * hairline, the active nav link and the account avatar all pick it up.
+   */
+  accent?: string;
 }
 
 /**
@@ -80,6 +87,7 @@ export default function PanelShell({
   showNotificationBell = true,
   fullBleed = false,
   mobileExtra,
+  accent = 'datiaBlue',
 }: PanelShellProps) {
   const [mobileOpened, { toggle: toggleMobile, close: closeMobile }] = useDisclosure(false);
   const tSidebar = useTranslations('sidebar');
@@ -106,7 +114,11 @@ export default function PanelShell({
     <AppShell header={{ height: HEADER_HEIGHT }} padding={0}>
       {/* ── Topbar ── */}
       <AppShell.Header
-        style={{ background: 'var(--mantine-color-white)', borderBottom: `1px solid ${HAIRLINE}` }}
+        style={{
+          background: 'var(--mantine-color-white)',
+          borderBottom: `1px solid ${HAIRLINE}`,
+          borderTop: `3px solid var(--mantine-color-${accent}-6)`,
+        }}
       >
         <Group h="100%" gap={0} wrap="nowrap" px="md">
           {/* Logo */}
@@ -131,8 +143,8 @@ export default function PanelShell({
                     height: 36,
                     padding: '0 12px',
                     borderRadius: 8,
-                    color: active ? 'var(--mantine-color-datiaBlue-7)' : MUTED,
-                    background: active ? 'var(--mantine-color-datiaBlue-0)' : 'transparent',
+                    color: active ? `var(--mantine-color-${accent}-7)` : MUTED,
+                    background: active ? `var(--mantine-color-${accent}-0)` : 'transparent',
                     textDecoration: 'none',
                     fontSize: 13.5,
                     fontWeight: active ? 600 : 500,
@@ -192,7 +204,7 @@ export default function PanelShell({
                     cursor: 'pointer',
                   }}
                 >
-                  <Avatar size={26} radius="xl" color="datiaBlue" variant="filled">
+                  <Avatar size={26} radius="xl" color={accent} variant="filled">
                     <Text fz={12} fw={700}>{initials}</Text>
                   </Avatar>
                   <IconChevronDown size={14} stroke={2} color="var(--mantine-color-gray-5)" />
@@ -240,6 +252,7 @@ export default function PanelShell({
                   label={label}
                   leftSection={<Icon size={18} stroke={1.6} />}
                   active={isActive(href, exact)}
+                  color={accent}
                   onClick={closeMobile}
                   styles={(theme) => ({
                     root: { borderRadius: theme.radius.md, fontWeight: isActive(href, exact) ? 600 : 450 },

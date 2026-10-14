@@ -106,6 +106,7 @@ export default function OrganizationLayout({ children }: { children: React.React
       user={user}
       onLogout={handleLogout}
       accountMenuItems={accountMenuItems}
+      accent="datiaBlue"
     >
       {user ? children : null}
     </PanelShell>
