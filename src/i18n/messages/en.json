@@ -1165,7 +1165,8 @@
   "superadminPanel": {
     "nav": {
       "organizations": "Organizations",
-      "support": "Support"
+      "support": "Support",
+      "certifications": "Certifications"
     },
     "accessDenied": {
       "title": "No access",
@@ -1539,6 +1540,19 @@
       "gridFactor": "Grid factor",
       "country": "Country",
       "guarantee": "GO / RECs"
+    }
+  },
+  "superadminCertifications": {
+    "title": "Pending certifications",
+    "description": "Issued to iBS but not yet confirmed on chain, across every organization.",
+    "empty": "No certification is waiting on iBS confirmation.",
+    "table": {
+      "organization": "Organization",
+      "company": "Company",
+      "records": "Records",
+      "waiting": "Waiting",
+      "waitingSince": "Since {date}",
+      "daysWaiting": "{count, plural, one {# day} other {# days}}"
     }
   },
   "superadminSupport": {

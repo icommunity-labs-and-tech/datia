@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Center, Loader, Stack, Text, Title } from '@mantine/core';
 import { useTranslations } from 'next-intl';
-import { IconHome2, IconBuildingSkyscraper, IconHeadset } from '@tabler/icons-react';
+import { IconHome2, IconBuildingSkyscraper, IconHeadset, IconClockHour4 } from '@tabler/icons-react';
 import PanelShell from '@/components/layout/PanelShell';
 
 const IS_PRODUCTION = process.env.NODE_ENV === 'production';
@@ -120,6 +120,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
     { href: '/superadmin', icon: IconHome2, label: tSidebar('home'), exact: true },
     { href: '/superadmin/organizations', icon: IconBuildingSkyscraper, label: t('nav.organizations') },
     { href: '/superadmin/support-messages', icon: IconHeadset, label: t('nav.support') },
+    { href: '/superadmin/certifications', icon: IconClockHour4, label: t('nav.certifications') },
   ];
 
   return (
