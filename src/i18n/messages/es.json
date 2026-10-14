@@ -1165,7 +1165,8 @@
   "superadminPanel": {
     "nav": {
       "organizations": "Organizaciones",
-      "support": "Soporte"
+      "support": "Soporte",
+      "certifications": "Certificaciones"
     },
     "accessDenied": {
       "title": "Sin acceso",
@@ -1539,6 +1540,19 @@
       "gridFactor": "Factor de red",
       "country": "País",
       "guarantee": "GO / RECs"
+    }
+  },
+  "superadminCertifications": {
+    "title": "Certificaciones pendientes",
+    "description": "Emitidas a iBS pero aún sin confirmar en cadena, de todas las organizaciones.",
+    "empty": "No hay ninguna certificación esperando confirmación de iBS.",
+    "table": {
+      "organization": "Organización",
+      "company": "Empresa",
+      "records": "Registros",
+      "waiting": "Esperando",
+      "waitingSince": "Desde {date}",
+      "daysWaiting": "{count, plural, one {# día} other {# días}}"
     }
   },
   "superadminSupport": {
