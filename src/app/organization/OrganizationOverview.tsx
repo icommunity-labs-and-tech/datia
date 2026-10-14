@@ -136,6 +136,12 @@ export default function OrganizationOverview({
         ))}
       </SimpleGrid>
 
+      {/* What an organization asks first is how its companies compare — that
+          leads, not a repeat of the figures the companies themselves show. */}
+      <Box mb="lg">
+        <CompanyComparisonTable rows={comparison} />
+      </Box>
+
       {/* Same figures a company's own Inicio leads with, summed across every
           company this organization operates. */}
       <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing="md" mb="lg">
@@ -183,10 +189,6 @@ export default function OrganizationOverview({
           />
         </SimpleGrid>
       )}
-
-      <Box mb="lg">
-        <CompanyComparisonTable rows={comparison} />
-      </Box>
 
       <SimpleGrid cols={{ base: 1, md: energyEnabled ? 2 : 1 }} spacing="lg">
         {recentAssets.length > 0 && (

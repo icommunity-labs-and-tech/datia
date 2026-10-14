@@ -87,6 +87,7 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
         user={user}
         onLogout={handleLogout}
         fullBleed={isDashboardHome}
+        accent="datiaGreen"
         accountMenuItems={
           <>
             <Menu.Item component={Link} href="/company/settings" leftSection={<IconSettings size={16} stroke={1.6} />}>

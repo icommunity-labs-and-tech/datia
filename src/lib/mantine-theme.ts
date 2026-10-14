@@ -29,6 +29,40 @@ const datiaAmber: MantineColorTuple = [
 ];
 
 /**
+ * Panel identity colors (#146): one per panel — company, organization,
+ * platform — so the topbar says which one you're in beyond the URL. Primary
+ * sits at index 6, like datiaBlue, so `color="datiaGreen"` resolves the same
+ * shade component defaults already use. Both pass the dataviz palette
+ * validator against datiaBlue (the organization panel's own accent) — run
+ * `validate_palette.js` again before changing either.
+ */
+const datiaGreen: MantineColorTuple = [
+  '#E7FAF3', // 0
+  '#C6F3E1', // 1
+  '#8FE6C3', // 2
+  '#58D9A5', // 3
+  '#2EC78C', // 4
+  '#11B278', // 5
+  '#0E9F6E', // 6 ← primary — the company panel's accent
+  '#0B8259', // 7
+  '#086545', // 8
+  '#054A33', // 9
+];
+
+const datiaRed: MantineColorTuple = [
+  '#FDECEC', // 0
+  '#FBD4D4', // 1
+  '#F5A8A8', // 2
+  '#EE7B7B', // 3
+  '#E34F4F', // 4
+  '#D22A2A', // 5
+  '#B91C1C', // 6 ← primary — the platform panel's accent
+  '#991717', // 7
+  '#7A1212', // 8
+  '#5C0D0D', // 9
+];
+
+/**
  * Neutral scale tuned for the light dashboard surface: cool, low-saturation
  * greys so that hairline borders read as structure instead of as boxes.
  */
@@ -54,6 +88,8 @@ export const mantineTheme = mergeMantineTheme(
     colors: {
       datiaBlue,
       datiaAmber,
+      datiaGreen,
+      datiaRed,
       gray: datiaGray,
     },
     black: '#1D2330',
