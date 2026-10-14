@@ -1173,20 +1173,19 @@
       "description": "Tu cuenta de Google no está registrada como administradora de la plataforma. Si crees que deberías tener acceso, contacta con quien gestiona el equipo."
     },
     "home": {
-      "organizations": {
-        "title": "Organizaciones",
-        "description": "Crea y gestiona organizaciones con sus administradores",
-        "cta": "Gestionar organizaciones"
+      "title": "iCommunity",
+      "description": "Lo que sostiene la plataforma, de un vistazo: todas las organizaciones, sus activos y sus certificaciones.",
+      "stats": {
+        "organizations": "Organizaciones",
+        "companiesHint": "{active} de {total} empresas activas",
+        "pendingCertifications": "Esperando a iBS",
+        "pendingCertificationsHint": "Certificaciones emitidas, aún sin confirmar en cadena"
       },
-      "support": {
-        "title": "Mensajes de soporte",
-        "description": "Revisa y gestiona los mensajes de soporte de las organizaciones",
-        "cta": "Ver mensajes"
-      },
-      "settings": {
-        "title": "Configuración",
-        "description": "Ajustes globales del sistema",
-        "cta": "Próximamente"
+      "topOrganizations": {
+        "title": "Organizaciones con más actividad",
+        "viewAll": "Ver todas",
+        "assets": "{count, plural, one {# activo} other {# activos}}",
+        "certifications": "{count, plural, one {# certificación} other {# certificaciones}}"
       }
     }
   },

@@ -15,7 +15,7 @@ export interface SuperAdminIdentity {
  * Who is signed in to the platform panel, now that IAP decides who can even
  * reach it rather than a password this app checks itself (#20 follow-up).
  *
- * In production, the Load Balancer in front of `/superadmin*` is the only way
+ * In production, the Load Balancer in front of `/admin*` is the only way
  * in, and Google has already verified the caller before the request reaches
  * here — this only has to confirm that verified identity is a registered,
  * active SUPER_ADMIN, the same way every other login in this app refuses an

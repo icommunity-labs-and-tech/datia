@@ -13,10 +13,10 @@ test.use({ storageState: ORGANIZATION_STORAGE_STATE });
 
 test.describe('Organization account', () => {
   test('a valid session on the wrong panel is sent back to its own', async ({ page }) => {
-    await page.goto('/superadmin', { waitUntil: 'networkidle' });
+    await page.goto('/admin', { waitUntil: 'networkidle' });
     await expect(page).toHaveURL(/\/organization\/companies$/);
 
-    await page.goto('/superadmin/organizations', { waitUntil: 'networkidle' });
+    await page.goto('/admin/organizations', { waitUntil: 'networkidle' });
     await expect(page).toHaveURL(/\/organization\/companies$/);
   });
 

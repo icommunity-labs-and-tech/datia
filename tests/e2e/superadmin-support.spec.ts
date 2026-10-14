@@ -11,7 +11,7 @@ test.use({ storageState: SUPERADMIN_STORAGE_STATE });
 
 test.describe('Superadmin support inbox', () => {
   test('renders the inbox as a table or an empty state', async ({ page }) => {
-    await page.goto('/superadmin/support-messages', { waitUntil: 'networkidle' });
+    await page.goto('/admin/support-messages', { waitUntil: 'networkidle' });
 
     await expect(page.getByRole('heading', { name: /mensajes de soporte|support messages/i, level: 2 })).toBeVisible();
     const table = page.getByRole('table');

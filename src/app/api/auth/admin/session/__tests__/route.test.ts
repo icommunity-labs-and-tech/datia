@@ -9,7 +9,7 @@ import { GET } from '../route';
 
 beforeEach(() => vi.clearAllMocks());
 
-describe('GET /api/auth/superadmin/session', () => {
+describe('GET /api/auth/admin/session', () => {
   it('returns the identity currentSuperAdmin resolves', async () => {
     mockCurrentSuperAdmin.mockResolvedValue({ id: 'u-1', email: 'a@x.test', name: 'A', role: 'SUPER_ADMIN' });
     const res = await GET();

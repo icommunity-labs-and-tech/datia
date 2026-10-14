@@ -146,7 +146,7 @@ describe('isSuperAdmin', () => {
 
   // isSuperAdmin()'s own try/catch around an unexpected throw from
   // currentSuperAdmin() is covered by the session route's equivalent test
-  // (src/app/api/auth/superadmin/session/__tests__/route.test.ts) — the same
+  // (src/app/api/auth/admin/session/__tests__/route.test.ts) — the same
   // scenario here reliably trips this file's rejection handling in a way
   // unrelated to the behavior under test, independent of how the rejection
   // is constructed or whether it is pre-handled.

@@ -45,7 +45,7 @@ sí la tiene, solo la suya. Toda consulta de dominio se filtra por `Scope`
 |---|---|---|---|
 | Empresa | `/company` | `/auth/company/login` | `company-auth-token` |
 | Organización | `/organization` | `/auth/organization/login` | `organization-auth-token` |
-| Plataforma | `/superadmin` | `/auth/superadmin/login` | `superadmin-auth-token` |
+| Plataforma | `/admin` | `/auth/admin/login` | `superadmin-auth-token` |
 
 Tres JWT separados: el panel de empresa firma con `DASHBOARD_JWT_SECRET`; el
 de plataforma y el de organización comparten `SUPERADMIN_JWT_SECRET` (son
@@ -71,7 +71,7 @@ src/
 ├── actions/          # Server Actions: orquestan el dominio, sin lógica propia
 ├── components/       # React (Mantine)
 ├── app/              # Next.js App Router — dashboard, organization,
-│                      # superadmin, api/v1, auth
+│                      # admin, api/v1, auth
 └── lib/               # Scope, auth, servicios compartidos
 ```
 

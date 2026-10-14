@@ -1173,20 +1173,19 @@
       "description": "Your Google account isn't registered as a platform administrator. If you think you should have access, contact whoever manages the team."
     },
     "home": {
-      "organizations": {
-        "title": "Organizations",
-        "description": "Create and manage organizations with their administrators",
-        "cta": "Manage organizations"
+      "title": "iCommunity",
+      "description": "What holds the platform up, at a glance: every organization, its assets and its certifications.",
+      "stats": {
+        "organizations": "Organizations",
+        "companiesHint": "{active} of {total} active companies",
+        "pendingCertifications": "Waiting on iBS",
+        "pendingCertificationsHint": "Certifications issued, not yet confirmed on chain"
       },
-      "support": {
-        "title": "Support messages",
-        "description": "Review and manage organizations' support messages",
-        "cta": "View messages"
-      },
-      "settings": {
-        "title": "Settings",
-        "description": "Global system settings",
-        "cta": "Coming soon"
+      "topOrganizations": {
+        "title": "Most active organizations",
+        "viewAll": "View all",
+        "assets": "{count, plural, one {# asset} other {# assets}}",
+        "certifications": "{count, plural, one {# certification} other {# certifications}}"
       }
     }
   },

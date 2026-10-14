@@ -14,7 +14,8 @@ import { scopeWhere, type Scope } from '@/lib/scope';
  * by anchoring date would pile a year of history onto whatever day the sweep ran.
  *
  * Scope-parameterized so both a company (`companyId` set) and an organization
- * (`companyId` null, every company summed) can read the same series.
+ * (`companyId` null, every company summed) can read the same series. `null`
+ * reads every organization, for the platform's own overview.
  */
 
 export interface CertificationTrendPoint {
@@ -57,9 +58,9 @@ function percentChange(current: number, previous: number): number | null {
   return parseFloat((((current - previous) / previous) * 100).toFixed(1));
 }
 
-export async function computeCertificationTrend(scope: Scope): Promise<CertificationTrend> {
+export async function computeCertificationTrend(scope: Scope | null): Promise<CertificationTrend> {
   const rows = await prisma.energyConsumption.findMany({
-    where: { EnergySource: { Asset: scopeWhere(scope) } },
+    where: scope ? { EnergySource: { Asset: scopeWhere(scope) } } : {},
     select: {
       periodStart: true,
       consumptionKwh: true,

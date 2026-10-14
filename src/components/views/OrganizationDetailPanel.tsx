@@ -90,7 +90,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
     try {
       const result = await deleteOrganization(organization.id);
       if (result.success) {
-        router.push('/superadmin/organizations');
+        router.push('/admin/organizations');
       } else {
         setDeleteError(result.error || t('errors.delete'));
       }
@@ -115,7 +115,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
   const backLink = (
     <Anchor
       component={Link}
-      href="/superadmin/organizations"
+      href="/admin/organizations"
       size="sm"
       mb="xs"
       display="inline-flex"
@@ -145,7 +145,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
           <Stack gap="sm">
             {error ?? t('notFound.description')}
             <Group>
-              <Button variant="default" size="xs" onClick={() => router.push('/superadmin/organizations')}>
+              <Button variant="default" size="xs" onClick={() => router.push('/admin/organizations')}>
                 {t('back')}
               </Button>
             </Group>
@@ -273,7 +273,7 @@ export default function OrganizationDetailPanel({ organizationId }: Organization
                 {companies.map((company) => (
                   <Table.Tr key={company.id}>
                     <Table.Td>
-                      <Anchor component={Link} href={`/superadmin/organizations/${organizationId}/companies/${company.id}`} size="sm" fw={550}>
+                      <Anchor component={Link} href={`/admin/organizations/${organizationId}/companies/${company.id}`} size="sm" fw={550}>
                         {company.name}
                       </Anchor>
                     </Table.Td>

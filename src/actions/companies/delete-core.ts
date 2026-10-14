@@ -43,8 +43,8 @@ export async function deleteCompanyCore(companyId: string, organizationId?: stri
   });
 
   revalidatePath('/organization/companies');
-  revalidatePath(`/superadmin/organizations/${company.organizationId}`);
-  revalidatePath(`/superadmin/organizations/${company.organizationId}/companies/${companyId}`);
+  revalidatePath(`/admin/organizations/${company.organizationId}`);
+  revalidatePath(`/admin/organizations/${company.organizationId}/companies/${companyId}`);
 
   return { success: true };
 }

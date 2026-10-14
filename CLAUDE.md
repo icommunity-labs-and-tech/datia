@@ -79,9 +79,9 @@ Three separate JWT contexts with different secrets and cookies:
 
 | Context | Login Route | Cookie | Secret Env Var |
 |---------|-------------|--------|----------------|
-| Admin | `/auth/admin/login` | `admin-auth-token` | `DASHBOARD_JWT_SECRET` |
+| Admin | `/auth/company/login` | `company-auth-token` | `DASHBOARD_JWT_SECRET` |
 | Operator | `/auth/operator/login` | `operator-auth-token` | `OPERATOR_JWT_SECRET` |
-| Super Admin | `/auth/superadmin/login` | `superadmin-auth-token` | `SUPERADMIN_JWT_SECRET` |
+| Super Admin | `/auth/admin/login` | `superadmin-auth-token` | `SUPERADMIN_JWT_SECRET` |
 
 ## Error Handling Pattern
 
