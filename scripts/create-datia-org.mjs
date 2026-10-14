@@ -102,7 +102,7 @@ async function main() {
   console.log('\n📋 Resumen de acceso local:');
   console.log(`   Login admin:    http://localhost:3000/org/datia/admin`);
   console.log(`   Login operator: http://localhost:3000/org/datia/operator`);
-  console.log(`   Dashboard:      http://localhost:3000/dashboard`);
+  console.log(`   Dashboard:      http://localhost:3000/company`);
   console.log('\n✅ Datia configurada correctamente');
 }
 

@@ -40,7 +40,7 @@ test.describe('Password recovery', () => {
     await page.fill('input[type="email"]', RESET_EMAIL);
     await page.fill('input[type="password"]', 'nueva-contraseña-123');
     await page.click('form button[type="submit"]');
-    await page.waitForURL(/\/dashboard/, { timeout: 20000 });
+    await page.waitForURL(/^https?:\/\/[^/]+\/company(\/.*)?$/, { timeout: 20000 });
 
     await page.context().clearCookies();
     await page.goto(`/auth/reset-password?token=${RESET_TOKEN}`, { waitUntil: 'networkidle' });

@@ -2,7 +2,7 @@
 
 /**
  * The three energy views. Each one is a route of its own
- * (/dashboard/energy/{sources,consumption,emissions}) so a visit only loads
+ * (/company/energy/{sources,consumption,emissions}) so a visit only loads
  * the data that view needs.
  */
 

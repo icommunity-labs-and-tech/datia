@@ -14,23 +14,23 @@ test.use({ storageState: ADMIN_STORAGE_STATE });
 test.describe('Authenticated User Flow (Admin)', () => {
 
   test('should access dashboard after login', async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
 
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(/\/company$/);
     await expect(page.getByRole('heading', { name: /inicio|home/i, level: 2 })).toBeVisible();
   });
 
   test('should navigate between dashboard sections', async ({ page }) => {
-    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
+    await page.goto('/company/assets', { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { name: /activos|assets/i, level: 2 })).toBeVisible();
 
-    await page.goto('/dashboard/api', { waitUntil: 'networkidle' });
+    await page.goto('/company/api', { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { name: 'API', level: 2 })).toBeVisible();
     await expect(page.getByRole('tab', { name: /documenta/i })).toBeVisible();
   });
 
   test('should display organisation settings', async ({ page }) => {
-    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+    await page.goto('/company/settings', { waitUntil: 'networkidle' });
 
     await expect(page.getByRole('heading', { name: /organizaci[óo]n|organisation/i }).first())
       .toBeVisible();
@@ -40,23 +40,23 @@ test.describe('Authenticated User Flow (Admin)', () => {
   });
 
   test('settings holds organisation config only', async ({ page }) => {
-    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+    await page.goto('/company/settings', { waitUntil: 'networkidle' });
 
     // The old hub split this screen into States / Users / Organisation tabs.
     await expect(page.getByRole('tab')).toHaveCount(0);
-    for (const hidden of ['/dashboard/users', '/dashboard/status-types']) {
+    for (const hidden of ['/company/users', '/company/status-types']) {
       await expect(page.locator(`a[href^="${hidden}"]`)).toHaveCount(0);
     }
   });
 
   test('profile URL redirects to settings', async ({ page }) => {
-    await page.goto('/dashboard/profile');
+    await page.goto('/company/profile');
 
-    await expect(page).toHaveURL(/\/dashboard\/settings$/);
+    await expect(page).toHaveURL(/\/company\/settings$/);
   });
 
   test('should change the password form validation state', async ({ page }) => {
-    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+    await page.goto('/company/settings', { waitUntil: 'networkidle' });
 
     const submit = page.getByRole('button', { name: /cambiar contrase[ñn]a|change password/i });
     await expect(submit).toBeDisabled();
@@ -71,7 +71,7 @@ test.describe('Authenticated User Flow (Admin)', () => {
   });
 
   test('should logout successfully', async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
 
     await logoutUser(page);
 
@@ -81,7 +81,7 @@ test.describe('Authenticated User Flow (Admin)', () => {
 
 test.describe('Assets gallery', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
+    await page.goto('/company/assets', { waitUntil: 'networkidle' });
   });
 
   test('opening an installation shows as many assets as its card says', async ({ page }) => {
@@ -92,7 +92,7 @@ test.describe('Assets gallery', () => {
 
     await card.click();
 
-    await expect(page.locator('a[href^="/dashboard/assets/"]')).toHaveCount(count);
+    await expect(page.locator('a[href^="/company/assets/"]')).toHaveCount(count);
   });
 
   test('search with no match offers a way back', async ({ page }) => {

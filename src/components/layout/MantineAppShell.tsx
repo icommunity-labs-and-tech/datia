@@ -20,7 +20,7 @@ import {
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import PanelShell from './PanelShell';
 import SupportMessageModal from '@/components/support/SupportMessageModal';
-import type { OrgModules } from '@/app/dashboard/(app)/layout';
+import type { OrgModules } from '@/app/company/(app)/layout';
 
 interface MantineAppShellProps {
   children: React.ReactNode;
@@ -60,28 +60,28 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
   // The energy views are separate routes, so each is its own nav entry. They
   // stay behind the module flag: an organisation without energy keeps a short bar.
   const mainLinks = [
-    { href: '/dashboard', icon: IconHome2, label: tSidebar('home'), exact: true },
+    { href: '/company', icon: IconHome2, label: tSidebar('home'), exact: true },
     ...(showPassport
-      ? [{ href: '/dashboard/assets', icon: IconPackage, label: tSidebar('assets'), exact: false }]
+      ? [{ href: '/company/assets', icon: IconPackage, label: tSidebar('assets'), exact: false }]
       : []),
     ...(showEnergy
       ? [
-          { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
-          { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
+          { href: '/company/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
+          { href: '/company/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
         ]
       : []),
-    { href: '/dashboard/api', icon: IconCode, label: tSidebar('api'), exact: false },
+    { href: '/company/api', icon: IconCode, label: tSidebar('api'), exact: false },
   ];
 
   // Dashboard home gets a full-height map with no padding
-  const isDashboardHome = pathname === '/dashboard';
+  const isDashboardHome = pathname === '/company';
 
   return (
     <>
       <style>{`:root { --datia-primary: ${primary}; }`}</style>
 
       <PanelShell
-        homeHref="/dashboard"
+        homeHref="/company"
         logoSrc={logoUrl}
         navLinks={mainLinks}
         user={user}
@@ -89,7 +89,7 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
         fullBleed={isDashboardHome}
         accountMenuItems={
           <>
-            <Menu.Item component={Link} href="/dashboard/settings" leftSection={<IconSettings size={16} stroke={1.6} />}>
+            <Menu.Item component={Link} href="/company/settings" leftSection={<IconSettings size={16} stroke={1.6} />}>
               {tSidebar('settings')}
             </Menu.Item>
             <Menu.Item onClick={openSupport} leftSection={<IconLifebuoy size={16} stroke={1.6} />}>
@@ -101,7 +101,7 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
           <>
             <NavLink
               component={Link}
-              href="/dashboard/settings"
+              href="/company/settings"
               label={tSidebar('settings')}
               leftSection={<IconSettings size={18} stroke={1.6} />}
               styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}

@@ -70,7 +70,7 @@ test.describe('Organization account', () => {
   });
 
   test('has no dashboard: its address leads back to its own panel', async ({ page }) => {
-    await page.goto('/dashboard/assets');
+    await page.goto('/company/assets');
     await expect(page).toHaveURL(/\/organization\/companies$/);
   });
 

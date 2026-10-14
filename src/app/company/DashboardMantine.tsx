@@ -123,7 +123,7 @@ export default function DashboardMantine({
           <Paper p="md" radius="md">
             <Group justify="space-between" mb="sm" wrap="nowrap">
               <Text fw={600} size="sm">{t('recentAssets')}</Text>
-              <Anchor component={Link} href="/dashboard/assets" size="xs" fw={550}>
+              <Anchor component={Link} href="/company/assets" size="xs" fw={550}>
                 {t('viewAll')}
               </Anchor>
             </Group>
@@ -132,7 +132,7 @@ export default function DashboardMantine({
                 <Anchor
                   key={item.id}
                   component={Link}
-                  href={`/dashboard/assets/${item.id}`}
+                  href={`/company/assets/${item.id}`}
                   underline="never"
                   c="inherit"
                   px={8}
@@ -165,9 +165,9 @@ export default function DashboardMantine({
             <Text fw={600} size="sm" mb="sm">{tSidebar('energy')}</Text>
             <Stack gap={2}>
               {[
-                { href: '/dashboard/energy/sources', icon: IconMap, label: tEnergy('tabs.map'), hint: `${energySummary.sourcesWithCoords}/${energySummary.totalSources}` },
-                { href: '/dashboard/energy/consumption', icon: IconBolt, label: tEnergy('tabs.consumption'), hint: kwhDisplay },
-                { href: '/dashboard/energy/emissions', icon: IconCloudFog, label: tEnergy('tabs.emissions'), hint: `${co2Tonnes} t` },
+                { href: '/company/energy/sources', icon: IconMap, label: tEnergy('tabs.map'), hint: `${energySummary.sourcesWithCoords}/${energySummary.totalSources}` },
+                { href: '/company/energy/consumption', icon: IconBolt, label: tEnergy('tabs.consumption'), hint: kwhDisplay },
+                { href: '/company/energy/emissions', icon: IconCloudFog, label: tEnergy('tabs.emissions'), hint: `${co2Tonnes} t` },
               ].map(({ href, icon: Icon, label, hint }) => (
                 <Anchor
                   key={href}

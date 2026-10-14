@@ -15,7 +15,7 @@ interface LogoProps {
 }
 
 export default function Logo({
-  href = '/dashboard',
+  href = '/company',
   width = 120,
   height = 40,
   className = '',

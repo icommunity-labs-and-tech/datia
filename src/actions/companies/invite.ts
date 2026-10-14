@@ -38,7 +38,7 @@ export async function inviteCompanyAccount(
   });
   if (!result.success) return { success: false, error: 'invite_failed', detail: result.error };
 
-  revalidatePath('/dashboard/companies');
+  revalidatePath('/company/companies');
   if (!result.emailSent) return { success: true, activationUrl: result.activationUrl };
   return { success: true };
 }

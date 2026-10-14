@@ -10,7 +10,7 @@ type RootContainerProps = {
 export default function RootContainer({ children }: RootContainerProps) {
   const pathname = usePathname();
 
-  const isDashboard = pathname?.startsWith('/dashboard');
+  const isDashboard = pathname?.startsWith('/company');
   const isOrgLogin = pathname?.startsWith('/org/');
   const isAuthLogin = pathname?.startsWith('/auth/');
 

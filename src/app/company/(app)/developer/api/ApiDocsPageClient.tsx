@@ -139,7 +139,7 @@ export default function ApiDocsPageClient() {
             style={{ verticalAlign: -2, marginRight: 4 }}
           />
           {t('auth.hint')}{' '}
-          <Anchor href="/dashboard/api?tab=auth" size="xs">
+          <Anchor href="/company/api?tab=auth" size="xs">
             {t('auth.hintLink')}
           </Anchor>
         </Text>

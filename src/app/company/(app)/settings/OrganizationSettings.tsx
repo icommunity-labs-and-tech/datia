@@ -16,10 +16,10 @@ import { IconBuilding, IconShieldCheck, IconPalette, IconUser, IconLock } from '
 import { useTranslations } from 'next-intl';
 import PageHeader from '@/components/layout/PageHeader';
 import ChangePasswordForm from '@/components/ChangePasswordForm';
-import OrgKycCard from '@/app/dashboard/profile/OrgKycCard';
-import OrgLogoCard from '@/app/dashboard/profile/OrgLogoCard';
-import OrgColorsCard from '@/app/dashboard/profile/OrgColorsCard';
-import OrgLoginUrlsCard from '@/app/dashboard/profile/OrgLoginUrlsCard';
+import OrgKycCard from '@/app/company/profile/OrgKycCard';
+import OrgLogoCard from '@/app/company/profile/OrgLogoCard';
+import OrgColorsCard from '@/app/company/profile/OrgColorsCard';
+import OrgLoginUrlsCard from '@/app/company/profile/OrgLoginUrlsCard';
 import { isDashboardRole } from '@/lib/auth/roles';
 
 interface SectionProps {

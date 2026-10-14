@@ -11,7 +11,7 @@ test.use({ storageState: ADMIN_STORAGE_STATE });
 
 test.describe('Notification bell', () => {
   test('shows the unread count, reads one by clicking it, then clears the rest at once', async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
 
     const bell = page.getByRole('button', { name: /notificaciones|notifications/i });
     const badge = page.getByTestId('notification-unread-badge');

@@ -7,8 +7,8 @@ test.use({ storageState: ADMIN_STORAGE_STATE });
 
 test.describe('Company account', () => {
   test('opens the dashboard but not the organization panel', async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.goto('/company', { waitUntil: 'networkidle' });
+    await expect(page).toHaveURL(/\/company$/);
 
     // Its session is not one of the panel's: it is sent to that panel's own login.
     await page.goto('/organization/companies');

@@ -29,7 +29,7 @@ test.describe('Company isolation: dashboard', () => {
 
   test('company B’s account cannot open company A’s asset by its id', async ({ page }) => {
     await loginAdmin(page, COMPANY_B_EMAIL, COMPANY_B_PASSWORD);
-    await page.goto(`/dashboard/assets/${COMPANY_A_ASSET_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/company/assets/${COMPANY_A_ASSET_ID}`, { waitUntil: 'networkidle' });
     await expect(page.getByText(/activo no encontrado|asset not found/i)).toBeVisible();
   });
 });

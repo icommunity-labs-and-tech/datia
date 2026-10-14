@@ -47,7 +47,7 @@ function ItemCard({ item }: { item: Item }) {
   return (
     <Card
       component={Link}
-      href={`/dashboard/assets/${item.id}`}
+      href={`/company/assets/${item.id}`}
       padding={0}
       radius="md"
       className={classes.card}

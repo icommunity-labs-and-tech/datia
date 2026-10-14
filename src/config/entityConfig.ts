@@ -13,9 +13,9 @@ export const entityConfigs: Record<string, EntityConfig> = {
   categories: {
     name: 'categories',
     displayName: 'Categoría',
-    listPath: '/dashboard/categories',
-    detailPath: (id: string) => `/dashboard/categories/${id}`,
-    editPath: (id: string) => `/dashboard/categories/${id}/edit`,
+    listPath: '/company/categories',
+    detailPath: (id: string) => `/company/categories/${id}`,
+    editPath: (id: string) => `/company/categories/${id}/edit`,
     hasCascade: true,
     cascadeFields: ['items'],
     getDetailsFunction: 'getCategoryDetails',
@@ -23,8 +23,8 @@ export const entityConfigs: Record<string, EntityConfig> = {
   items: {
     name: 'items',
     displayName: 'Item',
-    listPath: '/dashboard/assets',
-    detailPath: (id: string) => `/dashboard/assets/${id}`,
+    listPath: '/company/assets',
+    detailPath: (id: string) => `/company/assets/${id}`,
     // Nothing of the asset is shown as cascade any more: its state history is
     // gone (#63) and its proofs survive it, linked to the emissions.
     hasCascade: false,
@@ -33,9 +33,9 @@ export const entityConfigs: Record<string, EntityConfig> = {
   users: {
     name: 'users',
     displayName: 'Usuario',
-    listPath: '/dashboard/users',
-    detailPath: (id: string) => `/dashboard/users/${id}`,
-    editPath: (id: string) => `/dashboard/users/${id}/edit`,
+    listPath: '/company/users',
+    detailPath: (id: string) => `/company/users/${id}`,
+    editPath: (id: string) => `/company/users/${id}/edit`,
     hasCascade: false,
   },
 };

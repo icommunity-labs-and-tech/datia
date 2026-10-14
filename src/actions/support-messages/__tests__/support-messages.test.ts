@@ -89,7 +89,7 @@ describe('createSupportMessage', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('stores the message under the session organisation and author', async () => {
-    const result = await createSupportMessage({ subject: '  No certifica  ', message: ' Falla al anclar ', page: '/dashboard/assets' });
+    const result = await createSupportMessage({ subject: '  No certifica  ', message: ' Falla al anclar ', page: '/company/assets' });
 
     expect(result).toEqual({ success: true, id: 'msg-1' });
     expect(repo.create).toHaveBeenCalledWith({
@@ -98,7 +98,7 @@ describe('createSupportMessage', () => {
       userName: 'Ana',
       subject: 'No certifica',
       message: 'Falla al anclar',
-      page: '/dashboard/assets',
+      page: '/company/assets',
     });
   });
 

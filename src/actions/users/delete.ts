@@ -17,7 +17,7 @@ export async function deleteUser(id: string) {
     });
     await userService.deleteUser(id);
 
-    revalidatePath('/dashboard/users');
+    revalidatePath('/company/users');
 
     return {
       success: true,

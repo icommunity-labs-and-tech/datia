@@ -8,5 +8,5 @@ import { redirect } from 'next/navigation';
  * The redirect keeps old links and bookmarks working.
  */
 export default function EnergySourcesPage() {
-  redirect('/dashboard/assets');
+  redirect('/company/assets');
 }

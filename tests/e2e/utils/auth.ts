@@ -45,14 +45,16 @@ export async function loginAdmin(page: Page, email: string, password: string) {
   await page.fill('input[type="password"]', password);
   await page.click('form button[type="submit"]');
   
-  // Wait for navigation with retry logic
+  // Wait for navigation with retry logic. Anchored right after the host: an
+  // unanchored /company would also match /auth/company/login's own error
+  // redirect, since "company" is a substring of that path too.
   try {
-    await page.waitForURL(/\/dashboard(\/.*)?$/, { timeout: 15000 });
+    await page.waitForURL(/^https?:\/\/[^/]+\/company(\/.*)?$/, { timeout: 15000 });
   } catch (error) {
     // If navigation fails, try refreshing and waiting again
     console.log('Login navigation failed, retrying...');
     await page.waitForTimeout(2000);
-    await page.waitForURL(/\/dashboard(\/.*)?$/, { timeout: 10000 });
+    await page.waitForURL(/^https?:\/\/[^/]+\/company(\/.*)?$/, { timeout: 10000 });
   }
 }
 

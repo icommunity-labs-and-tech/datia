@@ -165,7 +165,7 @@ export async function executeCsvImport(formData: FormData): Promise<ExecuteCsvIm
     }
     
     // Revalidar cache después de la importación
-    revalidatePath('/dashboard/assets');
+    revalidatePath('/company/assets');
     
     const createdCount = createdItems.length;
     
