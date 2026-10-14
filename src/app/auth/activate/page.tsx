@@ -287,7 +287,7 @@ function ActivateAccountForm() {
     // Limpiar estado guardado antes de redirigir
     clearOnboardingState();
     // Redirigir al dashboard
-    router.push('/dashboard');
+    router.push('/company');
   }, [router]);
 
   const activateAccountAndComplete = useCallback(async () => {

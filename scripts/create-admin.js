@@ -42,8 +42,8 @@ async function createAdmin() {
     console.log('   Contraseña: admin123\n');
     
     console.log('🌐 Puedes acceder a:');
-    console.log('   Dashboard: http://localhost:3000/dashboard');
-    console.log('   Login: http://localhost:3000/auth/dashboard-login');
+    console.log('   Dashboard: http://localhost:3000/company');
+    console.log('   Login: http://localhost:3000/auth/company-login');
     
   } catch (error) {
     console.error('❌ Error al crear usuario administrador:', error.message);

@@ -62,9 +62,9 @@ export default function AssetDetailPage() {
     handleDelete,
   } = useDeleteEntity(deleteAsset, {
     entityName: t('deleteEntityName'),
-    redirectPath: '/dashboard/assets',
+    redirectPath: '/company/assets',
     onSuccess: () => {
-      router.push('/dashboard/assets');
+      router.push('/company/assets');
     },
     onError: () => {
       alert(t('deleteError'));
@@ -135,7 +135,7 @@ export default function AssetDetailPage() {
       <Stack gap="md">
         <Anchor
           component={Link}
-          href="/dashboard/assets"
+          href="/company/assets"
           size="sm"
           c="dimmed"
           underline="never"

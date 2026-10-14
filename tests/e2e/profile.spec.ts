@@ -2,14 +2,14 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Profile Page', () => {
   test('should load profile page', async ({ page }) => {
-    await page.goto('/dashboard/profile');
+    await page.goto('/company/profile');
     
     // Verificar que la página carga
     await expect(page.locator('body')).toBeVisible();
   });
 
   test('should display user data', async ({ page }) => {
-    await page.goto('/dashboard/profile');
+    await page.goto('/company/profile');
     
     // Verificar que se muestra información del usuario
     const content = await page.textContent('body');
@@ -17,7 +17,7 @@ test.describe('Profile Page', () => {
   });
 
   test('should have certificate toggle', async ({ page }) => {
-    await page.goto('/dashboard/profile');
+    await page.goto('/company/profile');
     
     // Buscar el switch de certificado digital
     const certSwitch = page.getByRole('checkbox', { name: /firmar las incidencias con certificado digital/i });
@@ -29,7 +29,7 @@ test.describe('Profile Page', () => {
   });
 
   test('should handle certificate toggle interaction', async ({ page }) => {
-    await page.goto('/dashboard/profile');
+    await page.goto('/company/profile');
     
     // Buscar el switch de certificado digital
     const certSwitch = page.getByRole('checkbox', { name: /firmar las incidencias con certificado digital/i });
@@ -51,7 +51,7 @@ test.describe('Profile Page', () => {
   });
 
   test('should show verification status', async ({ page }) => {
-    await page.goto('/dashboard/profile');
+    await page.goto('/company/profile');
     
     // Verificar que hay contenido relacionado con verificación
     const content = await page.textContent('body');

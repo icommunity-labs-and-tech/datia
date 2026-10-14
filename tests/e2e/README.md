@@ -18,8 +18,8 @@ Los recorridos cubren:
 - **Escritorio**: login → inicio → activos → búsqueda sin resultados → API →
   menú de cuenta → configuración.
 - **Móvil** (390×844): inicio → drawer → activos → configuración.
-- **Entidades ocultas**: `/dashboard/users` redirige al panel, y `/dashboard/states`
-  y `/dashboard/status-types` ya no existen (#63); ningún enlace apunta a ellas.
+- **Entidades ocultas**: `/company/users` redirige al panel, y `/company/states`
+  y `/company/status-types` ya no existen (#63); ningún enlace apunta a ellas.
 - **Pasaporte público**: `/customer/asset/<id>` con su informe energético, y que
   `/energy/*` redirige ahí. Los QR impresos apuntan a `/customer/asset/<id>`, así
   que ese recorrido protege una URL que no se puede romper.

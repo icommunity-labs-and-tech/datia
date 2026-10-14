@@ -32,7 +32,7 @@ export default function EmissionDetailClient({ emission }: Props) {
   const humanize = (value: string | null | undefined) => (value ? value.replace(/_/g, ' ').toLowerCase() : '—');
 
   const chain = [
-    { icon: IconPackage, label: t('chain.asset'), value: item.name, href: `/dashboard/assets/${item.id}` },
+    { icon: IconPackage, label: t('chain.asset'), value: item.name, href: `/company/assets/${item.id}` },
     { icon: IconBolt, label: t('chain.source'), value: source.name, sub: tEnergy(`carriers.${source.energyCarrier}`) },
     { icon: IconGauge, label: t('chain.consumption'), value: `${consumption.consumptionKwh} kWh`, sub: tLifecycle(`lifecycle.${consumption.lifecycleStage}`) },
     { icon: IconCloudFog, label: t('chain.emission'), value: `${emission.co2eKg} kg CO₂e`, sub: tScope(emission.scope) },
@@ -42,7 +42,7 @@ export default function EmissionDetailClient({ emission }: Props) {
     <>
       <Anchor
         component={Link}
-        href="/dashboard/energy/emissions"
+        href="/company/energy/emissions"
         size="sm"
         mb="xs"
         display="inline-flex"

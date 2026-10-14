@@ -60,7 +60,7 @@ test.describe('Sistema de Autenticación Separado', () => {
 
   test.describe('Middleware y Redirecciones', () => {
     test('debería redirigir dashboard sin autenticación', async ({ page }) => {
-      await page.goto('/dashboard');
+      await page.goto('/company');
       
       // Verificar que redirige al login de admin
       await expect(page).toHaveURL(/.*\/auth\/company\/login.*error=Unauthorized/);

@@ -44,7 +44,7 @@ test.describe('Invitation and signup', () => {
     await page.fill('input[type="email"]', INVITED_EMAIL);
     await page.fill('input[type="password"]', NEW_PASSWORD);
     await page.click('form button[type="submit"]');
-    await page.waitForURL(/\/dashboard(\/.*)?$/, { timeout: 30000 });
+    await page.waitForURL(/^https?:\/\/[^/]+\/company(\/.*)?$/, { timeout: 30000 });
 
     // activateAccount clears the token on success, so the same link, used
     // again, is indistinguishable from one that never existed — not a second

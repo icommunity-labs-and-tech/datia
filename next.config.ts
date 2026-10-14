@@ -34,11 +34,16 @@ const nextConfig: NextConfig = {
   // /customer/item/<id> and cannot be reissued, so those keep working for good;
   // the dashboard route is internal, and is redirected only so bookmarks do not
   // break. The API is not aliased: there were no integrators when it moved.
+  //
+  // The company panel itself moved from /dashboard to /company for the same
+  // reason — redirected whole, not just the renamed sub-paths above.
   async redirects() {
     return [
       { source: '/customer/item/:id', destination: '/customer/asset/:id', permanent: true },
       { source: '/dashboard/items', destination: '/dashboard/assets', permanent: true },
       { source: '/dashboard/items/:id', destination: '/dashboard/assets/:id', permanent: true },
+      { source: '/dashboard', destination: '/company', permanent: true },
+      { source: '/dashboard/:path*', destination: '/company/:path*', permanent: true },
     ];
   },
   // /api/v1-sandbox/** → /api/v1/** (same handlers; sandbox mode is determined by the auth token)

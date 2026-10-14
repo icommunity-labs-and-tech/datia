@@ -5,9 +5,9 @@ test.describe('Admin - Exports CSV', () => {
   test.use({ storageState: ADMIN_STORAGE_STATE });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/(app)/items');
-    if (!/\/dashboard\/.*/.test(page.url())) {
-      await page.goto('/dashboard/assets');
+    await page.goto('/company/(app)/items');
+    if (!/\/company\/.*/.test(page.url())) {
+      await page.goto('/company/assets');
     }
   });
 

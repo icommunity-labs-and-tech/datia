@@ -24,7 +24,7 @@ function AdminLoginContent() {
   useEffect(() => { setMounted(true); }, []);
 
   useEffect(() => {
-    if (user && !loading && isDashboardRole(user.role)) router.push('/dashboard');
+    if (user && !loading && isDashboardRole(user.role)) router.push('/company');
   }, [user, loading, router]);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ function AdminLoginContent() {
     setError(null);
     try {
       const result = await login(email, password);
-      if (result.success) { router.push('/dashboard'); }
+      if (result.success) { router.push('/company'); }
       else { setError(result.error || t('errors.invalidCredentials')); }
     } catch {
       setError(t('errors.loginError'));

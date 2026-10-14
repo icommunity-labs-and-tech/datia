@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export default function DeveloperApiPage() {
-  redirect('/dashboard/api?tab=docs');
+  redirect('/company/api?tab=docs');
 }

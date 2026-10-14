@@ -12,7 +12,7 @@ export default async function EnergyIndexPage({
 }) {
   const { tab } = await searchParams;
 
-  if (tab === 'consumption') redirect('/dashboard/energy/consumption');
-  if (tab === 'emissions') redirect('/dashboard/energy/emissions');
-  redirect('/dashboard/energy/sources');
+  if (tab === 'consumption') redirect('/company/energy/consumption');
+  if (tab === 'emissions') redirect('/company/energy/emissions');
+  redirect('/company/energy/sources');
 }

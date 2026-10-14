@@ -12,7 +12,7 @@ test.use({ storageState: ADMIN_STORAGE_STATE });
 
 test.describe('Energy forecast', () => {
   test('projects consumption and lets the reader change the horizon', async ({ page }) => {
-    await page.goto('/dashboard/energy/consumption', { waitUntil: 'networkidle' });
+    await page.goto('/company/energy/consumption', { waitUntil: 'networkidle' });
 
     // Anchored to the exact title, not a substring: other sources of lower
     // history than e2e-source-solar's own also mention "forecast" in their
@@ -27,7 +27,7 @@ test.describe('Energy forecast', () => {
   });
 
   test('projects emissions from the same underlying history', async ({ page }) => {
-    await page.goto('/dashboard/energy/emissions', { waitUntil: 'networkidle' });
+    await page.goto('/company/energy/emissions', { waitUntil: 'networkidle' });
 
     await expect(page.getByText(/^(proyección|forecast)$/i)).toBeVisible();
     await expect(page.getByText(/sin histórico suficiente|not enough history/i)).toBeHidden();

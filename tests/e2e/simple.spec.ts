@@ -32,7 +32,7 @@ test.describe('Simple Tests', () => {
     
     // Intentar ir a login (puede fallar, pero no debe romper)
     try {
-      await page.goto('/dashboard/login');
+      await page.goto('/company/login');
       await expect(page.locator('body')).toBeVisible();
     } catch (error) {
       // Si falla, está bien - solo verificamos que no rompa

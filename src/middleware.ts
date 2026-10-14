@@ -106,12 +106,12 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(new URL('/apps', request.url));
   }
 
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/company') || pathname.startsWith('/admin')) {
     const token = request.cookies.get('company-auth-token')?.value;
 
     if (!token) {
-      // The organization's own account has no dashboard: its own panel, so
-      // send it there instead of to a login it cannot use.
+      // The organization's own account has no company panel of its own — it
+      // has a different one, so send it there instead of to a login it cannot use.
       if (request.cookies.get('organization-auth-token')?.value) {
         return NextResponse.redirect(new URL('/organization/companies', request.url));
       }
@@ -133,7 +133,7 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
     if (token) {
       const user = await verifyAdminJWT(token);
       if (user && isDashboardRole(user.role)) {
-        return NextResponse.redirect(new URL('/dashboard', request.url));
+        return NextResponse.redirect(new URL('/company', request.url));
       }
     }
 

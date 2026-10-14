@@ -43,7 +43,7 @@ sí la tiene, solo la suya. Toda consulta de dominio se filtra por `Scope`
 
 | Quién | Ruta | Login | Cookie |
 |---|---|---|---|
-| Empresa | `/dashboard` | `/auth/admin/login` | `admin-auth-token` |
+| Empresa | `/company` | `/auth/company/login` | `company-auth-token` |
 | Organización | `/organization` | `/auth/organization/login` | `organization-auth-token` |
 | Plataforma | `/superadmin` | `/auth/superadmin/login` | `superadmin-auth-token` |
 
