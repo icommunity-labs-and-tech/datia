@@ -62,7 +62,7 @@ export async function createAsset(input: CreateAssetInput): Promise<CreateAssetR
       longitude: input.longitude ?? null,
     });
 
-    revalidatePath('/dashboard/assets');
+    revalidatePath('/company/assets');
     return { success: true, id: asset.id };
   } catch (error) {
     if (

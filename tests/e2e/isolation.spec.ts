@@ -23,7 +23,7 @@ test.describe('Isolation between organizations', () => {
   test.use({ storageState: ADMIN_STORAGE_STATE });
 
   test('the dashboard cannot open another organization’s asset by guessing its id', async ({ page }) => {
-    await page.goto(`/dashboard/assets/${ISOLATED_ASSET_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/company/assets/${ISOLATED_ASSET_ID}`, { waitUntil: 'networkidle' });
     await expect(page.getByText(/activo no encontrado|asset not found/i)).toBeVisible();
   });
 

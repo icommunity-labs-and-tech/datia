@@ -11,7 +11,7 @@ test.use({ storageState: ADMIN_STORAGE_STATE });
 
 test.describe('Energy emission detail', () => {
   test('shows the chain behind a verified emission', async ({ page }) => {
-    await page.goto('/dashboard/energy/emissions/e2e-emission-0', { waitUntil: 'networkidle' });
+    await page.goto('/company/energy/emissions/e2e-emission-0', { waitUntil: 'networkidle' });
 
     await expect(page.getByRole('heading', { name: /registro de emisi[óo]n|emission record/i, level: 2 })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Turbina eólica T-100' })).toBeVisible();

@@ -33,7 +33,7 @@ async function signIn(page: Page) {
   await page.locator('input[type="email"]').fill(EMAIL);
   await page.locator('input[type="password"]').fill(PASSWORD);
   await page.getByRole('button', { name: /acceder|iniciar sesión|access|sign in/i }).click();
-  await page.waitForURL('**/dashboard**', { timeout: 30000 });
+  await page.waitForURL('**/company**', { timeout: 30000 });
   await page.waitForLoadState('networkidle');
 }
 
@@ -52,11 +52,11 @@ test('recorrido completo', async ({ page }) => {
 
   await shot(page, '02-inicio');
 
-  await page.goto('/dashboard/assets', { waitUntil: 'networkidle' });
+  await page.goto('/company/assets', { waitUntil: 'networkidle' });
   await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
   await shot(page, '03-inventario');
 
-  await page.goto(`/dashboard/assets/${FEATURED}`, { waitUntil: 'networkidle' });
+  await page.goto(`/company/assets/${FEATURED}`, { waitUntil: 'networkidle' });
   await expect(page.getByText(/certificaciones|certifications|resumen|summary/i).first()).toBeVisible();
   await shot(page, '04-detalle-activo');
 
@@ -65,12 +65,12 @@ test('recorrido completo', async ({ page }) => {
     ['consumption', '06-energia-consumo'],
     ['emissions', '07-energia-emisiones'],
   ] as const) {
-    await page.goto(`/dashboard/energy/${view}`, { waitUntil: 'networkidle' });
+    await page.goto(`/company/energy/${view}`, { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
     await shot(page, name);
   }
 
-  await page.goto('/dashboard/api', { waitUntil: 'networkidle' });
+  await page.goto('/company/api', { waitUntil: 'networkidle' });
   await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
   await shot(page, '08-api-documentacion');
 
@@ -83,7 +83,7 @@ test('recorrido completo', async ({ page }) => {
     await shot(page, name);
   }
 
-  await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+  await page.goto('/company/settings', { waitUntil: 'networkidle' });
   await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
   await shot(page, '12-configuracion');
 });

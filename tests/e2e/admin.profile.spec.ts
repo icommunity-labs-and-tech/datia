@@ -5,9 +5,9 @@ test.describe('Admin - Profile & Preferences', () => {
   test.use({ storageState: ADMIN_STORAGE_STATE });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard/(app)/profile');
-    if (!/\/dashboard\/.*/.test(page.url())) {
-      await page.goto('/dashboard/profile');
+    await page.goto('/company/(app)/profile');
+    if (!/\/company\/.*/.test(page.url())) {
+      await page.goto('/company/profile');
     }
   });
 

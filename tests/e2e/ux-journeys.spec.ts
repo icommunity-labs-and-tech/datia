@@ -18,10 +18,10 @@ const MOBILE = { width: 390, height: 844 };
 const PASSPORT_ITEM_ID = 'e2e-item-0';
 
 /** Entities deliberately hidden from the UI for now. */
-const HIDDEN_ROUTES = ['/dashboard/users', '/dashboard/status-types', '/dashboard/states'];
+const HIDDEN_ROUTES = ['/company/users', '/company/status-types', '/company/states'];
 
 /** Gone with the state history (#63): these routes no longer exist. */
-const GONE_ROUTES = ['/dashboard/status-types', '/dashboard/states'];
+const GONE_ROUTES = ['/company/status-types', '/company/states'];
 
 async function shot(page: Page, device: string, step: string) {
   await page.waitForTimeout(400); // let Mantine transitions and maps settle
@@ -57,26 +57,26 @@ test.describe('UX journey — desktop', () => {
 
   test('full admin walkthrough', async ({ page }) => {
     // ── 2. Home ──
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
     await shot(page, 'desktop', '02-home');
     await expectNoHorizontalScroll(page);
 
     // The top nav carries content surfaces only: Home, Assets, the energy views
     // when that module is on, and API. Settings lives in the account menu.
-    const nav = page.locator('header a[href^="/dashboard"]');
+    const nav = page.locator('header a[href^="/company"]');
     const navHrefs = await nav.evaluateAll((els) =>
       els.map((e) => (e as HTMLAnchorElement).getAttribute('href'))
     );
-    expect(navHrefs, 'the home entry is always present').toContain('/dashboard');
+    expect(navHrefs, 'the home entry is always present').toContain('/company');
     expect(navHrefs, 'settings is reached from the account menu, not the nav')
-      .not.toContain('/dashboard/settings');
+      .not.toContain('/company/settings');
     for (const hidden of HIDDEN_ROUTES) {
       expect(navHrefs, `${hidden} must not be linked from the top nav`).not.toContain(hidden);
     }
 
     // ── 3. Assets ──
     await page.getByRole('link', { name: /activos|assets/i }).first().click();
-    await page.waitForURL('**/dashboard/assets');
+    await page.waitForURL('**/company/assets');
     await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
     await page.waitForLoadState('networkidle');
     await shot(page, 'desktop', '03-assets');
@@ -89,7 +89,7 @@ test.describe('UX journey — desktop', () => {
     await page.getByRole('button', { name: /limpiar filtros|clear filters/i }).click();
 
     // ── 5. API hub — every tab is its own migrated surface ──
-    await page.goto('/dashboard/api', { waitUntil: 'networkidle' });
+    await page.goto('/company/api', { waitUntil: 'networkidle' });
     await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
     await shot(page, 'desktop', '05-api');
     await expectNoHorizontalScroll(page);
@@ -105,11 +105,11 @@ test.describe('UX journey — desktop', () => {
     await expectNoHorizontalScroll(page);
 
     // ── 6. Settings, reached through the avatar menu ──
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
     await page.getByRole('button', { name: /cuenta|account/i }).click();
     await shot(page, 'desktop', '06-account-menu');
     await page.getByRole('menuitem', { name: /configuración|settings/i }).click();
-    await page.waitForURL('**/dashboard/settings');
+    await page.waitForURL('**/company/settings');
     await page.waitForLoadState('networkidle');
     await shot(page, 'desktop', '07-settings');
     await expectNoHorizontalScroll(page);
@@ -125,7 +125,7 @@ test.describe('UX journey — mobile', () => {
   test.use({ viewport: MOBILE, storageState: ADMIN_STORAGE_STATE });
 
   test('drawer navigation and key screens', async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
     await shot(page, 'mobile', '01-home');
     await expectNoHorizontalScroll(page);
 
@@ -136,12 +136,12 @@ test.describe('UX journey — mobile', () => {
     await shot(page, 'mobile', '02-drawer');
 
     await drawer.getByRole('link', { name: /activos|assets/i }).first().click();
-    await page.waitForURL('**/dashboard/assets');
+    await page.waitForURL('**/company/assets');
     await page.waitForLoadState('networkidle');
     await shot(page, 'mobile', '03-assets');
     await expectNoHorizontalScroll(page);
 
-    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+    await page.goto('/company/settings', { waitUntil: 'networkidle' });
     await shot(page, 'mobile', '04-settings');
     await expectNoHorizontalScroll(page);
   });
@@ -152,8 +152,8 @@ test.describe('Hidden entities', () => {
 
   test('users and status types are not reachable from the UI', async ({ page }) => {
     // Users are hidden: direct navigation bounces back to the dashboard.
-    await page.goto('/dashboard/users');
-    await expect(page).toHaveURL(/\/dashboard\/?$/);
+    await page.goto('/company/users');
+    await expect(page).toHaveURL(/\/company\/?$/);
 
     // States and status types no longer exist at all.
     for (const route of GONE_ROUTES) {
@@ -162,7 +162,7 @@ test.describe('Hidden entities', () => {
     }
 
     // And no link anywhere in the shell points at them.
-    await page.goto('/dashboard/settings', { waitUntil: 'networkidle' });
+    await page.goto('/company/settings', { waitUntil: 'networkidle' });
     for (const hidden of HIDDEN_ROUTES) {
       await expect(page.locator(`a[href^="${hidden}"]`)).toHaveCount(0);
     }
@@ -247,7 +247,7 @@ test.describe('Vistas de energía', () => {
     // They used to be tabs of one hub that loaded all three datasets at once.
     // Sources have no page of their own any more: they live in their installation.
     for (const view of ['consumption', 'emissions']) {
-      await page.goto(`/dashboard/energy/${view}`, { waitUntil: 'networkidle' });
+      await page.goto(`/company/energy/${view}`, { waitUntil: 'networkidle' });
       await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
       await expectNoHorizontalScroll(page);
     }
@@ -255,13 +255,13 @@ test.describe('Vistas de energía', () => {
 
   test('links to the former hub still resolve', async ({ page }) => {
     // The hub's default view was sources, which now redirects to the assets page.
-    await page.goto('/dashboard/energy');
-    await expect(page).toHaveURL(/\/dashboard\/assets$/);
+    await page.goto('/company/energy');
+    await expect(page).toHaveURL(/\/company\/assets$/);
 
-    await page.goto('/dashboard/energy?tab=consumption');
-    await expect(page).toHaveURL(/\/dashboard\/energy\/consumption$/);
+    await page.goto('/company/energy?tab=consumption');
+    await expect(page).toHaveURL(/\/company\/energy\/consumption$/);
 
-    await page.goto('/dashboard/energy?tab=emissions');
-    await expect(page).toHaveURL(/\/dashboard\/energy\/emissions$/);
+    await page.goto('/company/energy?tab=emissions');
+    await expect(page).toHaveURL(/\/company\/energy\/emissions$/);
   });
 });

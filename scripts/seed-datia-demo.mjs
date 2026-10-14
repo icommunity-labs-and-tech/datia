@@ -83,9 +83,9 @@ async function main() {
   console.log('   Login:   http://localhost:3000/org/datia/admin');
   console.log('   User:    admin@datia.icommunitylabs.com / datia-dev-2024');
   console.log('\n🔗 URLS DASHBOARD');
-  console.log('   /dashboard/energy/sources      — 4 fuentes ESPR');
-  console.log('   /dashboard/energy/consumption  — consumos por fuente y etapa');
-  console.log('   /dashboard/energy/emissions    — emisiones multi-scope');
+  console.log('   /company/energy/sources      — 4 fuentes ESPR');
+  console.log('   /company/energy/consumption  — consumos por fuente y etapa');
+  console.log('   /company/energy/emissions    — emisiones multi-scope');
   console.log('\n🌐 PORTAL PÚBLICO (activos con certif. ancladas)');
   console.log('   http://localhost:3000/customer/asset/DATIA-PV-001');
   console.log('   http://localhost:3000/customer/asset/DATIA-EV-001');

@@ -33,7 +33,7 @@ function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSeconda
 
   useEffect(() => {
     if (!user || loading) return;
-    if (isDashboardRole(user.role)) router.push('/dashboard');
+    if (isDashboardRole(user.role)) router.push('/company');
   }, [user, loading, router]);
 
   useEffect(() => {
@@ -49,7 +49,7 @@ function OrgLoginContent({ slug, orgName, logoUrl, brandColor, brandColorSeconda
     try {
       const result = await login(email, password);
       if (result.success) {
-        router.push('/dashboard');
+        router.push('/company');
       } else {
         setError(result.error || t('errors.invalidCredentials'));
       }

@@ -58,7 +58,7 @@ export function createAssetServiceImpl(deps: {
         });
 
         // 4. Revalidate cache
-        revalidatePath('/dashboard/assets');
+        revalidatePath('/company/assets');
 
         return {
           id: result.id,

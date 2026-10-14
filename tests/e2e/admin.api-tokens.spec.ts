@@ -12,7 +12,7 @@ test.describe('Admin - API tokens', () => {
   test('crea un token y lo muestra una sola vez', async ({ page }) => {
     const name = `e2e-token-${Date.now()}`;
 
-    await page.goto('/dashboard/api', { waitUntil: 'networkidle' });
+    await page.goto('/company/api', { waitUntil: 'networkidle' });
     await page.getByRole('tab', { name: text('apiHub.auth') }).click();
 
     await page.getByRole('button', { name: text('developer.auth.createToken') }).first().click();

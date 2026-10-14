@@ -5,7 +5,7 @@ import { findRowByText, clickActionInRow, saveForm } from './utils/table';
 
 /**
  * SKIPPED — user and status-type management are hidden from the UI for now
- * (see "UX journeys" in tests/e2e/README.md). The routes redirect to /dashboard,
+ * (see "UX journeys" in tests/e2e/README.md). The routes redirect to /company,
  * so these flows have no entry point. Re-enable by dropping `.skip` when the
  * screens are exposed again.
  */
@@ -15,7 +15,7 @@ test.describe.skip('Admin - Users CRUD', () => {
     const email = process.env.ADMIN_E2E_EMAIL || 'admin@datia.icommunitylabs.com';
     const password = process.env.ADMIN_E2E_PASSWORD || 'admin123';
     await loginAdmin(page, email, password);
-    await page.goto('/dashboard/users', { waitUntil: 'networkidle' });
+    await page.goto('/company/users', { waitUntil: 'networkidle' });
     await addTestDelay();
   });
 

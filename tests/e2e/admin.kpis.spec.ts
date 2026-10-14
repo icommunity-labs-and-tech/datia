@@ -12,7 +12,7 @@ test.describe('Admin - KPIs & Activity', () => {
   test.use({ storageState: ADMIN_STORAGE_STATE });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    await page.goto('/company', { waitUntil: 'networkidle' });
   });
 
   test('the overview leads with the assets it tracks', async ({ page }) => {
@@ -25,7 +25,7 @@ test.describe('Admin - KPIs & Activity', () => {
     // Only rendered when the organisation has assets.
     if (await panel.isVisible()) {
       await expect(page.getByRole('link', { name: /ver todos|view all/i })).toBeVisible();
-      await expect(page.locator('a[href^="/dashboard/assets/"]').first()).toBeVisible();
+      await expect(page.locator('a[href^="/company/assets/"]').first()).toBeVisible();
     } else {
       await expect(page.getByText(/activos totales|total assets/i)).toBeVisible();
     }

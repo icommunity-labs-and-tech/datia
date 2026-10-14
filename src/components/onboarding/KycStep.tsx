@@ -376,7 +376,7 @@ export default function KycStep({
                         handleCloseEmbedded();
                         // Pequeño delay para que se cierre el iframe
                         setTimeout(() => {
-                          window.location.href = '/dashboard';
+                          window.location.href = '/company';
                         }, 300);
                       }
                     }}
