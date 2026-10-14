@@ -20,10 +20,10 @@ export default function SuperAdminLoginPage() {
   useEffect(() => {
     // Production has no password login any more — IAP is the only way in
     // (#20 follow-up). Reaching this URL there only happens via a stale
-    // link, since the panel's own nav never points here; `/superadmin`'s own
+    // link, since the panel's own nav never points here; `/admin`'s own
     // layout is where the real check (and any "access denied") happens.
     if (process.env.NODE_ENV === 'production') {
-      router.replace('/superadmin');
+      router.replace('/admin');
     }
   }, [router]);
 
@@ -35,7 +35,7 @@ export default function SuperAdminLoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch('/api/auth/superadmin/login', {
+      const response = await fetch('/api/auth/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -44,7 +44,7 @@ export default function SuperAdminLoginPage() {
       const data = await response.json();
 
       if (data.success) {
-        router.push('/superadmin');
+        router.push('/admin');
       } else if (response.status === 429) {
         setError(t('errors.tooManyAttempts'));
       } else if (response.status === 400 || response.status === 401) {

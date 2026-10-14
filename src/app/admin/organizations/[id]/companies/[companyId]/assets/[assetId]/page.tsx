@@ -18,7 +18,7 @@ export default async function SuperadminAssetPage({
   return (
     <AssetOverviewPanel
       overview={overview}
-      backHref={`/superadmin/organizations/${id}/companies/${companyId}`}
+      backHref={`/admin/organizations/${id}/companies/${companyId}`}
       backLabel={overview.company.name}
     />
   );

@@ -49,8 +49,8 @@ async function createSuperAdmin() {
     console.log('   Contraseña: superadmin123\n');
     
     console.log('🌐 Puedes acceder a:');
-    console.log('   Super Admin Panel: http://localhost:3000/superadmin');
-    console.log('   Login: http://localhost:3000/auth/superadmin/login\n');
+    console.log('   Super Admin Panel: http://localhost:3000/admin');
+    console.log('   Login: http://localhost:3000/auth/admin/login\n');
     
   } catch (error) {
     console.error('❌ Error al crear usuario SUPER_ADMIN:', error.message);

@@ -22,7 +22,7 @@ test.describe('Organization onboarding starts a real KYC signature', () => {
     const orgName = `E2E Onboarding ${Date.now()}`;
     const adminEmail = `onboarding-${Date.now()}@datia.icommunitylabs.com`;
 
-    await page.goto('/superadmin/organizations', { waitUntil: 'networkidle' });
+    await page.goto('/admin/organizations', { waitUntil: 'networkidle' });
     await page.getByRole('button', { name: /nueva organizaci[óo]n|new organization/i }).click();
 
     const dialog = page.getByRole('dialog');

@@ -205,7 +205,7 @@ export default function OrganizationsPanel() {
                     key={org.id}
                     style={{ cursor: 'pointer' }}
                     title={t('table.doubleClickHint')}
-                    onDoubleClick={() => router.push(`/superadmin/organizations/${org.id}`)}
+                    onDoubleClick={() => router.push(`/admin/organizations/${org.id}`)}
                   >
                     <Table.Td>
                       <Text size="sm" fw={600}>{org.name}</Text>

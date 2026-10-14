@@ -106,7 +106,7 @@ async function handleAuth(request: NextRequest): Promise<NextResponse> {
     return NextResponse.redirect(new URL('/apps', request.url));
   }
 
-  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
+  if (pathname.startsWith('/dashboard')) {
     const token = request.cookies.get('company-auth-token')?.value;
 
     if (!token) {

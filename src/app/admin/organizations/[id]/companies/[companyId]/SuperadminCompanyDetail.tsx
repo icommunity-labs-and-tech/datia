@@ -69,7 +69,7 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
         setDeleteError(result.error ?? t('delete.failed'));
         return;
       }
-      router.push(`/superadmin/organizations/${organizationId}`);
+      router.push(`/admin/organizations/${organizationId}`);
     } catch {
       setDeleteError(t('delete.failed'));
     } finally {
@@ -79,7 +79,7 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
 
   return (
     <>
-      <Anchor component={Link} href={`/superadmin/organizations/${organizationId}`} size="sm" mb="xs" display="inline-flex">
+      <Anchor component={Link} href={`/admin/organizations/${organizationId}`} size="sm" mb="xs" display="inline-flex">
         <IconArrowLeft size={14} style={{ marginRight: 4, alignSelf: 'center' }} />
         {t('back')}
       </Anchor>
@@ -149,7 +149,7 @@ export default function SuperadminCompanyDetail({ organizationId, overview }: Pr
                         <Table.Td>
                           <Anchor
                             component={Link}
-                            href={`/superadmin/organizations/${organizationId}/companies/${company.id}/assets/${asset.id}`}
+                            href={`/admin/organizations/${organizationId}/companies/${company.id}/assets/${asset.id}`}
                             size="sm"
                             fw={550}
                           >

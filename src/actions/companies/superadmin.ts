@@ -75,8 +75,8 @@ export async function setCompanyActive(companyId: string, active: boolean): Prom
   }).catch(() => null);
   if (!company) return { success: false };
 
-  revalidatePath(`/superadmin/organizations/${company.organizationId}`);
-  revalidatePath(`/superadmin/organizations/${company.organizationId}/companies/${company.id}`);
+  revalidatePath(`/admin/organizations/${company.organizationId}`);
+  revalidatePath(`/admin/organizations/${company.organizationId}/companies/${company.id}`);
   return { success: true };
 }
 

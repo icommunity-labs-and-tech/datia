@@ -9,7 +9,7 @@ import { IconBolt, IconBuilding, IconCloudFog, IconHome2, IconSettings } from '@
 import PanelShell from '@/components/layout/PanelShell';
 import { isOrganizationEnergyEnabled } from '@/actions/organizations/get-trend';
 
-// The organization account's own panel (#20) — split out of /superadmin,
+// The organization account's own panel (#20) — split out of /admin,
 // which it used to share filtered to its own half by role. An ORG_ADMIN is a
 // real customer managing its own companies, not platform staff, and sharing
 // that panel's branding ("Panel de plataforma", "Acceso

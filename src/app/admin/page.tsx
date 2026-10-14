@@ -18,7 +18,7 @@ export default function SuperAdminDashboard() {
         <Text c="dimmed" mb="lg" mih={48}>{t('organizations.description')}</Text>
         <Button
           component={Link}
-          href="/superadmin/organizations"
+          href="/admin/organizations"
           fullWidth
           radius="md"
           leftSection={<IconBuildingSkyscraper size={18} stroke={1.6} />}
@@ -35,7 +35,7 @@ export default function SuperAdminDashboard() {
         <Text c="dimmed" mb="lg" mih={48}>{t('support.description')}</Text>
         <Button
           component={Link}
-          href="/superadmin/support-messages"
+          href="/admin/support-messages"
           fullWidth
           radius="md"
           leftSection={<IconHeadset size={18} stroke={1.6} />}

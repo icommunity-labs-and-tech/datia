@@ -43,7 +43,7 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/superadmin/session');
+      const response = await fetch('/api/auth/admin/session');
       const data = await response.json();
 
       if (data.user) {
@@ -66,14 +66,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
         // IAP already let this request through — it just is not a
         // registered platform account. There is no login form to send it
         // to any more; pushing to one here would only bounce it straight
-        // back (that page itself redirects to `/superadmin` in production).
+        // back (that page itself redirects to `/admin` in production).
         setDenied(true);
       } else {
-        router.push('/auth/superadmin/login');
+        router.push('/auth/admin/login');
       }
     } catch (error) {
       console.error('Auth check error:', error);
-      if (!IS_PRODUCTION) router.push('/auth/superadmin/login');
+      if (!IS_PRODUCTION) router.push('/auth/admin/login');
     } finally {
       setLoading(false);
     }
@@ -87,8 +87,8 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
       return;
     }
     try {
-      await fetch('/api/auth/superadmin/logout', { method: 'POST' });
-      router.push('/auth/superadmin/login');
+      await fetch('/api/auth/admin/logout', { method: 'POST' });
+      router.push('/auth/admin/login');
     } catch (error) {
       console.error('Logout error:', error);
     }
@@ -117,14 +117,14 @@ export default function SuperAdminLayout({ children }: { children: React.ReactNo
   }
 
   const navLinks = [
-    { href: '/superadmin', icon: IconHome2, label: tSidebar('home'), exact: true },
-    { href: '/superadmin/organizations', icon: IconBuildingSkyscraper, label: t('nav.organizations') },
-    { href: '/superadmin/support-messages', icon: IconHeadset, label: t('nav.support') },
-    { href: '/superadmin/certifications', icon: IconClockHour4, label: t('nav.certifications') },
+    { href: '/admin', icon: IconHome2, label: tSidebar('home'), exact: true },
+    { href: '/admin/organizations', icon: IconBuildingSkyscraper, label: t('nav.organizations') },
+    { href: '/admin/support-messages', icon: IconHeadset, label: t('nav.support') },
+    { href: '/admin/certifications', icon: IconClockHour4, label: t('nav.certifications') },
   ];
 
   return (
-    <PanelShell homeHref="/superadmin" navLinks={navLinks} user={user} onLogout={handleLogout}>
+    <PanelShell homeHref="/admin" navLinks={navLinks} user={user} onLogout={handleLogout}>
       {user ? children : null}
     </PanelShell>
   );

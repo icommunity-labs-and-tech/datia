@@ -19,14 +19,14 @@ import * as route from '../route';
 
 const post = (ip: string, body: unknown) =>
   route.POST(
-    new NextRequest('http://localhost/api/auth/superadmin/login', {
+    new NextRequest('http://localhost/api/auth/admin/login', {
       method: 'POST',
       headers: { 'x-forwarded-for': ip },
       body: JSON.stringify(body),
     })
   );
 
-describe('POST /api/auth/superadmin/login', () => {
+describe('POST /api/auth/admin/login', () => {
   beforeEach(() => vi.clearAllMocks());
   afterEach(() => vi.unstubAllEnvs());
 
