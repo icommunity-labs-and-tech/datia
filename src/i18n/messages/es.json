@@ -1186,6 +1186,18 @@
         "viewAll": "Ver todas",
         "assets": "{count, plural, one {# activo} other {# activos}}",
         "certifications": "{count, plural, one {# certificación} other {# certificaciones}}"
+      },
+      "pendingSignatures": {
+        "title": "Firmas pendientes de aprobar",
+        "description": "Cada empresa certifica con la suya propia: estas siguen esperando respuesta de iBS.",
+        "empty": "No hay ninguna empresa esperando aprobación de firma.",
+        "table": {
+          "organization": "Organización",
+          "company": "Empresa",
+          "waiting": "Esperando",
+          "waitingSince": "Desde {date}",
+          "daysWaiting": "{count, plural, one {# día} other {# días}}"
+        }
       }
     }
   },
@@ -1474,20 +1486,16 @@
   "onboardingKyc": {
     "title": "Verificación de identidad",
     "start": "Empezar",
-    "waitHint": "Completa el proceso de verificación a continuación",
+    "waitHint": "Se abrirá una pestaña nueva para completar la verificación",
+    "reopen": "Abrir de nuevo",
+    "checking": "Comprobando estado…",
+    "waitingBody": "Completa el proceso en la pestaña que se ha abierto. Esta página se actualizará sola cuando termines.",
     "previous": "Anterior",
     "continue": "Continuar",
     "verified": "Verificado",
     "urlMissing": {
       "title": "URL de verificación no disponible",
       "body": "No se pudo generar la URL de verificación. Por favor, contacta con soporte para completar el proceso de verificación."
-    },
-    "iframeTitle": "Proceso de verificación KYC",
-    "iframeError": {
-      "title": "Error al cargar el proceso de verificación",
-      "body": "Hubo un problema al cargar la página de verificación. Si ya completaste el proceso de verificación, puedes continuar al dashboard.",
-      "goDashboard": "Ir al dashboard",
-      "retry": "Reintentar"
     },
     "rejected": {
       "title": "Verificación rechazada",

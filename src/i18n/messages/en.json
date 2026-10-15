@@ -1186,6 +1186,18 @@
         "viewAll": "View all",
         "assets": "{count, plural, one {# asset} other {# assets}}",
         "certifications": "{count, plural, one {# certification} other {# certifications}}"
+      },
+      "pendingSignatures": {
+        "title": "Signatures pending approval",
+        "description": "Each company certifies with its own: these are still waiting on iBS.",
+        "empty": "No company is waiting on signature approval.",
+        "table": {
+          "organization": "Organization",
+          "company": "Company",
+          "waiting": "Waiting",
+          "waitingSince": "Since {date}",
+          "daysWaiting": "{count, plural, one {# day} other {# days}}"
+        }
       }
     }
   },
@@ -1474,20 +1486,16 @@
   "onboardingKyc": {
     "title": "Identity verification",
     "start": "Start",
-    "waitHint": "Complete the verification process below",
+    "waitHint": "A new tab will open to complete the verification",
+    "reopen": "Open again",
+    "checking": "Checking status…",
+    "waitingBody": "Complete the process in the tab that just opened. This page will update itself once you're done.",
     "previous": "Back",
     "continue": "Continue",
     "verified": "Verified",
     "urlMissing": {
       "title": "Verification URL unavailable",
       "body": "The verification URL could not be generated. Please contact support to complete the verification process."
-    },
-    "iframeTitle": "KYC verification process",
-    "iframeError": {
-      "title": "Error loading the verification process",
-      "body": "There was a problem loading the verification page. If you already completed the verification, you can continue to the dashboard.",
-      "goDashboard": "Go to dashboard",
-      "retry": "Retry"
     },
     "rejected": {
       "title": "Verification rejected",

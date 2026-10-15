@@ -26,7 +26,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockIsSuperAdmin.mockResolvedValue(true);
   mockPrisma.organization.count.mockResolvedValue(3);
-  mockPrisma.company.findMany.mockResolvedValue([{ active: true }, { active: true }, { active: false }]);
+  mockPrisma.company.findMany
+    .mockResolvedValueOnce([{ active: true }, { active: true }, { active: false }])
+    .mockResolvedValueOnce([
+      { id: 'c-1', name: 'Pendiente SA', updatedAt: new Date('2026-09-01'), Organization: { name: 'Norte' } },
+    ]);
   mockPrisma.asset.count.mockResolvedValue(42);
   mockPrisma.certification.count
     .mockResolvedValueOnce(30) // total
@@ -53,8 +57,14 @@ describe('getPlatformHome', () => {
         pendingCertifications: 2,
       },
       topOrganizations: [{ id: 'org-1', name: 'Norte', assets: 20, certifications: 15 }],
+      pendingSignatures: [
+        { companyId: 'c-1', companyName: 'Pendiente SA', organizationName: 'Norte', waitingSince: new Date('2026-09-01') },
+      ],
     });
     expect(mockTrend).toHaveBeenCalledWith(null);
+    expect(mockPrisma.company.findMany).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      where: { verificationStatus: 'WAITING' },
+    }));
   });
 
   it('is refused to anyone but the superadmin', async () => {

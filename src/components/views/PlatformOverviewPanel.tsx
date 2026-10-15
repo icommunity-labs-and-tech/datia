@@ -11,21 +11,19 @@ import {
   Group,
   Loader,
   Paper,
+  ScrollArea,
   SimpleGrid,
   Stack,
+  Table,
   Text,
+  ThemeIcon,
 } from '@mantine/core';
+import { IconSignature } from '@tabler/icons-react';
 import PageHeader from '@/components/layout/PageHeader';
-import CertificationChart, { TrendStat } from '@/components/dashboard/CertificationChart';
-import ScopeBreakdown from '@/components/dashboard/ScopeBreakdown';
+import { TrendStat } from '@/components/dashboard/CertificationChart';
 import { getPlatformHome, type PlatformHome } from '@/actions/admin/get-overview';
 
-/** Renders a `YYYY-MM` key in the reader's locale. */
-function monthName(month: string, locale: string) {
-  if (!month) return '';
-  const [year, m] = month.split('-').map(Number);
-  return new Date(year, m - 1, 1).toLocaleDateString(locale, { month: 'short', year: '2-digit' });
-}
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export default function PlatformOverviewPanel() {
   const t = useTranslations('superadminPanel.home');
@@ -50,7 +48,8 @@ export default function PlatformOverviewPanel() {
 
   if (!data) return null;
 
-  const { stats, trend, topOrganizations } = data;
+  const { stats, trend, topOrganizations, pendingSignatures } = data;
+  const waitingDays = (since: Date) => Math.floor((Date.now() - new Date(since).getTime()) / DAY_MS);
 
   const tiles = (
     <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing="md">
@@ -124,28 +123,56 @@ export default function PlatformOverviewPanel() {
     <>
       <PageHeader title={t('title')} description={t('description')} />
 
-      {/* The platform's own Inicio leads with the trend across every
-          organization, not a row of tiles — the figures that matter are
-          downstream of what's moving, not the other way round. */}
-      {trend.monthly.length > 0 && (
-        <Box mb="lg">
-          <CertificationChart data={trend.monthly} />
-        </Box>
-      )}
+      {/* Emissions are a company's own concern, not iCommunity's — what the
+          platform's own Inicio leads with is the one thing only iCommunity
+          can act on: companies whose signature iBS still hasn't approved. */}
+      <Paper withBorder radius="md" p="md" mb="lg">
+        <Group gap="xs" wrap="nowrap" mb="xs">
+          <ThemeIcon color="datiaRed" variant="light" size={28} radius="md">
+            <IconSignature size={16} stroke={1.6} />
+          </ThemeIcon>
+          <Text fw={600} size="sm">{t('pendingSignatures.title')}</Text>
+        </Group>
+        <Text size="xs" c="dimmed" mb="sm">{t('pendingSignatures.description')}</Text>
+        {pendingSignatures.length === 0 ? (
+          <Center py="lg">
+            <Text size="sm" c="dimmed">{t('pendingSignatures.empty')}</Text>
+          </Center>
+        ) : (
+          <ScrollArea>
+            <Table striped highlightOnHover verticalSpacing="xs" miw={480}>
+              <Table.Thead>
+                <Table.Tr>
+                  <Table.Th>{t('pendingSignatures.table.organization')}</Table.Th>
+                  <Table.Th>{t('pendingSignatures.table.company')}</Table.Th>
+                  <Table.Th>{t('pendingSignatures.table.waiting')}</Table.Th>
+                </Table.Tr>
+              </Table.Thead>
+              <Table.Tbody>
+                {pendingSignatures.map((row) => {
+                  const days = waitingDays(row.waitingSince);
+                  return (
+                    <Table.Tr key={row.companyId}>
+                      <Table.Td><Text size="sm" fw={550}>{row.organizationName}</Text></Table.Td>
+                      <Table.Td><Text size="sm" c="dimmed">{row.companyName}</Text></Table.Td>
+                      <Table.Td>
+                        <Text size="sm" c={days >= 1 ? 'orange' : 'dimmed'}>
+                          {t('pendingSignatures.table.waitingSince', { date: new Date(row.waitingSince).toLocaleDateString(locale) })}
+                          {days >= 1 && ` · ${t('pendingSignatures.table.daysWaiting', { count: days })}`}
+                        </Text>
+                      </Table.Td>
+                    </Table.Tr>
+                  );
+                })}
+              </Table.Tbody>
+            </Table>
+          </ScrollArea>
+        )}
+      </Paper>
 
       <Box mb="lg">{tiles}</Box>
 
-      {(trend.monthly.length > 0 || topOrganizationsPanel) && (
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="lg">
-          {trend.monthly.length > 0 && (
-            <ScopeBreakdown
-              slices={trend.byScope}
-              period={`${monthName(trend.from, locale)} – ${monthName(trend.to, locale)}`}
-            />
-          )}
-          {topOrganizationsPanel}
-        </SimpleGrid>
-      )}
+      {topOrganizationsPanel}
     </>
   );
 }

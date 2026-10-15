@@ -42,7 +42,6 @@ function ActivateAccountForm() {
   // Estado del wizard (solo para primer admin)
   const [currentStep, setCurrentStep] = useState<OnboardingStep>(1);
   const [passwordSaved, setPasswordSaved] = useState(false);
-  const [isKycEmbedded, setIsKycEmbedded] = useState(false);
 
   // Función para obtener la clave de localStorage
   const getStorageKey = () => {
@@ -474,7 +473,7 @@ function ActivateAccountForm() {
     const stepName = [t('steps.welcome'), t('steps.password'), t('steps.verification'), t('steps.completed')][currentStep - 1];
 
     return (
-      <ActivationShell wide={isKycEmbedded}>
+      <ActivationShell>
         <Stack gap="lg">
           <div>
             <Group justify="space-between" mb={6}>
@@ -538,7 +537,6 @@ function ActivateAccountForm() {
                 router.push('/auth/company/login?message=kyc-completed');
               }}
               onPrevious={handlePrevious}
-              onEmbeddedChange={setIsKycEmbedded}
             />
           )}
 
@@ -597,10 +595,10 @@ function ActivateAccountForm() {
   );
 }
 
-function ActivationShell({ children, wide = false }: { children: React.ReactNode; wide?: boolean }) {
+function ActivationShell({ children }: { children: React.ReactNode }) {
   return (
     <Center mih="100vh" bg="var(--mantine-color-gray-0)" p="md">
-      <Paper withBorder radius="lg" shadow="sm" w="100%" maw={wide ? 1400 : 560} style={{ overflow: 'hidden' }}>
+      <Paper withBorder radius="lg" shadow="sm" w="100%" maw={560} style={{ overflow: 'hidden' }}>
         <Center py="xl" bg="white" style={{ borderBottom: '1px solid var(--mantine-color-gray-2)' }}>
           <Logo href={null} width={200} height={56} priority src="/logo-datia.svg" alt="Datia" />
         </Center>

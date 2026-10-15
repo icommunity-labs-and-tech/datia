@@ -22,10 +22,18 @@ export interface TopOrganization {
   certifications: number;
 }
 
+export interface PendingSignature {
+  companyId: string;
+  companyName: string;
+  organizationName: string;
+  waitingSince: Date;
+}
+
 export interface PlatformHome {
   stats: PlatformStats;
   trend: CertificationTrend;
   topOrganizations: TopOrganization[];
+  pendingSignatures: PendingSignature[];
 }
 
 /**
@@ -36,7 +44,7 @@ export interface PlatformHome {
 export async function getPlatformHome(): Promise<PlatformHome | null> {
   if (!(await isSuperAdmin())) return null;
 
-  const [organizationsCount, companies, totalAssets, certTotal, certCertified, certIssued, trend, topOrgs] =
+  const [organizationsCount, companies, totalAssets, certTotal, certCertified, certIssued, trend, topOrgs, waitingCompanies] =
     await Promise.all([
       prisma.organization.count(),
       prisma.company.findMany({ select: { active: true } }),
@@ -49,6 +57,14 @@ export async function getPlatformHome(): Promise<PlatformHome | null> {
         select: { id: true, name: true, _count: { select: { Asset: true, Certification: true } } },
         orderBy: { Asset: { _count: 'desc' } },
         take: 5,
+      }),
+      // One signature per company (#23): WAITING is ibs still reviewing the
+      // KYC it already has — not NOT_VERIFIED, which just means no attempt
+      // has been made yet and isn't "pending" anything.
+      prisma.company.findMany({
+        where: { verificationStatus: 'WAITING' },
+        select: { id: true, name: true, updatedAt: true, Organization: { select: { name: true } } },
+        orderBy: { updatedAt: 'asc' },
       }),
     ]);
 
@@ -68,6 +84,12 @@ export async function getPlatformHome(): Promise<PlatformHome | null> {
       name: o.name,
       assets: o._count.Asset,
       certifications: o._count.Certification,
+    })),
+    pendingSignatures: waitingCompanies.map((c) => ({
+      companyId: c.id,
+      companyName: c.name,
+      organizationName: c.Organization.name,
+      waitingSince: c.updatedAt,
     })),
   };
 }
