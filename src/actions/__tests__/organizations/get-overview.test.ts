@@ -8,6 +8,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 const { mockPrisma, mockVerify, mockCountAssets, mockCertCounts } = vi.hoisted(() => ({
   mockPrisma: {
+    organization: { findUniqueOrThrow: vi.fn() },
     company: { findMany: vi.fn() },
     user: { groupBy: vi.fn() },
   },
@@ -31,6 +32,7 @@ import { getOrganizationOverview } from '@/actions/organizations/get-overview';
 beforeEach(() => {
   vi.clearAllMocks();
   mockVerify.mockResolvedValue({ id: 'u-org', role: 'ORG_ADMIN', organizationId: 'org-1' });
+  mockPrisma.organization.findUniqueOrThrow.mockResolvedValue({ name: 'Norte Holding' });
   mockPrisma.company.findMany.mockResolvedValue([
     { id: 'co-1', name: 'Norte', active: true, createdAt: new Date('2026-09-01'), _count: { Asset: 3, User: 2 } },
     { id: 'co-2', name: 'Sur', active: false, createdAt: new Date('2026-09-02'), _count: { Asset: 1, User: 1 } },
@@ -47,6 +49,7 @@ describe('getOrganizationOverview', () => {
   it('sums across every company of the organisation', async () => {
     const result = await getOrganizationOverview();
 
+    expect(result.organizationName).toBe('Norte Holding');
     expect(result.companiesCount).toBe(2);
     expect(result.activeCompaniesCount).toBe(1);
     expect(result.totalAssets).toBe(4);

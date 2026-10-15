@@ -1218,7 +1218,7 @@
   },
   "organizationOverview": {
     "title": "Home",
-    "description": "Your companies, together.",
+    "description": "{name}'s companies, together.",
     "stats": {
       "companies": "Companies",
       "companiesDetail": "{active, plural, one {1 active} other {# active}}",

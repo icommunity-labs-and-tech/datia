@@ -1218,7 +1218,7 @@
   },
   "organizationOverview": {
     "title": "Inicio",
-    "description": "El conjunto de tus empresas.",
+    "description": "El conjunto de las empresas de {name}.",
     "stats": {
       "companies": "Empresas",
       "companiesDetail": "{active, plural, one {1 activa} other {# activas}}",

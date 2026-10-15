@@ -24,6 +24,7 @@ interface SessionUser {
   name?: string;
   email: string;
   role: string;
+  organizationName?: string | null;
 }
 
 export default function OrganizationLayout({ children }: { children: React.ReactNode }) {
@@ -103,7 +104,7 @@ export default function OrganizationLayout({ children }: { children: React.React
     <PanelShell
       homeHref={NAV_HOME}
       navLinks={navLinks}
-      user={user}
+      user={user ? { ...user, contextLabel: user.organizationName } : null}
       onLogout={handleLogout}
       accountMenuItems={accountMenuItems}
       accent="datiaBlue"

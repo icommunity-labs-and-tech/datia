@@ -8,6 +8,7 @@ import { requireOrganizationAccount } from '@/actions/companies/access';
 import type { Scope } from '@/lib/scope';
 
 export interface OrganizationOverview {
+  organizationName: string;
   companies: CompanySummary[];
   companiesCount: number;
   activeCompaniesCount: number;
@@ -29,7 +30,8 @@ export async function getOrganizationOverview(): Promise<OrganizationOverview> {
   const { organizationId } = await requireOrganizationAccount();
   const scope: Scope = { organizationId, companyId: null };
 
-  const [companies, totalAssets, certifications, accountsByStatus] = await Promise.all([
+  const [organization, companies, totalAssets, certifications, accountsByStatus] = await Promise.all([
+    prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { name: true } }),
     companiesOfOrganization(organizationId),
     assetRepository.countTotalItems(scope),
     certificationCounts(scope),
@@ -45,6 +47,7 @@ export async function getOrganizationOverview(): Promise<OrganizationOverview> {
   const countOf = (status: string) => accountsByStatus.find((c) => c.status === status)?._count.id ?? 0;
 
   return {
+    organizationName: organization.name,
     companies,
     companiesCount: companies.length,
     activeCompaniesCount: companies.filter((c) => c.active).length,

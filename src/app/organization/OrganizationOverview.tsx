@@ -68,7 +68,7 @@ export default function OrganizationOverview({
   if (overview.companiesCount === 0) {
     return (
       <>
-        <PageHeader title={t('title')} description={t('description')} />
+        <PageHeader title={t('title')} description={t('description', { name: overview.organizationName })} />
         <Paper withBorder radius="md" p="xl">
           <Center>
             <Text size="sm" c="dimmed">{t('empty')}</Text>
@@ -106,7 +106,7 @@ export default function OrganizationOverview({
     <>
       <PageHeader
         title={t('title')}
-        description={t('description')}
+        description={t('description', { name: overview.organizationName })}
         actions={
           <Button
             component={Link}

@@ -49,7 +49,8 @@ interface PanelShellProps {
   logoSrc?: string | null;
   logoAlt?: string;
   navLinks: PanelNavLink[];
-  user: { name?: string | null; email?: string | null } | null;
+  /** `contextLabel` names the organization/company the account belongs to — the account menu is the one place that's always visible, whatever page you're on. */
+  user: { name?: string | null; email?: string | null; contextLabel?: string | null } | null;
   /** Extra Menu.Item(s) in the account dropdown, above the logout divider. */
   accountMenuItems?: React.ReactNode;
   onLogout: () => void | Promise<void>;
@@ -215,6 +216,11 @@ export default function PanelShell({
                   <Text size="xs" fw={600} c="dark" truncate>
                     {user?.name || user?.email || '—'}
                   </Text>
+                  {user?.contextLabel && (
+                    <Text size="xs" c="dimmed" truncate>
+                      {user.contextLabel}
+                    </Text>
+                  )}
                 </Menu.Label>
                 {accountMenuItems}
                 <Menu.Divider />
