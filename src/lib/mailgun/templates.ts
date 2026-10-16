@@ -44,7 +44,7 @@ export function generateInvitationEmailHTML(data: {
   appUrl?: string;
   language?: 'es' | 'en';
 }): string {
-  const logoUrl = data.appUrl ? `${data.appUrl}/logo.webp` : '/logo.webp';
+  const logoUrl = data.appUrl ? `${data.appUrl}/logo-email.png` : '/logo-email.png';
   const t = invitationTranslations[data.language || 'es'];
 
   return `
@@ -195,7 +195,7 @@ export function generatePasswordResetEmailHTML(data: {
   language?: 'es' | 'en';
 }): string {
   const t = passwordResetTranslations[data.language || 'es'];
-  const logoUrl = data.appUrl ? `${data.appUrl}/logo.webp` : '/logo.webp';
+  const logoUrl = data.appUrl ? `${data.appUrl}/logo-email.png` : '/logo-email.png';
   const name = escapeHtml(data.recipientName);
   const url = escapeHtml(data.resetUrl);
   const app = escapeHtml(data.appName);
