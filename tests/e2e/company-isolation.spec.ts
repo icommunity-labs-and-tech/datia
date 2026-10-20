@@ -5,14 +5,13 @@ import { loginAdmin } from './utils/auth';
  * No company sees another company's data, by dashboard or by API, inside the
  * same organization (#38). Seeded by scripts/bootstrap-e2e-users.mjs: "Datia E2E"
  * has two companies. Company A (the default one) owns e2e-item-0; company B owns
- * e2e-company-b-asset. The org-wide token has no company and must see both.
+ * e2e-company-b-asset.
  */
 
 const COMPANY_A_ASSET_ID = 'e2e-item-0';
 const COMPANY_B_ASSET_ID = 'e2e-company-b-asset';
 const COMPANY_A_TOKEN = 'e2e-datia-org-token-do-not-use-in-prod';
 const COMPANY_B_TOKEN = 'e2e-company-b-token-do-not-use-in-prod';
-const ORG_WIDE_TOKEN = 'e2e-datia-org-wide-token-do-not-use-in-prod';
 const COMPANY_B_EMAIL = 'companyb-e2e@datia.icommunitylabs.com';
 const COMPANY_B_PASSWORD = 'companyb123';
 
@@ -61,11 +60,5 @@ test.describe('Company isolation: API, without a dashboard session', () => {
       data: { assetId: COMPANY_A_ASSET_ID, name: 'Intento ajeno', energyCarrier: 'SOLAR_THERMAL', capacityKw: 1 },
     });
     expect(res.status()).toBe(404);
-  });
-
-  test('the organisation-wide token still sees both companies’ assets', async ({ request }) => {
-    const ids = await listedIds(request, ORG_WIDE_TOKEN);
-    expect(ids).toContain(COMPANY_A_ASSET_ID);
-    expect(ids).toContain(COMPANY_B_ASSET_ID);
   });
 });

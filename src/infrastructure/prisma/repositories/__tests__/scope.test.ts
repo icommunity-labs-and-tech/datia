@@ -21,7 +21,18 @@ const { db } = vi.hoisted(() => {
       asset: model(),
       eventLog: model(),
       webhook: model(),
-      apiToken: model(),
+      // create() also mimics `include: { Company: true }` — every company
+      // fixture in this file belongs to org-1 — so ApiTokenRepositoryPrisma's
+      // toDomain(), which reads organizationId off that relation, has
+      // something to read.
+      apiToken: {
+        ...model(),
+        create: vi.fn(async ({ data }: any) => ({
+          ...data,
+          createdAt: new Date(),
+          Company: { organizationId: 'org-1' },
+        })),
+      },
       apiCall: model(),
       user: model(),
       company: model(),
@@ -64,8 +75,6 @@ describe('reads are restricted to the company of the scope', () => {
     ['event findByType', 'eventLog', 'findMany', (s) => eventRepository.findByType(s, 'asset.created')],
     ['webhook list', 'webhook', 'findMany', (s) => webhookRepository.list(s)],
     ['webhook findByEvent', 'webhook', 'findMany', (s) => webhookRepository.findByEvent(s, 'asset.created')],
-    ['token list', 'apiToken', 'findMany', (s) => apiTokenRepository.findByOrganization(s)],
-    ['token findById', 'apiToken', 'findFirst', (s) => apiTokenRepository.findById('t-1', s)],
     ['api call count', 'apiCall', 'count', (s) => apiCallRepository.countByToken('t-1', s)],
     ['user list', 'user', 'findMany', (s) => userRepository.findByOrganization(s)],
     ['user count', 'user', 'count', (s) => userRepository.countAdmins(s)],
@@ -81,6 +90,25 @@ describe('reads are restricted to the company of the scope', () => {
     const where = lastWhere(model, fn);
     expect(where).toMatchObject({ organizationId: 'org-1' });
     expect(where).not.toHaveProperty('companyId');
+  });
+});
+
+describe('ApiToken has no organizationId column of its own (#25) — scoped via Company', () => {
+  const cases: Array<[string, 'findMany' | 'findFirst', (s: typeof company) => Promise<unknown>]> = [
+    ['token list', 'findMany', (s) => apiTokenRepository.findByOrganization(s)],
+    ['token findById', 'findFirst', (s) => apiTokenRepository.findById('t-1', s)],
+  ];
+
+  it.each(cases)('%s, for a company account', async (_name, fn, run) => {
+    await run(company);
+    expect(lastWhere('apiToken', fn)).toMatchObject({ Company: { organizationId: 'org-1', id: 'co-1' } });
+  });
+
+  it.each(cases)('%s, for the account that operates the organisation', async (_name, fn, run) => {
+    await run(organisation);
+    const where = lastWhere('apiToken', fn);
+    expect(where).toMatchObject({ Company: { organizationId: 'org-1' } });
+    expect(where.Company).not.toHaveProperty('id');
   });
 });
 
@@ -127,14 +155,20 @@ describe('writes are filed under the company of the scope', () => {
     expect(db.asset.create.mock.calls[0][0].data).toMatchObject({ organizationId: 'org-1', companyId: 'co-1' });
   });
 
-  it('an event, a webhook and a token', async () => {
+  it('an event and a webhook', async () => {
     await eventRepository.create(company, { eventType: 'x', entityType: 'X', entityId: '1', data: {} });
     await webhookRepository.create(company, { url: 'https://x.test', events: ['x'] } as any);
-    await apiTokenRepository.create({ name: 'ERP', tokenHash: 'h', organizationId: 'org-1', companyId: 'co-1' });
 
-    for (const model of ['eventLog', 'webhook', 'apiToken']) {
+    for (const model of ['eventLog', 'webhook']) {
       expect(db[model].create.mock.calls[0][0].data).toMatchObject({ organizationId: 'org-1', companyId: 'co-1' });
     }
+  });
+
+  it('a token — company only, no organizationId column (#25)', async () => {
+    await apiTokenRepository.create({ name: 'ERP', tokenHash: 'h', organizationId: 'org-1', companyId: 'co-1' });
+
+    expect(db.apiToken.create.mock.calls[0][0].data).toMatchObject({ companyId: 'co-1' });
+    expect(db.apiToken.create.mock.calls[0][0].data).not.toHaveProperty('organizationId');
   });
 
   it('the default company for the account that has none', async () => {
@@ -149,7 +183,10 @@ describe('writes are filed under the company of the scope', () => {
 describe('a company account cannot reach into another company', () => {
   it('deleting a token looks only inside its company', async () => {
     await apiTokenRepository.delete('t-1', company);
-    expect(lastWhere('apiToken', 'deleteMany')).toMatchObject({ id: 't-1', ...company });
+    expect(lastWhere('apiToken', 'deleteMany')).toMatchObject({
+      id: 't-1',
+      Company: { organizationId: 'org-1', id: 'co-1' },
+    });
   });
 
   it('a role change reaches a company account and nothing else', async () => {

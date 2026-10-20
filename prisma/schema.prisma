@@ -34,16 +34,18 @@ model ApiToken {
   id             String       @id
   name           String
   tokenHash      String       @unique
-  organizationId String
-  companyId       String?
+  // No organizationId of its own (#25): every real token is company-scoped
+  // (requireScope() throws for an account with no company), so the org is
+  // always reached via Company.organizationId. An organisation-wide token
+  // (companyId: null) never shipped as a reachable product path — only an
+  // e2e fixture ever produced one, writing straight to the DB.
+  companyId      String
   lastUsedAt     DateTime?
   expiresAt      DateTime?
   createdAt      DateTime     @default(now())
   ApiCall        ApiCall[]
-  Organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  Company        Company?     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  Company        Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  @@index([organizationId])
   @@index([tokenHash])
   @@index([companyId])
 }
@@ -176,7 +178,6 @@ model Organization {
   createdAt         DateTime           @default(now())
   updatedAt          DateTime
   ApiCall           ApiCall[]
-  ApiToken          ApiToken[]
   Certification     Certification[]
   Company           Company[]
   EventLog          EventLog[]

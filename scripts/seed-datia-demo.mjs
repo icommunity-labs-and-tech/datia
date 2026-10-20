@@ -60,7 +60,9 @@ async function main() {
   const tokenHash = crypto.createHash('sha256').update(RAW_TOKEN).digest('hex');
   const existingTok = await prisma.apiToken.findUnique({ where: { tokenHash } });
   if (!existingTok) {
-    await prisma.apiToken.create({ data: { id: uid(), name: 'Demo token', tokenHash, organizationId: org.id } });
+    const company = await prisma.company.findFirst({ where: { organizationId: org.id } });
+    if (!company) { console.error('❌ No company found for org "datia". Create one first.'); process.exit(1); }
+    await prisma.apiToken.create({ data: { id: uid(), name: 'Demo token', tokenHash, companyId: company.id } });
   }
 
   // ── Summary ───────────────────────────────────────────────────────────────

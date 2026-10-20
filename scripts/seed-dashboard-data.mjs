@@ -103,7 +103,6 @@ async function main() {
         id: generateId(),
         name: tokenNames[i],
         tokenHash,
-        organizationId: organization.id,
         companyId,
         lastUsedAt: randomDate(7),
         expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // Expira en 1 año

@@ -1,14 +1,26 @@
 import { ApiTokenRepository, type ApiTokenRecord, type CreateApiTokenInput, DbError } from '@/domain/api-tokens/ApiTokenRepository';
 import { prisma } from '@/lib/prisma';
 import { defaultCompanyId } from '@/lib/company';
-import { scopeWhere, type Scope } from '@/lib/scope';
+import type { Scope } from '@/lib/scope';
+
+// ApiToken has no organizationId column of its own (#25) — unlike every other
+// scoped table, it's always company-scoped, so the org side of a scope is
+// filtered through the Company relation instead of a flat field. The org is
+// still checked even with a company id set, same as scopeWhere: a company id
+// from another organisation matches nothing.
+const apiTokenScopeWhere = (scope: Scope) => ({
+  Company: {
+    organizationId: scope.organizationId,
+    ...(scope.companyId ? { id: scope.companyId } : {}),
+  },
+});
 
 const toDomain = (t: any): ApiTokenRecord => ({
   id: t.id,
   name: t.name,
   tokenHash: t.tokenHash,
-  organizationId: t.organizationId,
-  companyId: t.companyId ?? null,
+  organizationId: t.Company.organizationId,
+  companyId: t.companyId,
   lastUsedAt: t.lastUsedAt,
   expiresAt: t.expiresAt,
   createdAt: t.createdAt,
@@ -22,10 +34,10 @@ export const apiTokenRepository: ApiTokenRepository = {
           id: crypto.randomUUID(),
           name: input.name,
           tokenHash: input.tokenHash,
-          organizationId: input.organizationId,
           companyId: input.companyId ?? await defaultCompanyId(input.organizationId),
           expiresAt: input.expiresAt ?? null,
         },
+        include: { Company: true },
       });
       return toDomain(token);
     } catch (e: any) {
@@ -41,9 +53,10 @@ export const apiTokenRepository: ApiTokenRepository = {
           'Prisma Client no tiene el modelo apiToken. Por favor, reinicia el servidor de desarrollo.'
         );
       }
-      const tokens = await prisma.apiToken.findMany({ 
-        where: scopeWhere(scope),
-        orderBy: { createdAt: 'desc' } 
+      const tokens = await prisma.apiToken.findMany({
+        where: apiTokenScopeWhere(scope),
+        include: { Company: true },
+        orderBy: { createdAt: 'desc' }
       });
       return tokens.map(toDomain);
     } catch (e: any) {
@@ -59,7 +72,10 @@ export const apiTokenRepository: ApiTokenRepository = {
           'Prisma Client no tiene el modelo apiToken. Por favor, reinicia el servidor de desarrollo.'
         );
       }
-      const token = await prisma.apiToken.findFirst({ where: { id, ...scopeWhere(scope) } });
+      const token = await prisma.apiToken.findFirst({
+        where: { id, ...apiTokenScopeWhere(scope) },
+        include: { Company: true },
+      });
       return token ? toDomain(token) : null;
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');
@@ -74,7 +90,10 @@ export const apiTokenRepository: ApiTokenRepository = {
           'Prisma Client no tiene el modelo apiToken. Por favor, reinicia el servidor de desarrollo.'
         );
       }
-      const token = await prisma.apiToken.findUnique({ where: { tokenHash } });
+      const token = await prisma.apiToken.findUnique({
+        where: { tokenHash },
+        include: { Company: true },
+      });
       return token ? toDomain(token) : null;
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');
@@ -107,7 +126,7 @@ export const apiTokenRepository: ApiTokenRepository = {
         );
       }
       await prisma.apiToken.deleteMany({
-        where: { id, ...scopeWhere(scope) },
+        where: { id, ...apiTokenScopeWhere(scope) },
       });
     } catch (e: any) {
       throw new DbError(e, e?.message || 'Error de base de datos');
