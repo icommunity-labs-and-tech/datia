@@ -1,15 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 /**
- * In production, the only way in is the identity IAP already verified. Outside
- * production there is no IAP in front of `next dev`, so this falls back to the
- * password session the login route still issues there.
+ * In production, the only way in is the identity IAP already verified —
+ * IAP's own IAM policy is the access list, not a matching `User` row (#146
+ * follow-up). Outside production there is no IAP in front of `next dev`, so
+ * this falls back to the password session the login route still issues
+ * there, already gated by role/status at login time.
  */
 
-const { mockVerifiedIapEmail, mockVerifySuperAdminJWT, mockFindUnique, cookieJar, headerJar } = vi.hoisted(() => ({
+const { mockVerifiedIapEmail, mockVerifySuperAdminJWT, cookieJar, headerJar } = vi.hoisted(() => ({
   mockVerifiedIapEmail: vi.fn(),
   mockVerifySuperAdminJWT: vi.fn(),
-  mockFindUnique: vi.fn(),
   cookieJar: new Map<string, string>(),
   headerJar: new Map<string, string>(),
 }));
@@ -18,14 +19,11 @@ vi.mock('next/headers', () => ({
   cookies: async () => ({ get: (name: string) => (cookieJar.has(name) ? { value: cookieJar.get(name) } : undefined) }),
   headers: async () => ({ get: (name: string) => headerJar.get(name) ?? null }),
 }));
-vi.mock('@/lib/prisma', () => ({ prisma: { user: { findUnique: mockFindUnique } } }));
 vi.mock('../iap', () => ({ verifiedIapEmail: mockVerifiedIapEmail }));
 vi.mock('../jwt', () => ({ verifySuperAdminJWT: mockVerifySuperAdminJWT }));
 vi.mock('../config', () => ({ superadminAuthConfig: { cookieName: 'superadmin-auth-token' } }));
 
 const { currentSuperAdmin } = await import('../identity');
-
-const activeSuperAdmin = { id: 'u-1', email: 'a@icommunity.io', name: 'A', role: 'SUPER_ADMIN', status: 'ACTIVE' };
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -37,12 +35,16 @@ afterEach(() => vi.unstubAllEnvs());
 describe('currentSuperAdmin in production', () => {
   beforeEach(() => vi.stubEnv('NODE_ENV', 'production'));
 
-  it('trusts the IAP-verified email once it maps to an active SUPER_ADMIN', async () => {
+  it('trusts the IAP-verified email with no User row required', async () => {
     headerJar.set('x-goog-iap-jwt-assertion', 'a-jwt');
     mockVerifiedIapEmail.mockResolvedValue('a@icommunity.io');
-    mockFindUnique.mockResolvedValue(activeSuperAdmin);
 
-    await expect(currentSuperAdmin()).resolves.toMatchObject({ id: 'u-1', role: 'SUPER_ADMIN' });
+    await expect(currentSuperAdmin()).resolves.toEqual({
+      id: 'a@icommunity.io',
+      email: 'a@icommunity.io',
+      name: 'a',
+      role: 'SUPER_ADMIN',
+    });
     expect(mockVerifiedIapEmail).toHaveBeenCalledWith('a-jwt');
   });
 
@@ -54,21 +56,8 @@ describe('currentSuperAdmin in production', () => {
     expect(mockVerifySuperAdminJWT).not.toHaveBeenCalled();
   });
 
-  it('is null when IAP verified an identity with no matching user', async () => {
-    mockVerifiedIapEmail.mockResolvedValue('nobody@icommunity.io');
-    mockFindUnique.mockResolvedValue(null);
-    await expect(currentSuperAdmin()).resolves.toBeNull();
-  });
-
-  it('is null when the verified identity exists but is not SUPER_ADMIN', async () => {
-    mockVerifiedIapEmail.mockResolvedValue('org@icommunity.io');
-    mockFindUnique.mockResolvedValue({ ...activeSuperAdmin, role: 'ORG_ADMIN' });
-    await expect(currentSuperAdmin()).resolves.toBeNull();
-  });
-
-  it('is null when the matching account is not active', async () => {
-    mockVerifiedIapEmail.mockResolvedValue('a@icommunity.io');
-    mockFindUnique.mockResolvedValue({ ...activeSuperAdmin, status: 'PENDING' });
+  it('is null when IAP verifies nothing (missing, malformed or expired assertion)', async () => {
+    mockVerifiedIapEmail.mockResolvedValue(null);
     await expect(currentSuperAdmin()).resolves.toBeNull();
   });
 });
@@ -76,17 +65,27 @@ describe('currentSuperAdmin in production', () => {
 describe('currentSuperAdmin outside production', () => {
   beforeEach(() => vi.stubEnv('NODE_ENV', 'development'));
 
-  it('falls back to the password-session cookie, same as before IAP', async () => {
+  it('trusts the password-session cookie, already gated by role/status at login', async () => {
     cookieJar.set('superadmin-auth-token', 'tok');
-    mockVerifySuperAdminJWT.mockResolvedValue({ email: 'a@icommunity.io' });
-    mockFindUnique.mockResolvedValue(activeSuperAdmin);
+    mockVerifySuperAdminJWT.mockResolvedValue({ id: 'u-1', email: 'a@icommunity.io', name: 'A' });
 
-    await expect(currentSuperAdmin()).resolves.toMatchObject({ id: 'u-1' });
+    await expect(currentSuperAdmin()).resolves.toEqual({
+      id: 'u-1',
+      email: 'a@icommunity.io',
+      name: 'A',
+      role: 'SUPER_ADMIN',
+    });
     expect(mockVerifiedIapEmail).not.toHaveBeenCalled();
   });
 
   it('is null with no cookie at all', async () => {
     await expect(currentSuperAdmin()).resolves.toBeNull();
-    expect(mockFindUnique).not.toHaveBeenCalled();
+    expect(mockVerifySuperAdminJWT).not.toHaveBeenCalled();
+  });
+
+  it('is null when the cookie fails verification', async () => {
+    cookieJar.set('superadmin-auth-token', 'bad-token');
+    mockVerifySuperAdminJWT.mockResolvedValue(null);
+    await expect(currentSuperAdmin()).resolves.toBeNull();
   });
 });
