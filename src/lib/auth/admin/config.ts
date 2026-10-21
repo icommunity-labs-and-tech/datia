@@ -26,5 +26,3 @@ export const adminAuthConfig: AuthConfig = {
   sameSite: 'strict', // Más restrictivo para admin
   rateLimitMax: parseInt(process.env.DASHBOARD_RATE_LIMIT_MAX || '5'),
 };
-
-export const ADMIN_REQUIRED_ROLE = 'ADMIN';

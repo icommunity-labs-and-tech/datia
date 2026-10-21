@@ -37,7 +37,7 @@ export interface ApiTokenValidatorDeps {
  * dependencies injected. Checks the sandbox repo first; if the token is not
  * found there, falls through to the production repo.
  */
-export function createApiTokenValidator(deps: ApiTokenValidatorDeps) {
+function createApiTokenValidator(deps: ApiTokenValidatorDeps) {
   const { sandboxRepository, productionRepository } = deps;
 
   return async function validateApiToken(
@@ -82,14 +82,3 @@ export const validateApiToken = createApiTokenValidator({
   sandboxRepository: apiTokenRepositoryFilesystem,
   productionRepository: apiTokenRepository,
 });
-
-/**
- * Middleware helper — returns null if auth succeeds, or a 401 NextResponse.
- */
-export async function requireApiAuth(request: NextRequest): Promise<NextResponse | null> {
-  const auth = await validateApiToken(request);
-  if (!auth) {
-    return NextResponse.json({ error: 'Unauthorized', code: 'INVALID_TOKEN' }, { status: 401 });
-  }
-  return null;
-}

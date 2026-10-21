@@ -14,8 +14,6 @@ export const superadminAuthConfig = {
   sessionDuration: 60 * 60 * 8, // 8 horas
 } as const;
 
-export const SUPERADMIN_REQUIRED_ROLE = 'SUPER_ADMIN' as const;
-
 
 
 

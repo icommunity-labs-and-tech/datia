@@ -32,5 +32,3 @@ export interface AuthConfig {
   sameSite: 'strict' | 'lax' | 'none';
   rateLimitMax: number;
 }
-
-export type AuthContext = 'admin' | 'superadmin' | 'organization';

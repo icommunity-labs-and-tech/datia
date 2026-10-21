@@ -3,15 +3,7 @@
  * Avoids adding runtime dependencies while centralizing config.
  */
 
-export type SmtpConfig = {
-  host: string;
-  port: number;
-  user: string;
-  pass: string;
-  from: string;
-};
-
-export function getAppUrl(): string {
+function getAppUrl(): string {
   // Prefer environment variable
   if (process.env.NEXT_PUBLIC_APP_URL) {
     return process.env.NEXT_PUBLIC_APP_URL.replace(/\/$/, '');
@@ -57,9 +49,4 @@ export async function getDynamicAppUrl(): Promise<string> {
   }
   
   return getAppUrl();
-}
-
-export function getSmtpConfig(): SmtpConfig | null {
-  // Email feature is currently disabled; keep the helper as a no-op to avoid breaking imports
-  return null;
 }

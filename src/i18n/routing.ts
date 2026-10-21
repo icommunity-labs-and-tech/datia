@@ -15,7 +15,8 @@ export function isLocale(value: string | null | undefined): value is Locale {
   return routing.locales.some((locale) => locale === value);
 }
 
-// Lightweight wrappers around Next.js' navigation APIs
-// that will consider the routing configuration
-export const { Link, redirect, usePathname, useRouter } =
-  createNavigation(routing);
+// Lightweight wrapper around Next.js' navigation APIs that considers the
+// routing configuration. Only usePathname is actually consumed anywhere in
+// this app (Link/redirect/useRouter come from next/link and next/navigation
+// directly everywhere else) — the others were dropped as unused (#25).
+export const { usePathname } = createNavigation(routing);

@@ -107,7 +107,7 @@ async function sendEmailWithRetry(
   throw lastError || new Error('Failed to send email');
 }
 
-export function createMailgunService(): MailgunService {
+function createMailgunService(): MailgunService {
   return {
     async sendInvitationEmail(data: InvitationEmailData): Promise<void> {
       try {

@@ -157,14 +157,6 @@ export class EnergyValidationError extends Error {
   }
 }
 
-export class EnergyNotFoundError extends Error {
-  readonly _tag = 'EnergyNotFoundError';
-  constructor(id: string) {
-    super(`Energy record not found: ${id}`);
-    this.name = 'EnergyNotFoundError';
-  }
-}
-
 /** One month of an aggregated series, keyed as YYYY-MM so the client formats it. */
 export interface MonthlyPoint {
   month: string;

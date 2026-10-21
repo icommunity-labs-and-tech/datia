@@ -29,19 +29,3 @@ export class PasswordValidationError extends Error {
     this.name = 'PasswordValidationError';
   }
 }
-
-export class KycUrlGenerationError extends Error {
-  readonly _tag = 'KycUrlGenerationError';
-  constructor(public readonly userId: string, message: string) {
-    super(message);
-    this.name = 'KycUrlGenerationError';
-  }
-}
-
-export class SignatureCreationError extends Error {
-  readonly _tag = 'SignatureCreationError';
-  constructor(public readonly userId: string, message: string) {
-    super(message);
-    this.name = 'SignatureCreationError';
-  }
-}

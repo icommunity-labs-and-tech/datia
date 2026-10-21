@@ -67,6 +67,3 @@ if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL && !proces
 }
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-const prismaClient = { prisma };
-export default prismaClient;

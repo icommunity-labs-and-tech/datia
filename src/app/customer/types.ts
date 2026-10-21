@@ -1,20 +1,3 @@
-export interface ItemState {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  backed?: boolean;
-  backedAt?: string;
-  evidenceId?: string;
-  imageUrls?: string[];
-}
-
-export interface ItemCategory {
-  id: string;
-  name: string;
-  description?: string;
-}
-
 export type AssetData = {
   id: string;
   name: string;

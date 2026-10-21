@@ -1,86 +1,4 @@
-import type { VerifyOptions } from '../webhook/types';
-import { WebhookConfigError, WebhookParseError, WebhookSignatureInvalid, WebhookTimestampSkew, WebhookIdempotencyError } from '../webhook/errors';
 import * as crypto from 'crypto';
-
-export interface WebhookService {
-  verifyAndParse<T>(args: {
-    headers: Record<string, string | null | undefined>;
-    rawBody: string;
-    schema: { parse: (x: unknown) => T };
-    secretEnv: string; // env var name for secret
-    opts: VerifyOptions;
-  }): Promise<{ payload: unknown; event: T }>;
-
-  ensureIdempotent(key: string): Promise<void>;
-}
-
-function hmacSha256Hex(secret: string, content: string): string {
-  return crypto.createHmac('sha256', secret).update(content, 'utf8').digest('hex');
-}
-
-const defaultMaxSkew = 5 * 60 * 1000;
-
-// Simple in-memory idempotency set (process scoped)
-const seen = new Set<string>();
-
-export function createWebhookService(): WebhookService {
-  return {
-    async verifyAndParse<T>(args: {
-      headers: Record<string, string | null | undefined>;
-      rawBody: string;
-      schema: { parse: (x: unknown) => T };
-      secretEnv: string;
-      opts: VerifyOptions;
-    }): Promise<{ payload: unknown; event: T }> {
-      const { headers, rawBody, schema, secretEnv, opts } = args;
-      
-      const secret = process.env[secretEnv];
-      if (!secret) {
-        throw new WebhookConfigError(`${secretEnv} not configured`);
-      }
-
-      const sig = headers[opts.signatureHeader]?.toString() ?? '';
-      const tsStr = headers[opts.timestampHeader]?.toString() ?? '';
-      const ts = Number(tsStr);
-      if (!ts || Number.isNaN(ts)) {
-        throw new WebhookSignatureInvalid('Missing or invalid timestamp');
-      }
-      
-      const now = Date.now();
-      const maxSkew = opts.maxSkewMs ?? defaultMaxSkew;
-      if (Math.abs(now - ts) > maxSkew) {
-        throw new WebhookTimestampSkew(
-          'Timestamp skew',
-          Math.abs(now - ts)
-        );
-      }
-
-      const expected = hmacSha256Hex(secret, `${ts}.${rawBody}`);
-      if (!sig || sig !== expected) {
-        throw new WebhookSignatureInvalid('Invalid signature');
-      }
-
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(rawBody);
-      } catch {
-        throw new WebhookParseError('Invalid JSON');
-      }
-      
-      const event = schema.parse(parsed) as T;
-      return { payload: parsed, event };
-    },
-
-    async ensureIdempotent(key: string): Promise<void> {
-      if (seen.has(key)) {
-        throw new WebhookIdempotencyError('Duplicate event');
-      }
-      seen.add(key);
-    },
-  };
-}
-
-export const webhookService = createWebhookService();
 
 // Webhook trigger service (for sending webhooks)
 export interface WebhookPayload {
@@ -188,7 +106,7 @@ export interface WebhookTriggerService {
   ): Promise<TriggerWebhookResult>;
 }
 
-export function createWebhookTriggerService(): WebhookTriggerService {
+function createWebhookTriggerService(): WebhookTriggerService {
   return {
     async triggerWebhook(
       url: string,
