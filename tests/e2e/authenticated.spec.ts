@@ -99,6 +99,39 @@ test.describe('Assets gallery', () => {
     await expect(cards).toHaveCount(total);
   });
 
+  test('list and map point at the same asset', async ({ page }) => {
+    // Zoomed in on one place, its assets are dots of their own.
+    await page.getByRole('button', { name: /\d+ (activos?|assets?)/i }).first().click();
+    const dots = page.locator('.leaflet-marker-icon > div');
+    await expect(dots.first()).toBeVisible();
+    const largest = async () =>
+      Math.max(...(await dots.evaluateAll((els) => els.map((e) => parseInt((e as HTMLElement).style.width, 10)))));
+
+    // Hovering an asset in the list marks its dot.
+    const row = page.locator('[data-asset-row]').first();
+    await row.hover();
+    await expect.poll(largest).toBe(24);
+
+    // Clicking a dot marks it, and its row.
+    await page.mouse.move(0, 0);
+    await expect.poll(largest).toBeLessThan(24);
+    // Only dots inside the map's frame: the others are panned out of view.
+    const dot = await page.evaluate(() => {
+      const frame = document.querySelector('.leaflet-container')!.getBoundingClientRect();
+      const inside = [...document.querySelectorAll('.leaflet-marker-icon')]
+        .map((e) => e.getBoundingClientRect())
+        .find((r) => r.top > frame.top && r.bottom < frame.bottom && r.left > frame.left && r.right < frame.right)!;
+      return { x: inside.x + inside.width / 2, y: inside.y + inside.height / 2 };
+    });
+    await page.mouse.click(dot.x, dot.y);
+    await expect.poll(largest).toBe(24);
+    const marked = () =>
+      page.locator('[data-asset-row]').evaluateAll(
+        (els) => els.filter((e) => getComputedStyle(e).backgroundColor !== 'rgba(0, 0, 0, 0)').length
+      );
+    await expect.poll(marked).toBe(1);
+  });
+
   test('asset detail carries its QR inline, pointing at the public passport', async ({ page }) => {
     await page.goto('/company/assets/e2e-item-0', { waitUntil: 'networkidle' });
 

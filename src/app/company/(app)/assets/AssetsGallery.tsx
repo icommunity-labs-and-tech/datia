@@ -2,16 +2,13 @@
 
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import {
-  SimpleGrid,
   Grid,
-  Card,
   Image,
   Text,
   Badge,
   Group,
   Stack,
   TextInput,
-  Select,
   Center,
   Paper,
   ScrollArea,
@@ -21,7 +18,7 @@ import {
   CloseButton,
   Anchor,
 } from '@mantine/core';
-import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconShieldCheck } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getAssets } from '@/actions/assets';
@@ -32,7 +29,6 @@ import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
 import CreateAssetModal from '@/components/assets/CreateAssetModal';
 import EnergySourcesPanel from '@/components/energy/EnergySourcesPanel';
 import type { EnergySourceRecord, EnergyConsumptionRecord } from '@/domain/energy/EnergyTypes';
-import classes from './AssetsGallery.module.css';
 
 interface Item {
   id: string;
@@ -44,68 +40,78 @@ interface Item {
   municipality?: { name: string; province: string } | null;
 }
 
-function ItemCard({ item }: { item: Item }) {
-  const t = useTranslations('itemsPage');
-  const firstLetter = item.name.charAt(0).toUpperCase();
+/** Map and list share one height: they are one view, side by side. */
+const PANEL_HEIGHT = 480;
 
+/** An asset, listed under its place beside the map. */
+function AssetRow({
+  item,
+  highlighted,
+  onHover,
+}: {
+  item: Item;
+  highlighted: boolean;
+  onHover: (id: string | null) => void;
+}) {
+  const t = useTranslations('itemsPage');
   return (
-    <Card
+    <Anchor
       component={Link}
       href={`/company/assets/${item.id}`}
-      padding={0}
-      radius="md"
-      className={classes.card}
+      underline="never"
+      c="inherit"
+      display="block"
+      pl={48}
+      pr={10}
+      py={6}
+      data-asset-row={item.id}
+      onMouseEnter={() => onHover(item.id)}
+      onMouseLeave={() => onHover(null)}
+      style={{
+        borderRadius: 8,
+        background: highlighted ? 'var(--mantine-color-gray-1)' : 'transparent',
+      }}
     >
-      {item.imageUrl ? (
-        <Image src={item.imageUrl} height={150} alt={item.name} fit="cover" />
-      ) : (
-        <Center h={150} bg="var(--mantine-color-gray-1)">
-          <ThemeIcon color="datiaGreen" variant="light" size={56} radius="xl">
-            <Text fw={700} fz="xl">{firstLetter}</Text>
+      <Group gap={10} wrap="nowrap">
+        {item.imageUrl ? (
+          <Image src={item.imageUrl} alt="" w={28} h={28} radius="sm" fit="cover" style={{ flexShrink: 0 }} />
+        ) : (
+          <ThemeIcon color="gray" variant="light" size={28} radius="sm" style={{ flexShrink: 0 }}>
+            <Text fw={700} fz="xs">{item.name.charAt(0).toUpperCase()}</Text>
           </ThemeIcon>
-        </Center>
-      )}
-
-      <Stack gap={8} p="md">
-        <Group justify="space-between" wrap="nowrap" gap="xs">
-          <Text fw={600} size="sm" lineClamp={1}>{item.name}</Text>
-          {item.certified && (
-            <Badge size="xs" variant="light" color="green" style={{ flexShrink: 0 }}>
-              {t('certified')}
-            </Badge>
+        )}
+        <Stack gap={0} style={{ minWidth: 0, flex: 1 }}>
+          <Text size="sm" fw={500} lineClamp={1}>{item.name}</Text>
+          {item.description && (
+            <Text size="xs" c="dimmed" lineClamp={1}>{item.description}</Text>
           )}
-        </Group>
-
-        <Text size="xs" c="dimmed" lineClamp={2} style={{ minHeight: '2.4em' }}>
-          {item.description || ' '}
-        </Text>
-      </Stack>
-    </Card>
+        </Stack>
+        {item.certified && (
+          <ThemeIcon color="green" variant="light" size={22} radius="xl" style={{ flexShrink: 0 }} title={t('certified')}>
+            <IconShieldCheck size={13} stroke={1.8} />
+          </ThemeIcon>
+        )}
+      </Group>
+    </Anchor>
   );
 }
 
-function GallerySkeleton() {
+function PanelSkeleton() {
   return (
-    <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, md: 4 }} spacing="md">
-      {Array.from({ length: 8 }).map((_, i) => (
-        <Card key={i} padding={0} radius="md">
-          <Skeleton height={150} radius={0} />
-          <Stack gap={8} p="md">
-            <Skeleton height={12} width="70%" radius="sm" />
-            <Skeleton height={10} radius="sm" />
-            <Skeleton height={10} width="40%" radius="sm" />
-          </Stack>
-        </Card>
-      ))}
-    </SimpleGrid>
+    <Grid gutter="sm">
+      <Grid.Col span={{ base: 12, md: 7 }}>
+        <Skeleton height={PANEL_HEIGHT} radius="md" />
+      </Grid.Col>
+      <Grid.Col span={{ base: 12, md: 5 }}>
+        <Skeleton height={PANEL_HEIGHT} radius="md" />
+      </Grid.Col>
+    </Grid>
   );
 }
 
 /**
- * An installation, as a row in the list that sits beside the map — the two
- * read as one view, not two takes on the same thing: the map says where,
- * this says what's there. Selecting either highlights both, via the same
- * `installationId` the map already keys its own selection off of.
+ * A place, heading its assets in the list beside the map. Selecting it here or
+ * on the map does the same thing, through the same `installationId`.
  */
 function InstallationRow({
   label,
@@ -168,7 +174,9 @@ function InstallationRow({
                     ? `${(energy.capacityKw / 1000).toFixed(1)} MW`
                     : `${energy.capacityKw.toFixed(0)} kW`,
               })}
-              {energy.renewableShare != null ? ` · ${energy.renewableShare.toFixed(0)}% renovable` : ''}
+              {energy.renewableShare != null
+                ? ` · ${t('renewableShare', { share: energy.renewableShare.toFixed(0) })}`
+                : ''}
             </Text>
           )}
         </Stack>
@@ -191,6 +199,7 @@ export default function AssetsGallery({
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [installationId, setInstallationId] = useState<string | null>(null);
+  const [highlightedId, setHighlightedId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -288,20 +297,33 @@ export default function AssetsGallery({
     [sourcesByInstallation]
   );
 
-  const searching = Boolean(search.trim());
+  // Places, in the order the list shows them: the selected one alone, or all
+  // of them with the assets that have no position last.
+  const groups = useMemo(() => {
+    const all = [
+      ...installations.map((g) => ({ id: g.id, items: g.members.map((m) => m.item), unlocated: false })),
+      ...(unlocated.length ? [{ id: '__unlocated__', items: unlocated, unlocated: true }] : []),
+    ];
+    return installationId ? all.filter((g) => g.id === installationId) : all;
+  }, [installations, unlocated, installationId]);
 
-  // A search looks everywhere: finding a serial should never depend on knowing
-  // which site it sits at. Browsing, on the other hand, goes through the map.
-  const shown = useMemo(() => {
-    if (searching || !installationId) return filtered;
-    if (installationId === '__unlocated__') return unlocated;
-    const hit = installations.find((g) => g.id === installationId);
-    return hit ? hit.members.map((m) => m.item) : filtered;
-  }, [searching, installationId, installations, unlocated, filtered]);
-
+  const shownCount = groups.reduce((n, g) => n + g.items.length, 0);
   const hasFilters = Boolean(search.trim() || installationId);
   const clearFilters = () => { setSearch(''); setInstallationId(null); };
   const [creating, setCreating] = useState(false);
+
+  // A dot clicked on the map opens its place and brings its row into view.
+  const pickAsset = useCallback(
+    (assetId: string) => {
+      const group = installations.find((g) => g.members.some((m) => m.id === assetId));
+      if (group) setInstallationId(group.id);
+      setHighlightedId(assetId);
+      requestAnimationFrame(() =>
+        document.querySelector(`[data-asset-row="${CSS.escape(assetId)}"]`)?.scrollIntoView({ block: 'nearest' })
+      );
+    },
+    [installations]
+  );
 
   return (
     <>
@@ -317,7 +339,10 @@ export default function AssetsGallery({
               placeholder={t('searchPlaceholder')}
               leftSection={<IconSearch size={15} stroke={1.7} />}
               value={search}
-              onChange={(e) => setSearch(e.currentTarget.value)}
+              onChange={(e) => {
+                setSearch(e.currentTarget.value);
+                setInstallationId(null);
+              }}
             />
             <Button leftSection={<IconPlus size={15} stroke={1.9} />} onClick={() => setCreating(true)}>
               {t('create.button')}
@@ -328,8 +353,8 @@ export default function AssetsGallery({
       >
         {!loading && (
           <Group gap={6} mt="xs">
-            <Text size="sm" c="dimmed">{t('count', { count: shown.length })}</Text>
-            {installationId && !searching && (
+            <Text size="sm" c="dimmed">{t('count', { count: shownCount })}</Text>
+            {installationId && (
               <Badge
                 variant="light"
                 color="datiaGreen"
@@ -350,90 +375,90 @@ export default function AssetsGallery({
         )}
       </PageHeader>
 
-      {/* Map and list are one view of the same places: selecting either
-          highlights both, through the same installationId, and narrows the
-          assets below to that place. A search bypasses them, because looking
-          for a serial should not require knowing where it is. */}
-      {!loading && !searching && (installations.length > 0 || unlocated.length > 0) && (
-        <Grid gutter="sm" mb="lg">
-          <Grid.Col span={{ base: 12, md: 7 }}>
-            <InstallationsMap
-              installations={installations}
-              selectedId={installationId}
-              onSelect={setInstallationId}
-              height={400}
-            />
-          </Grid.Col>
-          <Grid.Col span={{ base: 12, md: 5 }}>
-            <Paper withBorder radius="md" p={6} h={{ base: 'auto', md: 400 }}>
-              <ScrollArea h="100%" type="auto">
-                <Stack gap={2}>
-                  {installations.map((g) => (
-                    <InstallationRow
-                      key={g.id}
-                      label={labelFor(g.id)}
-                      count={g.members.length}
-                      certified={g.members.filter((m) => m.item.certified).length}
-                      energy={withEnergy ? energyOf(g.id) : undefined}
-                      selected={installationId === g.id}
-                      onOpen={() => setInstallationId(installationId === g.id ? null : g.id)}
-                    />
-                  ))}
-                  {unlocated.length > 0 && (
-                    <InstallationRow
-                      label={t('unlocatedInstallation')}
-                      count={unlocated.length}
-                      certified={unlocated.filter((i) => i.certified).length}
-                      selected={installationId === '__unlocated__'}
-                      unlocated
-                      onOpen={() =>
-                        setInstallationId(installationId === '__unlocated__' ? null : '__unlocated__')
-                      }
-                    />
-                  )}
-                </Stack>
-              </ScrollArea>
-            </Paper>
-          </Grid.Col>
-        </Grid>
-      )}
-
       {loading ? (
-        <GallerySkeleton />
-      ) : shown.length === 0 ? (
+        <PanelSkeleton />
+      ) : items.length === 0 ? (
         <Paper p={48} radius="md">
           <Center>
             <Stack align="center" gap="sm">
               <ThemeIcon color="gray" variant="light" size={52} radius="xl">
                 <IconPackage size={26} stroke={1.5} />
               </ThemeIcon>
-              <Text c="dimmed">{hasFilters ? t('noResults') : t('noItems')}</Text>
-              {hasFilters && (
-                <Button variant="light" size="xs" onClick={clearFilters}>
-                  {t('clearFilters')}
-                </Button>
-              )}
+              <Text c="dimmed">{t('noItems')}</Text>
             </Stack>
           </Center>
         </Paper>
       ) : (
         <>
-        {withEnergy && installationId && !searching && (
-          <Stack gap="xs" mb="lg">
-            <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.4}>
-              {t('installationSources')}
-            </Text>
-            <EnergySourcesPanel
-              sources={sourcesByInstallation.get(installationId) ?? []}
-              consumption={consumption}
-            />
-          </Stack>
-        )}
-        <SimpleGrid cols={{ base: 1, xs: 2, sm: 3, md: 4 }} spacing="md">
-          {shown.map((item) => (
-            <ItemCard key={item.id} item={item} />
-          ))}
-        </SimpleGrid>
+          {/* One view of the same places: the map says where, the list what is
+              there. Selecting a place on either narrows both; hovering an asset
+              in the list marks it on the map. */}
+          <Grid gutter="sm" mb="lg">
+            <Grid.Col span={{ base: 12, md: 7 }}>
+              <InstallationsMap
+                installations={installations}
+                selectedId={installationId}
+                onSelect={setInstallationId}
+                highlightedId={highlightedId}
+                onPickAsset={pickAsset}
+                height={PANEL_HEIGHT}
+              />
+            </Grid.Col>
+            <Grid.Col span={{ base: 12, md: 5 }}>
+              <Paper withBorder radius="md" p={6} h={{ base: 'auto', md: PANEL_HEIGHT }}>
+                {groups.length === 0 ? (
+                  <Center h="100%" py="xl">
+                    <Stack align="center" gap="sm">
+                      <Text size="sm" c="dimmed">{hasFilters ? t('noResults') : t('noItems')}</Text>
+                      {hasFilters && (
+                        <Button variant="light" size="xs" onClick={clearFilters}>
+                          {t('clearFilters')}
+                        </Button>
+                      )}
+                    </Stack>
+                  </Center>
+                ) : (
+                  <ScrollArea h="100%" type="auto">
+                    <Stack gap={2}>
+                      {groups.map((g) => (
+                        <Stack key={g.id} gap={0}>
+                          <InstallationRow
+                            label={g.unlocated ? t('unlocatedInstallation') : labelFor(g.id)}
+                            count={g.items.length}
+                            certified={g.items.filter((i) => i.certified).length}
+                            energy={withEnergy && !g.unlocated ? energyOf(g.id) : undefined}
+                            selected={installationId === g.id}
+                            unlocated={g.unlocated}
+                            onOpen={() => setInstallationId(installationId === g.id ? null : g.id)}
+                          />
+                          {g.items.map((item) => (
+                            <AssetRow
+                              key={item.id}
+                              item={item}
+                              highlighted={highlightedId === item.id}
+                              onHover={setHighlightedId}
+                            />
+                          ))}
+                        </Stack>
+                      ))}
+                    </Stack>
+                  </ScrollArea>
+                )}
+              </Paper>
+            </Grid.Col>
+          </Grid>
+
+          {withEnergy && installationId && (
+            <Stack gap="xs" mb="lg">
+              <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.4}>
+                {t('installationSources')}
+              </Text>
+              <EnergySourcesPanel
+                sources={sourcesByInstallation.get(installationId) ?? []}
+                consumption={consumption}
+              />
+            </Stack>
+          )}
         </>
       )}
     </>

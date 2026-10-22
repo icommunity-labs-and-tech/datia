@@ -43,15 +43,15 @@ function makeInstallationIcon(count: number, selected: boolean) {
 }
 
 /** One asset, once its installation is zoomed in enough to tell them apart. */
-function makeAssetIcon(selected: boolean) {
-  const size = selected ? 18 : 16;
+function makeAssetIcon(selected: boolean, highlighted = false) {
+  const size = highlighted ? 24 : selected ? 18 : 16;
   return L.divIcon({
     className: '',
     html: `<div style="
       width:${size}px;height:${size}px;border-radius:50%;
-      background:${selected ? '#1c4ed8' : '#2563eb'};
-      border:${selected ? 3 : 2}px solid white;
-      box-shadow:0 1px 5px rgba(0,0,0,0.35);
+      background:${highlighted || selected ? '#1c4ed8' : '#2563eb'};
+      border:${highlighted ? 4 : selected ? 3 : 2}px solid white;
+      box-shadow:0 ${highlighted ? 2 : 1}px ${highlighted ? 10 : 5}px rgba(0,0,0,${highlighted ? 0.5 : 0.35});
     "></div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
@@ -86,7 +86,9 @@ function InstallationMarkers<T extends Located>({
   installations,
   selectedId,
   onSelect,
-}: Pick<InstallationsMapProps<T>, 'installations' | 'selectedId' | 'onSelect'>) {
+  highlightedId,
+  onPickAsset,
+}: Omit<InstallationsMapProps<T>, 'height'>) {
   const map = useMap();
   // Re-render whenever the view settles, reading the zoom from the map itself.
   const [, rerender] = useReducer((n: number) => n + 1, 0);
@@ -108,11 +110,12 @@ function InstallationMarkers<T extends Located>({
         );
 
         if (installation.members.length > 1 && !apart) {
+          const holdsHighlighted = installation.members.some((m) => m.id === highlightedId);
           return (
             <Marker
               key={installation.id}
               position={[installation.lat, installation.lng]}
-              icon={makeInstallationIcon(installation.members.length, selected)}
+              icon={makeInstallationIcon(installation.members.length, selected || holdsHighlighted)}
               eventHandlers={toggle}
             >
               {installation.label && <Tooltip direction="top" offset={[0, -14]}>{installation.label}</Tooltip>}
@@ -120,7 +123,13 @@ function InstallationMarkers<T extends Located>({
           );
         }
         return installation.members.map((m) => (
-          <Marker key={m.id} position={[m.lat, m.lng]} icon={makeAssetIcon(selected)} eventHandlers={toggle}>
+          <Marker
+            key={m.id}
+            position={[m.lat, m.lng]}
+            icon={makeAssetIcon(selected, m.id === highlightedId)}
+            zIndexOffset={m.id === highlightedId ? 1000 : 0}
+            eventHandlers={onPickAsset ? { click: () => onPickAsset(m.id) } : toggle}
+          >
             <Tooltip direction="top" offset={[0, -8]}>{m.name}</Tooltip>
           </Marker>
         ));
@@ -133,6 +142,10 @@ interface InstallationsMapProps<T extends Located> {
   installations: Array<Installation<T>>;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  /** An asset to mark, such as the one hovered in a list beside the map. */
+  highlightedId?: string | null;
+  /** Called with an asset's id when its own dot is clicked. */
+  onPickAsset?: (assetId: string) => void;
   height?: number | string;
 }
 
@@ -140,6 +153,8 @@ export default function InstallationsMap<T extends Located>({
   installations,
   selectedId,
   onSelect,
+  highlightedId = null,
+  onPickAsset,
   height = 420,
 }: InstallationsMapProps<T>) {
   const bounds = useMemo(() => {
@@ -164,7 +179,13 @@ export default function InstallationsMap<T extends Located>({
         attribution={`${LeafletMapConfig.tileLayerAttribution} · <a href="https://www.geonames.org">GeoNames</a>`}
       />
       <Frame bounds={bounds} focus={focus} />
-      <InstallationMarkers installations={installations} selectedId={selectedId} onSelect={onSelect} />
+      <InstallationMarkers
+        installations={installations}
+        selectedId={selectedId}
+        onSelect={onSelect}
+        highlightedId={highlightedId}
+        onPickAsset={onPickAsset}
+      />
     </MapContainer>
   );
 }
