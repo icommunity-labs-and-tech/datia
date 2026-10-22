@@ -953,7 +953,6 @@
     "noResults": "No asset matches your search",
     "clearFilters": "Clear filters",
     "installation": "{count, plural, one {1 asset} other {# assets}}",
-    "unlocated": "{count, plural, one {1 unlocated} other {# unlocated}}",
     "allInstallations": "Show all",
     "unnamedInstallation": "Unnamed installation",
     "unlocatedInstallation": "Unlocated",

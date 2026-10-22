@@ -84,13 +84,14 @@ test.describe('Assets gallery', () => {
     await page.goto('/company/assets', { waitUntil: 'networkidle' });
   });
 
-  test('opening an installation shows as many assets as its card says', async ({ page }) => {
-    // Installations come first; their assets appear once one is opened.
-    const card = page.locator('.mantine-Card-root').filter({ hasText: /\d+ (activos?|assets?)/i }).first();
-    await expect(card).toBeVisible();
-    const count = Number((await card.innerText()).match(/(\d+) (activos?|assets?)/i)![1]);
+  test('opening an installation shows as many assets as its row says', async ({ page }) => {
+    // Installations come first, as rows beside the map; their assets appear
+    // once one is opened.
+    const row = page.getByRole('button', { name: /\d+ (activos?|assets?)/i }).first();
+    await expect(row).toBeVisible();
+    const count = Number((await row.innerText()).match(/(\d+) (activos?|assets?)/i)![1]);
 
-    await card.click();
+    await row.click();
 
     await expect(page.locator('a[href^="/company/assets/"]')).toHaveCount(count);
   });

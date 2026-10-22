@@ -953,7 +953,6 @@
     "noResults": "Ningún activo coincide con la búsqueda",
     "clearFilters": "Limpiar filtros",
     "installation": "{count, plural, one {1 activo} other {# activos}}",
-    "unlocated": "{count, plural, one {1 sin ubicar} other {# sin ubicar}}",
     "allInstallations": "Ver todas",
     "unnamedInstallation": "Instalación sin nombre",
     "unlocatedInstallation": "Sin ubicar",
