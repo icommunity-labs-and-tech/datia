@@ -84,16 +84,19 @@ test.describe('Assets gallery', () => {
     await page.goto('/company/assets', { waitUntil: 'networkidle' });
   });
 
-  test('opening an installation shows as many assets as its row says', async ({ page }) => {
-    // Installations come first, as rows beside the map; their assets appear
-    // once one is opened.
+  test('selecting a place narrows the assets to it, and clearing it brings them back', async ({ page }) => {
+    // Every asset is listed from the start; places beside the map filter them.
+    const cards = page.locator('a[href^="/company/assets/"]');
+    await expect(cards.first()).toBeVisible();
+    const total = await cards.count();
+
     const row = page.getByRole('button', { name: /\d+ (activos?|assets?)/i }).first();
-    await expect(row).toBeVisible();
     const count = Number((await row.innerText()).match(/(\d+) (activos?|assets?)/i)![1]);
-
     await row.click();
+    await expect(cards).toHaveCount(count);
 
-    await expect(page.locator('a[href^="/company/assets/"]')).toHaveCount(count);
+    await page.getByRole('button', { name: /quitar filtro de ubicaci[óo]n|clear location filter/i }).click();
+    await expect(cards).toHaveCount(total);
   });
 
   test('asset detail carries its QR inline, pointing at the public passport', async ({ page }) => {

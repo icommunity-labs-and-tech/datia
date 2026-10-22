@@ -18,9 +18,10 @@ import {
   Skeleton,
   ThemeIcon,
   Button,
+  CloseButton,
   Anchor,
 } from '@mantine/core';
-import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconArrowLeft } from '@tabler/icons-react';
+import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { getAssets } from '@/actions/assets';
@@ -326,17 +327,33 @@ export default function AssetsGallery({
         }
       >
         {!loading && (
-          <Text size="sm" c="dimmed" mt="xs">
-            {t('count', { count: shown.length })}
-          </Text>
+          <Group gap={6} mt="xs">
+            <Text size="sm" c="dimmed">{t('count', { count: shown.length })}</Text>
+            {installationId && !searching && (
+              <Badge
+                variant="light"
+                color="datiaGreen"
+                rightSection={
+                  <CloseButton
+                    size="xs"
+                    variant="transparent"
+                    c="inherit"
+                    aria-label={t('clearInstallation')}
+                    onClick={() => setInstallationId(null)}
+                  />
+                }
+              >
+                {installationId === '__unlocated__' ? t('unlocatedInstallation') : labelFor(installationId)}
+              </Badge>
+            )}
+          </Group>
         )}
       </PageHeader>
 
-      {/* The map is how you browse: installations first, assets inside them. A
-          search bypasses it, because looking for a serial should not require
-          knowing where it is. Map and list are one view, not two takes on
-          the same list — selecting either highlights both, through the same
-          installationId. */}
+      {/* Map and list are one view of the same places: selecting either
+          highlights both, through the same installationId, and narrows the
+          assets below to that place. A search bypasses them, because looking
+          for a serial should not require knowing where it is. */}
       {!loading && !searching && (installations.length > 0 || unlocated.length > 0) && (
         <Grid gutter="sm" mb="lg">
           <Grid.Col span={{ base: 12, md: 7 }}>
@@ -351,18 +368,6 @@ export default function AssetsGallery({
             <Paper withBorder radius="md" p={6} h={{ base: 'auto', md: 400 }}>
               <ScrollArea h="100%" type="auto">
                 <Stack gap={2}>
-                  {installationId && (
-                    <Button
-                      size="compact-sm"
-                      variant="subtle"
-                      color="gray"
-                      leftSection={<IconArrowLeft size={14} stroke={1.8} />}
-                      onClick={() => setInstallationId(null)}
-                      style={{ alignSelf: 'flex-start' }}
-                    >
-                      {t('allInstallations')}
-                    </Button>
-                  )}
                   {installations.map((g) => (
                     <InstallationRow
                       key={g.id}
@@ -395,7 +400,7 @@ export default function AssetsGallery({
 
       {loading ? (
         <GallerySkeleton />
-      ) : !searching && !installationId ? null : shown.length === 0 ? (
+      ) : shown.length === 0 ? (
         <Paper p={48} radius="md">
           <Center>
             <Stack align="center" gap="sm">
