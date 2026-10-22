@@ -3,10 +3,14 @@
  *
  * Datia has no installation entity, and deliberately so for now: a site is not
  * something anyone declares, it is what emerges when several assets sit in the
- * same place. Grouping by proximity discovers them instead of asking someone to
- * maintain them, and an asset that moves changes installation on its own.
+ * same place. Deriving it instead of asking someone to maintain it means an
+ * asset that moves changes installation on its own.
  *
- * Grouping is by radius rather than by a fixed number of clusters: how many
+ * Assets are grouped by the municipality their coordinates fall in
+ * (`groupByMunicipality`), which is what people call a place by. Those with no
+ * municipality — coordinates nowhere near one — fall back to proximity.
+ *
+ * Proximity grouping is by radius rather than by a fixed number of clusters: how many
  * installations an organisation has is precisely what is not known in advance,
  * and a k-based method would have to be told. A radius also matches the physical
  * question being asked — «is this in the same place?» — and copes with one site
@@ -18,17 +22,13 @@ export interface Located {
   name: string;
   lat: number;
   lng: number;
-  /** Place name, when any of the asset's energy sources declares one. */
-  siteName?: string | null;
+  /** Municipality its coordinates fall in, resolved on the server. */
+  municipality?: { name: string; province: string } | null;
 }
 
 export interface Installation<T extends Located = Located> {
   id: string;
-  /**
-   * What to call it. Taken from the first member that knows its place name;
-   * installations are derived from coordinates, so there is nothing to read it
-   * from when no member carries one.
-   */
+  /** Municipality name; null for groups formed by proximity alone. */
   label: string | null;
   /** Centroid of its members. */
   lat: number;
@@ -103,21 +103,53 @@ export function clusterInstallations<T extends Located>(
     groups.push(group);
   }
 
-  return groups
-    .map((members) => {
-      const centre = centroid(members);
-      const sorted = [...members].sort((a, b) => a.name.localeCompare(b.name, 'es'));
-      return {
-        // Derived from the members, so the same site keeps its id across reloads.
-        id: sorted.map((m) => m.id).join('|'),
-        label: sorted.find((m) => m.siteName)?.siteName ?? null,
-        lat: parseFloat(centre.lat.toFixed(6)),
-        lng: parseFloat(centre.lng.toFixed(6)),
-        members: sorted,
-        spreadMeters: Math.round(
-          members.reduce((max, m) => Math.max(max, distanceMeters(centre, m)), 0)
-        ),
-      };
-    })
-    .sort((a, b) => b.members.length - a.members.length || a.lat - b.lat);
+  return groups.map((members) => toInstallation(members, null)).sort(bySize);
+}
+
+/**
+ * Groups located items by municipality; items without one are grouped by
+ * proximity instead. A municipality name shared by two groups (Castejón in
+ * Cuenca and in Navarra) carries its province.
+ */
+export function groupByMunicipality<T extends Located>(items: T[]): Array<Installation<T>> {
+  const byPlace = new Map<string, T[]>();
+  const unplaced: T[] = [];
+  for (const item of items) {
+    if (!item.municipality) {
+      unplaced.push(item);
+      continue;
+    }
+    const key = `${item.municipality.name}|${item.municipality.province}`;
+    byPlace.set(key, [...(byPlace.get(key) ?? []), item]);
+  }
+
+  const groups = [...byPlace.values()];
+  const nameCount = new Map<string, number>();
+  for (const [first] of groups) {
+    nameCount.set(first.municipality!.name, (nameCount.get(first.municipality!.name) ?? 0) + 1);
+  }
+
+  const placed = groups.map((members) => {
+    const { name, province } = members[0].municipality!;
+    return toInstallation(members, nameCount.get(name)! > 1 ? `${name} (${province})` : name);
+  });
+  return [...placed, ...clusterInstallations(unplaced)].sort(bySize);
+}
+
+function toInstallation<T extends Located>(members: T[], label: string | null): Installation<T> {
+  const centre = centroid(members);
+  const sorted = [...members].sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  return {
+    // Derived from the members, so the same site keeps its id across reloads.
+    id: sorted.map((m) => m.id).join('|'),
+    label,
+    lat: parseFloat(centre.lat.toFixed(6)),
+    lng: parseFloat(centre.lng.toFixed(6)),
+    members: sorted,
+    spreadMeters: Math.round(members.reduce((max, m) => Math.max(max, distanceMeters(centre, m)), 0)),
+  };
+}
+
+function bySize(a: Installation, b: Installation) {
+  return b.members.length - a.members.length || a.lat - b.lat;
 }

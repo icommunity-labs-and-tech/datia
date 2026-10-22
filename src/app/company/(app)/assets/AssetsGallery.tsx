@@ -26,7 +26,7 @@ import { useTranslations } from 'next-intl';
 import { getAssets } from '@/actions/assets';
 import PageHeader from '@/components/layout/PageHeader';
 import InstallationsMap from '@/components/maps/InstallationsMapLazy';
-import { clusterInstallations, type Located } from '@/lib/map/installations';
+import { groupByMunicipality, type Located } from '@/lib/map/installations';
 import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
 import CreateAssetModal from '@/components/assets/CreateAssetModal';
 import EnergySourcesPanel from '@/components/energy/EnergySourcesPanel';
@@ -40,7 +40,7 @@ interface Item {
   imageUrl?: string;
   certified: boolean;
   location?: { lat: number; lng: number } | null;
-  siteName?: string | null;
+  municipality?: { name: string; province: string } | null;
 }
 
 function ItemCard({ item }: { item: Item }) {
@@ -219,17 +219,16 @@ export default function AssetsGallery({
   // discovers them, so an asset that moves changes installation on its own.
   const installations = useMemo(() => {
     const located: Array<Located & { item: Item }> = filtered.flatMap((i) =>
-      i.location ? [{ id: i.id, name: i.name, siteName: i.siteName, ...i.location, item: i }] : []
+      i.location ? [{ id: i.id, name: i.name, municipality: i.municipality, ...i.location, item: i }] : []
     );
-    return clusterInstallations(located);
+    return groupByMunicipality(located);
   }, [filtered]);
 
   const unlocated = useMemo(() => filtered.filter((i) => !i.location), [filtered]);
 
-  // Two different sites can share a name ("Malaga", say, twice over) — the
-  // map tells them apart by position, but a list needs its own way, or two
-  // rows read as one. Numbering the repeats is enough; it doesn't invent a
-  // name nobody gave the place.
+  // Municipalities come out unique (a shared name carries its province), but
+  // groups with no municipality are all "unnamed" — numbering the repeats keeps
+  // their rows apart without inventing a name nobody gave the place.
   const labelFor = useMemo(() => {
     const counts = new Map<string, number>();
     for (const g of installations) {

@@ -3,6 +3,7 @@
 import { assetRepository } from '@/infrastructure/prisma/repositories/AssetRepositoryPrisma';
 import { requireScope } from '@/lib/auth/tenant';
 import { certifiedAssetIds } from '@/lib/certification/queries';
+import { nearestMunicipality } from '@/lib/map/municipality';
 
 export async function getAssets() {
   try {
@@ -21,7 +22,8 @@ export async function getAssets() {
       certified: certified.has(r.id),
       // Position has its own columns now (#37); the map needs nothing else.
       location: r.latitude != null && r.longitude != null ? { lat: r.latitude, lng: r.longitude } : null,
-      siteName: r.siteName ?? null,
+      municipality:
+        r.latitude != null && r.longitude != null ? nearestMunicipality(r.latitude, r.longitude) : null,
     }));
   } catch (error) {
     console.error('Error ejecutando getAssets:', error);

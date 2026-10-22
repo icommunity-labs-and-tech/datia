@@ -89,7 +89,7 @@ export default function InstallationsMap<T extends Located>({
     >
       <TileLayer
         url={LeafletMapConfig.tileLayerUrl}
-        attribution={LeafletMapConfig.tileLayerAttribution}
+        attribution={`${LeafletMapConfig.tileLayerAttribution} · <a href="https://www.geonames.org">GeoNames</a>`}
       />
       <Frame bounds={bounds} focus={focus} />
       {installations.map((installation) => (

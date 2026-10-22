@@ -3,6 +3,7 @@ import {
   DEFAULT_RADIUS_METERS,
   clusterInstallations,
   distanceMeters,
+  groupByMunicipality,
   isLocated,
   type Located,
 } from '../installations';
@@ -137,17 +138,37 @@ describe('clusterInstallations', () => {
   });
 });
 
-describe('installation labels', () => {
-  it('takes the name from whichever member knows its place', () => {
-    const [group] = clusterInstallations([
-      { id: 'a', name: 'Panel', lat: 40.0, lng: -3.0 },
-      { id: 'b', name: 'Inversor', lat: 40.0002, lng: -3.0, siteName: 'Cubierta Alcalá' },
+describe('groupByMunicipality', () => {
+  const MALAGA = { name: 'Málaga', province: 'Málaga' };
+  const inPlace = (id: string, lat: number, lng: number, municipality: Located['municipality']): Located =>
+    ({ id, name: id, lat, lng, municipality });
+
+  it('puts a municipality in one group however far apart its assets are', () => {
+    // Several kilometres apart: proximity alone would split them.
+    const groups = groupByMunicipality([
+      inPlace('port', 36.71, -4.41, MALAGA),
+      inPlace('airport', 36.675, -4.49, MALAGA),
     ]);
-    expect(group.label).toBe('Cubierta Alcalá');
+    expect(groups).toHaveLength(1);
+    expect(groups[0].label).toBe('Málaga');
+    expect(groups[0].members.map((m) => m.id)).toEqual(['airport', 'port']);
   });
 
-  it('leaves it unnamed when no member carries a place name', () => {
-    const [group] = clusterInstallations([{ id: 'a', name: 'Batería', lat: 40.0, lng: -3.0 }]);
-    expect(group.label).toBeNull();
+  it('adds the province when two municipalities share a name', () => {
+    const groups = groupByMunicipality([
+      inPlace('a', 39.98, -2.21, { name: 'Castejón', province: 'Cuenca' }),
+      inPlace('b', 42.17, -1.69, { name: 'Castejón', province: 'Navarra' }),
+    ]);
+    expect(groups.map((g) => g.label).sort()).toEqual(['Castejón (Cuenca)', 'Castejón (Navarra)']);
+  });
+
+  it('falls back to proximity, unnamed, for assets without a municipality', () => {
+    const groups = groupByMunicipality([
+      inPlace('x', 0, 0, null),
+      inPlace('y', 0.001, 0, null),
+      inPlace('m', 36.71, -4.41, MALAGA),
+    ]);
+    expect(groups).toHaveLength(2);
+    expect(groups.find((g) => g.label === null)!.members).toHaveLength(2);
   });
 });
