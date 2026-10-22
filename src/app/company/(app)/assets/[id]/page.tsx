@@ -170,7 +170,7 @@ export default function AssetDetailPage() {
                 {t('passport')}
               </Button>
               <Button
-                variant="light"
+                variant="outline"
                 color="red"
                 size="xs"
                 leftSection={<IconTrash size={15} />}
