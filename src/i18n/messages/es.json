@@ -939,7 +939,6 @@
     "certified": "Certificado",
     "pending": "Pendiente",
     "title": "Activos",
-    "description": "Cada activo reúne sus certificaciones en blockchain.",
     "count": "{count, plural, =0 {Sin activos} one {1 activo} other {# activos}}",
     "noResults": "Ningún activo coincide con la búsqueda",
     "clearFilters": "Limpiar filtros",

@@ -84,19 +84,25 @@ test.describe('Assets gallery', () => {
     await page.goto('/company/assets', { waitUntil: 'networkidle' });
   });
 
-  test('selecting a place narrows the assets to it, and clearing it brings them back', async ({ page }) => {
-    // Every asset is listed from the start; places beside the map filter them.
-    const cards = page.locator('a[href^="/company/assets/"]');
-    await expect(cards.first()).toBeVisible();
-    const total = await cards.count();
-
+  test('a place lists its assets once opened, and closes again', async ({ page }) => {
+    // Places only, until one is opened.
+    const assets = page.locator('a[href^="/company/assets/"]');
     const row = page.getByRole('button', { name: /\d+ (activos?|assets?)/i }).first();
+    await expect(row).toBeVisible();
+    await expect(assets).toHaveCount(0);
+
     const count = Number((await row.innerText()).match(/(\d+) (activos?|assets?)/i)![1]);
     await row.click();
-    await expect(cards).toHaveCount(count);
+    await expect(assets).toHaveCount(count);
 
     await page.getByRole('button', { name: /quitar filtro de ubicaci[óo]n|clear location filter/i }).click();
-    await expect(cards).toHaveCount(total);
+    await expect(assets).toHaveCount(0);
+  });
+
+  test('a search lists the matching assets without opening a place', async ({ page }) => {
+    await page.getByPlaceholder(/buscar|search/i).fill('Turbina');
+
+    await expect(page.locator('a[href^="/company/assets/"]')).toHaveCount(1);
   });
 
   test('list and map point at the same asset', async ({ page }) => {

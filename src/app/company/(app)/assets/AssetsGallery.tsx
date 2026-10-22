@@ -331,11 +331,12 @@ export default function AssetsGallery({
 
       <PageHeader
         title={t('title')}
-        description={t('description')}
         actions={
           <Group gap="xs" wrap="nowrap">
             <TextInput
-              w={{ base: 160, sm: 240 }}
+              // Plain CSS, not a responsive `w`: Mantine's generated style tag
+              // for it did not hydrate.
+              style={{ width: 'clamp(160px, 25vw, 240px)' }}
               placeholder={t('searchPlaceholder')}
               leftSection={<IconSearch size={15} stroke={1.7} />}
               value={search}
@@ -391,8 +392,8 @@ export default function AssetsGallery({
       ) : (
         <>
           {/* One view of the same places: the map says where, the list what is
-              there. Selecting a place on either narrows both; hovering an asset
-              in the list marks it on the map. */}
+              there. Selecting a place on either opens it in the list; hovering
+              one of its assets marks it on the map. */}
           <Grid gutter="sm" mb="lg">
             <Grid.Col span={{ base: 12, md: 7 }}>
               <InstallationsMap
@@ -431,7 +432,9 @@ export default function AssetsGallery({
                             unlocated={g.unlocated}
                             onOpen={() => setInstallationId(installationId === g.id ? null : g.id)}
                           />
-                          {g.items.map((item) => (
+                          {/* A place's assets show once it is opened, or while a
+                              search is looking for assets wherever they are. */}
+                          {(installationId === g.id || search.trim()) && g.items.map((item) => (
                             <AssetRow
                               key={item.id}
                               item={item}

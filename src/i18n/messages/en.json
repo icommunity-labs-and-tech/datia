@@ -939,7 +939,6 @@
     "certified": "Certified",
     "pending": "Pending",
     "title": "Assets",
-    "description": "Every asset gathers its blockchain certifications.",
     "count": "{count, plural, =0 {No assets} one {1 asset} other {# assets}}",
     "noResults": "No asset matches your search",
     "clearFilters": "Clear filters",
