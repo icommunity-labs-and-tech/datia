@@ -18,9 +18,20 @@ test.describe('Shared - Responsive checks', () => {
       await page.goto('/apps');
 
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      // Both entry points are offered on every viewport.
       await expect(page.getByRole('link', { name: /panel de empresa|company dashboard/i })).toBeVisible();
+      await expect(page.getByRole('link', { name: /panel de organizaci[óo]n|organi[sz]ation dashboard/i })).toBeVisible();
       await expectNoHorizontalScroll(page);
     }
+  });
+
+  test('apps page links to the organization login', async ({ page }) => {
+    await page.setViewportSize(DESKTOP);
+    await page.goto('/apps');
+
+    await page.getByRole('link', { name: /panel de organizaci[óo]n|organi[sz]ation dashboard/i }).click();
+
+    await expect(page).toHaveURL(/\/auth\/organization\/login/);
   });
 
   test('apps page links to the admin login', async ({ page }) => {

@@ -81,7 +81,9 @@
   "apps": {
     "title": "Choose how you want to sign in",
     "admin": "Company dashboard",
-    "adminDescription": "Manage assets, certifications and your organisation settings.",
+    "adminDescription": "Manage assets, certifications and your company settings.",
+    "organization": "Organisation dashboard",
+    "organizationDescription": "Oversee your organisation’s companies, their consumption and emissions.",
     "redirecting": "Redirecting..."
   },
   "forms": {

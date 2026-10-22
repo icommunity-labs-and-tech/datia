@@ -81,7 +81,9 @@
   "apps": {
     "title": "Elige cómo quieres entrar",
     "admin": "Panel de empresa",
-    "adminDescription": "Gestiona activos, certificaciones y la configuración de tu organización.",
+    "adminDescription": "Gestiona activos, certificaciones y la configuración de tu empresa.",
+    "organization": "Panel de organización",
+    "organizationDescription": "Supervisa las empresas de tu organización, su consumo y sus emisiones.",
     "redirecting": "Redirigiendo..."
   },
   "forms": {
