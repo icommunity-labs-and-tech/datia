@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, NavLink, Divider, Text, Stack } from '@mantine/core';
+import { Menu, NavLink } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -14,8 +14,6 @@ import {
   IconSettings,
   IconCode,
   IconLifebuoy,
-  IconExternalLink,
-  IconUserCircle,
 } from '@tabler/icons-react';
 import { useAuthSeparated } from '@/hooks/useAuthSeparated';
 import PanelShell from './PanelShell';
@@ -99,31 +97,13 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
           </>
         }
         mobileExtra={
-          <>
-            <NavLink
-              component={Link}
-              href="/company/settings"
-              label={tSidebar('settings')}
-              leftSection={<IconSettings size={18} stroke={1.6} />}
-              styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
-            />
-            <Divider my="xs" />
-            <Text size="xs" fw={700} c="dimmed" px="sm" mb={4} tt="uppercase">
-              {tSidebar('applications')}
-            </Text>
-            <Stack gap={2}>
-              <NavLink
-                component="a"
-                href="/customer"
-                target="_blank"
-                rel="noopener noreferrer"
-                label={tSidebar('appCustomer')}
-                leftSection={<IconUserCircle size={18} stroke={1.6} />}
-                rightSection={<IconExternalLink size={14} stroke={1.6} />}
-                styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
-              />
-            </Stack>
-          </>
+          <NavLink
+            component={Link}
+            href="/company/settings"
+            label={tSidebar('settings')}
+            leftSection={<IconSettings size={18} stroke={1.6} />}
+            styles={(theme) => ({ root: { borderRadius: theme.radius.md } })}
+          />
         }
       >
         {children}

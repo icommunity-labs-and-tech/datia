@@ -2,7 +2,7 @@
 
 import { Box, Group, Stack, Text, Title } from '@mantine/core';
 import { useTranslations } from 'next-intl';
-import { AssetData } from '../../types';
+import { AssetData } from '../types';
 import { EvidenceVerification } from '../EvidenceVerification';
 
 interface AssetInfoSectionProps {

@@ -10,7 +10,7 @@ interface PassportShellProps {
 }
 
 /**
- * Public wrapper for everything under /customer. Carries the issuing
+ * Public wrapper for the asset passport (/p/<id>). Carries the issuing
  * organisation's identity — this is the page an end customer reaches by
  * scanning a QR on a physical asset, so whose passport it is must be obvious.
  */

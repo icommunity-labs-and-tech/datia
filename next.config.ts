@@ -30,8 +30,10 @@ const nextConfig: NextConfig = {
       'storage.googleapis.com',
     ],
   },
-  // Assets used to be «items» in the URLs (#26). Printed QR codes point at
-  // /customer/item/<id> and cannot be reissued, so those keep working for good;
+  // Printed QR codes cannot be reissued, so every URL a QR has ever carried keeps
+  // working for good: /customer/item/<id> (assets were «items», #26), then
+  // /customer/asset/<id>, and now the public passport at /p/<id>. The old
+  // /customer landing (manual code lookup) is gone and falls back to /apps;
   // the dashboard route is internal, and is redirected only so bookmarks do not
   // break. The API is not aliased: there were no integrators when it moved.
   //
@@ -39,7 +41,9 @@ const nextConfig: NextConfig = {
   // reason — redirected whole, not just the renamed sub-paths above.
   async redirects() {
     return [
-      { source: '/customer/item/:id', destination: '/customer/asset/:id', permanent: true },
+      { source: '/customer/item/:id', destination: '/p/:id', permanent: true },
+      { source: '/customer/asset/:id', destination: '/p/:id', permanent: true },
+      { source: '/customer', destination: '/apps', permanent: true },
       { source: '/dashboard/items', destination: '/dashboard/assets', permanent: true },
       { source: '/dashboard/items/:id', destination: '/dashboard/assets/:id', permanent: true },
       { source: '/dashboard', destination: '/company', permanent: true },

@@ -96,6 +96,17 @@ test.describe('Assets gallery', () => {
     await expect(page.locator('a[href^="/company/assets/"]')).toHaveCount(count);
   });
 
+  test('asset detail carries its QR inline, pointing at the public passport', async ({ page }) => {
+    await page.goto('/company/assets/e2e-item-0', { waitUntil: 'networkidle' });
+
+    await expect(page.getByRole('heading', { name: /c[óo]digo qr|qr code/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /pasaporte p[úu]blico|public passport/i }))
+      .toHaveAttribute('href', '/p/e2e-item-0');
+    // QR and passport used to be header buttons; deleting is the only action left there.
+    await expect(page.getByRole('button', { name: /^qr$/i })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /^(pasaporte|passport)$/i })).toHaveCount(0);
+  });
+
   test('search with no match offers a way back', async ({ page }) => {
     await page.getByPlaceholder(/buscar|search/i).fill('zzz-no-match-zzz');
 

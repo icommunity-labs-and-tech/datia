@@ -64,7 +64,7 @@ export async function middleware(request: NextRequest) {
     '/_next',
     '/api/docs',
     '/api/v1/docs',
-    '/customer',
+    '/p/',
     '/logout',
     '/apps',
     '/org',

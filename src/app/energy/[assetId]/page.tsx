@@ -11,5 +11,5 @@ export default async function EnergyReportRedirect({
   params: Promise<{ assetId: string }>;
 }) {
   const { assetId } = await params;
-  redirect(`/customer/asset/${encodeURIComponent(assetId)}`);
+  redirect(`/p/${encodeURIComponent(assetId)}`);
 }

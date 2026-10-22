@@ -4,7 +4,6 @@ import {
   Alert,
   Badge,
   Box,
-  Button,
   Card,
   Group,
   Image,
@@ -15,47 +14,30 @@ import {
   Title,
 } from '@mantine/core';
 import {
-  IconArrowLeft,
   IconPackage,
   IconShieldCheck,
   IconShieldOff,
 } from '@tabler/icons-react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { AssetData } from '../types';
+import { AssetData } from './types';
 import { AssetInfoSection, EnergyReportSection } from './sections';
 import { VerifiedBadge } from './ui';
-import { formatDate } from '../utils/dateFormatters';
+import { formatDate } from './utils/dateFormatters';
 
 interface AssetPassportProps {
   item: AssetData;
-  onBack?: () => void;
 }
 
-export function AssetPassport({ item, onBack }: AssetPassportProps) {
+export function AssetPassport({ item }: AssetPassportProps) {
   const t = useTranslations('common');
   const tCustomer = useTranslations('customer');
   const tPassport = useTranslations('customer.passport');
-  const router = useRouter();
 
   const showEnergy = (item.energyCertifications?.length ?? 0) > 0;
   const isCertified = Boolean(item.evidenceId);
 
-  const handleBack = () => (onBack ? onBack() : router.push('/customer'));
-
   return (
     <Stack gap="md">
-      <Button
-        variant="subtle"
-        color="gray"
-        size="xs"
-        leftSection={<IconArrowLeft size={15} stroke={1.7} />}
-        onClick={handleBack}
-        style={{ alignSelf: 'flex-start' }}
-      >
-        {t('actions.back')}
-      </Button>
-
       {/* ── Identity ── */}
       <Card p={0} radius="md" style={{ overflow: 'hidden' }}>
         <Group

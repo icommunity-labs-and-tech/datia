@@ -20,9 +20,9 @@ Los recorridos cubren:
 - **Móvil** (390×844): inicio → drawer → activos → configuración.
 - **Entidades ocultas**: `/company/users` redirige al panel, y `/company/states`
   y `/company/status-types` ya no existen (#63); ningún enlace apunta a ellas.
-- **Pasaporte público**: `/customer/asset/<id>` con su informe energético, y que
-  `/energy/*` redirige ahí. Los QR impresos apuntan a `/customer/asset/<id>`, así
-  que ese recorrido protege una URL que no se puede romper.
+- **Pasaporte público**: `/p/<id>` con su informe energético, y que `/energy/*`
+  redirige ahí. Los QR impresos llevan `/customer/item/<id>` o `/customer/asset/<id>`
+  y no se pueden reimprimir: `passport.spec.ts` protege que sigan llegando.
 
 Además de las capturas, cada parada comprueba que la página no genera scroll
 horizontal y que la barra superior no crece más allá de las secciones de contenido.

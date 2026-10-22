@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-// The asset lookup lives in the public passport entry point now.
+// The old public lookup portal is gone; assets are reached through their QR.
 export default function EnergyPortalRedirect() {
-  redirect('/customer');
+  redirect('/apps');
 }

@@ -18,9 +18,7 @@ test.describe('Shared - Responsive checks', () => {
       await page.goto('/apps');
 
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-      // Both entry points are offered on every viewport.
       await expect(page.getByRole('link', { name: /panel de empresa|company dashboard/i })).toBeVisible();
-      await expect(page.getByRole('link', { name: /pasaporte del activo|asset passport/i })).toBeVisible();
       await expectNoHorizontalScroll(page);
     }
   });

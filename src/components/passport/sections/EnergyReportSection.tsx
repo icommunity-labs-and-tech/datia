@@ -33,7 +33,7 @@ import {
 } from 'recharts';
 import { axisProps, gridProps, tooltipStyle, colors } from '@/components/charts/theme';
 import { CARRIER_COLORS } from '@/lib/energy/carrierColors';
-import type { EnergyReport } from '../../types.energy';
+import type { EnergyReport } from '../types.energy';
 
 /** GHG scopes keep their own accents so chart, bars and badges agree. */
 const SCOPE_COLOR: Record<string, string> = {

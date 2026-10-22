@@ -16,7 +16,7 @@ import {
   ThemeIcon,
   Title,
 } from '@mantine/core';
-import { IconShieldLock, IconQrcode, IconArrowRight } from '@tabler/icons-react';
+import { IconShieldLock, IconArrowRight } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import Logo from '@/components/Logo';
 import { appConfig } from '@/config/app';
@@ -73,20 +73,13 @@ function AppsSelectContent() {
           <Text size="sm" c="dimmed" ta="center">{appConfig.description}</Text>
         </Stack>
 
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
+        <SimpleGrid cols={1} spacing="md" maw={320} mx="auto">
           <Entry
             href="/auth/company/login"
             icon={IconShieldLock}
             color="datiaBlue"
             title={t('admin')}
             description={t('adminDescription')}
-          />
-          <Entry
-            href="/customer"
-            icon={IconQrcode}
-            color="datiaAmber"
-            title={t('customer')}
-            description={t('customerDescription')}
           />
         </SimpleGrid>
       </Container>

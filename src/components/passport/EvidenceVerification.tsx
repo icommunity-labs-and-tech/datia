@@ -5,7 +5,7 @@ import { Alert, Group, Loader, SimpleGrid, Text } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { SignerBadge, BlockchainLink } from './ui';
-import { retryFetch } from '../utils/apiRetry';
+import { retryFetch } from './utils/apiRetry';
 
 interface EvidenceVerificationProps {
   evidenceId: string;

@@ -46,6 +46,8 @@ export const assetRepository: AssetRepository = {
           evidenceId: true,
           createdAt: true,
           updatedAt: true,
+          latitude: true,
+          longitude: true,
         },
       });
       return asset ? toDomain(asset) : null;

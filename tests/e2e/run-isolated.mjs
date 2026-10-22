@@ -18,7 +18,7 @@ const testSuites = [
   'tests/e2e/auth.spec.ts',
   'tests/e2e/authenticated.spec.ts',
   'tests/e2e/basic.spec.ts',
-  'tests/e2e/customer.passport.spec.ts',
+  'tests/e2e/passport.spec.ts',
   'tests/e2e/company.spec.ts',
   'tests/e2e/profile.spec.ts',
   'tests/e2e/shared.a11y.spec.ts',

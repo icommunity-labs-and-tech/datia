@@ -173,7 +173,7 @@ test.describe('UX journey — public passport', () => {
   // The passport is public: it must render for a visitor with no session.
   test.use({ storageState: { cookies: [], origins: [] } });
 
-  test('scanner and asset passport', async ({ page }) => {
+  test('app selector and asset passport', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
 
     // Entry point into the whole product.
@@ -182,11 +182,7 @@ test.describe('UX journey — public passport', () => {
     await shot(page, 'desktop', '00-apps');
     await expectNoHorizontalScroll(page);
 
-    await page.goto('/customer', { waitUntil: 'networkidle' });
-    await shot(page, 'desktop', '08-scanner');
-    await expectNoHorizontalScroll(page);
-
-    await page.goto(`/customer/asset/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/p/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
 
     // Certification status is the reason this page exists.
     await expect(
@@ -202,7 +198,7 @@ test.describe('UX journey — public passport', () => {
     await shot(page, 'desktop', '10-passport-energy');
 
     await page.setViewportSize(MOBILE);
-    await page.goto(`/customer/asset/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/p/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
     await expect(page.getByRole('tab').first()).toBeVisible();
     await shot(page, 'mobile', '05-passport');
     await expectNoHorizontalScroll(page);
@@ -210,7 +206,7 @@ test.describe('UX journey — public passport', () => {
 
   test('energy certification report', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    await page.goto(`/customer/asset/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
+    await page.goto(`/p/${PASSPORT_ITEM_ID}`, { waitUntil: 'networkidle' });
 
     await page.getByRole('tab', { name: /certificación energética|energy certification/i }).click();
     await expect(page.getByText(/co₂e certificado|certified co₂e/i)).toBeVisible();
@@ -221,20 +217,19 @@ test.describe('UX journey — public passport', () => {
   test('the old energy portal folds into the passport', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
 
-    // Printed QR codes point at /customer/asset/<id>, so that is the URL that
-    // survives; /energy/* only forwards old links now.
+    // The passport lives at /p/<id>; /energy/* only forwards old links now.
     await page.goto(`/energy/${PASSPORT_ITEM_ID}`);
-    await expect(page).toHaveURL(new RegExp(`/customer/asset/${PASSPORT_ITEM_ID}$`));
+    await expect(page).toHaveURL(new RegExp(`/p/${PASSPORT_ITEM_ID}$`));
 
     await page.goto('/energy');
-    await expect(page).toHaveURL(/\/customer$/);
+    await expect(page).toHaveURL(/\/apps$/);
   });
 
-  test('unknown code shows a recoverable error', async ({ page }) => {
+  test('unknown code shows a not-found message', async ({ page }) => {
     await page.setViewportSize(DESKTOP);
-    await page.goto('/customer/asset/does-not-exist', { waitUntil: 'networkidle' });
+    await page.goto('/p/does-not-exist', { waitUntil: 'networkidle' });
 
-    await expect(page.getByRole('button', { name: /volver al scanner|back to scanner/i })).toBeVisible();
+    await expect(page.getByText(/activo no encontrado|asset not found|product not found/i).first()).toBeVisible();
     await shot(page, 'desktop', '11-passport-not-found');
     await expectNoHorizontalScroll(page);
   });

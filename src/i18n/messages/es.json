@@ -53,8 +53,6 @@
   "sidebar": {
     "home": "Inicio",
     "developer": "DESARROLLADOR",
-    "applications": "APLICACIONES",
-    "appCustomer": "App Cliente",
     "events": "Eventos",
     "webhooks": "Webhooks",
     "auth": "Auth",
@@ -84,8 +82,6 @@
     "title": "Elige cómo quieres entrar",
     "admin": "Panel de empresa",
     "adminDescription": "Gestiona activos, certificaciones y la configuración de tu organización.",
-    "customer": "Pasaporte del activo",
-    "customerDescription": "Consulta la información certificada de un activo con su código.",
     "redirecting": "Redirigiendo..."
   },
   "forms": {
@@ -384,11 +380,6 @@
     }
   },
   "customer": {
-    "scanCode": "Escanear Código",
-    "scanDescription": "Coloca el código QR del activo frente a la cámara",
-    "scanWithCamera": "Escanear con Cámara",
-    "manualInput": "O ingresa el código manualmente",
-    "search": "Buscar",
     "copyright": "© 2026 Datia - Pasaporte Digital",
     "loading": "Cargando...",
     "loadingProduct": "Obteniendo información del activo",
@@ -421,14 +412,6 @@
     "loadingCertification": "Cargando certificación...",
     "blockchainCertification": "Certificación blockchain",
     "signer": "Firmante",
-    "error": {
-      "title": "Error",
-      "unknownError": "Error desconocido",
-      "backToScanner": "Volver al Scanner",
-      "tryWithCode": "Intentar con código: {code}",
-      "loading": "Cargando...",
-      "preparingError": "Preparando página de error"
-    },
     "tabEnergy": "Certificación Energética",
     "passport": {
       "title": "Pasaporte digital",
@@ -583,7 +566,6 @@
   "itemDetail": {
     "notFound": "Activo no encontrado",
     "notFoundDescription": "No se pudo cargar la información del activo.",
-    "passport": "Pasaporte",
     "delete": "Eliminar",
     "imageAlt": "Imagen de {name}",
     "noDescription": "Sin descripción",
@@ -595,10 +577,13 @@
     "deleteTitle": "Eliminar activo",
     "deleteMessage": "¿Estás seguro de que quieres eliminar el activo \"{name}\"?",
     "qr": {
-      "title": "Código QR del activo",
-      "titleNamed": "QR de {name}",
+      "title": "Código QR",
       "copyLink": "Copiar enlace",
-      "downloadPng": "Descargar PNG"
+      "downloadPng": "Descargar PNG",
+      "hint": "Lleva al pasaporte público del activo; se consulta sin cuenta.",
+      "openPublic": "Ver pasaporte público",
+      "copied": "Copiado",
+      "error": "No se pudo generar el QR"
     },
     "certifications": "Certificaciones",
     "noCertifications": "Este activo todavía no tiene certificaciones.",
@@ -607,7 +592,11 @@
     "viewProof": "Ver la prueba",
     "totalCertifications": "Certificaciones",
     "certifiedCertifications": "En cadena",
-    "noImage": "Sin imagen"
+    "noImage": "Sin imagen",
+    "energyReport": "Informe energético",
+    "blockchainProof": "Prueba en blockchain",
+    "position": "Ubicación",
+    "assetId": "ID del activo"
   },
   "userDetail": {
     "title": "Usuario: {name}",

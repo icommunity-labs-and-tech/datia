@@ -20,10 +20,9 @@ import {
   Title,
 } from '@mantine/core';
 import {
-  IconQrcode,
-  IconExternalLink,
   IconTrash,
   IconCertificate,
+  IconBolt,
   IconExternalLink as IconLink,
   IconInfoCircle,
   IconShieldCheck,
@@ -36,7 +35,9 @@ import type { AssetCertification } from '@/lib/certification/queries';
 import DeleteConfirmationModal from '@/components/DeleteConfirmationModal';
 import { useDeleteEntity } from '@/hooks/useDeleteEntity';
 import { getCascadeInfo } from '@/config/entityConfig';
-import AssetQrModal from '@/components/AssetQrModal';
+import AssetQrCard from '@/components/AssetQrCard';
+import { EvidenceVerification } from '@/components/passport/EvidenceVerification';
+import { EnergyReportSection } from '@/components/passport/sections';
 import ImageDisplay from '@/components/ImageDisplay';
 import PageHeader from '@/components/layout/PageHeader';
 import Link from 'next/link';
@@ -51,7 +52,6 @@ export default function AssetDetailPage() {
   const [item, setItem] = useState<any>(null);
   const [certifications, setCertifications] = useState<AssetCertification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showQr, setShowQr] = useState(false);
 
   const {
     showDeleteModal,
@@ -94,9 +94,7 @@ export default function AssetDetailPage() {
 
   const openDeleteModalWithDetails = async () => {
     try {
-      const detailedItem = await getAssetDetails(assetId);
-      setItem(detailedItem);
-      openDeleteModal(detailedItem);
+      openDeleteModal(await getAssetDetails(assetId));
     } catch {
       openDeleteModal(item);
     }
@@ -149,36 +147,15 @@ export default function AssetDetailPage() {
           title={item.name}
           description={item.description || undefined}
           actions={
-            <>
-              <Button
-                variant="default"
-                size="xs"
-                leftSection={<IconQrcode size={15} />}
-                onClick={() => setShowQr(true)}
-              >
-                QR
-              </Button>
-              <Button
-                variant="default"
-                size="xs"
-                leftSection={<IconExternalLink size={15} />}
-                component="a"
-                href={`/customer/asset/${encodeURIComponent(assetId)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {t('passport')}
-              </Button>
-              <Button
-                variant="outline"
-                color="red"
-                size="xs"
-                leftSection={<IconTrash size={15} />}
-                onClick={openDeleteModalWithDetails}
-              >
-                {t('delete')}
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              color="red"
+              size="xs"
+              leftSection={<IconTrash size={15} />}
+              onClick={openDeleteModalWithDetails}
+            >
+              {t('delete')}
+            </Button>
           }
         >
           <Group gap="xs" mt="xs">
@@ -201,7 +178,7 @@ export default function AssetDetailPage() {
               {/* ── Certifications ── */}
               <Card>
                 <Group gap="xs" mb="md">
-                  <ThemeIcon color="datiaBlue" variant="light" size={28} radius="sm">
+                  <ThemeIcon color="datiaGreen" variant="light" size={28} radius="sm">
                     <IconCertificate size={16} />
                   </ThemeIcon>
                   <Title order={5}>{t('certifications')}</Title>
@@ -256,10 +233,20 @@ export default function AssetDetailPage() {
                   </Timeline>
                 )}
               </Card>
+
+              <Card>
+                <Group gap="xs" mb="md">
+                  <ThemeIcon color="datiaGreen" variant="light" size={28} radius="sm">
+                    <IconBolt size={16} />
+                  </ThemeIcon>
+                  <Title order={5}>{t('energyReport')}</Title>
+                </Group>
+                <EnergyReportSection assetId={assetId} />
+              </Card>
             </Stack>
           </Grid.Col>
 
-          {/* ── Right column: image + summary ── */}
+          {/* ── Right column: image, QR, blockchain proof, summary ── */}
           <Grid.Col span={{ base: 12, md: 4 }}>
             <Stack gap="md">
               {item.imageUrl && (
@@ -276,6 +263,20 @@ export default function AssetDetailPage() {
                 </Card>
               )}
 
+              <AssetQrCard assetId={assetId} />
+
+              {item.evidenceId && (
+                <Card>
+                  <Group gap="xs" mb={4}>
+                    <ThemeIcon color="datiaGreen" variant="light" size={28} radius="sm">
+                      <IconShieldCheck size={16} />
+                    </ThemeIcon>
+                    <Title order={5}>{t('blockchainProof')}</Title>
+                  </Group>
+                  <EvidenceVerification evidenceId={item.evidenceId} entityId={item.id} />
+                </Card>
+              )}
+
               <Card>
                 <Title order={6} mb="sm">{t('summary')}</Title>
                 <Stack gap={8}>
@@ -287,6 +288,21 @@ export default function AssetDetailPage() {
                     <Text size="sm" c="dimmed">{t('certifiedCertifications')}</Text>
                     <Text size="sm" fw={600} c={certifiedCount > 0 ? 'green' : undefined}>
                       {certifiedCount}
+                    </Text>
+                  </Group>
+                  <Divider />
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="sm" c="dimmed">{t('position')}</Text>
+                    <Text size="sm" fw={600} ta="right">
+                      {item.latitude != null && item.longitude != null
+                        ? `${item.latitude}, ${item.longitude}`
+                        : '—'}
+                    </Text>
+                  </Group>
+                  <Group justify="space-between" wrap="nowrap">
+                    <Text size="sm" c="dimmed">{t('assetId')}</Text>
+                    <Text size="xs" ff="monospace" ta="right" style={{ wordBreak: 'break-all' }}>
+                      {item.id}
                     </Text>
                   </Group>
                 </Stack>
@@ -304,13 +320,6 @@ export default function AssetDetailPage() {
         message={t('deleteMessage', { name: entityToDelete?.name ?? '' })}
         cascadeInfo={cascadeInfo}
         isLoading={isDeleting}
-      />
-
-      <AssetQrModal
-        show={showQr}
-        onHide={() => setShowQr(false)}
-        assetId={assetId}
-        assetName={item?.name}
       />
 
     </>

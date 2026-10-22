@@ -1,17 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { Button, Center, Loader, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
+import { Center, Loader, Paper, Stack, Text, ThemeIcon, Title } from '@mantine/core';
 import { IconAlertCircle } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
-import { AssetPassport } from '../../components/AssetPassport';
-import PassportShell from '../../components/PassportShell';
-import { AssetData } from '../../types';
+import { AssetPassport } from '@/components/passport/AssetPassport';
+import PassportShell from '@/components/passport/PassportShell';
+import { AssetData } from '@/components/passport/types';
 
-export default function ItemPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PassportPage({ params }: { params: Promise<{ id: string }> }) {
   const t = useTranslations('customer');
-  const router = useRouter();
   const [itemData, setItemData] = useState<AssetData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -77,9 +75,6 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
               <Text size="sm" c="dimmed" ta="center">
                 {error || t('productNotFoundMessage')}
               </Text>
-              <Button variant="light" size="xs" onClick={() => router.push('/customer')}>
-                {t('error.backToScanner')}
-              </Button>
             </Stack>
           </Center>
         </Paper>
@@ -89,7 +84,7 @@ export default function ItemPage({ params }: { params: Promise<{ id: string }> }
 
   return (
     <PassportShell organization={itemData.organization}>
-      <AssetPassport item={itemData} onBack={() => router.push('/customer')} />
+      <AssetPassport item={itemData} />
     </PassportShell>
   );
 }

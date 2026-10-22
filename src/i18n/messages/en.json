@@ -53,8 +53,6 @@
   "sidebar": {
     "home": "Home",
     "developer": "DEVELOPER",
-    "applications": "APPLICATIONS",
-    "appCustomer": "Customer App",
     "events": "Events",
     "webhooks": "Webhooks",
     "auth": "Auth",
@@ -84,8 +82,6 @@
     "title": "Choose how you want to sign in",
     "admin": "Company dashboard",
     "adminDescription": "Manage assets, certifications and your organisation settings.",
-    "customer": "Asset passport",
-    "customerDescription": "Look up an asset’s certified information with its code.",
     "redirecting": "Redirecting..."
   },
   "forms": {
@@ -384,11 +380,6 @@
     }
   },
   "customer": {
-    "scanCode": "Scan Code",
-    "scanDescription": "Place the asset QR code in front of the camera",
-    "scanWithCamera": "Scan with Camera",
-    "manualInput": "Or enter the code manually",
-    "search": "Search",
     "copyright": "© 2026 Datia - Digital Passport",
     "loading": "Loading...",
     "loadingProduct": "Getting asset information",
@@ -421,14 +412,6 @@
     "loadingCertification": "Loading certification...",
     "blockchainCertification": "Blockchain certification",
     "signer": "Signer",
-    "error": {
-      "title": "Error",
-      "unknownError": "Unknown error",
-      "backToScanner": "Back to Scanner",
-      "tryWithCode": "Try with code: {code}",
-      "loading": "Loading...",
-      "preparingError": "Preparing error page"
-    },
     "tabEnergy": "Energy Certification",
     "passport": {
       "title": "Digital passport",
@@ -583,7 +566,6 @@
   "itemDetail": {
     "notFound": "Asset not found",
     "notFoundDescription": "Could not load asset information.",
-    "passport": "Passport",
     "delete": "Delete",
     "imageAlt": "Image of {name}",
     "noDescription": "No description",
@@ -595,10 +577,13 @@
     "deleteTitle": "Delete asset",
     "deleteMessage": "Are you sure you want to delete the asset \"{name}\"?",
     "qr": {
-      "title": "Asset QR code",
-      "titleNamed": "{name} QR",
+      "title": "QR code",
       "copyLink": "Copy link",
-      "downloadPng": "Download PNG"
+      "downloadPng": "Download PNG",
+      "hint": "Opens the asset’s public passport; no account needed.",
+      "openPublic": "View public passport",
+      "copied": "Copied",
+      "error": "Could not generate the QR code"
     },
     "certifications": "Certifications",
     "noCertifications": "This asset has no certifications yet.",
@@ -607,7 +592,11 @@
     "viewProof": "View the proof",
     "totalCertifications": "Certifications",
     "certifiedCertifications": "On chain",
-    "noImage": "No image"
+    "noImage": "No image",
+    "energyReport": "Energy report",
+    "blockchainProof": "Blockchain proof",
+    "position": "Location",
+    "assetId": "Asset ID"
   },
   "userDetail": {
     "title": "User: {name}",
