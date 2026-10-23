@@ -432,9 +432,9 @@ export default function AssetsGallery({
                             unlocated={g.unlocated}
                             onOpen={() => setInstallationId(installationId === g.id ? null : g.id)}
                           />
-                          {/* A place's assets show once it is opened, or while a
-                              search is looking for assets wherever they are. */}
-                          {(installationId === g.id || search.trim()) && g.items.map((item) => (
+                          {/* A place's assets show once it is opened; a search
+                              only narrows which places and assets there are. */}
+                          {installationId === g.id && g.items.map((item) => (
                             <AssetRow
                               key={item.id}
                               item={item}

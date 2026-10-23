@@ -99,10 +99,16 @@ test.describe('Assets gallery', () => {
     await expect(assets).toHaveCount(0);
   });
 
-  test('a search lists the matching assets without opening a place', async ({ page }) => {
+  test('a search narrows the places, whose assets still show once opened', async ({ page }) => {
+    const assets = page.locator('a[href^="/company/assets/"]');
     await page.getByPlaceholder(/buscar|search/i).fill('Turbina');
 
-    await expect(page.locator('a[href^="/company/assets/"]')).toHaveCount(1);
+    const place = page.getByRole('button', { name: /\d+ (activos?|assets?)/i });
+    await expect(place).toHaveCount(1);
+    await expect(assets).toHaveCount(0);
+
+    await place.click();
+    await expect(assets).toHaveCount(1);
   });
 
   test('list and map point at the same asset', async ({ page }) => {
