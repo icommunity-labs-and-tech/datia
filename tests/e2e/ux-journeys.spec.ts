@@ -248,6 +248,22 @@ test.describe('Vistas de energía', () => {
     }
   });
 
+  test('every company has them, broken down across its assets', async ({ page }) => {
+    // The seeded organisation never turned the energy module on.
+    await page.goto('/company', { waitUntil: 'networkidle' });
+    await page.getByRole('link', { name: /^consumo$|^consumption$/i }).first().click();
+    await expect(page).toHaveURL(/\/company\/energy\/consumption$/);
+
+    await expect(page.getByText(/^por activo$|^by asset$/i)).toBeVisible();
+    await expect(page.getByText(/^por tipo de energ[íi]a$|^by energy type$/i)).toBeVisible();
+    await expect(page.locator('table a[href^="/company/assets/"]').first()).toBeVisible();
+
+    await page.goto('/company/energy/emissions', { waitUntil: 'networkidle' });
+    await expect(page.getByText(/^por alcance$|^by scope$/i)).toBeVisible();
+    await expect(page.getByText(/^verificaci[óo]n$|^verification$/i)).toBeVisible();
+    await expect(page.locator('table a[href^="/company/energy/emissions/"]').first()).toBeVisible();
+  });
+
   test('links to the former hub still resolve', async ({ page }) => {
     // The hub's default view was sources, which now redirects to the assets page.
     await page.goto('/company/energy');

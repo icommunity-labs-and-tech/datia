@@ -51,23 +51,17 @@ export default function DatiaAppShell({ children, logoUrl, brandColorPrimary, mo
 
   const primary = brandColorPrimary ?? '#1752CC';
   const showPassport = modules?.passport !== false;
-  const showEnergy = modules?.energy === true;
 
   // Only content surfaces live in the top nav; account/organisation settings sit
   // under the avatar menu so the bar stays down to what the product actually does.
-  // The energy views are separate routes, so each is its own nav entry. They
-  // stay behind the module flag: an organisation without energy keeps a short bar.
+  // Consumption and emissions are part of every company's panel, data or not.
   const mainLinks = [
     { href: '/company', icon: IconHome2, label: tSidebar('home'), exact: true },
     ...(showPassport
       ? [{ href: '/company/assets', icon: IconPackage, label: tSidebar('assets'), exact: false }]
       : []),
-    ...(showEnergy
-      ? [
-          { href: '/company/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
-          { href: '/company/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
-        ]
-      : []),
+    { href: '/company/energy/consumption', icon: IconBolt, label: tEnergy('navConsumption'), exact: false },
+    { href: '/company/energy/emissions', icon: IconCloudFog, label: tEnergy('navEmissions'), exact: false },
     { href: '/company/api', icon: IconCode, label: tSidebar('api'), exact: false },
   ];
 

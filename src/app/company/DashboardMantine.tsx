@@ -29,8 +29,6 @@ interface DashboardMantineProps {
   kpis: DashboardKPIs;
   trend?: CertificationTrend;
   energySummary: EnergySummary;
-  /** When the energy module is off, its metrics stay out of the way. */
-  energyEnabled?: boolean;
   recentItems?: RecentItem[];
 }
 
@@ -51,7 +49,6 @@ export default function DashboardMantine({
   kpis,
   trend,
   energySummary,
-  energyEnabled = false,
   recentItems = [],
 }: DashboardMantineProps) {
   const t = useTranslations('dashboard');
@@ -102,12 +99,13 @@ export default function DashboardMantine({
     </Stack>
   );
 
-  const energyLinks = energyEnabled && (
+  const energyLinks = (
     <Paper p="md" radius="md">
       <Text fw={600} size="sm" mb="sm">{tSidebar('energy')}</Text>
       <Stack gap={2}>
         {[
-          { href: '/company/energy/sources', icon: IconMap, label: tEnergy('tabs.map'), hint: `${energySummary.sourcesWithCoords}/${energySummary.totalSources}` },
+          // Sources live inside the assets page now; /company/energy/sources only redirects there.
+          { href: '/company/assets', icon: IconMap, label: tEnergy('tabs.map'), hint: `${energySummary.sourcesWithCoords}/${energySummary.totalSources}` },
           { href: '/company/energy/consumption', icon: IconBolt, label: tEnergy('tabs.consumption'), hint: kwhDisplay },
           { href: '/company/energy/emissions', icon: IconCloudFog, label: tEnergy('tabs.emissions'), hint: `${co2Tonnes} t` },
         ].map(({ href, icon: Icon, label, hint }) => (
@@ -194,7 +192,7 @@ export default function DashboardMantine({
         </Stack>
       </SimpleGrid>
 
-      {trend && energyEnabled && (
+      {trend && (
         <SimpleGrid cols={{ base: 1, md: 3 }} spacing="lg">
           <Box style={{ gridColumn: 'span 2' }}>
             <CertificationChart data={trend.monthly} />

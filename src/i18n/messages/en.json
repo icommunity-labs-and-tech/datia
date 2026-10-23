@@ -1111,7 +1111,40 @@
     },
     "navConsumption": "Consumption",
     "navEmissions": "Emissions",
-    "latestRecords": "Latest {count} of {total} records"
+    "latestRecords": "Latest {count} of {total} records",
+    "company": {
+      "consumptionDescription": "Consumption across all your assets.",
+      "emissionsDescription": "CO₂e emissions across all your assets, and their verification.",
+      "totalConsumption": "Total consumption",
+      "totalEmissions": "Total emissions",
+      "records": "{count, plural, one {1 record} other {# records}}",
+      "renewable": "Renewable",
+      "renewableHint": "Of the consumption whose sources declare their origin",
+      "renewableUnknown": "No source declares its origin",
+      "lastMonth": "Last month · {month}",
+      "vsPrevious": "{change} on {month}",
+      "noPrevious": "No previous month with data",
+      "coverage": "Assets with data",
+      "coverageHint": "{sources, plural, one {1 energy source} other {# energy sources}}",
+      "verified": "Verified",
+      "intensity": "Intensity",
+      "intensityHint": "kg CO₂e per kWh consumed",
+      "byAsset": "By asset",
+      "byMunicipality": "By municipality",
+      "byCarrier": "By energy type",
+      "byScope": "By scope",
+      "byStatus": "Verification",
+      "others": "{count, plural, one {One more} other {# more}}",
+      "noPlace": "No asset has a location",
+      "latest": "Recent records",
+      "asset": "Asset",
+      "empty": {
+        "consumptionTitle": "No consumption data yet",
+        "emissionsTitle": "No emissions yet",
+        "body": "They arrive through the API: each asset registers its energy sources and consumption readings, and emissions are calculated from them.",
+        "cta": "See the API"
+      }
+    }
   },
   "apiHub": {
     "title": "API",

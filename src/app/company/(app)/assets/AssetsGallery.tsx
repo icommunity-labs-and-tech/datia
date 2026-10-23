@@ -186,11 +186,12 @@ function InstallationRow({
 }
 
 export default function AssetsGallery({
-  withEnergy = false,
+  simulator = false,
   sources = [],
   consumption = [],
 }: {
-  withEnergy?: boolean;
+  /** The BMS simulator: a demo tool, only where the organization turns it on. */
+  simulator?: boolean;
   sources?: EnergySourceRecord[];
   consumption?: EnergyConsumptionRecord[];
 } = {}) {
@@ -348,7 +349,7 @@ export default function AssetsGallery({
             <Button leftSection={<IconPlus size={15} stroke={1.9} />} onClick={() => setCreating(true)}>
               {t('create.button')}
             </Button>
-            {withEnergy && <BmsSimulatorButton />}
+            {simulator && <BmsSimulatorButton />}
           </Group>
         }
       >
@@ -427,7 +428,7 @@ export default function AssetsGallery({
                             label={g.unlocated ? t('unlocatedInstallation') : labelFor(g.id)}
                             count={g.items.length}
                             certified={g.items.filter((i) => i.certified).length}
-                            energy={withEnergy && !g.unlocated ? energyOf(g.id) : undefined}
+                            energy={!g.unlocated ? energyOf(g.id) : undefined}
                             selected={installationId === g.id}
                             unlocated={g.unlocated}
                             onOpen={() => setInstallationId(installationId === g.id ? null : g.id)}
@@ -451,7 +452,7 @@ export default function AssetsGallery({
             </Grid.Col>
           </Grid>
 
-          {withEnergy && installationId && (
+          {installationId && (sourcesByInstallation.get(installationId)?.length ?? 0) > 0 && (
             <Stack gap="xs" mb="lg">
               <Text size="xs" c="dimmed" tt="uppercase" fw={700} lts={0.4}>
                 {t('installationSources')}

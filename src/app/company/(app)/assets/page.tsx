@@ -17,7 +17,12 @@ export const dynamic = 'force-dynamic';
  * points twice. Here the installation is the spine, and an asset's energy is one
  * more thing you find inside it.
  */
-async function energyEnabled(): Promise<boolean> {
+/**
+ * The organization's energy switch no longer gates any energy data — every
+ * company sees its own. What it still turns on is the BMS simulator, a demo
+ * tool that writes a year of synthetic readings.
+ */
+async function simulatorEnabled(): Promise<boolean> {
   try {
     const token = (await cookies()).get(adminAuthConfig.cookieName)?.value;
     if (!token) return false;
@@ -37,17 +42,15 @@ async function energyEnabled(): Promise<boolean> {
 }
 
 export default async function ItemsPage() {
-  const withEnergy = await energyEnabled();
-
-  // Only loaded when the organisation has the module: without it the page is
-  // the asset catalogue and nothing else.
-  const [sources, consumption] = withEnergy
-    ? await Promise.all([listEnergySources(), listEnergyConsumption()])
-    : [[], []];
+  const [simulator, sources, consumption] = await Promise.all([
+    simulatorEnabled(),
+    listEnergySources(),
+    listEnergyConsumption(),
+  ]);
 
   return (
     <AssetsGallery
-      withEnergy={withEnergy}
+      simulator={simulator}
       sources={sources ?? []}
       consumption={consumption ?? []}
     />
