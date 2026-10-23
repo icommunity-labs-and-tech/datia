@@ -172,68 +172,9 @@ export default function AssetDetailPage() {
         </PageHeader>
 
         <Grid gutter="md">
-          {/* ── Left column: info + certifications ── */}
+          {/* ── Left column: energy report ── */}
           <Grid.Col span={{ base: 12, md: 8 }}>
             <Stack gap="md">
-              {/* ── Certifications ── */}
-              <Card>
-                <Group gap="xs" mb="md">
-                  <ThemeIcon color="datiaGreen" variant="light" size={28} radius="sm">
-                    <IconCertificate size={16} />
-                  </ThemeIcon>
-                  <Title order={5}>{t('certifications')}</Title>
-                </Group>
-
-                {certifications.length === 0 ? (
-                  <Text size="sm" c="dimmed" ta="center" py="lg">{t('noCertifications')}</Text>
-                ) : (
-                  <Timeline active={certifications.length} bulletSize={26} lineWidth={2} color="datiaBlue">
-                    {certifications.map((certification) => {
-                      const certified = certification.status === 'CERTIFIED';
-                      return (
-                        <Timeline.Item
-                          key={certification.id}
-                          bullet={certified ? <IconShieldCheck size={14} /> : <IconClock size={14} />}
-                          color={certified ? 'green' : 'datiaBlue'}
-                          title={
-                            <Group gap={6} wrap="wrap">
-                              <Text fw={600} size="sm">
-                                {certification.period ?? t('certificationWithoutPeriod')}
-                              </Text>
-                              {certification.co2eKg != null && (
-                                <Badge size="xs" color="datiaBlue" variant="light">
-                                  {certification.co2eKg} kg CO₂e
-                                </Badge>
-                              )}
-                              <Badge size="xs" color={certified ? 'green' : 'yellow'} variant="dot">
-                                {certified ? t('certified') : t('pendingBackup')}
-                              </Badge>
-                            </Group>
-                          }
-                        >
-                          {certification.readings != null && (
-                            <Text size="sm" c="dimmed">{t('readingsCovered', { count: certification.readings })}</Text>
-                          )}
-                          <Group gap={8} mt={4}>
-                            <Text size="xs" c="dimmed">
-                              {new Date(certification.certifiedAt ?? certification.createdAt).toLocaleString()}
-                            </Text>
-                            {certification.checkerUrl && (
-                              <Anchor href={certification.checkerUrl} target="_blank" rel="noreferrer" size="xs">
-                                <Group gap={4}>
-                                  {t('viewProof')}
-                                  <IconLink size={12} />
-                                </Group>
-                              </Anchor>
-                            )}
-                          </Group>
-                        </Timeline.Item>
-                      );
-                    })}
-                  </Timeline>
-                )}
-              </Card>
-
               <Card>
                 <Group gap="xs" mb="md">
                   <ThemeIcon color="datiaGreen" variant="light" size={28} radius="sm">
@@ -310,6 +251,65 @@ export default function AssetDetailPage() {
             </Stack>
           </Grid.Col>
         </Grid>
+
+        {/* ── Certifications: last, since the list grows with every period ── */}
+        <Card>
+          <Group gap="xs" mb="md">
+            <ThemeIcon color="datiaGreen" variant="light" size={28} radius="sm">
+              <IconCertificate size={16} />
+            </ThemeIcon>
+            <Title order={5}>{t('certifications')}</Title>
+          </Group>
+
+          {certifications.length === 0 ? (
+            <Text size="sm" c="dimmed" ta="center" py="lg">{t('noCertifications')}</Text>
+          ) : (
+            <Timeline active={certifications.length} bulletSize={26} lineWidth={2} color="datiaBlue">
+              {certifications.map((certification) => {
+                const certified = certification.status === 'CERTIFIED';
+                return (
+                  <Timeline.Item
+                    key={certification.id}
+                    bullet={certified ? <IconShieldCheck size={14} /> : <IconClock size={14} />}
+                    color={certified ? 'green' : 'datiaBlue'}
+                    title={
+                      <Group gap={6} wrap="wrap">
+                        <Text fw={600} size="sm">
+                          {certification.period ?? t('certificationWithoutPeriod')}
+                        </Text>
+                        {certification.co2eKg != null && (
+                          <Badge size="xs" color="datiaBlue" variant="light">
+                            {certification.co2eKg} kg CO₂e
+                          </Badge>
+                        )}
+                        <Badge size="xs" color={certified ? 'green' : 'yellow'} variant="dot">
+                          {certified ? t('certified') : t('pendingBackup')}
+                        </Badge>
+                      </Group>
+                    }
+                  >
+                    {certification.readings != null && (
+                      <Text size="sm" c="dimmed">{t('readingsCovered', { count: certification.readings })}</Text>
+                    )}
+                    <Group gap={8} mt={4}>
+                      <Text size="xs" c="dimmed">
+                        {new Date(certification.certifiedAt ?? certification.createdAt).toLocaleString()}
+                      </Text>
+                      {certification.checkerUrl && (
+                        <Anchor href={certification.checkerUrl} target="_blank" rel="noreferrer" size="xs">
+                          <Group gap={4}>
+                            {t('viewProof')}
+                            <IconLink size={12} />
+                          </Group>
+                        </Anchor>
+                      )}
+                    </Group>
+                  </Timeline.Item>
+                );
+              })}
+            </Timeline>
+          )}
+        </Card>
       </Stack>
 
       <DeleteConfirmationModal

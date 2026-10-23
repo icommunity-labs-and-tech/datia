@@ -127,6 +127,16 @@ test.describe('Assets gallery', () => {
     // Clicking a dot marks it, and its row.
     await page.mouse.move(0, 0);
     await expect.poll(largest).toBeLessThan(24);
+    // The map eases into the place it framed; aiming at a dot mid-flight misses.
+    const positions = () =>
+      page.locator('.leaflet-marker-icon').evaluateAll((els) =>
+        els.map((e) => { const r = e.getBoundingClientRect(); return `${Math.round(r.x)},${Math.round(r.y)}`; }).join('|')
+      );
+    let previous = '';
+    await expect
+      .poll(async () => { const now = await positions(); const settled = now === previous; previous = now; return settled; }, { intervals: [250] })
+      .toBe(true);
+
     // Only dots inside the map's frame: the others are panned out of view.
     const dot = await page.evaluate(() => {
       const frame = document.querySelector('.leaflet-container')!.getBoundingClientRect();
