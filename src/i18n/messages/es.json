@@ -947,7 +947,7 @@
     "unlocatedInstallation": "Sin ubicar",
     "clearInstallation": "Quitar filtro de ubicación",
     "certifiedRatio": "{certified} de {total} certificados",
-    "installationEnergy": "{sources} fuente(s) · {capacity}",
+    "installationConsumption": "{consumption} consumidos",
     "renewableShare": "{share}% renovable",
     "installationSources": "Fuentes de energía",
     "create": {

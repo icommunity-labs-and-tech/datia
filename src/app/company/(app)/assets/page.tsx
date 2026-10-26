@@ -4,6 +4,7 @@ import { adminAuthConfig } from '@/lib/auth/admin/config';
 import { prisma } from '@/lib/prisma';
 import { listEnergySources } from '@/actions/energy/list-sources';
 import { listEnergyConsumption } from '@/actions/energy/list-consumption';
+import { getConsumptionBreakdown } from '@/actions/energy/get-breakdown';
 import AssetsGallery from './AssetsGallery';
 
 export const dynamic = 'force-dynamic';
@@ -42,15 +43,17 @@ async function simulatorEnabled(): Promise<boolean> {
 }
 
 export default async function ItemsPage() {
-  const [simulator, sources, consumption] = await Promise.all([
+  const [simulator, sources, consumption, breakdown] = await Promise.all([
     simulatorEnabled(),
     listEnergySources(),
     listEnergyConsumption(),
+    getConsumptionBreakdown(),
   ]);
 
   return (
     <AssetsGallery
       simulator={simulator}
+      energyByAsset={breakdown.perAsset}
       sources={sources ?? []}
       consumption={consumption ?? []}
     />

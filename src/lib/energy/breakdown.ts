@@ -27,7 +27,16 @@ export interface EmissionRow {
   asset: { id: string; name: string };
 }
 
+/** An asset's consumption, with what is needed to weight its renewable share. */
+export interface AssetEnergy {
+  kwh: number;
+  /** kWh whose source declares a renewable share, and how much of it is renewable. */
+  declaredKwh: number;
+  renewableKwh: number;
+}
+
 export interface ConsumptionBreakdown {
+  perAsset: Record<string, AssetEnergy>;
   assets: number;
   sources: number;
   /** % of the kWh whose source declares a renewable share; null when none does. */
@@ -106,10 +115,21 @@ export function consumptionBreakdown(
     if (nameCount.get(s.label)! > 1) s.label = `${s.label} (${s.key.split('|')[1]})`;
   }
 
+  const perAsset: Record<string, AssetEnergy> = {};
+  for (const r of rows) {
+    const a = (perAsset[r.asset.id] ??= { kwh: 0, declaredKwh: 0, renewableKwh: 0 });
+    a.kwh += r.consumptionKwh;
+    if (r.source.renewableShare != null) {
+      a.declaredKwh += r.consumptionKwh;
+      a.renewableKwh += (r.consumptionKwh * r.source.renewableShare) / 100;
+    }
+  }
+
   const declared = rows.filter((r) => r.source.renewableShare != null);
   const declaredKwh = declared.reduce((n, r) => n + r.consumptionKwh, 0);
 
   return {
+    perAsset,
     assets: new Set(rows.map((r) => r.asset.id)).size,
     sources: new Set(rows.map((r) => r.source.id)).size,
     renewableShare: declaredKwh

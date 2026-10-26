@@ -60,6 +60,17 @@ describe('consumptionBreakdown', () => {
     expect(b.renewableShare).toBe(75);
   });
 
+  it('keeps each asset\'s kWh, and the part of it with a declared origin', () => {
+    const b = consumptionBreakdown(
+      [
+        consumption('c1', 300, { source: { id: 's1', renewableShare: 50 } }),
+        consumption('c2', 100, { source: { id: 's2', renewableShare: null } }),
+      ],
+      locate
+    );
+    expect(b.perAsset.a1).toEqual({ kwh: 400, declaredKwh: 300, renewableKwh: 150 });
+  });
+
   it('has no renewable share when no source declares one', () => {
     expect(consumptionBreakdown([consumption('c1', 10)], locate).renewableShare).toBeNull();
   });

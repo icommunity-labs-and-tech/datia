@@ -20,7 +20,7 @@ import {
 } from '@mantine/core';
 import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconShieldCheck } from '@tabler/icons-react';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { getAssets } from '@/actions/assets';
 import PageHeader from '@/components/layout/PageHeader';
 import InstallationsMap from '@/components/maps/InstallationsMapLazy';
@@ -29,6 +29,7 @@ import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
 import CreateAssetModal from '@/components/assets/CreateAssetModal';
 import EnergySourcesPanel from '@/components/energy/EnergySourcesPanel';
 import type { EnergySourceRecord, EnergyConsumptionRecord } from '@/domain/energy/EnergyTypes';
+import type { AssetEnergy } from '@/lib/energy/breakdown';
 
 interface Item {
   id: string;
@@ -125,12 +126,13 @@ function InstallationRow({
   label: string;
   count: number;
   certified: number;
-  energy?: { capacityKw: number; renewableShare: number | null; sources: unknown[] };
+  energy?: { kwh: number; renewableShare: number | null };
   selected: boolean;
   unlocated?: boolean;
   onOpen: () => void;
 }) {
   const t = useTranslations('itemsPage');
+  const locale = useLocale();
   const Icon = unlocated ? IconMapPinOff : IconMapPin;
   return (
     <Anchor
@@ -165,14 +167,13 @@ function InstallationRow({
             {t('installation', { count })}
             {!unlocated && ` · ${t('certifiedRatio', { certified, total: count })}`}
           </Text>
-          {energy && energy.sources.length > 0 && (
+          {energy && energy.kwh > 0 && (
             <Text size="xs" c="dimmed">
-              {t('installationEnergy', {
-                sources: energy.sources.length,
-                capacity:
-                  energy.capacityKw >= 1000
-                    ? `${(energy.capacityKw / 1000).toFixed(1)} MW`
-                    : `${energy.capacityKw.toFixed(0)} kW`,
+              {t('installationConsumption', {
+                consumption:
+                  energy.kwh >= 1000
+                    ? `${(energy.kwh / 1000).toLocaleString(locale, { maximumFractionDigits: 1 })} MWh`
+                    : `${energy.kwh.toLocaleString(locale, { maximumFractionDigits: 0 })} kWh`,
               })}
               {energy.renewableShare != null
                 ? ` · ${t('renewableShare', { share: energy.renewableShare.toFixed(0) })}`
@@ -187,11 +188,14 @@ function InstallationRow({
 
 export default function AssetsGallery({
   simulator = false,
+  energyByAsset = {},
   sources = [],
   consumption = [],
 }: {
   /** The BMS simulator: a demo tool, only where the organization turns it on. */
   simulator?: boolean;
+  /** Every asset's consumption, over all its records. */
+  energyByAsset?: Record<string, AssetEnergy>;
   sources?: EnergySourceRecord[];
   consumption?: EnergyConsumptionRecord[];
 } = {}) {
@@ -282,20 +286,21 @@ export default function AssetsGallery({
     return result;
   }, [sources, installations, unlocated]);
 
+  // A place's consumption is its assets', whole — not the latest page of records.
   const energyOf = useCallback(
-    (installationId: string) => {
-      const list = sourcesByInstallation.get(installationId) ?? [];
-      const capacityKw = list.reduce((s, r) => s + (r.capacityKw ?? 0), 0);
-      const withShare = list.filter((r) => r.renewableShare != null);
-      return {
-        sources: list,
-        capacityKw,
-        renewableShare: withShare.length
-          ? withShare.reduce((s, r) => s + r.renewableShare!, 0) / withShare.length
-          : null,
-      };
+    (members: Item[]) => {
+      const sum = members.reduce(
+        (n, m) => {
+          const e = energyByAsset[m.id];
+          return e
+            ? { kwh: n.kwh + e.kwh, declared: n.declared + e.declaredKwh, renewable: n.renewable + e.renewableKwh }
+            : n;
+        },
+        { kwh: 0, declared: 0, renewable: 0 }
+      );
+      return { kwh: sum.kwh, renewableShare: sum.declared ? (sum.renewable / sum.declared) * 100 : null };
     },
-    [sourcesByInstallation]
+    [energyByAsset]
   );
 
   // Places, in the order the list shows them: the selected one alone, or all
@@ -428,7 +433,7 @@ export default function AssetsGallery({
                             label={g.unlocated ? t('unlocatedInstallation') : labelFor(g.id)}
                             count={g.items.length}
                             certified={g.items.filter((i) => i.certified).length}
-                            energy={!g.unlocated ? energyOf(g.id) : undefined}
+                            energy={energyOf(g.items)}
                             selected={installationId === g.id}
                             unlocated={g.unlocated}
                             onOpen={() => setInstallationId(installationId === g.id ? null : g.id)}
