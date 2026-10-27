@@ -18,7 +18,7 @@ import {
   CloseButton,
   Anchor,
 } from '@mantine/core';
-import { IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconShieldCheck } from '@tabler/icons-react';
+import { IconFileUpload, IconPlus, IconSearch, IconPackage, IconMapPin, IconMapPinOff, IconShieldCheck } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { getAssets } from '@/actions/assets';
@@ -27,6 +27,7 @@ import InstallationsMap from '@/components/maps/InstallationsMapLazy';
 import { groupByMunicipality, type Located } from '@/lib/map/installations';
 import BmsSimulatorButton from '@/components/energy/BmsSimulatorButton';
 import CreateAssetModal from '@/components/assets/CreateAssetModal';
+import ImportAssetsModal from '@/components/assets/ImportAssetsModal';
 import EnergySourcesPanel from '@/components/energy/EnergySourcesPanel';
 import type { EnergySourceRecord, EnergyConsumptionRecord } from '@/domain/energy/EnergyTypes';
 import type { AssetEnergy } from '@/lib/energy/breakdown';
@@ -317,6 +318,7 @@ export default function AssetsGallery({
   const hasFilters = Boolean(search.trim() || installationId);
   const clearFilters = () => { setSearch(''); setInstallationId(null); };
   const [creating, setCreating] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   // A dot clicked on the map opens its place and brings its row into view.
   const pickAsset = useCallback(
@@ -334,6 +336,7 @@ export default function AssetsGallery({
   return (
     <>
       <CreateAssetModal opened={creating} onClose={() => setCreating(false)} onCreated={load} />
+      <ImportAssetsModal opened={importing} onClose={() => setImporting(false)} onImported={load} />
 
       <PageHeader
         title={t('title')}
@@ -351,6 +354,9 @@ export default function AssetsGallery({
                 setInstallationId(null);
               }}
             />
+            <Button variant="default" leftSection={<IconFileUpload size={15} stroke={1.9} />} onClick={() => setImporting(true)}>
+              {t('import.button')}
+            </Button>
             <Button leftSection={<IconPlus size={15} stroke={1.9} />} onClick={() => setCreating(true)}>
               {t('create.button')}
             </Button>

@@ -474,28 +474,6 @@
     },
     "position": "Position"
   },
-  "exports": {
-    "title": "Export/Import assets",
-    "exportToCsv": "Export assets to CSV",
-    "exportDescription": "Use the {button} button to select assets and fields to export. This CSV can be used both for analysis and to prepare future imports. The example CSV for import usually uses at least {fields}.",
-    "exportCsv": "Export CSV",
-    "selectProductsAndFields": "Select assets and fields to export CSV",
-    "selectFields": "Select the fields you want to include in the CSV.",
-    "importFromCsv": "Import assets from CSV",
-    "importDescription": "The {button} button allows you to upload a CSV file to import assets. The file will first be validated and then you can execute the import if everything is correct. The CSV must contain at least the columns: {fields}.",
-    "importButton": "Import items from CSV",
-    "selectProducts": "Select assets",
-    "summary": "Summary:",
-    "totalRows": "Total rows: {count}",
-    "validRows": "Valid rows: {count}",
-    "fieldLabels": {
-      "id": "ID",
-      "name": "Name",
-      "description": "Description",
-      "createdAt": "Creation date",
-      "customerUrl": "Public URL"
-    }
-  },
   "fieldTypes": {
     "text": "Text",
     "textarea": "Textarea",
@@ -964,6 +942,65 @@
         "required": "ID and name are required.",
         "failed": "Could not create the asset."
       }
+    },
+    "import": {
+      "button": "Import CSV",
+      "title": "Import assets from CSV",
+      "intro": "One row per asset. Required: id and name. To place it on the map, latitude and longitude; if you do not have them, the municipality (and the province when the name is shared). Each asset is certified as it is created.",
+      "choose": "Choose CSV file",
+      "template": "Download template",
+      "reading": "Checking {file}…",
+      "readError": "The file could not be read. Check that it is a CSV and try again.",
+      "ready": "{count, plural, one {1 asset ready} other {# assets ready}}",
+      "withIssues": "{count, plural, one {1 row with errors} other {# rows with errors}}",
+      "issuesTitle": "Rows that will not be imported",
+      "previewTitle": "Will be created",
+      "line": "Line {line}",
+      "columns": {
+        "id": "ID",
+        "name": "Name",
+        "place": "Location"
+      },
+      "located": {
+        "coordinates": "by coordinates",
+        "municipality": "by municipality",
+        "none": "No location"
+      },
+      "outsideSpain": "Outside Spain",
+      "fields": {
+        "id": "id",
+        "name": "name",
+        "latitude": "latitude",
+        "longitude": "longitude",
+        "municipality": "municipality"
+      },
+      "issues": {
+        "required": "Missing {field}",
+        "duplicate_id": "Repeated ID (already on line {line})",
+        "id_taken": "That ID already exists",
+        "invalid_number": "The {field} “{value}” is not a number",
+        "out_of_range": "The {field} {value} is out of range",
+        "partial_coordinates": "Latitude and longitude go together",
+        "unknown_municipality": "Unknown municipality “{value}”",
+        "ambiguous_municipality": "Several municipalities are called “{value}”: add the province ({provinces})",
+        "missing_fields": "Missing id or name"
+      },
+      "fileIssues": {
+        "empty": "The file has no rows.",
+        "too_large": "The file is too large to be a CSV of assets.",
+        "missing_columns": "Required columns missing: {columns}.",
+        "too_many_rows": "The file has {rows} rows and the maximum is {max}. Split it."
+      },
+      "back": "Choose another file",
+      "import": "Import {count, plural, one {1 asset} other {# assets}}",
+      "importing": "Importing {done} of {total}…",
+      "keepOpen": "Keep this window open until it finishes.",
+      "created": "{count, plural, one {1 asset created} other {# assets created}}.",
+      "failed": "{count, plural, one {1 could not be created} other {# could not be created}}",
+      "stopped": "Import stopped: {reason}",
+      "networkError": "the connection to the server was lost.",
+      "close": "Close",
+      "notImported": "{count, plural, one {1 asset was not imported} other {# assets were not imported}}"
     }
   },
   "energyHub": {

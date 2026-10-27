@@ -67,15 +67,27 @@ const index = new Map(municipalities.map((m, i) => [m.code, i]));
 // term — Santa Cruz de Tenerife's centre landed in La Laguna — while thousands
 // of settlements trace the boundaries closely. Municipalities with no populated
 // place in GeoNames keep their centroid.
-const points = [];
-const covered = new Set();
-for (const r of rows) {
-  if (r[6] !== 'P' || !index.has(r[12])) continue;
-  points.push(round(r[4]), round(r[5]), index.get(r[12]));
-  covered.add(r[12]);
+const settlements = rows.filter((r) => r[6] === 'P' && index.has(r[12]));
+// Each municipality's most populated settlement — normally its seat.
+const seat = new Map();
+for (const r of settlements) {
+  const population = Number(r[14]) || 0;
+  if (!seat.has(r[12]) || population > seat.get(r[12]).population) {
+    seat.set(r[12], { id: r[0], population, lat: round(r[4]), lng: round(r[5]) });
+  }
 }
+// Seats go first: the lookup keeps the first of two equally near points, and
+// GeoNames sometimes files a settlement under the neighbour at the very same
+// coordinates as a seat. Six municipalities still resolve to a neighbour from
+// their own seat (Beneixida, Quart de les Valls…): GeoNames gives both seats
+// identical coordinates, so no ordering can tell them apart.
+const points = [];
 for (const m of municipalities) {
-  if (!covered.has(m.code)) points.push(m.lat, m.lng, index.get(m.code));
+  const s = seat.get(m.code);
+  points.push(s ? s.lat : m.lat, s ? s.lng : m.lng, index.get(m.code));
+}
+for (const r of settlements) {
+  if (seat.get(r[12]).id !== r[0]) points.push(round(r[4]), round(r[5]), index.get(r[12]));
 }
 
 const missing = municipalities.filter((m) => !m.province).length;
@@ -84,6 +96,14 @@ fs.writeFileSync(
   JSON.stringify({
     source: 'GeoNames (https://www.geonames.org), CC BY 4.0',
     municipalities: municipalities.map((m) => [m.name, m.province]),
+    // Where an asset goes when all that is known is its municipality's name, in
+    // the same order: its seat, or its centroid when it has no settlement. Both
+    // are reference points, so the nearest-settlement lookup always finds the
+    // same municipality again — the centroid alone did not, for 7% of them.
+    centres: municipalities.flatMap((m) => {
+      const s = seat.get(m.code);
+      return s ? [s.lat, s.lng] : [m.lat, m.lng];
+    }),
     // Flat [lat, lng, municipality index, ...] to keep the file small.
     points,
   }) + '\n'

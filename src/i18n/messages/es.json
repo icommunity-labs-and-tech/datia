@@ -474,28 +474,6 @@
     },
     "position": "Posición"
   },
-  "exports": {
-    "title": "Exportar/Importar activos",
-    "exportToCsv": "Exportar activos a CSV",
-    "exportDescription": "Usa el botón {button} para seleccionar activos y campos a exportar. Este CSV puede usarse tanto para análisis como para preparar futuras importaciones. El CSV de ejemplo para importación suele usar al menos {fields}.",
-    "exportCsv": "Exportar CSV",
-    "selectProductsAndFields": "Seleccionar activos y campos para exportar CSV",
-    "selectFields": "Selecciona los campos que quieres incluir en el CSV.",
-    "importFromCsv": "Importar activos desde CSV",
-    "importDescription": "El botón {button} permite subir un archivo CSV para importar activos. Primero se validará el archivo y luego podrás ejecutar la importación si todo está correcto. El CSV debe contener al menos las columnas: {fields}.",
-    "importButton": "Importar items desde CSV",
-    "selectProducts": "Seleccionar activos",
-    "summary": "Resumen:",
-    "totalRows": "Total de filas: {count}",
-    "validRows": "Filas válidas: {count}",
-    "fieldLabels": {
-      "id": "ID",
-      "name": "Nombre",
-      "description": "Descripción",
-      "createdAt": "Fecha de creación",
-      "customerUrl": "URL pública"
-    }
-  },
   "fieldTypes": {
     "text": "Texto",
     "textarea": "Textarea",
@@ -964,6 +942,65 @@
         "required": "El ID y el nombre son obligatorios.",
         "failed": "No se pudo crear el activo."
       }
+    },
+    "import": {
+      "button": "Importar CSV",
+      "title": "Importar activos desde CSV",
+      "intro": "Una fila por activo. Obligatorias: id y nombre. Para situarlo en el mapa, latitud y longitud; si no las tienes, el municipio (y la provincia cuando el nombre se repite). Los activos se certifican uno a uno al crearse.",
+      "choose": "Elegir archivo CSV",
+      "template": "Descargar plantilla",
+      "reading": "Revisando {file}…",
+      "readError": "No se pudo leer el archivo. Comprueba que es un CSV y vuelve a intentarlo.",
+      "ready": "{count, plural, one {1 activo listo} other {# activos listos}}",
+      "withIssues": "{count, plural, one {1 fila con errores} other {# filas con errores}}",
+      "issuesTitle": "Filas que no se importarán",
+      "previewTitle": "Se crearán",
+      "line": "Línea {line}",
+      "columns": {
+        "id": "ID",
+        "name": "Nombre",
+        "place": "Ubicación"
+      },
+      "located": {
+        "coordinates": "por coordenadas",
+        "municipality": "por municipio",
+        "none": "Sin ubicación"
+      },
+      "outsideSpain": "Fuera de España",
+      "fields": {
+        "id": "id",
+        "name": "nombre",
+        "latitude": "latitud",
+        "longitude": "longitud",
+        "municipality": "municipio"
+      },
+      "issues": {
+        "required": "Falta el {field}",
+        "duplicate_id": "ID repetido (ya está en la línea {line})",
+        "id_taken": "Ese ID ya existe",
+        "invalid_number": "La {field} «{value}» no es un número",
+        "out_of_range": "La {field} {value} está fuera de rango",
+        "partial_coordinates": "Hacen falta latitud y longitud juntas",
+        "unknown_municipality": "No se reconoce el municipio «{value}»",
+        "ambiguous_municipality": "Hay varios municipios «{value}»: indica la provincia ({provinces})",
+        "missing_fields": "Faltan el id o el nombre"
+      },
+      "fileIssues": {
+        "empty": "El archivo no tiene filas.",
+        "too_large": "El archivo es demasiado grande para ser un CSV de activos.",
+        "missing_columns": "Faltan columnas obligatorias: {columns}.",
+        "too_many_rows": "El archivo tiene {rows} filas y el máximo es {max}. Divídelo en varios."
+      },
+      "back": "Elegir otro archivo",
+      "import": "Importar {count, plural, one {1 activo} other {# activos}}",
+      "importing": "Importando {done} de {total}…",
+      "keepOpen": "Mantén esta ventana abierta hasta que termine.",
+      "created": "{count, plural, one {Se ha creado 1 activo} other {Se han creado # activos}}.",
+      "failed": "{count, plural, one {1 no se pudo crear} other {# no se pudieron crear}}",
+      "stopped": "Importación detenida: {reason}",
+      "networkError": "se perdió la conexión con el servidor.",
+      "close": "Cerrar",
+      "notImported": "{count, plural, one {1 activo no se importó} other {# activos no se importaron}}"
     }
   },
   "energyHub": {

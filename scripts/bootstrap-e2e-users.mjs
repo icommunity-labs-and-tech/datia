@@ -355,6 +355,39 @@ async function bootstrapE2EUsers() {
         data: { id: randomUUID(), name: 'Company C E2E token', tokenHash: companyCTokenHash, companyId: COMPANY_C_ID },
       });
     }
+    // A fourth company, verified from the start and with a dashboard account, so the
+    // CSV import can be seen creating — and certifying — assets end to end (#147).
+    const COMPANY_D_ID = 'e2e-company-d';
+    const COMPANY_D_EMAIL = 'companyd-e2e@datia.icommunitylabs.com';
+    const COMPANY_D_PASSWORD = 'companyd123';
+    if (!(await prisma.company.findUnique({ where: { id: COMPANY_D_ID } }))) {
+      await prisma.company.create({
+        data: {
+          id: COMPANY_D_ID,
+          organizationId: org.id,
+          name: 'Empresa E2E D',
+          signatureID: 'e2e-signature-company-d',
+          verificationStatus: 'VERIFIED',
+        },
+      });
+    }
+    if (!(await prisma.user.findUnique({ where: { email: COMPANY_D_EMAIL } }))) {
+      await prisma.user.create({
+        data: {
+          id: randomUUID(),
+          email: COMPANY_D_EMAIL,
+          password: await bcrypt.hash(COMPANY_D_PASSWORD, 10),
+          name: 'Company D E2E',
+          role: 'ADMIN',
+          status: 'ACTIVE',
+          organizationId: org.id,
+          companyId: COMPANY_D_ID,
+          updatedAt: now,
+        },
+      });
+    }
+
+    console.log('✅ Fourth company in Datia E2E: verified KYC and an account, for the CSV import');
     console.log('✅ Third company in Datia E2E: unverified KYC and token for the certification flow');
     console.log('✅ Second company in Datia E2E: asset, account and token, to prove company isolation');
 
