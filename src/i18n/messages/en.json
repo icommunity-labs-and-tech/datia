@@ -941,7 +941,14 @@
       "errors": {
         "required": "ID and name are required.",
         "failed": "Could not create the asset."
-      }
+      },
+      "locationLabel": "Location",
+      "searchPlaceholder": "Search municipality (e.g. “Castejón, Navarra”)",
+      "searchButton": "Search",
+      "searchUnknown": "That municipality was not found.",
+      "searchAmbiguous": "Several share that name: add the province ({provinces}).",
+      "locationHint": "Click the map to place the asset, or search for its municipality.",
+      "outsideSpain": "Outside Spain"
     },
     "import": {
       "button": "Import CSV",

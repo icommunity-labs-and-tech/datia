@@ -1,10 +1,12 @@
 'use client';
 
-import { useState } from 'react';
-import { Alert, Button, Group, Modal, NumberInput, Stack, TextInput, Textarea } from '@mantine/core';
-import { IconAlertTriangleFilled } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
+import { Alert, Button, Group, Modal, NumberInput, Stack, Text, TextInput, Textarea } from '@mantine/core';
+import { IconAlertTriangleFilled, IconMapPin, IconSearch } from '@tabler/icons-react';
 import { useTranslations } from 'next-intl';
 import { createAsset } from '@/actions/assets/createAsset';
+import { municipalityAt, searchMunicipality } from '@/actions/assets/locate';
+import LocationPicker from '@/components/maps/LocationPickerLazy';
 
 interface CreateAssetModalProps {
   opened: boolean;
@@ -17,7 +19,10 @@ interface CreateAssetModalProps {
  * Creates an asset from the dashboard.
  *
  * Its position is a field of the asset (#37), so it is asked for here: without
- * coordinates the asset stays out of the map and its installation.
+ * coordinates the asset stays out of the map and its place. Nobody has
+ * coordinates to hand, so they come from a pin on a map — dropped by clicking,
+ * or on a municipality found by name — and the number fields stay as an
+ * alternative for whoever pastes them from a GPS.
  */
 export default function CreateAssetModal({ opened, onClose, onCreated }: CreateAssetModalProps) {
   const t = useTranslations('itemsPage.create');
@@ -29,6 +34,41 @@ export default function CreateAssetModal({ opened, onClose, onCreated }: CreateA
   const [longitude, setLongitude] = useState<number | ''>('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [place, setPlace] = useState<string | null>(null);
+  const [query, setQuery] = useState('');
+  const [searchError, setSearchError] = useState<string | null>(null);
+
+  const point = latitude !== '' && longitude !== '' ? { lat: latitude, lng: longitude } : null;
+  const setPoint = (p: { lat: number; lng: number }) => {
+    setLatitude(+p.lat.toFixed(6));
+    setLongitude(+p.lng.toFixed(6));
+  };
+
+  // The municipality the asset will be grouped under, as the assets page will see it.
+  useEffect(() => {
+    if (latitude === '' || longitude === '') {
+      setPlace(null);
+      return;
+    }
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const m = await municipalityAt(latitude, longitude).catch(() => null);
+      if (!cancelled) setPlace(m ? `${m.name} (${m.province})` : t('outsideSpain'));
+    }, 250);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [latitude, longitude, t]);
+
+  const search = async () => {
+    if (!query.trim()) return;
+    setSearchError(null);
+    const match = await searchMunicipality(query).catch(() => ({ status: 'unknown' as const }));
+    if (match.status === 'found') setPoint(match);
+    else if (match.status === 'ambiguous') setSearchError(t('searchAmbiguous', { provinces: match.provinces.join(', ') }));
+    else setSearchError(t('searchUnknown'));
+  };
 
   const close = () => {
     onClose();
@@ -38,6 +78,8 @@ export default function CreateAssetModal({ opened, onClose, onCreated }: CreateA
       setDescription('');
       setLatitude('');
       setLongitude('');
+      setQuery('');
+      setSearchError(null);
       setError(null);
     }, 200);
   };
@@ -75,7 +117,7 @@ export default function CreateAssetModal({ opened, onClose, onCreated }: CreateA
   };
 
   return (
-    <Modal opened={opened} onClose={close} title={t('title')} centered>
+    <Modal opened={opened} onClose={close} title={t('title')} centered size="lg">
       <form onSubmit={submit}>
         <Stack gap="md">
           {error && (
@@ -103,6 +145,37 @@ export default function CreateAssetModal({ opened, onClose, onCreated }: CreateA
             autosize
             minRows={2}
           />
+          <Stack gap={6}>
+            <Text size="sm" fw={500}>{t('locationLabel')}</Text>
+            <TextInput
+              placeholder={t('searchPlaceholder')}
+              aria-label={t('searchPlaceholder')}
+              leftSection={<IconSearch size={15} stroke={1.7} />}
+              value={query}
+              onChange={(e) => setQuery(e.currentTarget.value)}
+              onKeyDown={(e) => {
+                // Enter searches the map; it must not submit the asset.
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  search();
+                }
+              }}
+              error={searchError}
+              rightSectionWidth={72}
+              rightSection={
+                <Button size="compact-xs" variant="subtle" onClick={search}>
+                  {t('searchButton')}
+                </Button>
+              }
+            />
+            <LocationPicker value={point} onChange={setPoint} />
+            <Group gap={6}>
+              <IconMapPin size={14} stroke={1.7} color="var(--mantine-color-dimmed)" />
+              <Text size="xs" c={point ? undefined : 'dimmed'} data-testid="asset-place">
+                {point ? place ?? '…' : t('locationHint')}
+              </Text>
+            </Group>
+          </Stack>
           <Group grow>
             <NumberInput
               label={t('latitudeLabel')}

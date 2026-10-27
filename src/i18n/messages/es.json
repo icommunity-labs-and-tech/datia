@@ -941,7 +941,14 @@
       "errors": {
         "required": "El ID y el nombre son obligatorios.",
         "failed": "No se pudo crear el activo."
-      }
+      },
+      "locationLabel": "Ubicación",
+      "searchPlaceholder": "Buscar municipio (p. ej. «Castejón, Navarra»)",
+      "searchButton": "Buscar",
+      "searchUnknown": "No se encuentra ese municipio.",
+      "searchAmbiguous": "Hay varios con ese nombre: añade la provincia ({provinces}).",
+      "locationHint": "Pincha en el mapa para situar el activo, o busca su municipio.",
+      "outsideSpain": "Fuera de España"
     },
     "import": {
       "button": "Importar CSV",
