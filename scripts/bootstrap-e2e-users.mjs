@@ -387,7 +387,22 @@ async function bootstrapE2EUsers() {
       });
     }
 
-    console.log('✅ Fourth company in Datia E2E: verified KYC and an account, for the CSV import');
+    if (!(await prisma.asset.findUnique({ where: { id: 'e2e-d-asset' } }))) {
+      await prisma.asset.create({
+        data: {
+          id: 'e2e-d-asset',
+          name: 'Nave D',
+          description: 'Activo de la empresa verificada, para importar lecturas.',
+          organizationId: org.id,
+          companyId: COMPANY_D_ID,
+          latitude: 37.3891,
+          longitude: -5.9845,
+          updatedAt: now,
+        },
+      });
+    }
+
+    console.log('✅ Fourth company in Datia E2E: verified KYC, an account and an asset, for the CSV imports');
     console.log('✅ Third company in Datia E2E: unverified KYC and token for the certification flow');
     console.log('✅ Second company in Datia E2E: asset, account and token, to prove company isolation');
 

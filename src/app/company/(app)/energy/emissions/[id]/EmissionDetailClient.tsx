@@ -128,7 +128,7 @@ export default function EmissionDetailClient({ emission }: Props) {
           <Row label={t('source.carrier')} value={tEnergy(`carriers.${source.energyCarrier}`)} />
           {source.generationTechnology && <Row label={t('source.technology')} value={source.generationTechnology} />}
           {source.renewableShare != null && <Row label={t('source.renewable')} value={`${source.renewableShare}%`} />}
-          {source.gridEmissionFactor != null && <Row label={t('source.gridFactor')} value={`${source.gridEmissionFactor} gCO₂/kWh`} />}
+          {source.gridEmissionFactor != null && <Row label={t('source.gridFactor')} value={`${source.gridEmissionFactor} kgCO₂e/kWh`} />}
           {source.countryOfOrigin && <Row label={t('source.country')} value={source.countryOfOrigin} />}
           {source.guaranteeOfOriginId && <Row label={t('source.guarantee')} value={<Code>{source.guaranteeOfOriginId}</Code>} />}
         </Section>

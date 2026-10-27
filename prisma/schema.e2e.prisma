@@ -360,7 +360,7 @@ model EnergySource {
   renewableShare      Float?        // 0–100 %
   guaranteeOfOriginId String?       // GO / RECs certificate reference
   countryOfOrigin     String?       // ISO 3166-1 alpha-2
-  gridEmissionFactor  Float?        // gCO2eq/kWh (IEA, national grid)
+  gridEmissionFactor  Float?        // kgCO2e/kWh (IEA, national grid) — same unit as EmissionRecord.emissionFactor
   // Relations — assetId required: every source is a physical asset
   assetId             String
   createdAt           DateTime      @default(now())

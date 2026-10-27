@@ -555,7 +555,7 @@ const manualOpenApiSpec = {
                   renewableShare: { type: 'number', minimum: 0, maximum: 100, example: 100 },
                   guaranteeOfOriginId: { type: 'string', example: 'GO-ES-2024-001' },
                   countryOfOrigin: { type: 'string', example: 'ES', description: 'ISO 3166-1 alpha-2' },
-                  gridEmissionFactor: { type: 'number', example: 207, description: 'gCO2eq/kWh' },
+                  gridEmissionFactor: { type: 'number', example: 0.207, description: 'kgCO2e/kWh' },
                   assetId: { type: 'string', description: 'ID of the asset this source belongs to' },
                 },
               },

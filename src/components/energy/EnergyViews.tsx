@@ -131,7 +131,7 @@ export function SourceDrawer({
           {source.gridEmissionFactor != null && (
             <Paper withBorder p="xs" radius="sm">
               <Text size="xs" c="dimmed">{t('drawer.emissionFactor')}</Text>
-              <Text fw={600}>{source.gridEmissionFactor} gCO₂/kWh</Text>
+              <Text fw={600}>{source.gridEmissionFactor} kgCO₂e/kWh</Text>
             </Paper>
           )}
           {source.generationTechnology && (
