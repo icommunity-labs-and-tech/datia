@@ -50,7 +50,8 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <Group justify="space-between" wrap="nowrap" gap="md">
       <Text size="sm" c="dimmed">{label}</Text>
-      <Text size="sm" fw={550} ta="right" style={{ minWidth: 0 }} truncate>
+      {/* A div, not a <p>: some values are badges, and a <p> cannot hold a <div>. */}
+      <Text component="div" size="sm" fw={550} ta="right" style={{ minWidth: 0 }} truncate>
         {value}
       </Text>
     </Group>

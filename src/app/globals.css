@@ -175,9 +175,10 @@ textarea {
   font-size: 16px !important;
 }
 
-/* Mejorar la experiencia táctil */
+/* Mejorar la experiencia táctil. Sin min-height: forzaba 44px en todo <button>,
+   también en los que Mantine dibuja dentro de otros controles (las flechas de
+   NumberInput, botones dentro de un input), que se desbordaban. */
 button, .btn {
-  min-height: 44px;
   touch-action: manipulation;
 }
 
