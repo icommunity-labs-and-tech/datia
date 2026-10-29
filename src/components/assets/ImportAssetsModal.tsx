@@ -228,7 +228,7 @@ export default function ImportAssetsModal({
                         {withIssues.map((row) => (
                           <Table.Tr key={row.line}>
                             <Table.Td c="dimmed" w={80}>{t('line', { line: row.line })}</Table.Td>
-                            <Table.Td w={120} ff="monospace">{row.id || '—'}</Table.Td>
+                            <Table.Td ff="monospace" style={{ whiteSpace: 'nowrap' }}>{row.id || '—'}</Table.Td>
                             <Table.Td>{row.issues.map(issueText).join(' · ')}</Table.Td>
                           </Table.Tr>
                         ))}
@@ -308,7 +308,7 @@ export default function ImportAssetsModal({
                   <Table.Tbody>
                     {failed.map((o) => (
                       <Table.Tr key={o.id}>
-                        <Table.Td w={120} ff="monospace">{o.id || '—'}</Table.Td>
+                        <Table.Td ff="monospace" style={{ whiteSpace: 'nowrap' }}>{o.id || '—'}</Table.Td>
                         <Table.Td>{o.error === 'missing_fields' ? t('issues.missing_fields') : o.error}</Table.Td>
                       </Table.Tr>
                     ))}
