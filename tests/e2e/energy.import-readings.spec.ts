@@ -86,4 +86,39 @@ test.describe('Lecturas por CSV', () => {
       await expect(dialog.getByText(text('energyHub.import.notVerified'))).toBeVisible();
     });
   });
+
+  test.describe('las tablas de registros', () => {
+    test.use({ storageState: ADMIN_STORAGE_STATE });
+
+    test('se paginan y se filtran por mes y por activo, en consumo y en emisiones', async ({ page }) => {
+      // February 2028: 29 daily readings, more than one page of 25.
+      const days = Array.from({ length: 29 }, (_, i) => `2028-02-${String(i + 1).padStart(2, '0')},${10 + i}`);
+      await page.goto('/company/energy/consumption', { waitUntil: 'networkidle' });
+      await page.getByRole('button', { name: text('energyHub.import.button') }).click();
+      const dialog = page.getByRole('dialog', { name: text('energyHub.import.title') });
+      await pick(page, text('energyHub.import.assetLabel'), /^Turbina eólica T-100$/);
+      await pick(page, text('energyHub.import.sourceLabel'), /Planta solar Ariza/);
+      await upload(page, ['inicio,kwh', ...days].join('\n'));
+      await dialog.getByRole('button', { name: /importar 29 lecturas|import 29 readings/i }).click();
+      await expect(dialog.getByText(/29 lecturas importadas|29 readings imported/i)).toBeVisible({ timeout: 30_000 });
+      await dialog.getByRole('button', { name: text('energyHub.import.close') }).click();
+
+      for (const path of ['/company/energy/consumption', '/company/energy/emissions']) {
+        await page.goto(path, { waitUntil: 'networkidle' });
+        const range = page.getByTestId('records-range');
+
+        await page.getByRole('textbox', { name: text('energyHub.records.monthFilter') }).click();
+        await page.getByRole('option', { name: /febrero de 2028|february 2028/i }).click();
+        await expect(range).toHaveText(/1–25 (de|of) 29/);
+
+        await page.getByRole('button', { name: '2' }).click();
+        await expect(range).toHaveText(/26–29 (de|of) 29/);
+
+        // Narrowing again starts from the first page.
+        await page.getByRole('textbox', { name: text('energyHub.records.assetFilter') }).click();
+        await page.getByRole('option', { name: /^Turbina eólica T-100$/ }).click();
+        await expect(range).toHaveText(/1–25 (de|of) 29/);
+      }
+    });
+  });
 });

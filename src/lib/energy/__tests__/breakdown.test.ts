@@ -74,11 +74,6 @@ describe('consumptionBreakdown', () => {
   it('has no renewable share when no source declares one', () => {
     expect(consumptionBreakdown([consumption('c1', 10)], locate).renewableShare).toBeNull();
   });
-
-  it('lists the most recent periods first', () => {
-    const b = consumptionBreakdown([consumption('old', 1, { month: 0 }), consumption('new', 1, { month: 5 })], locate);
-    expect(b.latest.map((r) => r.id)).toEqual(['new', 'old']);
-  });
 });
 
 const emission = (id: string, co2eKg: number, overrides: Partial<EmissionRow> = {}): EmissionRow => ({

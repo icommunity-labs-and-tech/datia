@@ -42,6 +42,10 @@ export async function GET(
         EnergySource: {
           include: {
             EnergyConsumption: {
+              // Only readings with something verified: taking the latest ten and
+              // filtering afterwards let a fresh, still unverified import hide
+              // every verified emission the asset already had.
+              where: { EmissionRecord: { some: { verificationStatus: 'VERIFIED' } } },
               include: {
                 EmissionRecord: {
                   where: { verificationStatus: 'VERIFIED' },
@@ -49,7 +53,7 @@ export async function GET(
                   take: 5,
                 },
               },
-              orderBy: { createdAt: 'desc' },
+              orderBy: { periodStart: 'desc' },
               take: 10,
             },
           },

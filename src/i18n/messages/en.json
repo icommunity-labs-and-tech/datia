@@ -1180,7 +1180,6 @@
       "byStatus": "Verification",
       "others": "{count, plural, one {One more} other {# more}}",
       "noPlace": "No asset has a location",
-      "latest": "Recent records",
       "asset": "Asset",
       "empty": {
         "consumptionTitle": "No consumption data yet",
@@ -1271,6 +1270,16 @@
       "certifyFailed": "Could not certify: {months}. The readings are saved.",
       "writeError": "The readings could not be written. Nothing was saved.",
       "close": "Close"
+    },
+    "records": {
+      "title": "Records",
+      "assetFilter": "Filter by asset",
+      "monthFilter": "Filter by month",
+      "allAssets": "All assets",
+      "allMonths": "All months",
+      "empty": "No records match these filters.",
+      "range": "{from}–{to} of {total}",
+      "onChain": "On chain"
     }
   },
   "apiHub": {

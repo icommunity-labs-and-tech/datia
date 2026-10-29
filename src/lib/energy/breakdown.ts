@@ -44,15 +44,6 @@ export interface ConsumptionBreakdown {
   byAsset: Share[];
   byMunicipality: Share[];
   byCarrier: Share[];
-  latest: Array<{
-    id: string;
-    periodStart: string;
-    consumptionKwh: number;
-    lifecycleStage: string;
-    source: string;
-    assetId: string;
-    asset: string;
-  }>;
 }
 
 export interface EmissionBreakdown {
@@ -61,20 +52,7 @@ export interface EmissionBreakdown {
   byAsset: Share[];
   byScope: Share[];
   byStatus: Array<{ status: string; records: number; co2eKg: number }>;
-  latest: Array<{
-    id: string;
-    periodStart: string;
-    co2eKg: number;
-    scope: string;
-    verificationStatus: string;
-    emissionFactor: number | null;
-    source: string;
-    assetId: string;
-    asset: string;
-  }>;
 }
-
-const LATEST = 50;
 
 /** Sums by key, largest first. */
 function shares<T>(rows: T[], key: (r: T) => string, label: (r: T) => string, value: (r: T) => number): Share[] {
@@ -138,18 +116,6 @@ export function consumptionBreakdown(
     byAsset: shares(rows, (r) => r.asset.id, (r) => r.asset.name, (r) => r.consumptionKwh),
     byMunicipality,
     byCarrier: shares(rows, (r) => r.source.energyCarrier, (r) => r.source.energyCarrier, (r) => r.consumptionKwh),
-    latest: [...rows]
-      .sort((a, b) => b.periodStart.getTime() - a.periodStart.getTime())
-      .slice(0, LATEST)
-      .map((r) => ({
-        id: r.id,
-        periodStart: r.periodStart.toISOString(),
-        consumptionKwh: r.consumptionKwh,
-        lifecycleStage: r.lifecycleStage,
-        source: r.source.name,
-        assetId: r.asset.id,
-        asset: r.asset.name,
-      })),
   };
 }
 
@@ -173,19 +139,5 @@ export function emissionBreakdown(rows: EmissionRow[]): EmissionBreakdown {
     byAsset: shares(rows, (r) => r.asset.id, (r) => r.asset.name, (r) => r.co2eKg),
     byScope: shares(rows, (r) => r.scope, (r) => r.scope, (r) => r.co2eKg),
     byStatus: ['VERIFIED', 'PENDING', 'REJECTED'].flatMap((s) => (byStatus.has(s) ? [byStatus.get(s)!] : [])),
-    latest: [...rows]
-      .sort((a, b) => b.consumption.periodStart.getTime() - a.consumption.periodStart.getTime())
-      .slice(0, LATEST)
-      .map((r) => ({
-        id: r.id,
-        periodStart: r.consumption.periodStart.toISOString(),
-        co2eKg: r.co2eKg,
-        scope: r.scope,
-        verificationStatus: r.verificationStatus,
-        emissionFactor: r.emissionFactor,
-        source: r.source.name,
-        assetId: r.asset.id,
-        asset: r.asset.name,
-      })),
   };
 }

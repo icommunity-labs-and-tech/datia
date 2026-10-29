@@ -11,8 +11,6 @@
 
 import Link from 'next/link';
 import {
-  Anchor,
-  Badge,
   Button,
   Center,
   Grid,
@@ -21,7 +19,6 @@ import {
   Progress,
   SimpleGrid,
   Stack,
-  Table,
   Text,
   ThemeIcon,
   Title,
@@ -46,6 +43,8 @@ import { axisProps, gridProps, tooltipStyle } from '@/components/charts/theme';
 import { useEnergyForecast } from './useEnergyForecast';
 import { ForecastSection } from './ForecastSection';
 import { monthLabel } from './EnergyViews';
+import { ConsumptionRecordsTable, EmissionRecordsTable } from './RecordsTables';
+import type { ConsumptionRecordRow, EmissionRecordRow, RecordsPage } from '@/actions/energy/records';
 
 const CONSUMPTION_HUE = '#F0930A';
 const EMISSIONS_HUE = '#0D3585';
@@ -247,14 +246,15 @@ export function CompanyConsumption({
   totals,
   forecast: initialForecast,
   breakdown,
+  records,
 }: {
   totals: EnergyConsumptionTotals;
   forecast: EnergyForecast;
   breakdown: ConsumptionBreakdown;
+  records: RecordsPage<ConsumptionRecordRow>;
 }) {
   const t = useTranslations('energyHub');
   const tc = useTranslations('energyHub.company');
-  const tStage = useTranslations('organizationAssetDetail.lifecycle');
   const f = useFormat();
   const { forecast, horizon, setHorizon, isPending } = useEnergyForecast(initialForecast);
 
@@ -321,46 +321,10 @@ export function CompanyConsumption({
         unit="kWh"
       />
 
-      <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
-        <Group justify="space-between" px="md" pt="md" pb="xs">
-          <Text fw={600}>{tc('latest')}</Text>
-          {breakdown.latest.length < totals.records && (
-            <Text size="xs" c="dimmed">{t('latestRecords', { count: breakdown.latest.length, total: totals.records })}</Text>
-          )}
-        </Group>
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>{t('consumptionTab.period')}</Table.Th>
-              <Table.Th>{tc('asset')}</Table.Th>
-              <Table.Th>{t('consumptionTab.source')}</Table.Th>
-              <Table.Th ta="right">{t('consumptionTab.consumption')}</Table.Th>
-              <Table.Th>{t('consumptionTab.stage')}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {breakdown.latest.map((r) => (
-              <Table.Tr key={r.id}>
-                <Table.Td><Text size="sm" c="dimmed">{f.date(r.periodStart)}</Text></Table.Td>
-                <Table.Td>
-                  <Anchor component={Link} href={`/company/assets/${r.assetId}`} size="sm">{r.asset}</Anchor>
-                </Table.Td>
-                <Table.Td><Text size="sm">{r.source}</Text></Table.Td>
-                <Table.Td ta="right">
-                  <Text size="sm" fw={600} style={{ fontVariantNumeric: 'tabular-nums' }}>
-                    {r.consumptionKwh.toLocaleString(f.locale, { maximumFractionDigits: 0 })} kWh
-                  </Text>
-                </Table.Td>
-                <Table.Td>
-                  <Badge size="xs" variant="outline" color="gray">
-                    {tStage(r.lifecycleStage as 'USE')}
-                  </Badge>
-                </Table.Td>
-              </Table.Tr>
-            ))}
-          </Table.Tbody>
-        </Table>
-      </Paper>
+      <ConsumptionRecordsTable
+        initial={records}
+        filters={{ assets: breakdown.byAsset.map((a) => ({ value: a.key, label: a.label })), months: totals.monthly.map((m) => m.month) }}
+      />
     </Stack>
   );
 }
@@ -369,10 +333,12 @@ export function CompanyEmissions({
   totals,
   forecast: initialForecast,
   breakdown,
+  records,
 }: {
   totals: EmissionTotals;
   forecast: EnergyForecast;
   breakdown: EmissionBreakdown;
+  records: RecordsPage<EmissionRecordRow>;
 }) {
   const t = useTranslations('energyHub');
   const tc = useTranslations('energyHub.company');
@@ -464,63 +430,10 @@ export function CompanyEmissions({
         unit="kg CO₂e"
       />
 
-      <Paper withBorder radius="md" style={{ overflow: 'auto' }}>
-        <Group justify="space-between" px="md" pt="md" pb="xs">
-          <Text fw={600}>{tc('latest')}</Text>
-          {breakdown.latest.length < totals.records && (
-            <Text size="xs" c="dimmed">{t('latestRecords', { count: breakdown.latest.length, total: totals.records })}</Text>
-          )}
-        </Group>
-        <Table striped highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>{t('consumptionTab.period')}</Table.Th>
-              <Table.Th>{tc('asset')}</Table.Th>
-              <Table.Th>{t('consumptionTab.source')}</Table.Th>
-              <Table.Th ta="right">CO₂e</Table.Th>
-              <Table.Th>{t('emissionsTab.scope')}</Table.Th>
-              <Table.Th>{t('emissionsTab.state')}</Table.Th>
-              <Table.Th ta="right">{t('emissionsTab.emissionFactor')}</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>
-            {breakdown.latest.map((r) => {
-              const { color, icon: Icon } = STATUS[r.verificationStatus as keyof typeof STATUS] ?? STATUS.PENDING;
-              return (
-                <Table.Tr key={r.id}>
-                  <Table.Td><Text size="sm" c="dimmed">{f.date(r.periodStart)}</Text></Table.Td>
-                  <Table.Td>
-                    <Anchor component={Link} href={`/company/assets/${r.assetId}`} size="sm">{r.asset}</Anchor>
-                  </Table.Td>
-                  <Table.Td><Text size="sm">{r.source}</Text></Table.Td>
-                  <Table.Td ta="right">
-                    <Anchor
-                      component={Link}
-                      href={`/company/energy/emissions/${r.id}`}
-                      size="sm"
-                      fw={600}
-                      style={{ fontVariantNumeric: 'tabular-nums' }}
-                    >
-                      {r.co2eKg.toLocaleString(f.locale, { maximumFractionDigits: 2 })} kg
-                    </Anchor>
-                  </Table.Td>
-                  <Table.Td><Text size="sm">{tScope(r.scope as 'SCOPE_1')}</Text></Table.Td>
-                  <Table.Td>
-                    <Badge size="xs" color={color} variant="light" leftSection={<Icon size={10} />}>
-                      {t(`status.${r.verificationStatus}` as 'status.PENDING')}
-                    </Badge>
-                  </Table.Td>
-                  <Table.Td ta="right">
-                    <Text size="xs" c="dimmed">
-                      {r.emissionFactor != null ? `${r.emissionFactor} kg/kWh` : '—'}
-                    </Text>
-                  </Table.Td>
-                </Table.Tr>
-              );
-            })}
-          </Table.Tbody>
-        </Table>
-      </Paper>
+      <EmissionRecordsTable
+        initial={records}
+        filters={{ assets: breakdown.byAsset.map((a) => ({ value: a.key, label: a.label })), months: totals.monthly.map((m) => m.month) }}
+      />
     </Stack>
   );
 }

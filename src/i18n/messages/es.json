@@ -1180,7 +1180,6 @@
       "byStatus": "Verificación",
       "others": "{count, plural, one {Otro activo} other {Otros #}}",
       "noPlace": "Ningún activo con ubicación",
-      "latest": "Registros recientes",
       "asset": "Activo",
       "empty": {
         "consumptionTitle": "Todavía no hay datos de consumo",
@@ -1271,6 +1270,16 @@
       "certifyFailed": "No se pudieron certificar: {months}. Las lecturas están guardadas.",
       "writeError": "No se pudieron escribir las lecturas. No se ha guardado nada.",
       "close": "Cerrar"
+    },
+    "records": {
+      "title": "Registros",
+      "assetFilter": "Filtrar por activo",
+      "monthFilter": "Filtrar por mes",
+      "allAssets": "Todos los activos",
+      "allMonths": "Todos los meses",
+      "empty": "Ningún registro con estos filtros.",
+      "range": "{from}–{to} de {total}",
+      "onChain": "En cadena"
     }
   },
   "apiHub": {
